@@ -11,7 +11,7 @@ services:
     volumes:
       - data:/var/lib/postgresql/data
     networks:
-      - network
+      - transcendence
     restart: always
 
   backend:
@@ -27,7 +27,7 @@ services:
       - ./backend:/app
       - /app/node_modules
     networks:
-      - network
+      - transcendence
     restart: always
 
   frontend:
@@ -45,11 +45,12 @@ services:
       - ./frontend:/app
       - /app/node_modules
     networks:
-      - network
+      - transcendence
     restart: always
+
+networks:
+  transcendence:
+    name: transcendence
 
 volumes:
   data:
-
-networks:
-  network:
