@@ -14,4 +14,4 @@ RUN pnpm install
 COPY . .
 
 # Starts application
-CMD ["pnpm", "start"]
+CMD ["pnpm", "start:dev"]
