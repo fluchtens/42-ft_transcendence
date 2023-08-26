@@ -2,21 +2,21 @@ version: '3'
 
 services:
   postgres:
-    container_name: postgres
+    container_name: transcendence-postgres
     image: postgres:latest
     env_file:
       - .env
     ports:
       - 5432:5432
     volumes:
-      - data:/var/lib/postgresql/data
+      - database:/var/lib/postgresql/data
     networks:
       - transcendence
     restart: always
 
   backend:
-    container_name: backend
-    image: backend
+    container_name: transcendence-backend
+    image: transcendence-backend
     build:
       context: ./backend
     depends_on:
@@ -24,15 +24,15 @@ services:
     env_file:
       - .env
     volumes:
-      - ./backend:/app
-      - /app/node_modules
+      - backend:/app
+      - backend_node_modules:/app/node_modules
     networks:
       - transcendence
     restart: always
 
   frontend:
-    container_name: frontend
-    image: frontend
+    container_name: transcendence-frontend
+    image: transcendence-frontend
     build:
       context: ./frontend
     depends_on:
@@ -42,8 +42,8 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - frontend:/app
+      - frontend_node_modules:/app/node_modules
     networks:
       - transcendence
     restart: always
@@ -53,4 +53,8 @@ networks:
     name: transcendence
 
 volumes:
-  data:
+  database:
+  backend:
+  backend_node_modules:
+  frontend:
+  frontend_node_modules:
