@@ -1,13 +1,16 @@
 all: up
 
-up:
-	docker-compose up --build
-
 install:
 	cd backend && pnpm install
 	cd frontend && pnpm install
 
-destroy:
+run:
+	docker-compose up --build
+
+rund:
+	docker-compose up --build -d
+
+clean:
 	sh destroy.sh
 
 .PHONY: all
