@@ -1,4 +1,4 @@
-all: up
+all: run
 
 install:
 	cd backend && pnpm install
