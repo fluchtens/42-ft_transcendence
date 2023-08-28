@@ -9,9 +9,9 @@ RUN apt-get update && \
 WORKDIR /app
 
 # Installs project dependencies
-COPY package.json pnpm-lock.yaml .
+COPY package.json pnpm-lock.yaml ./
 RUN pnpm install
-COPY . .
+COPY ./ ./
 
 # Exposes port
 EXPOSE 3000
