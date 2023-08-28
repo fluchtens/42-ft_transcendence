@@ -14,7 +14,7 @@ RUN pnpm install
 COPY ./ ./
 
 # Exposes port
-EXPOSE 3000
+EXPOSE 80
 
 # Starts application
 CMD ["pnpm", "run", "dev"]
