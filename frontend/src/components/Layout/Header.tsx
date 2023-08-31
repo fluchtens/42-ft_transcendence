@@ -1,7 +1,7 @@
 function Header() {
   return (
     <>
-      <header>
+      <header className="text-white">
         <h1>Header</h1>
       </header>
     </>
