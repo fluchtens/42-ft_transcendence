@@ -1,9 +1,7 @@
-import styles from './Header.module.scss'
-
 function Header() {
   return (
     <>
-      <header className={styles.main}>
+      <header>
         <h1>Header</h1>
       </header>
     </>

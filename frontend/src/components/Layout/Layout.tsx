@@ -1,7 +1,7 @@
 import { Outlet, useLocation } from "react-router-dom";
-import Home from '../../pages/Home/Home'
-import Footer from './Footer/Footer'
-import Header from './Header/Header'
+import Home from '../../pages/Home'
+import Footer from './Footer'
+import Header from './Header'
 
 function Layout() {
   const { pathname } = useLocation()

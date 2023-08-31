@@ -1,8 +1,6 @@
-import styles from './Login.module.scss'
-
 function Login() {
 	return (
-		<div className={styles.main}>
+		<div>
 			<h1>Login</h1>
 		</div>
 	)
