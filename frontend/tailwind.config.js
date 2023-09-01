@@ -4,11 +4,17 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        'montserrat': ['Montserrat', 'sans'],
+      },
       colors: {
-        'primary': '#0D0E14',
+        'primary': '#25273F',
+        'secondary': '#171930',
+        'tertiary': '#2F3759',
+        'quaternary': '#7090E9',
+        'quinary': '#5064FB',
       },
     },
   },
   plugins: [],
 }
-
