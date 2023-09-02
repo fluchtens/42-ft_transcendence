@@ -1,6 +1,8 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Layout from './components/Layout/Layout'
 import Error from './pages/Error'
+import Game from './pages/Game'
+import Leaderboard from './pages/Leaderboard'
 import Login from './pages/Login'
 
 function App() {
@@ -10,6 +12,14 @@ function App() {
       element: <Layout />,
       errorElement: <Error />,
       children: [
+        {
+          path: "/game",
+          element: <Game />,
+        },
+        {
+          path: "/leaderboard",
+          element: <Leaderboard />,
+        },
         {
           path: "/login",
           element: <Login />,

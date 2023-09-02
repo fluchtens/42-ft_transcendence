@@ -16,8 +16,11 @@ function Header() {
             <div className={pathname === "/" ? "text-quaternary" : ""}>
               <Link to={'/'}>Home</Link>
             </div>
-            <div className={pathname === "/about" ? "text-quaternary" : ""}>
-              <Link to={'/about'}>About</Link>
+            <div className={pathname === "/game" ? "text-quaternary" : ""}>
+              <Link to={'/game'}>Game</Link>
+            </div>
+            <div className={pathname === "/leaderboard" ? "text-quaternary" : ""}>
+              <Link to={'/leaderboard'}>Leaderboard</Link>
             </div>
             <div className="text-white font-medium">
               <Link to={'/login'}>
