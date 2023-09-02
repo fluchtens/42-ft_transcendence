@@ -1,8 +1,13 @@
+import errorLogo from '/error_page.svg'
+
 function Error() {
 	return (
-		<div className="py-20 flex items-center justify-center">
-			<h1 className="text-6xl font-medium">Error</h1>
-		</div>
+		<main>
+			<div className="flex flex-col items-center">
+				<img src={errorLogo} alt="" className=""/>
+				<p className="text-6xl font-semibold">404 Not Found</p>
+			</div>
+		</main>
 	)
 }
 
