@@ -7,27 +7,27 @@ function Header() {
   return (
     <>
       <header className="bg-secondary border-b border-quaternary">
-        <nav className="p-3 container mx-auto flex max-w-screen-xl justify-between">
-          <div className="flex gap-3 items-center text-lg font-medium">
-            <img src={pongLogo} className="h-10 w-10"/>
-            <Link to={'/'}>ft_transcendence</Link>
+        <nav className="px-6 py-3 flex items-center justify-between max-w-screen-xl mx-auto">
+          <div>
+            <img src={pongLogo} className="hidden md:w-10 md:h-10 md:inline md:mr-4"/>
+            <Link to={'/'} className="text-lg font-medium">ft_transcendence</Link>
           </div>
-          <div className="flex gap-4 items-center">
-            <div className={pathname === "/" ? "text-quaternary" : ""}>
-              <Link to={'/'}>Home</Link>
-            </div>
-            <div className={pathname === "/game" ? "text-quaternary" : ""}>
-              <Link to={'/game'}>Game</Link>
-            </div>
-            <div className={pathname === "/leaderboard" ? "text-quaternary" : ""}>
-              <Link to={'/leaderboard'}>Leaderboard</Link>
-            </div>
-            <div className="text-white font-medium">
+          <ul className="hidden md:flex md:items-center md:gap-4">
+            <li className={pathname === "/" ? "text-quaternary" : ""}>
+              <Link to={'/'} className="hover:text-quaternary">Home</Link>
+            </li>
+            <li className={pathname === "/game" ? "text-quaternary" : ""}>
+              <Link to={'/game'} className="hover:text-quaternary">Game</Link>
+            </li>
+            <li className={pathname === "/leaderboard" ? "text-quaternary" : ""}>
+              <Link to={'/leaderboard'} className="hover:text-quaternary">Leaderboard</Link>
+            </li>
+            <li className="text-white font-medium">
               <Link to={'/login'}>
-               <button className="px-2.5 py-1.5 rounded-md bg-quinary hover:bg-quaternary">Sign in</button>
+                <button className="px-2.5 py-1.5 rounded-md bg-quinary hover:bg-quaternary">Sign in</button>
               </Link>
-            </div>
-          </div>
+            </li>
+          </ul>
         </nav>
       </header>
     </>
