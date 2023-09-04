@@ -13,5 +13,8 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm install
 COPY ./ ./
 
+# Exposes port
+EXPOSE 3000
+
 # Starts application
 CMD ["pnpm", "start:dev"]
