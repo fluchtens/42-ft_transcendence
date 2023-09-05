@@ -17,10 +17,9 @@ function ApiTest() {
   }, []);
 
   return (
-    <div className="flex justify-center">
-      <div className="bg-secondary border border-quaternary rounded-lg p-[4rem]">
-        <h1 className="text-2xl font-medium" >Response data from http://localhost:3000/</h1>
-        <br/>
+    <div className="flex items-center justify-center">
+      <div className="bg-secondary shadow-lg rounded-lg p-[3rem]">
+        <h1 className="text-2xl font-medium" >Response data from http://localhost:3000/</h1><br/>
         <p className="text-lg">{dataFromLocalhost}</p>
       </div>
     </div>
