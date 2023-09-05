@@ -4,7 +4,7 @@ import pongLogo from '/pong_logo.png'
 function Login() {
   return (
 
-    <main className="flex flex-col items-center justify-center p-5 mx-auto h-screen">
+    <main className="flex flex-col items-center justify-center p-5 mx-auto md:h-screen">
 
         <div className="flex items-center mb-4">
           <img src={pongLogo} className="w-10 h-10 mr-3"/>
