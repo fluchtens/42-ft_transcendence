@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"
+import { Link } from 'react-router-dom'
 import pongLogo from '/pong_logo.png'
 
 function Login() {

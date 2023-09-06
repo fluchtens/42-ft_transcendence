@@ -1,4 +1,4 @@
-import { useLocation, Link } from "react-router-dom"
+import { useLocation, Link } from 'react-router-dom'
 import pongLogo from '/pong_logo.png'
 
 function Header() {
