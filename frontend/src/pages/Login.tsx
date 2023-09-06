@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import pongLogo from '/pong_logo.png'
+import { GiPingPongBat } from "react-icons/gi";
 
 function Login() {
   return (
@@ -7,7 +7,7 @@ function Login() {
     <main className="flex flex-col items-center justify-center p-5 mx-auto md:h-screen">
 
         <div className="flex items-center mb-4">
-          <img src={pongLogo} className="w-10 h-10 mr-3"/>
+            <GiPingPongBat className="w-9 h-9 mr-2.5"/>
           <Link to={'/'} className="text-3xl font-semibold">ft_transcendence</Link>
         </div>
 

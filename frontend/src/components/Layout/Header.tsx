@@ -1,9 +1,8 @@
 import { useLocation, Link } from 'react-router-dom'
 import { AiFillHome } from 'react-icons/ai';
 import { IoGameController } from 'react-icons/io5';
+import { GiPingPongBat } from "react-icons/gi";
 import { MdLeaderboard } from "react-icons/md";
-import pongLogo from '/pong_logo.png'
-
 
 function Header() {
   const { pathname } = useLocation()
@@ -12,9 +11,9 @@ function Header() {
     <>
       <header className="bg-secondary shadow-lg">
         <nav className="flex items-center justify-between px-6 py-3">
-
-          <div>
-            <img src={pongLogo} className="hidden md:w-10 md:h-10 md:inline md:mr-4"/>
+      
+          <div className="flex items-center">
+            <GiPingPongBat className="hidden md:w-7 md:h-7 md:inline md:mr-2.5"/>
             <Link to={'/'} className="text-lg font-medium">ft_transcendence</Link>
           </div>
 
