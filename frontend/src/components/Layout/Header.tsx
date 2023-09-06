@@ -27,7 +27,7 @@ function Header() {
             <AiOutlineMenu className="w-6 h-6"/>
           </button>
 
-          <ul className={`${!isMenuOpen ? "hidden" : "flex flex-col w-full py-2 gap-1"} font-medium md:flex md:flex-row md:w-max md:uppercase md:items-center md:py-0 md:gap-4`}>
+          <ul className={`${!isMenuOpen ? "hidden" : "flex flex-col w-full py-3 gap-2"} uppercase font-medium items-center md:flex md:flex-row md:w-max md:py-0 md:gap-4`}>
             <li className={`${pathname === "/" ? "text-tertiary" : ""} flex items-center`}>
               <AiFillHome className="w-5 h-5 mr-1.5 mb-0.5" />
               <Link to={'/'} className="hover:text-tertiary ">Home</Link>
