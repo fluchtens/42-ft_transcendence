@@ -1,5 +1,9 @@
 import { useLocation, Link } from 'react-router-dom'
+import { AiFillHome } from 'react-icons/ai';
+import { IoGameController } from 'react-icons/io5';
+import { MdLeaderboard } from "react-icons/md";
 import pongLogo from '/pong_logo.png'
+
 
 function Header() {
   const { pathname } = useLocation()
@@ -7,26 +11,32 @@ function Header() {
   return (
     <>
       <header className="bg-secondary shadow-lg">
-        <nav className="px-6 py-3 flex items-center justify-between">
+        <nav className="flex items-center justify-between px-6 py-3">
 
           <div>
             <img src={pongLogo} className="hidden md:w-10 md:h-10 md:inline md:mr-4"/>
             <Link to={'/'} className="text-lg font-medium">ft_transcendence</Link>
           </div>
 
-          <ul className="hidden md:font-medium md:flex md:items-center md:gap-4">
-            <li className={pathname === "/" ? "text-tertiary" : ""}>
+          <ul className="hidden md:uppercase md:font-medium md:flex md:items-center md:gap-4">
+            <li className={pathname === "/" ? "text-tertiary flex items-center" : "flex items-center"}>
+              <AiFillHome className="w-5 h-5 mr-1.5 mb-0.5" />
               <Link to={'/'} className="hover:text-tertiary">Home</Link>
             </li>
-            <li className={pathname === "/game" ? "text-tertiary" : ""}>
+
+            <li className={pathname === "/game" ? "text-tertiary flex items-center" : "flex items-center"}>
+              <IoGameController className="w-5 h-5 mr-1.5 mb-0.5" />
               <Link to={'/game'} className="hover:text-tertiary">Game</Link>
             </li>
-            <li className={pathname === "/leaderboard" ? "text-tertiary" : ""}>
+
+            <li className={pathname === "/leaderboard" ? "text-tertiary flex items-center" : "flex items-center"}>
+              <MdLeaderboard className="w-5 h-5 mr-1.5 mb-0.5" />
               <Link to={'/leaderboard'} className="hover:text-tertiary">Leaderboard</Link>
             </li>
+
             <li className="text-white">
               <Link to={'/login'}>
-                <button className="px-2.5 py-1.5 rounded-md bg-quaternary hover:bg-tertiary">Sign in</button>
+                <button className="uppercase rounded-md bg-quaternary hover:bg-tertiary px-2.5 py-1.5">Sign in</button>
               </Link>
             </li>
           </ul>
