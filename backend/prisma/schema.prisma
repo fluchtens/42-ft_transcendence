@@ -10,8 +10,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Book { 
+model User { 
   id Int @id @default(autoincrement())
-  title String
-  description String?
+  userName String @unique
+  imageUrl String @db.Text
 }
