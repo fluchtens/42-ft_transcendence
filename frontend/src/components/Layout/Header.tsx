@@ -28,19 +28,25 @@ function Header() {
           </button>
 
           <ul className={`${!isMenuOpen ? "hidden" : "flex flex-col w-full py-3 gap-2"} uppercase font-medium items-center md:flex md:flex-row md:w-max md:py-0 md:gap-4`}>
-            <li className={`hover:text-tertiary ${pathname === "/" ? "text-tertiary" : ""} flex items-center`}>
-              <AiFillHome className="w-5 h-5 mr-1.5 mb-0.5"/>
-              <Link to={'/'}>Home</Link>
+            <li className={`hover:text-tertiary ${pathname === "/" ? "text-tertiary" : ""}`}>
+              <Link to={'/'} className="flex items-center">
+               <AiFillHome className="w-5 h-5 mr-1.5 mb-0.5"/>
+                Home
+              </Link>
             </li>
 
-            <li className={`hover:text-tertiary ${pathname === "/game" ? "text-tertiary" : ""} flex items-center`}>
-              <IoGameController className="w-5 h-5 mr-1.5 mb-0.5"/>
-              <Link to={'/game'}>Game</Link>
+            <li className={`hover:text-tertiary ${pathname === "/game" ? "text-tertiary" : ""}`}>
+              <Link to={'/game'} className="flex items-center">
+                <IoGameController className="w-5 h-5 mr-1.5 mb-0.5"/>
+                Game
+              </Link>
             </li>
 
-            <li className={`hover:text-tertiary ${pathname === "/leaderboard" ? "text-tertiary" : ""} flex items-center`}>
-              <MdLeaderboard className="w-5 h-5 mr-1.5 mb-0.5"/>
-              <Link to={'/leaderboard'}>Leaderboard</Link>
+            <li className={`hover:text-tertiary ${pathname === "/leaderboard" ? "text-tertiary" : ""}`}>
+              <Link to={'/leaderboard'} className="flex items-center">
+                <MdLeaderboard className="w-5 h-5 mr-1.5 mb-0.5"/>
+                Leaderboard
+              </Link>
             </li>
 
             <li className="text-white mt-1 md:mt-0">
