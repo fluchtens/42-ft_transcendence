@@ -9,9 +9,9 @@ function Layout() {
 
   return (
     <>
-      <Header />
+      {pathname !== "/login" && <Header />}
       {pathname === "/" ? <Home /> : <Outlet />}
-      <Footer />
+      {pathname !== "/login" && <Footer />}
     </>
   )
 }
