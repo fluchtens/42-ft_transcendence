@@ -7,9 +7,6 @@ install:
 run:
 	docker-compose up --build
 
-rund:
-	docker-compose up --build -d
-
 clean:
 	sh destroy.sh
 
