@@ -14,8 +14,4 @@ export class UserController{
   async postUser(@Body() postData: User):Promise<User>{
     return this.userService.createUser(postData)
   }
-  @Get()
-  getHello(): string {
-    return this.userService.getHello();
-  }
 }
