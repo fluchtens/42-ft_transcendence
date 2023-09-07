@@ -1,7 +1,7 @@
 import axios, {AxiosResponse} from 'axios';
 
 export async function getHelloWorld(onSuccess: (data: string) => void, onError: (error: string) => void): Promise<void> {
-  const apiUrl: string = "http://localhost:3000/";
+  const apiUrl: string = `${import.meta.env.VITE_API_URL}:3000/`;
 
   try {
     const response: AxiosResponse = await axios.get(apiUrl);
