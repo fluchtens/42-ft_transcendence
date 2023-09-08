@@ -21,4 +21,4 @@ EXPOSE 3000
 EXPOSE 5555
 
 # Starts application
-CMD ["pnpm", "start:dev"]
+CMD ["pnpm", "run", "start:migrate:dev"]
