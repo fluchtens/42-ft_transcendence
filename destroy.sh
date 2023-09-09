@@ -1,9 +1,28 @@
 #!/bin/sh
-docker stop $(docker ps -qa) 2>/dev/null
-docker rm $(docker ps -qa) 2>/dev/null
-docker rmi -f $(docker images -qa) 2>/dev/null
-docker volume rm $(docker volume ls -q) 2>/dev/null
-docker network rm $(docker network ls -q) 2>/dev/null
-docker system prune -a --volume 2>/dev/null
-docker system prune -a --force 2>/dev/null
+
+# Stop containers
+docker stop transcendence-frontend
+docker stop transcendence-backend
+docker stop transcendence-postgres
+
+# Remove containers
+docker rm transcendence-frontend
+docker rm transcendence-backend
+docker rm transcendence-postgres
+
+# Remove images
+docker rmi transcendence-frontend
+docker rmi transcendence-backend
+# docker rmi postgres
+
+# Remove volumes
+docker volume rm $(docker volume ls -q)
+
+# Remove networks
+docker network rm transcendence
+
+# Remove prisma migrations
 rm -rf backend/prisma/migrations
+
+# docker system prune -a --volume
+# docker system prune -a --force
