@@ -19,6 +19,7 @@ services:
     image: transcendence-backend
     build:
       context: ./backend
+      dockerfile: ./dev.Dockerfile
     depends_on:
       - postgres
     env_file:

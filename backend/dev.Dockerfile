@@ -13,7 +13,7 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm install
 COPY ./ ./
 
-# Setups Prisma
+# Setups prisma
 RUN npx prisma generate
 
 # Exposes port
