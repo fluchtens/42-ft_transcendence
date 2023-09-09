@@ -38,6 +38,7 @@ services:
     image: transcendence-frontend
     build:
       context: ./frontend
+      dockerfile: ./dev.Dockerfile
     depends_on:
       - backend
     env_file:

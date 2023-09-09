@@ -1,9 +1,9 @@
 # Specifies the base image to be used to build the Docker image
-FROM alpine:3.17
+FROM node:lts-alpine
 
 # Installs the required packages
 RUN apk update && \
-	apk add nginx nodejs npm && \
+	apk add nginx && \
 	npm install -g pnpm
 
 # Sets the working directory
@@ -14,10 +14,10 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm install
 COPY ./ ./
 
-# Build project
+# Build project app
 RUN pnpm run build
 
-# Setups nginx
+# Setups nginx with app
 COPY nginx.conf /etc/nginx/http.d/default.conf
 
 # Exposes port
