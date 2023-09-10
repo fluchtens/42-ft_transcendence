@@ -1,6 +1,6 @@
-import { NestFactory } from '@nestjs/core';
-import { UserModule } from './User/user.module';
-import * as dotenv from 'dotenv';
+import { NestFactory } from "@nestjs/core";
+import { UserModule } from "./User/user.module";
+import * as dotenv from "dotenv";
 
 dotenv.config();
 
