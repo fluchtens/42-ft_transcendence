@@ -1,11 +1,11 @@
 import { NestFactory } from "@nestjs/core";
-import { UserModule } from "./User/user.module";
 import * as dotenv from "dotenv";
+import { CoreModule } from "./core.module";
 
 dotenv.config();
 
 async function bootstrap() {
-  const app = await NestFactory.create(UserModule);
+  const app = await NestFactory.create(CoreModule);
   app.enableCors(
     {
       origin: [process.env.VITE_API_URL],
