@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { getUserList, User } from "../api/getUserList";
+import { getUserList } from "../api/getUserList";
+import { User } from "../interfaces/user";
 
 function UserList() {
   const [userList, setUserList] = useState<User[]>();
@@ -15,7 +16,6 @@ function UserList() {
     }
     fetchData();
   }, []);
-
 
   return (
     <div className="flex items-center justify-center">
