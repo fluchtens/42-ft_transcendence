@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getUserList } from "../api/getUserList";
+import { getUserList } from "../api/user";
 import { User } from "../interfaces/user";
 
 function UserList() {

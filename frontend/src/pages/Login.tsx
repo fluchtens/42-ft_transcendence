@@ -1,7 +1,27 @@
 import { Link } from 'react-router-dom'
+import { useState } from "react";
 import { GiPingPongBat } from "react-icons/gi";
+import { createUser } from "../api/user";
+import { User } from "../interfaces/user";
 
 function Login() {
+  const [username, setUsername] = useState('');
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const userData: User = {
+      userName: username,
+      imageUrl: "uneImageDeFou"
+    };
+
+    try {
+      await createUser(userData);
+    } catch (error) {
+      console.error("Create user request error:", error);
+    }
+  };
+
   return (
     <main className="flex flex-col items-center justify-center p-5 mx-auto md:h-screen">
 
@@ -15,10 +35,10 @@ function Login() {
 
           <h1 className="text-xl font-bold leading-tight tracking-tight md:text-2xl">Sign in to your account</h1>
 
-          <form className="space-y-3 md:space-y-6" action="#">
+          <form onSubmit={handleFormSubmit} className="space-y-3 md:space-y-6" action="#">
             <div>
               <label htmlFor="username" className="block mb-2 text-sm font-medium">Username</label>
-              <input type="text" name="username" id="username" placeholder="fluchten" className="bg-gray-700 border border-gray-600 placeholder-gray-400 rounded-lg w-full p-2.5 md:text-sm" required/>
+              <input type="text" name="username" id="username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="fluchten" className="bg-gray-700 border border-gray-600 placeholder-gray-400 rounded-lg w-full p-2.5 md:text-sm" required/>
             </div>
 
             <div>
