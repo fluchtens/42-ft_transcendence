@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getUserList } from "../api/user";
 import { User } from "../interfaces/user";
+import noImageLogo from "/no_image.png";
 
 function UserList() {
   const [userList, setUserList] = useState<User[]>();
@@ -18,18 +19,26 @@ function UserList() {
   }, []);
 
   return (
-    <div className="flex items-center justify-center">
-      <div className="bg-secondary shadow-lg rounded-lg p-[3rem]">
-        <h1 className="text-2xl font-medium" >Data response from API</h1><br/>
-        <ul className="text-lg">
+    <div className="bg-primary px-[5rem]">
+      <div className="bg-secondary rounded-lg shadow-lg p-[3rem]">
+
+        <ul>
           {userList ? (
             userList.map((user) => (
-              <li>{user.id}. {user.userName}</li>
+              <li className="bg-primary rounded-lg shadow-lg flex items-center justify-between w-full h-[4rem] mb-3">
+                <div className="flex items-center">
+                  <div className="pl-5 text-3xl">{user.id}</div>
+                  <img src={noImageLogo} className="rounded-full shadow-lg w-[2.5rem] h-[2.5rem] ml-5"/>
+                </div>
+                <div className="">{user.userName}</div>
+                <div className="pr-5">42</div>
+              </li>
             ))
           ) : (
             <li>Data recovery error...</li>
           )}
         </ul>
+
       </div>
     </div>
   );
