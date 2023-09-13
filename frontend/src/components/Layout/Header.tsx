@@ -50,7 +50,7 @@ function Header() {
             </li>
 
             <li className="text-white mt-1 md:mt-0">
-              <Link to={'/login'}>
+              <Link to={'/signin'}>
                 <button className="uppercase rounded-md bg-quaternary hover:bg-tertiary px-2.5 py-1.5">Sign in</button>
               </Link>
             </li>
