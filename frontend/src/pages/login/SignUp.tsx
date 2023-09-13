@@ -1,13 +1,13 @@
 import { Link } from 'react-router-dom'
 import { useState } from "react";
 import { GiPingPongBat } from "react-icons/gi";
-import { createUser } from "../api/user";
-import { User } from "../interfaces/user";
+import { createUser } from "../../api/user";
+import { User } from "../../interfaces/user";
 
-function Login() {
+function SignUp() {
   const [username, setUsername] = useState('');
 
-  const handleFormSubmit = async (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: any) => {
     e.preventDefault();
 
     const userData: User = {
@@ -33,7 +33,7 @@ function Login() {
       <div className="bg-secondary rounded-lg shadow-lg w-full md:max-w-md">
         <div className="p-5 space-y-3 md:p-8 md:space-y-6">
 
-          <h1 className="text-xl font-bold leading-tight tracking-tight md:text-2xl">Sign in to your account</h1>
+          <h1 className="text-xl font-bold leading-tight tracking-tight md:text-2xl">Register a new account</h1>
 
           <form onSubmit={handleFormSubmit} className="space-y-3 md:space-y-6" action="#">
             <div>
@@ -46,14 +46,12 @@ function Login() {
               <input type="password" name="password" id="password" placeholder="••••••••" className="bg-gray-700 border border-gray-600 placeholder-gray-400 rounded-lg w-full p-2.5 md:text-sm" required/>
             </div>
 
-            <button type="submit" className="text-white bg-quaternary hover:bg-tertiary rounded-lg text-sm font-medium w-full p-2.5">Sign in</button>
+            <button type="submit" className="text-white bg-quaternary hover:bg-tertiary rounded-lg text-sm font-medium w-full p-2.5">Sign up</button>
           </form>
 
-          <button className="text-white bg-secondary hover:bg-primary border border-gray-500 rounded-lg text-sm font-medium w-full p-2.5">Sign in with 42</button>
-
           <div className="flex text-sm">
-            <p className="font-light text-gray-400 mr-1">Don’t have an account yet?</p>
-            <Link to={'/'} className="font-medium text-gray-400 hover:underline">Sign up</Link>
+            <p className="font-light text-gray-400 mr-1">Have an account?</p>
+            <Link to={'/signin'} className="font-medium text-gray-400 hover:underline">Sign in</Link>
           </div>
 
         </div>
@@ -63,4 +61,4 @@ function Login() {
   );
 }
 
-export default Login
+export default SignUp
