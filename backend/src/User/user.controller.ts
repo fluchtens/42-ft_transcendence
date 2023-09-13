@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Req, Res } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Req, Res, UsePipes, ValidationPipe } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { User } from "./user.model";
 import { Request, Response } from "express";
+import { CreateUserDto } from "./user.dto";
 
 @Controller('api/v1/user')
 
@@ -26,8 +27,9 @@ export class UserController {
     }
   }
   @Post()
-  async postUser(@Body() postData: User
-  ) : Promise<User>{
-    return this.userService.createUser(postData);
+  @UsePipes(ValidationPipe)
+  async postUser(@Body() createUserDto: CreateUserDto
+  ): Promise<CreateUserDto>{
+    return this.userService.createUser(createUserDto);
   }
 }
