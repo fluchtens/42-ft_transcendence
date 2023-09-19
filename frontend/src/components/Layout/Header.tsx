@@ -1,16 +1,29 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, Link } from 'react-router-dom'
 import { AiFillHome, AiOutlineMenu } from 'react-icons/ai';
 import { IoGameController } from 'react-icons/io5';
 import { GiPingPongBat } from "react-icons/gi";
-import { MdLeaderboard } from "react-icons/md";
+import { MdLeaderboard, MdOutlineDarkMode, MdDarkMode } from "react-icons/md";
 
 function Header() {
   const { pathname } = useLocation()
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [theme, setTheme] = useState("light");
 
   const toggleMenu = () => {
     setIsMenuOpen(isMenuOpen == false);
+  };
+
+  useEffect(() => {
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark")
   };
 
   return (
@@ -53,6 +66,12 @@ function Header() {
               <Link to={'/signin'}>
                 <button className="uppercase rounded-md bg-quaternary hover:bg-tertiary px-2.5 py-1.5">Sign in</button>
               </Link>
+            </li>
+
+            <li>
+              <button onClick={toggleTheme} className="flex items-center">
+                {theme === "dark" ? <MdDarkMode className="w-5 h-5 mb-0.5"/> : <MdOutlineDarkMode className="w-5 h-5 mb-0.5"/>}
+              </button>
             </li>
           </ul>
 
