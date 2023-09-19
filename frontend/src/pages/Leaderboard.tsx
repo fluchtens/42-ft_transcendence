@@ -19,32 +19,27 @@ function Leaderboard() {
   }, []);
 
 	return (
-		<>
-			<div className="py-[2rem] flex items-center justify-center">
-				<h1 className="text-5xl font-medium">Leaderboard</h1>
-			</div>
-
-      <div className="bg-primary px-[5rem]">
-        <div className="bg-secondary rounded-lg shadow-lg p-[3rem]">
-          <ul>
-            {userList ? (
-              userList.map((user) => (
-                <li className="bg-primary rounded-lg shadow-lg flex items-center justify-between w-full h-[4rem] mb-3">
-                  <div className="flex items-center">
-                    <div className="pl-5 text-3xl">{user.id}</div>
-                    <img src={noImageLogo} className="rounded-full shadow-lg w-[2.5rem] h-[2.5rem] ml-5"/>
-                  </div>
-                  <div className="">{user.userName}</div>
-                  <div className="pr-5">42</div>
-                </li>
-              ))
-            ) : (
-              <li>Data recovery error...</li>
-            )}
-          </ul>
-        </div>
+    <div className="p-[2rem]">
+      <div className="bg-lsecondary dark:bg-dsecondary rounded-2xl shadow-lg pt-5 p-[2rem]">
+        <h1 className="text-3xl font-medium text-center mb-5">Leaderboard</h1>
+        <ul>
+          {userList ? (
+            userList.map((user) => (
+              <li className="border-b flex items-center justify-between w-full h-[3rem] mb-3">
+                <div className="flex items-center">
+                  <div className="pl-5 text-3xl">{user.id}</div>
+                  <img src={noImageLogo} className="rounded-full shadow-lg w-[2.5rem] h-[2.5rem] ml-5"/>
+                </div>
+                <div className="">{user.userName}</div>
+                <div className="pr-5">42</div>
+              </li>
+            ))
+          ) : (
+            <li>Data recovery error...</li>
+          )}
+        </ul>
       </div>
-		</>
+    </div>
 	)
 }
 

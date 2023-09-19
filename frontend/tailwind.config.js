@@ -9,11 +9,11 @@ export default {
         'montserrat': ['Montserrat', 'sans'],
       },
       colors: {
-        'lprimary': '#F5F5F9',
-        'primary': '#171930',
+        'lprimary': '#f5f5f9',
+        'dprimary': '#171930',
 
-        'lsecondary': '#F5F5F9',
-        'secondary': '#25273F',
+        'lsecondary': '#ffffff',
+        'dsecondary': '#25273F',
 
         'tertiary': '#7090E9',
 

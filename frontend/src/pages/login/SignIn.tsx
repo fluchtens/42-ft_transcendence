@@ -30,7 +30,7 @@ function SignIn() {
         <Link to={'/'} className="text-3xl font-semibold">ft_transcendence</Link>
       </div>
 
-      <div className="bg-secondary rounded-lg shadow-lg w-full md:max-w-md">
+      <div className="bg-dsecondary rounded-lg shadow-lg w-full md:max-w-md">
         <div className="p-5 space-y-3 md:p-8 md:space-y-6">
 
           <h1 className="text-xl font-bold leading-tight tracking-tight md:text-2xl">Sign in to your account</h1>

@@ -28,7 +28,7 @@ function Header() {
 
   return (
     <>
-      <header className="bg-lsecondary dark:bg-secondary shadow-lg">
+      <header className="bg-lsecondary dark:bg-dsecondary shadow-lg">
         <nav className="w-full flex flex-wrap items-center justify-between px-6 py-3">
       
           <div className="flex items-center">

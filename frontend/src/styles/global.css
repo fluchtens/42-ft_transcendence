@@ -3,5 +3,5 @@
 @tailwind utilities;
 
 body {
-  @apply bg-lprimary dark:bg-primary text-ltext dark:text-dtext font-montserrat;
+  @apply bg-lprimary dark:bg-dprimary text-ltext dark:text-dtext font-montserrat;
 }
