@@ -28,7 +28,7 @@ function Header() {
 
   return (
     <>
-      <header className="bg-secondary shadow-lg">
+      <header className="bg-lsecondary dark:bg-secondary shadow-lg">
         <nav className="w-full flex flex-wrap items-center justify-between px-6 py-3">
       
           <div className="flex items-center">
@@ -70,7 +70,7 @@ function Header() {
 
             <li>
               <button onClick={toggleTheme} className="flex items-center">
-                {theme === "dark" ? <MdDarkMode className="w-5 h-5 mb-0.5"/> : <MdOutlineDarkMode className="w-5 h-5 mb-0.5"/>}
+                {theme === "light" ? <MdDarkMode className="w-5 h-5 mb-0.5"/> : <MdOutlineDarkMode className="w-5 h-5 mb-0.5"/>}
               </button>
             </li>
           </ul>
