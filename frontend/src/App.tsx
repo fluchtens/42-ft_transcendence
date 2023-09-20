@@ -1,5 +1,5 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import Layout from './components/Layout/Layout';
+import Layout from './layouts/Layout';
 import Error from './pages/Error';
 import Game from './pages/Game';
 import Leaderboard from './pages/Leaderboard';

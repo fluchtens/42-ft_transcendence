@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
 import { useState } from "react";
 import { GiPingPongBat } from "react-icons/gi";
-import { createUser } from "../../api/user";
-import { User } from "../../interfaces/User";
+import { createUser } from "../../services/user";
+import { User } from "../../utils/user.interface";
 
 function SignIn() {
   const [username, setUsername] = useState('');

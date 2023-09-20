@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { getUserList } from "../api/user";
-import { User } from "../interfaces/User";
+import { getUserList } from "../services/user";
+import { User } from "../utils/user.interface";
 import noImageLogo from "/no_image.png";
 
 function Leaderboard() {

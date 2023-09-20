@@ -1,5 +1,5 @@
 import axios, {AxiosResponse} from 'axios';
-import { User } from "../interfaces/User";
+import { User } from "../utils/user.interface";
 
 const apiUrl: string = `${import.meta.env.VITE_API_URL}:3000/api/v1/user`;
 
