@@ -9,9 +9,13 @@ function Layout() {
 
   return (
     <>
-      {pathname !== "/signin" && pathname !== "/signup" && <Header/>}
-      {pathname === "/" ? <Home/> : <Outlet/>}
-      {pathname !== "/signin" && pathname !== "/signup" && <Footer/>}
+      <div className="flex flex-col min-h-screen">
+        {pathname !== "/signin" && pathname !== "/signup" && <Header/>}
+        <main className="flex-grow">
+          {pathname === "/" ? <Home/> : <Outlet/>}
+        </main>
+        {pathname !== "/signin" && pathname !== "/signup" && <Footer/>}
+      </div>
     </>
   )
 }
