@@ -26,6 +26,15 @@ function Header() {
     setTheme(theme === "dark" ? "light" : "dark")
   };
 
+  const createLinkButton = (path: string, text: string, icon: any) => (
+    <li className={`hover:text-tertiary ${pathname === path ? "text-tertiary" : ""}`}>
+      <Link to={path} className="flex items-center">
+        {icon}
+        {text}
+      </Link>
+    </li>
+  );
+
   return (
     <>
       <header className="bg-lsecondary dark:bg-dsecondary border-b border-gray-200 dark:border-gray-700">
@@ -41,26 +50,9 @@ function Header() {
           </button>
 
           <ul className={`${!isMenuOpen ? "hidden" : "flex flex-col w-full py-3 gap-2"} uppercase font-medium items-center md:flex md:flex-row md:w-max md:py-0 md:gap-4`}>
-            <li className={`hover:text-tertiary ${pathname === "/" ? "text-tertiary" : ""}`}>
-              <Link to={'/'} className="flex items-center">
-               <AiFillHome className="w-5 h-5 mr-1.5 mb-0.5"/>
-                Home
-              </Link>
-            </li>
-
-            <li className={`hover:text-tertiary ${pathname === "/game" ? "text-tertiary" : ""}`}>
-              <Link to={'/game'} className="flex items-center">
-                <IoGameController className="w-5 h-5 mr-1.5 mb-0.5"/>
-                Game
-              </Link>
-            </li>
-
-            <li className={`hover:text-tertiary ${pathname === "/leaderboard" ? "text-tertiary" : ""}`}>
-              <Link to={'/leaderboard'} className="flex items-center">
-                <MdLeaderboard className="w-5 h-5 mr-1.5 mb-0.5"/>
-                Leaderboard
-              </Link>
-            </li>
+            {createLinkButton("/", "Home", <AiFillHome className="w-5 h-5 mr-1.5 mb-0.5"/>)}
+            {createLinkButton("/game", "Game", <IoGameController className="w-5 h-5 mr-1.5 mb-0.5"/>)}
+            {createLinkButton("/leaderboard", "Leaderboard", <MdLeaderboard className="w-5 h-5 mr-1.5 mb-0.5"/>)}
 
             <li className="text-white mt-1 md:mt-0">
               <Link to={'/signin'}>
