@@ -40,7 +40,7 @@ function Header() {
             <AiOutlineMenu className="w-6 h-6"/>
           </button>
 
-          <ul className={`${!isMenuOpen ? "hidden" : "flex flex-col w-full py-3 gap-2"} uppercase font-medium items-center md:flex md:flex-row md:w-max md:py-0 md:gap-4`}>
+          <ul className={`${!isMenuOpen ? "hidden" : "flex flex-col w-full py-3 gap-2"} font-medium items-center md:flex md:flex-row md:w-max md:py-0 md:gap-4`}>
             <PageButton path="/" text="Home" icon={<AiFillHome className="w-5 h-5 mr-1.5 mb-0.5"/>} />
             <PageButton path="/game" text="Game" icon={<IoGameController className="w-5 h-5 mr-1.5 mb-0.5"/>} />
             <PageButton path="/leaderboard" text="Leaderboard" icon={<MdLeaderboard className="w-5 h-5 mr-1.5 mb-0.5"/>} />

@@ -11,10 +11,12 @@ function PageButton({ path, text, icon }: PageButtonProps) {
 
   return (
     <li className={`hover:text-tertiary ${pathname === path ? "text-tertiary" : ""}`}>
-      <Link to={path} className="flex items-center">
-        {icon}
-        {text}
-      </Link>
+      <button className="uppercase md:h-9">
+        <Link to={path} className="flex items-center">
+          {icon}
+          {text}
+        </Link>
+      </button>
     </li>
   );
 }
