@@ -15,13 +15,20 @@ export class UserService {
   async getUser(id : number) : Promise<User>{
     return this.prisma.user.findUnique({where: {id : Number(id)}})
   }
-  async createUser(data: CreateUserDto): Promise<CreateUserDto> {
+  async createUser(data: CreateUserDto): Promise<CreateUserDto | null>{
+    let user = await this.prisma.user.findUnique({where: {userName : String(data.userName)}})
+    if(user){
+      return;
+    }
     return this.prisma.user.create({
       data,
     });
   }
-
-  async changeUserName(userName: String, data:User): Promise<User> {
+  async changeUserName(userName: String, data:User): Promise<User | null> {
+    let user = await this.prisma.user.findUnique({where: {userName : String(data.userName)}})
+    if(user){
+      return;
+    }
     return this.prisma.user.update({
       where: {userName:String(userName)},
       data: {userName: data.userName}
