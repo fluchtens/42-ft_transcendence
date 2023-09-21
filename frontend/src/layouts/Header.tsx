@@ -60,6 +60,19 @@ function Header() {
 
         </nav>
       </header>
+
+      {/* <div className="flex">
+        <div className="bg-lsecondary border-r border-gray-200 w-[18rem] h-screen">
+          <ul className="font-medium text-lg m-5 space-y-1">
+            <PageButton path="/" text="Home" icon={<AiFillHome className="w-6 h-6 mr-2.5 mb-0.5"/>} />
+            <PageButton path="/game" text="Game" icon={<IoGameController className="w-6 h-6 mr-2.5 mb-0.5"/>} />
+            <PageButton path="/leaderboard" text="Leaderboard" icon={<MdLeaderboard className="w-6 h-6 mr-2.5 mb-0.5"/>} />
+          </ul>
+        </div>
+        <div className="py-20 flex items-center justify-center">
+          <h1 className="text-6xl font-medium">Home</h1>
+        </div>
+      </div> */}
     </>
   );
 }
