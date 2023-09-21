@@ -11,5 +11,6 @@ generator client {
 model User { 
   id Int @id @default(autoincrement())
   userName String @unique
-  imageUrl String @db.Text
+  password String
+  imageUrl String? @db.Text
 }

@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Req, Res, UsePipes, ValidationPipe } from "@nestjs/common";
 import { UserService } from "./user.service";
-import { User } from "./user.model";
+import { User, serializedUser } from "./user.model";
 import { Request, Response } from "express";
 import { CreateUserDto } from "./user.dto";
 
@@ -20,7 +20,7 @@ export class UserController {
     const user = await this.userService.getUser(id);
     if (user){
       res.setHeader('Cache-Control', 'no-store');
-      res.status(200).send(user);
+      res.status(200).send(new serializedUser(user));
     }
     else{
       res.status(400).send({msg: 'User not found!'})
