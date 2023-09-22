@@ -1,38 +1,38 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Req, Res, UsePipes, ValidationPipe } from "@nestjs/common";
+import { Body, ClassSerializerInterceptor, Controller, Get, HttpCode, HttpException, HttpStatus, Param, ParseIntPipe, Post, Req, Res, UseInterceptors, UsePipes, ValidationPipe } from "@nestjs/common";
 import { UserService } from "./user.service";
-import { User, serializedUser } from "./user.model";
+import { User } from "./user.model";
 import { Request, Response } from "express";
-import { ChangeUsername, CreateUserDto } from "./user.dto";
+import { ChangeUsername, CreateUserDto, SerializedUser } from "./user.dto";
 
 @Controller('api/v1/user')
 
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @HttpCode(HttpStatus.OK)
   @Get()
   async getAllUser(): Promise<User[]> {
     return this.userService.getAllUsers();
   }
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get(':id')
-  async GetUser(@Param('id', ParseIntPipe) id : number,
-  @Res() res : Response,
-  ) {
+  async GetUser(@Param('id', ParseIntPipe) id: number,
+   ) {
     const user = await this.userService.getUser(id);
-    if (user){
-      res.setHeader('Cache-Control', 'no-store');
-      res.status(200).send(new serializedUser(user));
+    if (!user) {
+      throw new HttpException("User Don't Exist", HttpStatus.BAD_REQUEST);
     }
-    else{
-      throw res.status(400).send({msg: 'User not found!'})
-    }
+    return (new SerializedUser(user))
   }
   @Post()
   @UsePipes(ValidationPipe)
-  async postUser(@Body() createUserDto: CreateUserDto
+  async postUser(@Body() createUserDto: CreateUserDto,
+  @Res() res: Response,
   ){
     const user = await this.userService.createUser(createUserDto);
-    if (user)
-      return user
+    if (user){
+      res.status(HttpStatus.CREATED).send(user)
+    }
     else{
       throw new HttpException('User Exists', HttpStatus.BAD_REQUEST)
     }

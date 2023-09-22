@@ -1,4 +1,5 @@
 import { Prisma } from "@prisma/client";
+import { Exclude } from "class-transformer";
 import { IsString, Length, Matches, isString } from "class-validator";
 
 export class CreateUserDto implements Prisma.UserCreateInput{
@@ -19,4 +20,15 @@ export class ChangeUsername implements Prisma.UserCreateInput{
   userName: string;
   @Length(3, 16)
   password: string;
+}
+
+export class SerializedUser{
+  userName: string;
+  imageUrl?: string;
+
+  @Exclude()
+  password: string;
+  constructor(partial: Partial<SerializedUser>){
+    Object.assign(this, partial);
+  }
 }
