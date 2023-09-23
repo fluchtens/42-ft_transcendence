@@ -50,7 +50,7 @@ function SignIn() {
 
         <div className="flex text-sm">
           <p className="font-light text-gray-500 dark:text-gray-400 mr-1">Don’t have an account yet?</p>
-          <Link to={'/signup'} className="font-medium text-gray-500 dartext-gray-400 hover:underline">Sign up</Link>
+          <Link to={'/signup'} className="font-medium text-gray-500 dark:text-gray-400 hover:underline">Sign up</Link>
         </div>
       </div>
     </div>
