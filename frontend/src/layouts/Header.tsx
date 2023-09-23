@@ -4,6 +4,7 @@ import { AiFillHome, AiOutlineMenu } from 'react-icons/ai';
 import { IoGameController } from 'react-icons/io5';
 import { GiPingPongBat } from 'react-icons/gi';
 import { MdLeaderboard, MdOutlineDarkMode, MdDarkMode } from 'react-icons/md';
+import { BsFillChatDotsFill } from 'react-icons/bs';
 import PageButton from '../components/PageButton'
 
 function Header() {
@@ -29,50 +30,40 @@ function Header() {
   return (
     <>
       <header className="bg-lsecondary dark:bg-dsecondary border-b border-gray-200 dark:border-gray-700">
-        <nav className="w-full flex flex-wrap items-center justify-between px-6 py-3">
-      
+        <nav className="flex flex-wrap items-center justify-between px-6 py-3">
+
           <div className="flex items-center">
-            <GiPingPongBat className="w-7 h-7 mr-2.5"/>
-            <Link to={'/'} className="text-lg font-medium">ft_transcendence</Link>
+            <GiPingPongBat className="w-8 h-8 mr-2.5"/>
+            <Link to={'/'} className="text-lg font-semibold lg:text-xl">ft_transcendence</Link>
           </div>
 
-          <button className="hover:text-white md:hidden"onClick={toggleMenu}>
+          <button className="hover:text-white lg:hidden"onClick={toggleMenu}>
             <AiOutlineMenu className="w-6 h-6"/>
           </button>
 
-          <ul className={`${!isMenuOpen ? "hidden" : "flex flex-col w-full py-3 gap-2"} font-medium items-center md:flex md:flex-row md:w-max md:py-0 md:gap-4`}>
-            <PageButton path="/" text="Home" icon={<AiFillHome className="w-5 h-5 mr-1.5 mb-0.5"/>} />
-            <PageButton path="/game" text="Game" icon={<IoGameController className="w-5 h-5 mr-1.5 mb-0.5"/>} />
-            <PageButton path="/leaderboard" text="Leaderboard" icon={<MdLeaderboard className="w-5 h-5 mr-1.5 mb-0.5"/>} />
+          <ul className={`${!isMenuOpen ? "hidden" : "flex flex-col w-full py-3 gap-2"} items-center lg:flex lg:flex-row lg:w-max lg:py-0 lg:gap-4`}>
+            <PageButton path="/" text="Home" icon={<AiFillHome className="w-5 h-5 mr-1.5 mb-0.5"/>}/>
+            <PageButton path="/game" text="Game" icon={<IoGameController className="w-5 h-5 mr-1.5 mb-0.5"/>}/>
+            <PageButton path="/chat" text="Chat" icon={<BsFillChatDotsFill className="w-5 h-5 mr-1.5 mb-0.5"/>}/>
+            <PageButton path="/leaderboard" text="Leaderboard" icon={<MdLeaderboard className="w-5 h-5 mr-1.5 mb-0.5"/>}/>
+          </ul>
 
-            <li className="text-white mt-1 md:mt-0">
-              <Link to={'/signin'}>
-                <button className="uppercase rounded-md bg-quaternary hover:bg-tertiary px-2.5 py-1.5">Sign in</button>
-              </Link>
+          <ul className={`${!isMenuOpen ? "hidden" : "flex flex-col w-full py-3 gap-2"} items-center lg:flex lg:flex-row lg:w-max lg:py-0 lg:gap-3`}>
+            <li>
+              <button onClick={toggleTheme} className="flex items-center px-1.5 py-1.5">
+                {theme === "light" ? <MdDarkMode className="w-5 h-5"/> : <MdOutlineDarkMode className="w-5 h-5"/>}
+              </button>
             </li>
 
-            <li>
-              <button onClick={toggleTheme} className="flex items-center">
-                {theme === "light" ? <MdDarkMode className="w-5 h-5 mb-0.5"/> : <MdOutlineDarkMode className="w-5 h-5 mb-0.5"/>}
-              </button>
+            <li className="text-white font-medium mt-1 lg:mt-0">
+              <Link to={'/signin'}>
+                <button className="uppercase bg-ltertiary hover:bg-lquaternary rounded-md px-2.5 py-1.5">Sign in</button>
+              </Link>
             </li>
           </ul>
 
         </nav>
       </header>
-
-      {/* <div className="flex">
-        <div className="bg-lsecondary border-r border-gray-200 w-[18rem] h-screen">
-          <ul className="font-medium text-lg m-5 space-y-1">
-            <PageButton path="/" text="Home" icon={<AiFillHome className="w-6 h-6 mr-2.5 mb-0.5"/>} />
-            <PageButton path="/game" text="Game" icon={<IoGameController className="w-6 h-6 mr-2.5 mb-0.5"/>} />
-            <PageButton path="/leaderboard" text="Leaderboard" icon={<MdLeaderboard className="w-6 h-6 mr-2.5 mb-0.5"/>} />
-          </ul>
-        </div>
-        <div className="py-20 flex items-center justify-center">
-          <h1 className="text-6xl font-medium">Home</h1>
-        </div>
-      </div> */}
     </>
   );
 }

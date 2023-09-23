@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Layout from './layouts/Layout';
 import Error from './pages/Error';
 import Game from './pages/Game';
+import Chat from './pages/Chat';
 import Leaderboard from './pages/Leaderboard';
 import Profile from './pages/Profile';
 import SignIn from './pages/login/SignIn';
@@ -25,6 +26,10 @@ function App() {
         {
           path: "/game",
           element: <Game />,
+        },
+        {
+          path: "/chat",
+          element: <Chat />,
         },
         {
           path: "/leaderboard",

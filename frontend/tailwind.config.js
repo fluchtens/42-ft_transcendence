@@ -7,6 +7,7 @@ export default {
     extend: {
       fontFamily: {
         'montserrat': ['Montserrat', 'sans'],
+        'public-sans': ['"Public Sans"', 'sans']
       },
       colors: {
         'lprimary': '#f5f5f9',
@@ -15,9 +16,11 @@ export default {
         'lsecondary': '#ffffff',
         'dsecondary': '#25273F',
 
-        'tertiary': '#7090E9',
+        'ltertiary': '#6A6CFF',
+        'dtertiary': '#7090E9',
 
-        'quaternary': '#5064FB',
+        'lquaternary': '#5064FB',
+        'dquaternary': '#5064FB',
 
         'ltext': '#1B1B1B',
         'dtext': '#E2E8F0',
