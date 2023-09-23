@@ -1,4 +1,4 @@
-import { AiFillGithub } from 'react-icons/ai';
+import { AiFillGithub } from "react-icons/ai";
 
 function Footer() {
   return (
@@ -7,7 +7,7 @@ function Footer() {
         <p>© 2023 All rights reserved</p>
         <a href="https://github.com/fluchtens/42-ft_transcendence">
           <button className="flex items-center justify-center w-6 h-6">
-            <AiFillGithub className="w-6 h-6"/>
+            <AiFillGithub className="w-6 h-6" />
           </button>
         </a>
       </div>
@@ -15,4 +15,4 @@ function Footer() {
   );
 }
 
-export default Footer
+export default Footer;
