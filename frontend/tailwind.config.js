@@ -2,16 +2,28 @@ export default {
   content: [
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: "class",
   theme: {
     extend: {
       fontFamily: {
         'montserrat': ['Montserrat', 'sans'],
+        'public-sans': ['"Public Sans"', 'sans']
       },
       colors: {
-        'primary': '#171930',
-        'secondary': '#25273F',
-        'tertiary': '#7090E9',
-        'quaternary': '#5064FB',
+        'lprimary': '#f5f5f9',
+        'dprimary': '#171930',
+
+        'lsecondary': '#ffffff',
+        'dsecondary': '#25273F',
+
+        'ltertiary': '#6A6CFF',
+        'dtertiary': '#7090E9',
+
+        'lquaternary': '#5064FB',
+        'dquaternary': '#5064FB',
+
+        'ltext': '#1B1B1B',
+        'dtext': '#E2E8F0',
       },
     },
   },
