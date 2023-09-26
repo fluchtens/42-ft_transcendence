@@ -1,19 +1,21 @@
-import { Prisma } from "@prisma/client";
-import { Exclude } from "class-transformer";
-import { IsString, Length, Matches, isString } from "class-validator";
+import { Prisma } from '@prisma/client';
+import { Exclude } from 'class-transformer';
+import { IsString, Length, Matches, isString } from 'class-validator';
 
-export class CreateUserDto implements Prisma.UserCreateInput{
+export class CreateUserDto implements Prisma.UserCreateInput {
   @Length(3, 16)
   @Matches(RegExp('^[a-zA-Z0-9\\-\\_]+$'))
   userName: string;
   @IsString()
   @Length(8, 30)
-  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {message: 'password too weak'})
+  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+    message: 'password too weak',
+  })
   password: string;
   imageUrl?: string;
 }
 
-export class ChangeUsername implements Prisma.UserCreateInput{
+export class ChangeUsername implements Prisma.UserCreateInput {
   @IsString()
   @Length(3, 16)
   @Matches(RegExp('^[a-zA-Z0-9\\-\\_]+$'))
@@ -22,13 +24,13 @@ export class ChangeUsername implements Prisma.UserCreateInput{
   password: string;
 }
 
-export class SerializedUser{
+export class SerializedUser {
   userName: string;
   imageUrl?: string;
 
   @Exclude()
   password: string;
-  constructor(partial: Partial<SerializedUser>){
+  constructor(partial: Partial<SerializedUser>) {
     Object.assign(this, partial);
   }
 }
