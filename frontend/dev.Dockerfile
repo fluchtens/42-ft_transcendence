@@ -3,7 +3,7 @@ FROM node:lts
 
 # Installs the required packages
 RUN apt-get update && \
-	npm install -g pnpm
+		npm install -g pnpm
 
 # Sets the working directory
 WORKDIR /app

@@ -1,109 +1,63 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { AiFillHome, AiOutlineMenu } from "react-icons/ai";
 import { IoGameController } from "react-icons/io5";
 import { GiPingPongBat } from "react-icons/gi";
-import { MdLeaderboard, MdOutlineDarkMode, MdDarkMode } from "react-icons/md";
+import { MdLeaderboard } from "react-icons/md";
 import { BsFillChatDotsFill } from "react-icons/bs";
-import PageButton from "../components/PageButton";
+import styles from "../styles/Header.module.scss";
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [theme, setTheme] = useState("light");
 
   const toggleMenu = () => {
     setIsMenuOpen(isMenuOpen == false);
   };
 
-  const toggleTheme = () => {
-    const newTheme = theme === "dark" ? "light" : "dark";
-    setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
-  };
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme) {
-      setTheme(savedTheme);
-    }
-
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [theme]);
-
   return (
     <>
-      <header className="bg-lsecondary dark:bg-dsecondary border-b border-gray-200 dark:border-gray-700">
-        <nav className="flex flex-wrap items-center justify-between px-6 py-3">
-          <div className="flex items-center">
-            <GiPingPongBat className="w-8 h-8 mr-2.5" />
-            <Link to={"/"} className="text-lg font-semibold lg:text-xl">
-              ft_transcendence
+      <nav className={styles.nav}>
+        <Link to="/" className={styles.mainLink}>
+          <GiPingPongBat className={styles.mainIcon} />
+          ft_transcendence
+        </Link>
+
+        <button className={styles.pagesButton} onClick={toggleMenu}>
+          <AiOutlineMenu className={styles.pagesButtonIcon} />
+        </button>
+
+        <ul className={!isMenuOpen ? styles.navListClose : styles.navListOpen}>
+          <li>
+            <Link to="/" className={styles.linkButton}>
+              <AiFillHome className={styles.linkButtonIcon} />
+              Home
             </Link>
-          </div>
-
-          <button className="hover:text-white lg:hidden" onClick={toggleMenu}>
-            <AiOutlineMenu className="w-6 h-6" />
-          </button>
-
-          <ul
-            className={`${
-              !isMenuOpen ? "hidden" : "flex flex-col w-full py-3 gap-2"
-            } items-center lg:flex lg:flex-row lg:w-max lg:py-0 lg:gap-4`}
-          >
-            <PageButton
-              path="/"
-              text="Home"
-              icon={<AiFillHome className="w-5 h-5 mr-1.5 mb-0.5" />}
-            />
-            <PageButton
-              path="/game"
-              text="Game"
-              icon={<IoGameController className="w-5 h-5 mr-1.5 mb-0.5" />}
-            />
-            <PageButton
-              path="/chat"
-              text="Chat"
-              icon={<BsFillChatDotsFill className="w-5 h-5 mr-1.5 mb-0.5" />}
-            />
-            <PageButton
-              path="/leaderboard"
-              text="Leaderboard"
-              icon={<MdLeaderboard className="w-5 h-5 mr-1.5 mb-0.5" />}
-            />
-          </ul>
-
-          <ul
-            className={`${
-              !isMenuOpen ? "hidden" : "flex flex-col w-full py-3 gap-2"
-            } items-center lg:flex lg:flex-row lg:w-max lg:py-0 lg:gap-3`}
-          >
-            <li>
-              <button
-                onClick={toggleTheme}
-                className="flex items-center px-1.5 py-1.5"
-              >
-                {theme === "light" ? (
-                  <MdDarkMode className="w-5 h-5" />
-                ) : (
-                  <MdOutlineDarkMode className="w-5 h-5" />
-                )}
-              </button>
-            </li>
-
-            <li className="text-white font-medium mt-1 lg:mt-0">
-              <Link to={"/signin"}>
-                <button className="uppercase bg-ltertiary hover:bg-lquaternary rounded-md px-2.5 py-1.5">
-                  Sign in
-                </button>
-              </Link>
-            </li>
-          </ul>
-        </nav>
-      </header>
+          </li>
+          <li>
+            <Link to="/game" className={styles.linkButton}>
+              <IoGameController className={styles.linkButtonIcon} />
+              Game
+            </Link>
+          </li>
+          <li>
+            <Link to="/chat" className={styles.linkButton}>
+              <BsFillChatDotsFill className={styles.linkButtonIcon} />
+              Chat
+            </Link>
+          </li>
+          <li>
+            <Link to="/leaderboard" className={styles.linkButton}>
+              <MdLeaderboard className={styles.linkButtonIcon} />
+              Leaderboard
+            </Link>
+          </li>
+          <li>
+            <Link to="/login" className={styles.loginButton}>
+              Sign in
+            </Link>
+          </li>
+        </ul>
+      </nav>
     </>
   );
 }

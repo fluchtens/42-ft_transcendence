@@ -3,8 +3,8 @@ FROM node:lts-alpine
 
 # Installs the required packages
 RUN apk update && \
-	apk add nginx && \
-	npm install -g pnpm
+		apk add nginx && \
+		npm install -g pnpm
 
 # Sets the working directory
 WORKDIR /app

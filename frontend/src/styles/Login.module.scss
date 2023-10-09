@@ -1,0 +1,99 @@
+@import "config";
+
+.container {
+  flex-direction: column;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .mainLink {
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: $text-primary-color;
+
+    .mainIcon {
+      margin-right: 0.6rem;
+      width: 2rem;
+      height: 2rem;
+    }
+  }
+
+  .form {
+    padding: 2.5rem;
+    background-color: $bg-secondary-color;
+    box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
+    border-radius: 30px;
+
+    .title {
+      margin: 0 0 2rem 0;
+      font-size: 1.5rem;
+      text-align: center;
+      color: $text-primary-color;
+    }
+
+    .label {
+      display: block;
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+      color: $text-primary-color;
+    }
+
+    .input {
+      width: 20rem;
+      padding-left: 1rem;
+      height: 2.5rem;
+      margin-bottom: 1rem;
+      background-color: #374151;
+      border: none;
+      border-radius: 5px;
+      outline: none;
+      font-size: 0.9rem;
+      color: $text-primary-color;
+    }
+
+    .button {
+      width: 100%;
+      padding: 0.7rem;
+      margin-top: 1rem;
+      background-color: $extra-secondary-color;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.125rem;
+      font-weight: 500;
+      color: white;
+      cursor: pointer;
+    }
+
+    .button:hover {
+      background-color: $extra-primary-color;
+    }
+
+    .helpContainer {
+      margin-top: 1rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      .helpText {
+        margin: 0;
+        font-size: 0.875rem;
+        font-weight: 300;
+        color: #9ca3af;
+      }
+
+      .helpRedirect {
+        margin-left: 0.3rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-decoration: none;
+        color: #9ca3af;
+      }
+    }
+  }
+}
