@@ -1,22 +1,21 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post } from "@nestjs/common";
-import { UserService } from "./user.service";
-import { User } from "./user.model";
+import { Controller, Get, Request, UseGuards } from '@nestjs/common';
+import { UserService } from './user.service';
+import { User } from '@prisma/client';
+import { AuthGuard } from 'src/auth/auth.guard';
 
-@Controller('api/v1/user')
-
+@Controller('api/user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @UseGuards(AuthGuard)
   @Get()
-  async getAllUser(): Promise<User[]> {
+  async getAllUsers(): Promise<User[]> {
     return this.userService.getAllUsers();
   }
-  @Get(':id')
-  async GetUser(@Param('id', ParseIntPipe) id : number) : Promise<User>{
-    return this.userService.getUser(id);
-  }
-  @Post()
-  async postUser(@Body() postData: User): Promise<User> {
-    return this.userService.createUser(postData);
+
+  @UseGuards(AuthGuard)
+  @Get('profile')
+  getProfile(@Request() req: any) {
+    return req.user;
   }
 }

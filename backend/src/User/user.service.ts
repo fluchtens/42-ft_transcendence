@@ -1,29 +1,17 @@
-import { PrismaService } from "../prisma.service";
-import { User } from "./user.model";
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { User } from '@prisma/client';
 
 @Injectable()
-
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {}
-  
+  constructor(private readonly prismaService: PrismaService) {}
+
   async getAllUsers(): Promise<User[]> {
-    return this.prisma.user.findMany();
-  }
-
-  async getUser(id : number) : Promise<User>{
-    return this.prisma.user.findUnique({where: {id : Number(id)}})
-  }
-  async createUser(data: User): Promise<User> {
-    return this.prisma.user.create({
-      data,
-    });
-  }
-
-  async changeUserName(userName: String, data:User): Promise<User> {
-    return this.prisma.user.update({
-      where: {userName:String(userName)},
-      data: {userName: data.userName}
-    })
+    try {
+      const users = await this.prismaService.user.findMany();
+      return users;
+    } catch (error) {
+      throw new InternalServerErrorException('Internal server error');
+    }
   }
 }

@@ -1,7 +1,7 @@
 all: run
 
 install:
-	cd backend && pnpm install
+	cd backend && pnpm install && npx prisma generate
 	cd frontend && pnpm install
 
 run:
