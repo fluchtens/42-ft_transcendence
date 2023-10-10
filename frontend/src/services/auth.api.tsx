@@ -11,10 +11,10 @@ interface LoginUserResponse {
   token: string;
 }
 
-export async function registerUser(
+export const registerUser = async (
   username: string,
   password: string
-): Promise<AuthApiResponse> {
+): Promise<AuthApiResponse> => {
   try {
     const response = await fetch(`${apiUrl}/register`, {
       method: "POST",
@@ -41,12 +41,12 @@ export async function registerUser(
       message: "An error occurred while processing your request.",
     };
   }
-}
+};
 
-export async function loginUser(
+export const loginUser = async (
   username: string,
   password: string
-): Promise<LoginUserResponse> {
+): Promise<LoginUserResponse> => {
   try {
     const response = await fetch(`${apiUrl}/login`, {
       method: "POST",
@@ -77,4 +77,4 @@ export async function loginUser(
       token: "",
     };
   }
-}
+};

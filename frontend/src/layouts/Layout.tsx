@@ -6,7 +6,6 @@ import styles from "./Layout.module.scss";
 
 function Layout() {
   const { pathname } = useLocation();
-  console.log(pathname);
 
   return (
     <div className={styles.container}>

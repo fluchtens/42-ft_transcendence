@@ -55,11 +55,12 @@ export class AuthService {
       expiresIn: '7d',
     });
 
-    response.cookie('access_token', token, {
-      secure: false,
-      httpOnly: true,
-      maxAge: 3600 * 1000,
-    });
+    // response.cookie('access_token', token, {
+    //   maxAge: 3600 * 1000,
+    //   sameSite: 'none',
+    //   secure: false,
+    //   httpOnly: true,
+    // });
 
     return { message: 'User succesfully connected', token: token };
   }

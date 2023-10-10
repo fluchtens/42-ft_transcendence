@@ -1,32 +1,34 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { AiFillHome, AiOutlineMenu } from "react-icons/ai";
+import { AiFillHome } from "react-icons/ai";
 import { IoGameController } from "react-icons/io5";
 import { GiPingPongBat } from "react-icons/gi";
 import { MdLeaderboard } from "react-icons/md";
 import { BsFillChatDotsFill } from "react-icons/bs";
 import styles from "./Header.module.scss";
-import { getUserProfile } from "../services/user";
+import { getUserProfile } from "../services/user.api";
+import { NavLink } from "../components/NavLink";
 
 function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const toggleMenu = () => {
-    setIsMenuOpen(isMenuOpen == false);
+  const handleLogin = async () => {
+    const accessToken = localStorage.getItem("access_token");
+    if (!accessToken) {
+      return;
+    }
+    const data = await getUserProfile(accessToken);
+    if (data) {
+      setIsAuthenticated(true);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("access_token");
+    setIsAuthenticated(false);
   };
 
   useEffect(() => {
-    const handleLogin = async () => {
-      const accessToken = localStorage.getItem("access_token");
-      if (!accessToken) {
-        return;
-      }
-      const data = await getUserProfile(accessToken);
-      if (data) {
-        setIsAuthenticated(true);
-      }
-    };
     handleLogin();
   }, []);
 
@@ -38,42 +40,26 @@ function Header() {
           ft_transcendence
         </Link>
 
-        <button className={styles.pagesButton} onClick={toggleMenu}>
-          <AiOutlineMenu className={styles.pagesButtonIcon} />
-        </button>
-
-        <ul className={!isMenuOpen ? styles.navListClose : styles.navListOpen}>
+        <ul className={styles.navList}>
+          <NavLink path="/" text="Home" icon={<AiFillHome />} />
+          <NavLink path="/game" text="Game" icon={<IoGameController />} />
+          <NavLink path="/chat" text="Chat" icon={<BsFillChatDotsFill />} />
+          <NavLink
+            path="/leaderboard"
+            text="Leaderboard"
+            icon={<MdLeaderboard />}
+          />
           <li>
-            <Link to="/" className={styles.linkButton}>
-              <AiFillHome className={styles.linkButtonIcon} />
-              Home
-            </Link>
-          </li>
-          <li>
-            <Link to="/game" className={styles.linkButton}>
-              <IoGameController className={styles.linkButtonIcon} />
-              Game
-            </Link>
-          </li>
-          <li>
-            <Link to="/chat" className={styles.linkButton}>
-              <BsFillChatDotsFill className={styles.linkButtonIcon} />
-              Chat
-            </Link>
-          </li>
-          <li>
-            <Link to="/leaderboard" className={styles.linkButton}>
-              <MdLeaderboard className={styles.linkButtonIcon} />
-              Leaderboard
-            </Link>
-          </li>
-          {!isAuthenticated && (
-            <li>
+            {isAuthenticated ? (
+              <button onClick={handleLogout} className={styles.logoutButton}>
+                Sign out
+              </button>
+            ) : (
               <Link to="/login" className={styles.loginButton}>
                 Sign in
               </Link>
-            </li>
-          )}
+            )}
+          </li>
         </ul>
       </nav>
     </>
