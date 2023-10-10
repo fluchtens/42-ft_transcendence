@@ -1,14 +1,17 @@
 all: run
 
 install:
-	cd backend && pnpm install && npx prisma generate
-	cd frontend && pnpm install
+	cd backend && npm install && npx prisma generate
+	cd frontend && npm install
 
 run:
 	docker-compose up --build
 
 clean:
 	sh destroy.sh
+
+fclean: clean
+	docker system prune -a
 
 .PHONY: all
 
