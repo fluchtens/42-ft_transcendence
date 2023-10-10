@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { GiPingPongBat } from "react-icons/gi";
-import styles from "../styles/Login.module.scss";
+import styles from "../../styles/Login.module.scss";
+import { loginUser } from "../../services/auth.api";
 
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value);
@@ -15,10 +17,15 @@ function Login() {
     setPassword(e.target.value);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Email:", username);
-    console.log("Mot de passe:", password);
+    const data = await loginUser(username, password);
+    if (data.success) {
+      navigate("/");
+      localStorage.setItem("access_token", data.token);
+    } else {
+      console.error("Error:", data.message);
+    }
   };
 
   return (

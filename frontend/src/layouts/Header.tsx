@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { AiFillHome, AiOutlineMenu } from "react-icons/ai";
 import { IoGameController } from "react-icons/io5";
@@ -6,13 +6,29 @@ import { GiPingPongBat } from "react-icons/gi";
 import { MdLeaderboard } from "react-icons/md";
 import { BsFillChatDotsFill } from "react-icons/bs";
 import styles from "../styles/Header.module.scss";
+import { getUserProfile } from "../services/user";
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const toggleMenu = () => {
     setIsMenuOpen(isMenuOpen == false);
   };
+
+  useEffect(() => {
+    const handleLogin = async () => {
+      const accessToken = localStorage.getItem("access_token");
+      if (!accessToken) {
+        return;
+      }
+      const data = await getUserProfile(accessToken);
+      if (data) {
+        setIsAuthenticated(true);
+      }
+    };
+    handleLogin();
+  }, []);
 
   return (
     <>
@@ -51,11 +67,13 @@ function Header() {
               Leaderboard
             </Link>
           </li>
-          <li>
-            <Link to="/login" className={styles.loginButton}>
-              Sign in
-            </Link>
-          </li>
+          {!isAuthenticated && (
+            <li>
+              <Link to="/login" className={styles.loginButton}>
+                Sign in
+              </Link>
+            </li>
+          )}
         </ul>
       </nav>
     </>

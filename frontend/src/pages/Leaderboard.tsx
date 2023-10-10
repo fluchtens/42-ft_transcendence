@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getUserList } from "../services/user";
-import { User } from "../utils/user.interface";
+import { User } from "../types/user.interface";
 import styles from "../styles/Leaderboard.module.scss";
 
 function Leaderboard() {

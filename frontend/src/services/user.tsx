@@ -1,6 +1,6 @@
-import { User } from "../utils/user.interface";
+import { User } from "../types/user.interface";
 
-const apiUrl: string = `${import.meta.env.VITE_BACK_URL}/api/v1/user`;
+const apiUrl: string = `${import.meta.env.VITE_BACK_URL}/api/user`;
 
 export async function getUserList(): Promise<User[]> {
   const response: Response = await fetch(apiUrl);
@@ -30,4 +30,27 @@ export function createUser(userData: User) {
     .catch((error) => {
       console.error("Il y a eu un problème avec l'opération fetch :", error);
     });
+}
+
+export async function getUserProfile(
+  accessToken: string
+): Promise<User | null> {
+  try {
+    const response = await fetch(`${apiUrl}/profile`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      return data;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
 }

@@ -3,8 +3,8 @@ import Layout from "./layouts/Layout";
 import Game from "./pages/Game";
 import Chat from "./pages/Chat";
 import Leaderboard from "./pages/Leaderboard";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
 
 function App() {
   const router = createBrowserRouter([
