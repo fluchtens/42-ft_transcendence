@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getUserList } from "../services/user";
 import { User } from "../types/user.interface";
-import styles from "../styles/Leaderboard.module.scss";
+import styles from "./Leaderboard.module.scss";
 
 function Leaderboard() {
   const [userList, setUserList] = useState<User[]>();

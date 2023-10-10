@@ -1,5 +1,5 @@
 import { AiFillGithub } from "react-icons/ai";
-import styles from "../styles/Footer.module.scss";
+import styles from "./Footer.module.scss";
 
 function Footer() {
   return (

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { GiPingPongBat } from "react-icons/gi";
-import styles from "../../styles/Login.module.scss";
+import styles from "./Auth.module.scss";
 import { loginUser } from "../../services/auth.api";
 
 function Login() {

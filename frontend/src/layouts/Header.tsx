@@ -5,7 +5,7 @@ import { IoGameController } from "react-icons/io5";
 import { GiPingPongBat } from "react-icons/gi";
 import { MdLeaderboard } from "react-icons/md";
 import { BsFillChatDotsFill } from "react-icons/bs";
-import styles from "../styles/Header.module.scss";
+import styles from "./Header.module.scss";
 import { getUserProfile } from "../services/user";
 
 function Header() {
