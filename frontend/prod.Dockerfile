@@ -3,19 +3,18 @@ FROM node:lts-alpine
 
 # Installs the required packages
 RUN apk update && \
-		apk add nginx && \
-		npm install -g pnpm
+		apk add nginx
 
 # Sets the working directory
 WORKDIR /app
 
 # Installs project dependencies
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install
+COPY package.json package-lock.json ./
+RUN npm install
 COPY ./ ./
 
 # Build project app
-RUN pnpm run build
+RUN npm run build
 
 # Setups nginx with app
 COPY nginx.conf /etc/nginx/http.d/default.conf
