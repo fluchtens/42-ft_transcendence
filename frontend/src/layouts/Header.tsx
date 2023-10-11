@@ -8,15 +8,17 @@ import { BsFillChatDotsFill } from "react-icons/bs";
 import styles from "./Header.module.scss";
 import { getUserProfile } from "../services/user.api";
 import { NavLink } from "../components/NavLink";
+import { getAccessToken } from "../utils/getAccessToken";
 
 function Header() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const handleLogin = async () => {
-    const accessToken = localStorage.getItem("access_token");
+    const accessToken = getAccessToken();
     if (!accessToken) {
       return;
     }
+
     const data = await getUserProfile(accessToken);
     if (data) {
       setIsAuthenticated(true);
@@ -24,6 +26,7 @@ function Header() {
   };
 
   const handleLogout = () => {
+    sessionStorage.removeItem("access_token");
     localStorage.removeItem("access_token");
     setIsAuthenticated(false);
   };
