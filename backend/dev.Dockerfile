@@ -2,15 +2,14 @@
 FROM node:lts
 
 # Installs the required packages
-RUN apt-get update && \
-	npm install -g pnpm
+RUN apt-get update
 
 # Sets the working directory
 WORKDIR /app
 
 # Installs project dependencies
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install
+COPY package.json package-lock.json ./
+RUN npm install
 COPY ./ ./
 
 # Setups prisma
@@ -24,4 +23,4 @@ EXPOSE 3000
 EXPOSE 5555
 
 # Starts application
-CMD ["pnpm", "run", "start:migrate:dev"]
+CMD ["npm", "run", "start:migrate:dev"]

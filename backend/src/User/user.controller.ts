@@ -1,51 +1,21 @@
-import {
-  Body,
-  ClassSerializerInterceptor,
-  Controller,
-  Get,
-  HttpCode,
-  HttpException,
-  HttpStatus,
-  Param,
-  ParseIntPipe,
-  Post,
-  Req,
-  Res,
-  UseInterceptors,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
+import { Controller, Get, Request, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
-import { User } from './user.model';
-import { Request, Response } from 'express';
-import { ChangeUsername, CreateUserDto, SerializedUser } from './user.dto';
+import { User } from '@prisma/client';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
-@Controller('api/v1/user')
+@Controller('api/user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
   @Get()
-  async getAllUser(): Promise<User[]> {
+  async getAllUsers(): Promise<User[]> {
     return this.userService.getAllUsers();
   }
-  @UseInterceptors(ClassSerializerInterceptor)
-  @Get(':id')
-  async GetUser(@Param('id', ParseIntPipe) id: number) {
-    const user = await this.userService.getUser(id);
-    if (!user) {
-      throw new HttpException("User Don't Exist", HttpStatus.BAD_REQUEST);
-    }
-    return new SerializedUser(user);
-  }
-  @Post()
-  @UsePipes(ValidationPipe)
-  async postUser(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
-    const user = await this.userService.createUser(createUserDto);
-    if (user) {
-      res.status(HttpStatus.CREATED).send(user);
-    } else {
-      throw new HttpException('User Exists', HttpStatus.BAD_REQUEST);
-    }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  getProfile(@Request() req: any) {
+    return req.user;
   }
 }

@@ -2,21 +2,21 @@ import { Outlet, useLocation } from "react-router-dom";
 import Home from "../pages/Home";
 import Footer from "./Footer";
 import Header from "./Header";
+import styles from "./Layout.module.scss";
 
 function Layout() {
   const { pathname } = useLocation();
-  console.log(pathname);
 
   return (
-    <>
-      <div className="flex flex-col min-h-screen">
-        {pathname !== "/signin" && pathname !== "/signup" && <Header />}
-        <main className="flex-grow">
-          {pathname === "/" ? <Home /> : <Outlet />}
-        </main>
-        {pathname !== "/signin" && pathname !== "/signup" && <Footer />}
-      </div>
-    </>
+    <div className={styles.container}>
+      <header>
+        {pathname !== "/login" && pathname !== "/register" && <Header />}
+      </header>
+      <main>{pathname === "/" ? <Home /> : <Outlet />}</main>
+      <footer>
+        {pathname !== "/login" && pathname !== "/register" && <Footer />}
+      </footer>
+    </div>
   );
 }
 

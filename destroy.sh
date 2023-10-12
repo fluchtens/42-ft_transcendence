@@ -23,6 +23,3 @@ docker network rm transcendence
 
 # Remove prisma migrations
 rm -rf backend/prisma/migrations
-
-# docker system prune -a 2>/dev/null
-

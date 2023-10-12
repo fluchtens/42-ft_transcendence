@@ -1,16 +1,42 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-  binaryTargets = ["native", "debian-openssl-3.0.x"]
+model User {
+  id       Int    @id @default(autoincrement())
+  username String @unique @db.VarChar(255)
+  // avatarUrl String @db.VarChar(255)
+
+  password String @db.VarChar(255)
+  // twoFactor Boolean @default(false)
+
+  // friendIds Int[] @relation(?)
+  // blockedIds
+  // matchs @relation(?)
+
+  // wins Int
+  // losses Int
+  // mmr Int
+  // stats ...
 }
 
-model User { 
-  id Int @id @default(autoincrement())
-  userName String @unique
-  password String
-  imageUrl String? @db.Text
-}
+// model Channel {
+// id       Int    @id @default(autoincrement())
+// name, messagesList, userlist, adminlist, owner
+// }
+
+// model Messages {
+// id       Int    @id @default(autoincrement())
+// channel, sender, content
+// }
+
+// model Match {
+// id       Int    @id @default(autoincrement())
+// match history stats (winner, loser, date, stats, etc)
+// }
