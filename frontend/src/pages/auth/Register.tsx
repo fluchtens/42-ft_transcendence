@@ -43,7 +43,7 @@ function Register() {
           <input
             type="text"
             id="username"
-            className={styles.input}
+            className={styles.textInput}
             value={username}
             onChange={handleUsernameChange}
             placeholder="Username"
@@ -57,7 +57,7 @@ function Register() {
           <input
             type="password"
             id="password"
-            className={styles.input}
+            className={styles.textInput}
             value={password}
             onChange={handlePasswordChange}
             placeholder="••••••••"
