@@ -9,9 +9,11 @@ import styles from "./Header.module.scss";
 import { getUserProfile } from "../services/user.api";
 import { NavLink } from "../components/NavLink";
 import { getAccessToken } from "../utils/getAccessToken";
+import { User } from "../types/user.interface";
 
 function Header() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userData, setUserData] = useState<User | null>(null);
 
   const handleLogin = async () => {
     const accessToken = getAccessToken();
@@ -22,6 +24,7 @@ function Header() {
     const data = await getUserProfile(accessToken);
     if (data) {
       setIsAuthenticated(true);
+      setUserData(data);
     }
   };
 
@@ -53,7 +56,7 @@ function Header() {
             icon={<MdLeaderboard />}
           />
           <li>
-            {isAuthenticated ? (
+            {isAuthenticated && userData ? (
               <button onClick={handleLogout} className={styles.logoutButton}>
                 Sign out
               </button>
