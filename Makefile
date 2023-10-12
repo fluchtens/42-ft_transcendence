@@ -10,10 +10,8 @@ run: down
 down:
 	docker-compose down --rmi all --volumes
 
-clean:
-	sh destroy.sh
-
-fclean: clean
+clean: down
+	rm -rf backend/prisma/migrations
 	docker system prune -a
 
 .PHONY: all
