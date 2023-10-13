@@ -58,7 +58,8 @@ function Header() {
           <li>
             {isAuthenticated && userData ? (
               <button onClick={handleLogout} className={styles.logoutButton}>
-                Sign out
+                {/* Sign out */}
+                {userData.username}
               </button>
             ) : (
               <Link to="/login" className={styles.loginButton}>
