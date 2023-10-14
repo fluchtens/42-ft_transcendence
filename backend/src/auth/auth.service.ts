@@ -18,7 +18,7 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  async register(registerDto: RegisterDto): Promise<any> {
+  async register(registerDto: RegisterDto) {
     const { username, password } = registerDto;
 
     const user = await this.prismaService.user.findUnique({
@@ -36,31 +36,57 @@ export class AuthService {
     return { message: 'User succesfully created' };
   }
 
-  async login(loginDto: LoginDto, response: Response): Promise<any> {
+  async login(loginDto: LoginDto, response: Response) {
     const { username, password } = loginDto;
 
     const user = await this.prismaService.user.findUnique({
       where: { username },
     });
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException('Incorrect username or password.');
     }
 
     const isPwdMatch = await bcrypt.compare(password, user.password);
-    if (!isPwdMatch) throw new UnauthorizedException('User not found');
+    if (!isPwdMatch) {
+      throw new UnauthorizedException('Incorrect username or password.');
+    }
 
     const payload = { sub: user.id, username: user.username };
     const token = await this.jwtService.signAsync(payload, {
       secret: this.configService.get('JWT_SECRET'),
-      expiresIn: '7d',
+      expiresIn: '2h',
     });
 
-    // response.cookie('access_token', token, {
-    //   maxAge: 3600 * 1000,
-    //   sameSite: 'none',
-    //   secure: false,
-    //   httpOnly: true,
-    // });
+    response.cookie('access_token', token, {
+      httpOnly: true,
+      sameSite: 'strict',
+    });
+
+    return { message: 'User succesfully connected' };
+  }
+
+  async fortyTwoAuth(req, res) {
+    const { username } = req.user;
+
+    const user = await this.prismaService.user.findUnique({
+      where: { username },
+    });
+    if (!user) {
+      await this.prismaService.user.create({
+        data: { username, password: null },
+      });
+    }
+
+    const payload = { sub: user.id, username: user.username };
+    const token = await this.jwtService.signAsync(payload, {
+      secret: this.configService.get('JWT_SECRET'),
+      expiresIn: '2h',
+    });
+
+    res.cookie('access_token', token, {
+      httpOnly: true,
+      sameSite: 'strict',
+    });
 
     return { message: 'User succesfully connected', token: token };
   }

@@ -7,6 +7,7 @@ import { registerUser } from "../../services/auth.api";
 function Register() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,6 +24,7 @@ function Register() {
     if (success) {
       navigate("/login");
     } else {
+      setErrorMessage(message);
       console.error("Error:", message);
     }
   };
@@ -36,6 +38,9 @@ function Register() {
 
       <form className={styles.form} onSubmit={handleSubmit}>
         <h1 className={styles.title}>Register a new account</h1>
+        {errorMessage && (
+          <div className={styles.errorMessage}>{errorMessage[0]}</div>
+        )}
         <div>
           <label htmlFor="username" className={styles.label}>
             Username :
@@ -46,7 +51,7 @@ function Register() {
             className={styles.textInput}
             value={username}
             onChange={handleUsernameChange}
-            placeholder="Username"
+            placeholder="Enter a username"
             required
           />
         </div>
@@ -60,7 +65,7 @@ function Register() {
             className={styles.textInput}
             value={password}
             onChange={handlePasswordChange}
-            placeholder="••••••••"
+            placeholder="Enter a password"
             required
           />
         </div>

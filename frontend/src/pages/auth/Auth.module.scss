@@ -1,10 +1,10 @@
 @import "../../styles/config.scss";
 
 .container {
-  flex-direction: column;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  // flex-direction: column;
+  // display: flex;
+  // justify-content: center;
+  // align-items: center;
 
   .mainLink {
     padding: 0.5rem;
@@ -31,10 +31,21 @@
     border-radius: 30px;
 
     .title {
-      margin: 0 0 2rem 0;
+      margin: 0 0 1.5rem 0;
       font-size: 1.5rem;
       text-align: center;
       color: $text-primary-color;
+    }
+
+    .errorMessage {
+      max-width: 20rem;
+      padding: 0.5rem 1rem;
+      margin-bottom: 1rem;
+      background-color: #f8d7da;
+      border: none;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      color: #721c24;
     }
 
     .label {
@@ -76,6 +87,23 @@
 
     .button:hover {
       background-color: $extra-primary-color;
+    }
+
+    .fortyTwoLoginBtn {
+      width: 100%;
+      padding: 0.7rem;
+      margin-top: 1rem;
+      background-color: #36babb;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.125rem;
+      font-weight: 500;
+      color: white;
+      cursor: pointer;
+    }
+
+    .fortyTwoLoginBtn:hover {
+      background-color: #48c7c7;
     }
 
     .helpContainer {

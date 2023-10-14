@@ -1,4 +1,4 @@
-import { Strategy, Profile, VerifyCallback } from 'passport-42';
+import { Strategy } from 'passport-42';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';

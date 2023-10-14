@@ -6,6 +6,7 @@ import {
   Get,
   UseGuards,
   Req,
+  Redirect,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto } from './auth.dto';
@@ -35,7 +36,8 @@ export class AuthController {
 
   @Get('42/callback')
   @UseGuards(FortyTwoAuthGuard)
-  fortyTwoAuthRedirect(@Req() req) {
-    return req.user;
+  @Redirect('http://localhost:80/login')
+  fortyTwoAuthRedirect(@Req() req, @Res({ passthrough: true }) res) {
+    return this.userService.fortyTwoAuth(req, res);
   }
 }

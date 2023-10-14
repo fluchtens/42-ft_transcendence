@@ -7,6 +7,7 @@ import { loginUser } from "../../services/auth.api";
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
 
@@ -33,7 +34,16 @@ function Login() {
         sessionStorage.setItem("access_token", data.token);
       }
     } else {
+      setErrorMessage(data.message);
       console.error("Error:", data.message);
+    }
+  };
+
+  const handleFortyTwoLogin = async () => {
+    try {
+      window.location.href = `${import.meta.env.VITE_BACK_URL}/api/auth/42`;
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -45,6 +55,9 @@ function Login() {
       </Link>
       <form className={styles.form} onSubmit={handleSubmit}>
         <h1 className={styles.title}>Sign in to your account</h1>
+        {errorMessage && (
+          <div className={styles.errorMessage}>{errorMessage}</div>
+        )}
         <div>
           <label htmlFor="username" className={styles.label}>
             Username :
@@ -85,6 +98,13 @@ function Login() {
         </div>
         <button type="submit" className={styles.button}>
           Sign in
+        </button>
+        <button
+          type="button"
+          onClick={handleFortyTwoLogin}
+          className={styles.fortyTwoLoginBtn}
+        >
+          Sign in with 42
         </button>
         <div className={styles.helpContainer}>
           <p className={styles.helpText}>Don’t have an account yet?</p>
