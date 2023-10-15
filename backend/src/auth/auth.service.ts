@@ -18,8 +18,8 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  async register(registerDto: RegisterDto) {
-    const { username, password } = registerDto;
+  async register(data: RegisterDto) {
+    const { username, password } = data;
 
     const user = await this.prismaService.user.findUnique({
       where: { username },
@@ -36,8 +36,8 @@ export class AuthService {
     return { message: 'User succesfully created' };
   }
 
-  async login(loginDto: LoginDto, response: Response) {
-    const { username, password } = loginDto;
+  async login(data: LoginDto, res: Response) {
+    const { username, password } = data;
 
     const user = await this.prismaService.user.findUnique({
       where: { username },
@@ -57,7 +57,7 @@ export class AuthService {
       expiresIn: '2h',
     });
 
-    response.cookie('access_token', token, {
+    res.cookie('access_token', token, {
       httpOnly: true,
       sameSite: 'strict',
     });
@@ -88,6 +88,11 @@ export class AuthService {
       sameSite: 'strict',
     });
 
-    return { message: 'User succesfully connected', token: token };
+    return { message: 'User succesfully connected' };
+  }
+
+  async logout(res: Response) {
+    res.clearCookie('access_token');
+    return { message: 'User perfectly disconnected' };
   }
 }

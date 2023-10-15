@@ -62,3 +62,19 @@ export const loginUser = async ({
     };
   }
 };
+
+export const logoutUser = async (): Promise<void> => {
+  try {
+    const response = await fetch(`${apiUrl}/logout`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.log(data.message);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};

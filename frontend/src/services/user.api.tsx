@@ -13,7 +13,7 @@ export const getUserProfile = async (): Promise<User | null> => {
     if (response.ok) {
       return data;
     } else {
-      console.error("Error:", data.message);
+      console.log("Error:", data.message);
       return null;
     }
   } catch (error) {

@@ -8,14 +8,14 @@ import styles from "./Header.module.scss";
 import { getUserProfile } from "../services/user.api";
 import { NavLink } from "../components/NavLink";
 import { User } from "../types/user.interface";
+import { logoutUser } from "../services/auth.api";
 
 function Header() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userData, setUserData] = useState<User | null>(null);
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("access_token");
-    localStorage.removeItem("access_token");
+  const handleLogout = async () => {
+    logoutUser();
     setIsAuthenticated(false);
   };
 
