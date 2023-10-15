@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { AiFillHome } from "react-icons/ai";
 import { IoGameController } from "react-icons/io5";
 import { GiPingPongBat } from "react-icons/gi";
-import { MdLeaderboard } from "react-icons/md";
 import { BsFillChatDotsFill } from "react-icons/bs";
 import styles from "./Header.module.scss";
 import { getUserProfile } from "../services/user.api";
@@ -44,11 +43,6 @@ function Header() {
           <NavLink path="/" text="Home" icon={<AiFillHome />} />
           <NavLink path="/game" text="Game" icon={<IoGameController />} />
           <NavLink path="/chat" text="Chat" icon={<BsFillChatDotsFill />} />
-          <NavLink
-            path="/leaderboard"
-            text="Leaderboard"
-            icon={<MdLeaderboard />}
-          />
           <li>
             {isAuthenticated && userData ? (
               <button onClick={handleLogout} className={styles.logoutButton}>

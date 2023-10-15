@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { GiPingPongBat } from "react-icons/gi";
 import styles from "./Auth.module.scss";
 import { registerUser } from "../../services/auth.api";
+import { getUserProfile } from "../../services/user.api";
 
 function Register() {
   const [username, setUsername] = useState("");
@@ -10,15 +11,15 @@ function Register() {
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
-  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const changeUsername = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value);
   };
 
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const changePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const submitData = async (e: React.FormEvent) => {
     e.preventDefault();
     const user = { username, password };
     const data = await registerUser(user);
@@ -29,6 +30,16 @@ function Register() {
     }
   };
 
+  useEffect(() => {
+    const checkAuth = async () => {
+      const data = await getUserProfile();
+      if (data) {
+        navigate("/");
+      }
+    };
+    checkAuth();
+  }, []);
+
   return (
     <div className={styles.container}>
       <Link to="/" className={styles.mainLink}>
@@ -36,7 +47,7 @@ function Register() {
         ft_transcendence
       </Link>
 
-      <form className={styles.form} onSubmit={handleSubmit}>
+      <form className={styles.form} onSubmit={submitData}>
         <h1>Register a new account</h1>
 
         {errorMessage && (
@@ -53,7 +64,7 @@ function Register() {
             type="text"
             id="username"
             value={username}
-            onChange={handleUsernameChange}
+            onChange={changeUsername}
             placeholder="Enter a username"
             required
           />
@@ -65,7 +76,7 @@ function Register() {
             type="password"
             id="password"
             value={password}
-            onChange={handlePasswordChange}
+            onChange={changePassword}
             placeholder="Enter a password"
             required
           />

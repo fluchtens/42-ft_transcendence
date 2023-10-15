@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { GiPingPongBat } from "react-icons/gi";
 import styles from "./Auth.module.scss";
 import { loginUser } from "../../services/auth.api";
+import { getUserProfile } from "../../services/user.api";
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -11,19 +12,19 @@ function Login() {
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
 
-  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const changeUsername = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value);
   };
 
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const changePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
   };
 
-  const handleRememberMeChange = () => {
+  const changeRememberStatus = () => {
     setRememberMe(!rememberMe);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const submitData = async (e: React.FormEvent) => {
     e.preventDefault();
     const user = { username, password };
     const data = await loginUser(user);
@@ -34,13 +35,23 @@ function Login() {
     }
   };
 
-  const handleFortyTwoLogin = async () => {
+  const fortyTwoAuth = async () => {
     try {
       window.location.href = `${import.meta.env.VITE_BACK_URL}/api/auth/42`;
     } catch (error) {
       console.error(error);
     }
   };
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const data = await getUserProfile();
+      if (data) {
+        navigate("/");
+      }
+    };
+    checkAuth();
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -49,7 +60,7 @@ function Login() {
         ft_transcendence
       </Link>
 
-      <form className={styles.form} onSubmit={handleSubmit}>
+      <form className={styles.form} onSubmit={submitData}>
         <h1>Sign in to your account</h1>
 
         {errorMessage && (
@@ -64,7 +75,7 @@ function Login() {
             type="text"
             id="username"
             value={username}
-            onChange={handleUsernameChange}
+            onChange={changeUsername}
             placeholder="Enter a username"
             required
           />
@@ -76,7 +87,7 @@ function Login() {
             type="password"
             id="password"
             value={password}
-            onChange={handlePasswordChange}
+            onChange={changePassword}
             placeholder="Enter a password"
             required
           />
@@ -87,7 +98,7 @@ function Login() {
             type="checkbox"
             id="rememberMe"
             checked={rememberMe}
-            onChange={handleRememberMeChange}
+            onChange={changeRememberStatus}
           />
           <label htmlFor="rememberMe">Remember me </label>
         </div>
@@ -97,7 +108,7 @@ function Login() {
         </div>
 
         <div className={styles.fortyTwoBtn}>
-          <button type="button" onClick={handleFortyTwoLogin}>
+          <button type="button" onClick={fortyTwoAuth}>
             Sign in with 42
           </button>
         </div>
