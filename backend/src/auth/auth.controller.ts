@@ -14,7 +14,7 @@ import { Response, Request } from 'express';
 import { FortyTwoAuthGuard } from './guards/42-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
-@Controller('api/auth')
+@Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

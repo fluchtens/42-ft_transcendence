@@ -1,6 +1,6 @@
 import { User } from "../types/user.interface";
 
-const apiUrl: string = `${import.meta.env.VITE_BACK_URL}/api/user`;
+const apiUrl: string = `${import.meta.env.VITE_BACK_URL}/user`;
 
 export const getUserProfile = async (): Promise<User | null> => {
   try {

@@ -37,7 +37,7 @@ function Login() {
 
   const fortyTwoAuth = async () => {
     try {
-      window.location.href = `${import.meta.env.VITE_BACK_URL}/api/auth/42Auth`;
+      window.location.href = `${import.meta.env.VITE_BACK_URL}/auth/42Auth`;
     } catch (error) {
       console.error(error);
     }

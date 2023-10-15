@@ -1,4 +1,4 @@
-const apiUrl: string = `${import.meta.env.VITE_BACK_URL}/api/auth`;
+const apiUrl: string = `${import.meta.env.VITE_BACK_URL}/auth`;
 
 interface AuthUser {
   username: string;
