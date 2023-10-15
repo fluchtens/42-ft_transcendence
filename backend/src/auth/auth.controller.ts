@@ -31,14 +31,13 @@ export class AuthController {
     return this.authService.login(data, res);
   }
 
-  @Get('42')
-  @UseGuards(FortyTwoAuthGuard)
-  async fortyTwoAuth() {}
-
-  @Get('42/callback')
+  @Get('42Auth')
   @UseGuards(FortyTwoAuthGuard)
   @Redirect('http://localhost:80/login')
-  fortyTwoAuthRedirect(@Req() req, @Res({ passthrough: true }) res) {
+  fortyTwoAuthRedirect(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     return this.authService.fortyTwoAuth(req, res);
   }
 
