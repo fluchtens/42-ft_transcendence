@@ -43,12 +43,12 @@ export class AuthService {
       where: { username },
     });
     if (!user) {
-      throw new UnauthorizedException('Incorrect username or password.');
+      throw new UnauthorizedException('Incorrect username or password');
     }
 
     const isPwdMatch = await bcrypt.compare(password, user.password);
     if (!isPwdMatch) {
-      throw new UnauthorizedException('Incorrect username or password.');
+      throw new UnauthorizedException('Incorrect username or password');
     }
 
     const payload = { sub: user.id, username: user.username };

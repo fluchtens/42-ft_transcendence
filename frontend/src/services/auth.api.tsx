@@ -1,20 +1,19 @@
 const apiUrl: string = `${import.meta.env.VITE_BACK_URL}/api/auth`;
 
-interface AuthApiResponse {
+interface AuthUser {
+  username: string;
+  password: string;
+}
+
+interface AuthResponse {
   success: boolean;
   message: string;
 }
 
-interface LoginUserResponse {
-  success: boolean;
-  message: string;
-  token: string;
-}
-
-export const registerUser = async (
-  username: string,
-  password: string
-): Promise<AuthApiResponse> => {
+export const registerUser = async ({
+  username,
+  password,
+}: AuthUser): Promise<AuthResponse> => {
   try {
     const response = await fetch(`${apiUrl}/register`, {
       method: "POST",
@@ -23,17 +22,11 @@ export const registerUser = async (
     });
 
     const data = await response.json();
-    if (response.ok) {
-      return {
-        success: true,
-        message: data.message,
-      };
-    } else {
-      return {
-        success: false,
-        message: data.message,
-      };
+    if (!response.ok) {
+      console.log("Error:", data.message);
+      return { success: false, message: data.message };
     }
+    return { success: true, message: data.message };
   } catch (error) {
     console.error(error);
     return {
@@ -43,10 +36,10 @@ export const registerUser = async (
   }
 };
 
-export const loginUser = async (
-  username: string,
-  password: string
-): Promise<LoginUserResponse> => {
+export const loginUser = async ({
+  username,
+  password,
+}: AuthUser): Promise<AuthResponse> => {
   try {
     const response = await fetch(`${apiUrl}/login`, {
       method: "POST",
@@ -56,25 +49,16 @@ export const loginUser = async (
     });
 
     const data = await response.json();
-    if (response.ok) {
-      return {
-        success: true,
-        message: data.message,
-        token: data.token,
-      };
-    } else {
-      return {
-        success: false,
-        message: data.message,
-        token: "",
-      };
+    if (!response.ok) {
+      console.log("Error:", data.message);
+      return { success: false, message: data.message };
     }
+    return { success: true, message: data.message };
   } catch (error) {
     console.error(error);
     return {
       success: false,
       message: "An error occurred while processing your request.",
-      token: "",
     };
   }
 };

@@ -20,65 +20,67 @@ function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { success, message } = await registerUser(username, password);
-    if (success) {
+    const user = { username, password };
+    const data = await registerUser(user);
+    if (data.success) {
       navigate("/login");
     } else {
-      setErrorMessage(message);
-      console.error("Error:", message);
+      setErrorMessage(data.message);
     }
   };
 
   return (
     <div className={styles.container}>
       <Link to="/" className={styles.mainLink}>
-        <GiPingPongBat className={styles.mainIcon} />
+        <GiPingPongBat className={styles.icon} />
         ft_transcendence
       </Link>
 
       <form className={styles.form} onSubmit={handleSubmit}>
-        <h1 className={styles.title}>Register a new account</h1>
+        <h1>Register a new account</h1>
+
         {errorMessage && (
-          <div className={styles.errorMessage}>{errorMessage[0]}</div>
+          <div className={styles.error}>
+            <p>
+              {Array.isArray(errorMessage) ? errorMessage[0] : errorMessage}
+            </p>
+          </div>
         )}
-        <div>
-          <label htmlFor="username" className={styles.label}>
-            Username :
-          </label>
+
+        <div className={styles.input}>
+          <label htmlFor="username">Username :</label>
           <input
             type="text"
             id="username"
-            className={styles.textInput}
             value={username}
             onChange={handleUsernameChange}
             placeholder="Enter a username"
             required
           />
         </div>
-        <div>
-          <label htmlFor="password" className={styles.label}>
-            Password :
-          </label>
+
+        <div className={styles.input}>
+          <label htmlFor="password">Password :</label>
           <input
             type="password"
             id="password"
-            className={styles.textInput}
             value={password}
             onChange={handlePasswordChange}
             placeholder="Enter a password"
             required
           />
         </div>
-        <button type="submit" className={styles.button}>
-          Sign up
-        </button>
 
-        <div className={styles.helpContainer}>
-          <p className={styles.helpText}>Have an account?</p>
-          <Link to={"/login"} className={styles.helpRedirect}>
+        <div className={styles.submitBtn}>
+          <button type="submit">Sign up</button>
+        </div>
+
+        <p className={styles.help}>
+          <span>Have an account?</span>
+          <Link to={"/login"} className={styles.link}>
             Sign in
           </Link>
-        </div>
+        </p>
       </form>
     </div>
   );

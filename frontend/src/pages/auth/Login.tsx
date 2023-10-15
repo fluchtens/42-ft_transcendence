@@ -25,17 +25,12 @@ function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const data = await loginUser(username, password);
+    const user = { username, password };
+    const data = await loginUser(user);
     if (data.success) {
       navigate("/");
-      if (rememberMe) {
-        localStorage.setItem("access_token", data.token);
-      } else {
-        sessionStorage.setItem("access_token", data.token);
-      }
     } else {
       setErrorMessage(data.message);
-      console.error("Error:", data.message);
     }
   };
 
@@ -50,68 +45,69 @@ function Login() {
   return (
     <div className={styles.container}>
       <Link to="/" className={styles.mainLink}>
-        <GiPingPongBat className={styles.mainIcon} />
+        <GiPingPongBat className={styles.icon} />
         ft_transcendence
       </Link>
+
       <form className={styles.form} onSubmit={handleSubmit}>
-        <h1 className={styles.title}>Sign in to your account</h1>
+        <h1>Sign in to your account</h1>
+
         {errorMessage && (
-          <div className={styles.errorMessage}>{errorMessage}</div>
+          <div className={styles.error}>
+            <p>{errorMessage}</p>
+          </div>
         )}
-        <div>
-          <label htmlFor="username" className={styles.label}>
-            Username :
-          </label>
+
+        <div className={styles.input}>
+          <label htmlFor="username">Username :</label>
           <input
             type="text"
             id="username"
-            className={styles.textInput}
             value={username}
             onChange={handleUsernameChange}
-            placeholder="Username"
+            placeholder="Enter a username"
             required
           />
         </div>
-        <div>
-          <label htmlFor="password" className={styles.label}>
-            Password :
-          </label>
+
+        <div className={styles.input}>
+          <label htmlFor="password">Password :</label>
           <input
             type="password"
             id="password"
-            className={styles.textInput}
             value={password}
             onChange={handlePasswordChange}
-            placeholder="••••••••"
+            placeholder="Enter a password"
             required
           />
         </div>
-        <div>
+
+        <div className={styles.checkbox}>
           <input
             type="checkbox"
             id="rememberMe"
-            className={styles.checkboxInput}
             checked={rememberMe}
             onChange={handleRememberMeChange}
           />
           <label htmlFor="rememberMe">Remember me </label>
         </div>
-        <button type="submit" className={styles.button}>
-          Sign in
-        </button>
-        <button
-          type="button"
-          onClick={handleFortyTwoLogin}
-          className={styles.fortyTwoLoginBtn}
-        >
-          Sign in with 42
-        </button>
-        <div className={styles.helpContainer}>
-          <p className={styles.helpText}>Don’t have an account yet?</p>
-          <Link to={"/register"} className={styles.helpRedirect}>
+
+        <div className={styles.submitBtn}>
+          <button type="submit">Sign in</button>
+        </div>
+
+        <div className={styles.fortyTwoBtn}>
+          <button type="button" onClick={handleFortyTwoLogin}>
+            Sign in with 42
+          </button>
+        </div>
+
+        <p className={styles.help}>
+          <span>Don’t have an account yet?</span>
+          <Link to={"/register"} className={styles.link}>
             Sign up
           </Link>
-        </div>
+        </p>
       </form>
     </div>
   );

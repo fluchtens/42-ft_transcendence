@@ -1,11 +1,6 @@
 @import "../../styles/config.scss";
 
 .container {
-  // flex-direction: column;
-  // display: flex;
-  // justify-content: center;
-  // align-items: center;
-
   .mainLink {
     padding: 0.5rem;
     margin-bottom: 1rem;
@@ -17,7 +12,7 @@
     text-decoration: none;
     color: $text-primary-color;
 
-    .mainIcon {
+    .icon {
       margin-right: 0.6rem;
       width: 2rem;
       height: 2rem;
@@ -25,101 +20,115 @@
   }
 
   .form {
-    padding: 2.5rem;
-    background-color: $bg-secondary-color;
+    width: 25rem;
+    padding: 1rem 2.5rem;
+    border-radius: 2.5rem;
     box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
-    border-radius: 30px;
+    background: $bg-secondary-color;
+    color: $text-primary-color;
 
-    .title {
-      margin: 0 0 1.5rem 0;
+    h1 {
+      margin-bottom: 1.5rem;
       font-size: 1.5rem;
       text-align: center;
-      color: $text-primary-color;
     }
 
-    .errorMessage {
-      max-width: 20rem;
-      padding: 0.5rem 1rem;
-      margin-bottom: 1rem;
-      background-color: #f8d7da;
-      border: none;
-      border-radius: 5px;
-      font-size: 0.9rem;
-      color: #721c24;
-    }
-
-    .label {
-      display: block;
-      font-size: 1rem;
-      margin-bottom: 0.25rem;
-      color: $text-primary-color;
-    }
-
-    .textInput {
-      width: 20rem;
-      padding-left: 1rem;
-      height: 2.5rem;
-      margin-bottom: 1rem;
-      background-color: #374151;
-      border: none;
-      border-radius: 5px;
-      outline: none;
-      font-size: 0.9rem;
-      color: $text-primary-color;
-    }
-
-    .checkboxInput {
-      margin-right: 0.5rem;
-    }
-
-    .button {
+    .error {
       width: 100%;
-      padding: 0.7rem;
-      margin-top: 1rem;
-      background-color: $extra-secondary-color;
+      margin-bottom: 1rem;
+      padding: 0.5rem 0.5rem;
+      box-sizing: border-box;
       border: none;
-      border-radius: 5px;
-      font-size: 1.125rem;
-      font-weight: 500;
-      color: white;
-      cursor: pointer;
-    }
+      border-radius: 0.5rem;
+      background: #f8d7da;
 
-    .button:hover {
-      background-color: $extra-primary-color;
-    }
-
-    .fortyTwoLoginBtn {
-      width: 100%;
-      padding: 0.7rem;
-      margin-top: 1rem;
-      background-color: #36babb;
-      border: none;
-      border-radius: 5px;
-      font-size: 1.125rem;
-      font-weight: 500;
-      color: white;
-      cursor: pointer;
-    }
-
-    .fortyTwoLoginBtn:hover {
-      background-color: #48c7c7;
-    }
-
-    .helpContainer {
-      margin-top: 1rem;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-
-      .helpText {
+      p {
         margin: 0;
+        font-size: 0.875rem;
+        text-align: center;
+        color: #721c24;
+      }
+    }
+
+    .input {
+      label {
+        margin-bottom: 0.25rem;
+        display: block;
+        font-weight: 500;
+      }
+
+      input {
+        width: 100%;
+        height: 2.5rem;
+        margin-bottom: 1rem;
+        padding-left: 1rem;
+        box-sizing: border-box;
+        border: none;
+        border-radius: 0.5rem;
+        outline: none;
+        background: #374151;
+        font-size: 0.9rem;
+        color: $text-primary-color;
+      }
+    }
+
+    .checkbox {
+      input {
+        margin-right: 0.5rem;
+      }
+    }
+
+    .submitBtn {
+      button {
+        width: 100%;
+        height: 2.5rem;
+        margin-top: 1rem;
+        box-sizing: border-box;
+        border: none;
+        border-radius: 0.5rem;
+        background: $extra-secondary-color;
+        font-size: 1.125rem;
+        font-weight: 500;
+        color: white;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: $extra-primary-color;
+      }
+    }
+
+    .fortyTwoBtn {
+      button {
+        width: 100%;
+        height: 2.5rem;
+        margin-top: 1rem;
+        background: #36babb;
+        box-sizing: border-box;
+        border: none;
+        border-radius: 0.5rem;
+        font-size: 1.125rem;
+        font-weight: 500;
+        color: white;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #48c7c7;
+      }
+    }
+
+    .help {
+      margin-top: 1rem;
+      text-align: center;
+
+      span {
         font-size: 0.875rem;
         font-weight: 300;
         color: #9ca3af;
       }
 
-      .helpRedirect {
+      .link {
         margin-left: 0.3rem;
         font-size: 0.875rem;
         font-weight: 500;
