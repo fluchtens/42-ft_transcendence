@@ -18,12 +18,14 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
+  private findUserByUsername(username: string) {
+    return this.prismaService.user.findUnique({ where: { username } });
+  }
+
   async register(data: RegisterDto) {
     const { username, password } = data;
 
-    const user = await this.prismaService.user.findUnique({
-      where: { username },
-    });
+    const user = await this.findUserByUsername(username);
     if (user) {
       throw new ConflictException('This username is already taken');
     }
@@ -39,9 +41,7 @@ export class AuthService {
   async login(data: LoginDto, res: Response) {
     const { username, password } = data;
 
-    const user = await this.prismaService.user.findUnique({
-      where: { username },
-    });
+    const user = await this.findUserByUsername(username);
     if (!user) {
       throw new UnauthorizedException('Incorrect username or password');
     }
@@ -67,14 +67,14 @@ export class AuthService {
 
   async fortyTwoAuth(req, res) {
     const { username } = req.user;
+    console.log(req.user);
 
-    const user = await this.prismaService.user.findUnique({
-      where: { username },
-    });
+    let user = await this.findUserByUsername(username);
     if (!user) {
-      await this.prismaService.user.create({
+      user = await this.prismaService.user.create({
         data: { username, password: null },
       });
+      console.log(user);
     }
 
     const payload = { sub: user.id, username: user.username };
