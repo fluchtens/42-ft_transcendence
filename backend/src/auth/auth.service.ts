@@ -50,7 +50,7 @@ export class AuthService {
     const { username, password } = data;
 
     const user = await this.findUserByUsername(username);
-    if (!user) {
+    if (!user || user.fortyTwoId) {
       throw new UnauthorizedException('Incorrect username or password');
     }
 
