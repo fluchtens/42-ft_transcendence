@@ -19,7 +19,15 @@ export class AuthService {
   ) {}
 
   private findUserByUsername(username: string) {
-    return this.prismaService.user.findUnique({ where: { username } });
+    return this.prismaService.user.findUnique({
+      where: { username },
+    });
+  }
+
+  private findUserByFortyTwoId(fortyTwoId: number) {
+    return this.prismaService.user.findUnique({
+      where: { fortyTwoId },
+    });
   }
 
   async register(data: RegisterDto) {
@@ -51,7 +59,7 @@ export class AuthService {
       throw new UnauthorizedException('Incorrect username or password');
     }
 
-    const payload = { sub: user.id, username: user.username };
+    const payload = { id: user.id, username: user.username };
     const token = await this.jwtService.signAsync(payload, {
       secret: this.configService.get('JWT_SECRET'),
       expiresIn: '2h',
@@ -66,18 +74,17 @@ export class AuthService {
   }
 
   async fortyTwoAuth(req, res) {
-    const { username } = req.user;
-    console.log(req.user);
+    const { id, username }: any = req.user;
+    const fortyTwoId: number = parseInt(id);
 
-    let user = await this.findUserByUsername(username);
+    let user = await this.findUserByFortyTwoId(fortyTwoId);
     if (!user) {
       user = await this.prismaService.user.create({
-        data: { username, password: null },
+        data: { username, fortyTwoId, password: null },
       });
-      console.log(user);
     }
 
-    const payload = { sub: user.id, username: user.username };
+    const payload = { id: user.id, username: user.username };
     const token = await this.jwtService.signAsync(payload, {
       secret: this.configService.get('JWT_SECRET'),
       expiresIn: '2h',
@@ -93,6 +100,6 @@ export class AuthService {
 
   async logout(res: Response) {
     res.clearCookie('access_token');
-    return { message: 'User perfectly disconnected' };
+    return { message: 'User succesfully disconnected' };
   }
 }

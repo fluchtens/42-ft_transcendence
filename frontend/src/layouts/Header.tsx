@@ -25,7 +25,6 @@ function Header() {
       if (data) {
         setIsAuthenticated(true);
         setUserData(data);
-        console.log(data);
       }
     };
     handleLogin();
