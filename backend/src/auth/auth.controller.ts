@@ -5,7 +5,6 @@ import {
   Res,
   Get,
   UseGuards,
-  Redirect,
   Req,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -13,14 +12,10 @@ import { LoginDto, RegisterDto, SetupDto } from './auth.dto';
 import { Response, Request } from 'express';
 import { FortyTwoAuthGuard } from './guards/42-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly configService: ConfigService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('register')
   async register(@Body() data: RegisterDto) {
