@@ -63,6 +63,30 @@ export const loginUser = async ({
   }
 };
 
+export const setupUser = async (username: string): Promise<AuthResponse> => {
+  try {
+    const response = await fetch(`${apiUrl}/setup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username }),
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.log("Error:", data.message);
+      return { success: false, message: data.message };
+    }
+    return { success: true, message: data.message };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      message: "An error occurred while processing your request.",
+    };
+  }
+};
+
 export const logoutUser = async (): Promise<void> => {
   try {
     const response = await fetch(`${apiUrl}/logout`, {

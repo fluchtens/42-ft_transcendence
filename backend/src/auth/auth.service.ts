@@ -4,7 +4,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { LoginDto, RegisterDto } from './auth.dto';
+import { LoginDto, RegisterDto, SetupDto } from './auth.dto';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -18,15 +18,36 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  private findUserByUsername(username: string) {
+  private async findUserByUsername(username: string) {
     return this.prismaService.user.findUnique({
       where: { username },
     });
   }
 
-  private findUserByFortyTwoId(fortyTwoId: number) {
+  private async findUserByFortyTwoId(fortyTwoId: number) {
     return this.prismaService.user.findUnique({
       where: { fortyTwoId },
+    });
+  }
+
+  private async generateJwtToken(payload: any, expiresIn: string) {
+    const token = await this.jwtService.signAsync(payload, {
+      secret: this.configService.get('JWT_SECRET'),
+      expiresIn: expiresIn,
+    });
+    return token;
+  }
+
+  private async setAccessTokenCookie(
+    res: Response,
+    token: string,
+    expiresIn: number,
+  ) {
+    const expirationTime = new Date(Date.now() + expiresIn);
+    res.cookie('access_token', token, {
+      httpOnly: true,
+      sameSite: 'strict',
+      expires: expirationTime,
     });
   }
 
@@ -74,8 +95,31 @@ export class AuthService {
   }
 
   async fortyTwoAuth(req, res) {
-    const { id, username }: any = req.user;
-    const fortyTwoId: number = parseInt(id);
+    const fortyTwoId: number = parseInt(req.user.id);
+
+    const user = await this.findUserByFortyTwoId(fortyTwoId);
+    if (!user) {
+      const payload = { fortyTwoId, toConfig: true };
+      const token = await this.generateJwtToken(payload, '2h');
+      await this.setAccessTokenCookie(res, token, 2 * 60 * 60 * 1000);
+
+      return res.redirect(this.configService.get('VITE_FRONT_URL') + '/setup');
+    }
+
+    const payload = { id: user.id, username: user.username };
+    const token = await this.generateJwtToken(payload, '2h');
+    await this.setAccessTokenCookie(res, token, 2 * 60 * 60 * 1000);
+
+    return res.redirect(this.configService.get('VITE_FRONT_URL'));
+  }
+
+  async setup(req, data, res) {
+    const { username } = data;
+    const { fortyTwoId, toConfig } = req.user;
+
+    if (!toConfig) {
+      throw new UnauthorizedException('Your account has already been set up');
+    }
 
     let user = await this.findUserByFortyTwoId(fortyTwoId);
     if (!user) {
@@ -85,15 +129,8 @@ export class AuthService {
     }
 
     const payload = { id: user.id, username: user.username };
-    const token = await this.jwtService.signAsync(payload, {
-      secret: this.configService.get('JWT_SECRET'),
-      expiresIn: '2h',
-    });
-
-    res.cookie('access_token', token, {
-      httpOnly: true,
-      sameSite: 'strict',
-    });
+    const token = await this.generateJwtToken(payload, '2h');
+    await this.setAccessTokenCookie(res, token, 2 * 60 * 60 * 1000);
 
     return { message: 'User succesfully connected' };
   }

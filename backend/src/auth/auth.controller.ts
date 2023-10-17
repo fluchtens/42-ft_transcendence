@@ -5,18 +5,22 @@ import {
   Res,
   Get,
   UseGuards,
-  Req,
   Redirect,
+  Req,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto } from './auth.dto';
+import { LoginDto, RegisterDto, SetupDto } from './auth.dto';
 import { Response, Request } from 'express';
 import { FortyTwoAuthGuard } from './guards/42-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Post('register')
   async register(@Body() data: RegisterDto) {
@@ -33,12 +37,21 @@ export class AuthController {
 
   @Get('42Auth')
   @UseGuards(FortyTwoAuthGuard)
-  @Redirect('http://localhost:80/login')
   fortyTwoAuthRedirect(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
     return this.authService.fortyTwoAuth(req, res);
+  }
+
+  @Post('setup')
+  @UseGuards(JwtAuthGuard)
+  async setup(
+    @Req() req,
+    @Body() data: SetupDto,
+    @Res({ passthrough: true }) res,
+  ) {
+    return this.authService.setup(req, data, res);
   }
 
   @Get('logout')
