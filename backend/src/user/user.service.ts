@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from '@prisma/client';
 
@@ -6,12 +10,32 @@ import { User } from '@prisma/client';
 export class UserService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async getAllUsers(): Promise<User[]> {
-    try {
-      const users = await this.prismaService.user.findMany();
-      return users;
-    } catch (error) {
-      throw new InternalServerErrorException('Internal server error');
+  private async getUserById(id: number) {
+    return this.prismaService.user.findUnique({
+      where: { id },
+    });
+  }
+
+  async getProfile(req) {
+    if (req.user.toConfig) {
+      return req.user;
     }
+    return this.getUser(req.user.id);
+  }
+
+  async getUser(id: number) {
+    if (!id) {
+      throw new UnauthorizedException('User not found');
+    }
+    const user = await this.getUserById(id);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    return user;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    const users = await this.prismaService.user.findMany();
+    return users;
   }
 }

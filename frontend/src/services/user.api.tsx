@@ -4,7 +4,7 @@ const apiUrl: string = `${import.meta.env.VITE_BACK_URL}/user`;
 
 export const getUserProfile = async (): Promise<User | null> => {
   try {
-    const response = await fetch(`${apiUrl}/profile`, {
+    const response = await fetch(`${apiUrl}/`, {
       method: "GET",
       credentials: "include",
     });

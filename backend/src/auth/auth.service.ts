@@ -96,6 +96,7 @@ export class AuthService {
 
   async fortyTwoAuth(req, res) {
     const fortyTwoId: number = parseInt(req.user.id);
+    // console.log(req.user._json.image.link);
 
     const user = await this.findUserByFortyTwoId(fortyTwoId);
     if (!user) {
@@ -116,6 +117,7 @@ export class AuthService {
   async setup(req, data, res) {
     const { username } = data;
     const { fortyTwoId, toConfig } = req.user;
+    console.log(req.user);
 
     if (!toConfig) {
       throw new UnauthorizedException('Your account has already been set up');

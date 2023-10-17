@@ -46,6 +46,7 @@ function Login() {
   useEffect(() => {
     const checkAuth = async () => {
       const data = await getUserProfile();
+      console.log(data);
       if (data) {
         navigate("/");
       }
