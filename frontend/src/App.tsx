@@ -3,8 +3,9 @@ import Layout from "./layouts/layout/Layout";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Setup from "./pages/auth/Setup";
-import Game from "./pages/Game";
-import Chat from "./pages/Chat";
+import User from "./pages/user/User";
+import Game from "./pages/game/Game";
+import Chat from "./pages/chat/Chat";
 
 function App() {
   const router = createBrowserRouter([
@@ -24,6 +25,10 @@ function App() {
         {
           path: "/setup",
           element: <Setup />,
+        },
+        {
+          path: "/user",
+          element: <User />,
         },
         {
           path: "/game",

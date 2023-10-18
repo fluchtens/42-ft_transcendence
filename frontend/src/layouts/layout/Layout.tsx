@@ -1,5 +1,5 @@
 import { Outlet, useLocation } from "react-router-dom";
-import Home from "../../pages/Home";
+import Home from "../../pages/home/Home";
 import Footer from "../footer/Footer";
 import Header from "../header/Header";
 import styles from "./Layout.module.scss";
