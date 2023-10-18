@@ -4,23 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { User } from "../../types/user.interface";
 import { FaUser, FaUserPlus, FaUserPen } from "react-icons/fa6";
 import { PiFootprintsFill } from "react-icons/pi";
-import styles from "./UserProfile.module.scss";
+import { convertDate } from "../../utils/date";
 import defaultAvatar from "/default_avatar.png";
-
-function convertDate(date: string | null | undefined) {
-  if (!date) {
-    return null;
-  }
-  const newDate = new Date(date);
-  return newDate.toLocaleDateString("fr-FR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZoneName: "short",
-  });
-}
+import styles from "./UserProfile.module.scss";
 
 export default function UserProfile() {
   const [user, setUser] = useState<User | null>(null);
