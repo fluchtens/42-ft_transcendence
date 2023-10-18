@@ -10,8 +10,37 @@ import styles from "./UserProfile.module.scss";
 
 export default function UserProfile() {
   const [user, setUser] = useState<User | null>(null);
-
+  const [file, setFile] = useState(null);
   const navigate = useNavigate();
+
+  const handleFileChange = (event: any) => {
+    setFile(event.target.files[0]);
+  };
+
+  const handleUpload = async () => {
+    try {
+      if (!file) return;
+      const formData = new FormData();
+      formData.append("avatar", file);
+
+      const response = await fetch("http://localhost:3000/user/avatar", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log("Fichier téléchargé avec succès !");
+      } else {
+        console.error("Erreur lors du téléchargement du fichier", data.message);
+      }
+    } catch (error) {
+      console.error("Erreur lors du téléchargement du fichier : ", error);
+    }
+  };
+
   useEffect(() => {
     const checkAuth = async () => {
       const data = await getUserProfile();
@@ -33,7 +62,6 @@ export default function UserProfile() {
             [{user?.id}] {user?.username}
           </h1>
         </div>
-
         <div className={styles.details}>
           <img src={defaultAvatar} />
           <ul className={styles.dataList}>
@@ -59,6 +87,8 @@ export default function UserProfile() {
             </li>
           </ul>
         </div>
+        <input type="file" onChange={handleFileChange} />
+        <button onClick={handleUpload}>Télécharger</button>
       </div>
     </div>
   );
