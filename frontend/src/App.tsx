@@ -4,7 +4,7 @@ import Error from "./pages/error/Error";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Setup from "./pages/auth/Setup";
-import User from "./pages/user/User";
+import UserProfile from "./pages/user/UserProfile";
 import Game from "./pages/game/Game";
 import Chat from "./pages/chat/Chat";
 
@@ -29,7 +29,7 @@ function App() {
         },
         {
           path: "/user",
-          element: <User />,
+          element: <UserProfile />,
         },
         {
           path: "/game",
