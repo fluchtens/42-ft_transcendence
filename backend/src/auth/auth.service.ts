@@ -117,18 +117,18 @@ export class AuthService {
   async setup(req, data, res) {
     const { username } = data;
     const { fortyTwoId, toConfig } = req.user;
-    console.log(req.user);
 
     if (!toConfig) {
       throw new UnauthorizedException('Your account has already been set up');
     }
 
-    let user = await this.findUserByFortyTwoId(fortyTwoId);
-    if (!user) {
-      user = await this.prismaService.user.create({
-        data: { username, fortyTwoId, password: null },
-      });
+    let user = await this.findUserByUsername(username);
+    if (user) {
+      throw new ConflictException('This username is already taken');
     }
+    user = await this.prismaService.user.create({
+      data: { username, fortyTwoId, password: null },
+    });
 
     const payload = { id: user.id, username: user.username };
     const token = await this.generateJwtToken(payload, '2h');
