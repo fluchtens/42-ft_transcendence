@@ -1,5 +1,6 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Layout from "./layouts/layout/Layout";
+import Error from "./pages/error/Error";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Setup from "./pages/auth/Setup";
@@ -12,7 +13,7 @@ function App() {
     {
       path: "/",
       element: <Layout />,
-      // errorElement: <Error />,
+      errorElement: <Error />,
       children: [
         {
           path: "/login",
