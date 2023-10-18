@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { User } from "../../types/user.interface";
 import { FaUser, FaUserPlus, FaUserPen } from "react-icons/fa6";
 import { PiFootprintsFill } from "react-icons/pi";
-import { GiHouseKeys } from "react-icons/gi";
 import styles from "./UserProfile.module.scss";
 import defaultAvatar from "/default_avatar.png";
 
