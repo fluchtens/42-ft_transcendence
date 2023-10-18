@@ -2,12 +2,11 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { GiPingPongBat } from "react-icons/gi";
 import styles from "./Auth.module.scss";
-import { registerUser } from "../../services/auth.api";
+import { setupUser } from "../../services/auth.api";
 import { getUserProfile } from "../../services/user.api";
 
-function Register() {
+function Setup() {
   const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
@@ -15,16 +14,11 @@ function Register() {
     setUsername(e.target.value);
   };
 
-  const changePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value);
-  };
-
   const submitData = async (e: React.FormEvent) => {
     e.preventDefault();
-    const user = { username, password };
-    const data = await registerUser(user);
+    const data = await setupUser(username);
     if (data.success) {
-      navigate("/login");
+      navigate("/");
     } else {
       setErrorMessage(data.message);
     }
@@ -33,7 +27,7 @@ function Register() {
   useEffect(() => {
     const checkAuth = async () => {
       const data = await getUserProfile();
-      if (data) {
+      if (!data || !data.toConfig) {
         navigate("/");
       }
     };
@@ -48,7 +42,8 @@ function Register() {
       </Link>
 
       <form className={styles.form} onSubmit={submitData}>
-        <h1>Register a new account</h1>
+        <h1>Set up your new account</h1>
+        <p>Before using our services, please choose a unique username :</p>
 
         {errorMessage && (
           <div className={styles.error}>
@@ -59,10 +54,8 @@ function Register() {
         )}
 
         <div className={styles.input}>
-          <label htmlFor="username">Username :</label>
           <input
             type="text"
-            id="username"
             value={username}
             onChange={changeUsername}
             placeholder="Enter a username"
@@ -70,31 +63,12 @@ function Register() {
           />
         </div>
 
-        <div className={styles.input}>
-          <label htmlFor="password">Password :</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={changePassword}
-            placeholder="Enter a password"
-            required
-          />
-        </div>
-
         <div className={styles.submitBtn}>
-          <button type="submit">Sign up</button>
+          <button type="submit">Continue</button>
         </div>
-
-        <p className={styles.help}>
-          <span>Have an account?</span>
-          <Link to={"/login"} className={styles.link}>
-            Sign in
-          </Link>
-        </p>
       </form>
     </div>
   );
 }
 
-export default Register;
+export default Setup;

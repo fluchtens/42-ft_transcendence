@@ -9,12 +9,14 @@ datasource db {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  username String @unique @db.VarChar(255)
-  // avatarUrl String @db.VarChar(255)
+  id         Int    @id @default(autoincrement())
+  username   String @unique @db.VarChar(255)
+  fortyTwoId Int?   @unique
 
-  password String @db.VarChar(255)
-  // twoFactor Boolean @default(false)
+  password String? @db.VarChar(255)
+  twoFa    Boolean @default(false)
+
+  // avatarUrl String @db.VarChar(255)
 
   // friendIds Int[] @relation(?)
   // blockedIds
@@ -26,10 +28,11 @@ model User {
   // stats ...
 }
 
-// model Channel {
-// id       Int    @id @default(autoincrement())
+model Channel {
+id       Int    @id @default(autoincrement())
+
 // name, messagesList, userlist, adminlist, owner
-// }
+}
 
 // model Messages {
 // id       Int    @id @default(autoincrement())
@@ -40,3 +43,16 @@ model User {
 // id       Int    @id @default(autoincrement())
 // match history stats (winner, loser, date, stats, etc)
 // }
+
+model Member{
+  id String @id @default(uuid())
+  role MemberRole @default(GUEST)
+
+  
+}
+
+enum MemberRole {
+  ADMIN
+  MODERATOR
+  GUEST
+}

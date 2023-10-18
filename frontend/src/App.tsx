@@ -1,10 +1,10 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Layout from "./layouts/Layout";
-import Game from "./pages/Game";
-import Chat from "./pages/Chat";
-import Leaderboard from "./pages/Leaderboard";
+import Layout from "./layouts/layout/Layout";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import Setup from "./pages/auth/Setup";
+import Game from "./pages/Game";
+import Chat from "./pages/Chat";
 
 function App() {
   const router = createBrowserRouter([
@@ -22,16 +22,16 @@ function App() {
           element: <Register />,
         },
         {
+          path: "/setup",
+          element: <Setup />,
+        },
+        {
           path: "/game",
           element: <Game />,
         },
         {
           path: "/chat",
           element: <Chat />,
-        },
-        {
-          path: "/leaderboard",
-          element: <Leaderboard />,
         },
       ],
     },
