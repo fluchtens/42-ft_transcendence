@@ -11,6 +11,7 @@ import styles from "./UserProfile.module.scss";
 export default function UserProfile() {
   const [user, setUser] = useState<User | null>(null);
   const [file, setFile] = useState(null);
+  const avatarUrl = `${import.meta.env.VITE_BACK_URL}/user/avatar`;
   const navigate = useNavigate();
 
   const handleFileChange = (event: any) => {
@@ -48,7 +49,6 @@ export default function UserProfile() {
         navigate("/login");
       }
       setUser(data);
-      console.log(data);
     };
     checkAuth();
   }, []);
@@ -63,7 +63,13 @@ export default function UserProfile() {
           </h1>
         </div>
         <div className={styles.details}>
-          <img src={defaultAvatar} />
+          {user?.avatar ? (
+            <img src={`${avatarUrl}/${user.avatar}`} />
+          ) : (
+            <img src={defaultAvatar} />
+          )}
+          <input type="file" onChange={handleFileChange} />
+          <button onClick={handleUpload}>Télécharger</button>
           <ul className={styles.dataList}>
             <li className={styles.data}>
               <PiFootprintsFill className={styles.dataIcon} />
@@ -87,8 +93,6 @@ export default function UserProfile() {
             </li>
           </ul>
         </div>
-        <input type="file" onChange={handleFileChange} />
-        <button onClick={handleUpload}>Télécharger</button>
       </div>
     </div>
   );

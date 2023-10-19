@@ -48,7 +48,6 @@ export class UserController {
   }
 
   @Get('avatar/:filename')
-  @UseGuards(JwtAuthGuard)
   async getAvatar(@Param('filename') filename: string, @Res() res) {
     return this.userService.getAvatar(filename, res);
   }
