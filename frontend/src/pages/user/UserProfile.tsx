@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { getUserProfile } from "../../services/user.api";
-import { useNavigate } from "react-router-dom";
+import { getUserByUsername } from "../../services/user.api";
+import { useNavigate, useParams } from "react-router-dom";
 import { User } from "../../types/user.interface";
 import { FaUser, FaUserPlus, FaUserPen } from "react-icons/fa6";
 import { PiFootprintsFill } from "react-icons/pi";
@@ -12,6 +12,7 @@ export default function UserProfile() {
   const [user, setUser] = useState<User | null>(null);
   const [file, setFile] = useState(null);
   const avatarUrl = `${import.meta.env.VITE_BACK_URL}/user/avatar`;
+  const { username } = useParams();
   const navigate = useNavigate();
 
   const handleFileChange = (event: any) => {
@@ -43,14 +44,18 @@ export default function UserProfile() {
   };
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const data = await getUserProfile();
-      if (!data || !data.id) {
-        navigate("/login");
+    const getUser = async () => {
+      if (!username) {
+        return;
+      }
+      const data = await getUserByUsername(username);
+      if (!data) {
+        navigate("/");
+        return;
       }
       setUser(data);
     };
-    checkAuth();
+    getUser();
   }, []);
 
   return (

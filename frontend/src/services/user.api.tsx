@@ -2,7 +2,7 @@ import { User } from "../types/user.interface";
 
 const apiUrl: string = `${import.meta.env.VITE_BACK_URL}/user`;
 
-export const getUserProfile = async (): Promise<User | null> => {
+const getUserProfile = async (): Promise<User | null> => {
   try {
     const response = await fetch(`${apiUrl}/`, {
       method: "GET",
@@ -21,3 +21,24 @@ export const getUserProfile = async (): Promise<User | null> => {
     return null;
   }
 };
+
+async function getUserByUsername(username: string): Promise<User | null> {
+  try {
+    const response = await fetch(`${apiUrl}/username/${username}`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
+export { getUserProfile, getUserByUsername };

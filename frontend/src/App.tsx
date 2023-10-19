@@ -28,7 +28,7 @@ function App() {
           element: <Setup />,
         },
         {
-          path: "/user",
+          path: "/user/:username",
           element: <UserProfile />,
         },
         {

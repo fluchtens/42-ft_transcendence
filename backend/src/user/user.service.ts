@@ -18,6 +18,12 @@ export class UserService {
     });
   }
 
+  private async findUserByUsername(username: string) {
+    return this.prismaService.user.findUnique({
+      where: { username },
+    });
+  }
+
   private async findUserAvatar(id: number) {
     return this.prismaService.user.findUnique({
       where: { id },
@@ -30,6 +36,11 @@ export class UserService {
       where: { id },
       data: { avatar },
     });
+  }
+
+  async getAllUsers() {
+    const users = await this.prismaService.user.findMany();
+    return users;
   }
 
   async getProfile(req) {
@@ -50,9 +61,11 @@ export class UserService {
     return user;
   }
 
-  async getAllUsers(): Promise<User[]> {
-    const users = await this.prismaService.user.findMany();
-    return users;
+  async getUserByUsername(username: string) {
+    const user = await this.findUserByUsername(username);
+    if (!user) throw new NotFoundException('User not found');
+
+    return user;
   }
 
   async postAvatar(req, file) {
