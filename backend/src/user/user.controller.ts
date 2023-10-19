@@ -1,12 +1,10 @@
 import {
   Controller,
-  FileTypeValidator,
   Get,
-  MaxFileSizeValidator,
   Param,
-  ParseFilePipe,
   Post,
   Req,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -16,7 +14,9 @@ import { User } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Express } from 'express';
-import { diskStorage } from 'multer';
+import { multerAvatarOptions } from './middlewares/multer.options';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Controller('user')
 export class UserController {
@@ -42,29 +42,14 @@ export class UserController {
 
   @Post('avatar')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(
-    FileInterceptor('avatar', {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, callback) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          callback(null, `${uniqueSuffix}-${file.originalname}`);
-        },
-      }),
-    }),
-  )
-  async postAvatar(
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 1024000 }),
-          new FileTypeValidator({ fileType: 'image/*' }),
-        ],
-      }),
-    )
-    file: Express.Multer.File,
-  ) {
-    console.log('Fichier téléchargé avec succès !', file);
+  @UseInterceptors(FileInterceptor('avatar', multerAvatarOptions))
+  async postAvatar(@Req() req, @UploadedFile() file: Express.Multer.File) {
+    return this.userService.postAvatar(req, file);
+  }
+
+  @Get('avatar/:filename')
+  @UseGuards(JwtAuthGuard)
+  async getAvatar(@Param('filename') filename: string, @Res() res) {
+    return this.userService.getAvatar(filename, res);
   }
 }

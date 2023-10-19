@@ -32,7 +32,7 @@ export default function UserProfile() {
       const data = await response.json();
 
       if (response.ok) {
-        console.log("Fichier téléchargé avec succès !");
+        console.log("Fichier téléchargé avec succès !", data.message);
       } else {
         console.error("Erreur lors du téléchargement du fichier", data.message);
       }
