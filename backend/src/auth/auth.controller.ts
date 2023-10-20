@@ -9,7 +9,6 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto, SetupDto } from './auth.dto';
-import { Response, Request } from 'express';
 import { FortyTwoAuthGuard } from './guards/42-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
@@ -23,35 +22,29 @@ export class AuthController {
   }
 
   @Post('login')
-  async login(
-    @Body() data: LoginDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async login(@Body() data: LoginDto, @Res({ passthrough: true }) res) {
     return this.authService.login(data, res);
   }
 
   @Get('42Auth')
   @UseGuards(FortyTwoAuthGuard)
-  fortyTwoAuthRedirect(
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  fortyTwoAuth(@Req() req, @Res({ passthrough: true }) res) {
     return this.authService.fortyTwoAuth(req, res);
   }
 
   @Post('setup')
   @UseGuards(JwtAuthGuard)
   async setup(
-    @Req() req,
     @Body() data: SetupDto,
+    @Req() req,
     @Res({ passthrough: true }) res,
   ) {
-    return this.authService.setup(req, data, res);
+    return this.authService.setup(data, req, res);
   }
 
   @Get('logout')
   @UseGuards(JwtAuthGuard)
-  async logout(@Res({ passthrough: true }) res: Response) {
+  async logout(@Res({ passthrough: true }) res) {
     return this.authService.logout(res);
   }
 }

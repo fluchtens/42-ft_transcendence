@@ -25,13 +25,13 @@ function Setup() {
   };
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const getUser = async () => {
       const data = await getUserProfile();
-      if (!data || !data.toConfig) {
+      if (!data || !data.fortyTwoId) {
         navigate("/");
       }
     };
-    checkAuth();
+    getUser();
   }, []);
 
   return (

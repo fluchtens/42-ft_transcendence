@@ -22,22 +22,22 @@ import * as path from 'path';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get('all')
-  @UseGuards(JwtAuthGuard)
-  async getAllUsers(): Promise<User[]> {
-    return this.userService.getAllUsers();
-  }
-
   @Get()
   @UseGuards(JwtAuthGuard)
   async getProfile(@Req() req) {
     return this.userService.getProfile(req);
   }
 
-  @Get(':id')
+  @Get('all')
+  @UseGuards(JwtAuthGuard)
+  async getAllUsers(): Promise<User[]> {
+    return this.userService.getAllUsers();
+  }
+
+  @Get('id/:id')
   @UseGuards(JwtAuthGuard)
   async getUserById(@Param('id') id: string) {
-    return this.userService.getUser(parseInt(id));
+    return this.userService.getUserById(parseInt(id));
   }
 
   @Get('username/:username')

@@ -12,7 +12,7 @@ import * as path from 'path';
 export class UserService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  private async getUserById(id: number) {
+  private async findUserById(id: number) {
     return this.prismaService.user.findUnique({
       where: { id },
     });
@@ -38,34 +38,45 @@ export class UserService {
     });
   }
 
+  private exclude<User, Key extends keyof User>(
+    user: User,
+    keys: Key[],
+  ): Omit<User, Key> {
+    return Object.fromEntries(
+      Object.entries(user).filter(([key]) => !keys.includes(key as Key)),
+    ) as Omit<User, Key>;
+  }
+
+  async getProfile(req) {
+    if (req.user.fortyTwoId) {
+      return req.user;
+    }
+    return this.getUserById(req.user.id);
+  }
+
   async getAllUsers() {
     const users = await this.prismaService.user.findMany();
     return users;
   }
 
-  async getProfile(req) {
-    if (req.user.toConfig) {
-      return req.user;
-    }
-    return this.getUser(req.user.id);
-  }
-
-  async getUser(id: number) {
-    if (!id) {
-      throw new UnauthorizedException('User not found');
-    }
-    const user = await this.getUserById(id);
+  async getUserById(id: number) {
+    const user = await this.findUserById(id);
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new NotFoundException('User not found');
     }
-    return user;
+
+    const userData = this.exclude(user, ['fortyTwoId', 'password']);
+    return userData;
   }
 
   async getUserByUsername(username: string) {
     const user = await this.findUserByUsername(username);
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
-    return user;
+    const userData = this.exclude(user, ['fortyTwoId', 'password']);
+    return userData;
   }
 
   async postAvatar(req, file) {

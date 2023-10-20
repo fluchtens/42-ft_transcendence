@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MainLink } from "../../components/MainLink";
 import { NavLink } from "../../components/NavLink";
 import { ProfileBtn } from "../../components/ProfileBtn";
@@ -12,6 +12,7 @@ import styles from "./Header.module.scss";
 
 export default function Header() {
   const [user, setUser] = useState<User | null>(null);
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     setUser(null);
@@ -20,8 +21,11 @@ export default function Header() {
   useEffect(() => {
     const getUser = async () => {
       const data = await getUserProfile();
-      if (data && !data.toConfig) {
-        true;
+      if (data) {
+        if (data.fortyTwoId) {
+          navigate("/setup");
+          return;
+        }
         setUser(data);
         console.log(data);
       }

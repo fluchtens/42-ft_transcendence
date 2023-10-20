@@ -8,7 +8,6 @@ import { LoginDto, RegisterDto, SetupDto } from './auth.dto';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +16,8 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
+
+  private readonly cookieExpirationTime = 2 * 60 * 60 * 1000;
 
   private async findUserByUsername(username: string) {
     return this.prismaService.user.findUnique({
@@ -35,15 +36,13 @@ export class AuthService {
       secret: this.configService.get('JWT_SECRET'),
       expiresIn: expiresIn,
     });
+
     return token;
   }
 
-  private async setAccessTokenCookie(
-    res: Response,
-    token: string,
-    expiresIn: number,
-  ) {
+  private async setAccessTokenCookie(res, token: string, expiresIn: number) {
     const expirationTime = new Date(Date.now() + expiresIn);
+
     res.cookie('access_token', token, {
       httpOnly: true,
       sameSite: 'strict',
@@ -67,7 +66,7 @@ export class AuthService {
     return { message: 'User succesfully created' };
   }
 
-  async login(data: LoginDto, res: Response) {
+  async login(data: LoginDto, res) {
     const { username, password } = data;
 
     const user = await this.findUserByUsername(username);
@@ -75,50 +74,43 @@ export class AuthService {
       throw new UnauthorizedException('Incorrect username or password');
     }
 
-    const isPwdMatch = await bcrypt.compare(password, user.password);
-    if (!isPwdMatch) {
+    const matchPwd = await bcrypt.compare(password, user.password);
+    if (!matchPwd) {
       throw new UnauthorizedException('Incorrect username or password');
     }
 
-    const payload = { id: user.id, username: user.username };
-    const token = await this.jwtService.signAsync(payload, {
-      secret: this.configService.get('JWT_SECRET'),
-      expiresIn: '2h',
-    });
-
-    res.cookie('access_token', token, {
-      httpOnly: true,
-      sameSite: 'strict',
-    });
+    const payload = { id: user.id };
+    const token = await this.generateJwtToken(payload, '2h');
+    await this.setAccessTokenCookie(res, token, this.cookieExpirationTime);
 
     return { message: 'User succesfully connected' };
   }
 
   async fortyTwoAuth(req, res) {
     const fortyTwoId: number = parseInt(req.user.id);
-    // console.log(req.user._json.image.link);
+    const avatar: string = req.user._json.image.link;
 
     const user = await this.findUserByFortyTwoId(fortyTwoId);
     if (!user) {
-      const payload = { fortyTwoId, toConfig: true };
+      const payload = { fortyTwoId, avatar };
       const token = await this.generateJwtToken(payload, '2h');
-      await this.setAccessTokenCookie(res, token, 2 * 60 * 60 * 1000);
+      await this.setAccessTokenCookie(res, token, this.cookieExpirationTime);
 
       return res.redirect(this.configService.get('VITE_FRONT_URL') + '/setup');
     }
 
     const payload = { id: user.id, username: user.username };
     const token = await this.generateJwtToken(payload, '2h');
-    await this.setAccessTokenCookie(res, token, 2 * 60 * 60 * 1000);
+    await this.setAccessTokenCookie(res, token, this.cookieExpirationTime);
 
     return res.redirect(this.configService.get('VITE_FRONT_URL'));
   }
 
-  async setup(req, data, res) {
+  async setup(data: SetupDto, req, res) {
     const { username } = data;
-    const { fortyTwoId, toConfig } = req.user;
+    const { fortyTwoId, avatar } = req.user;
 
-    if (!toConfig) {
+    if (!fortyTwoId) {
       throw new UnauthorizedException('Your account has already been set up');
     }
 
@@ -127,18 +119,19 @@ export class AuthService {
       throw new ConflictException('This username is already taken');
     }
     user = await this.prismaService.user.create({
-      data: { username, fortyTwoId, password: null },
+      data: { username, fortyTwoId, avatar, password: null },
     });
 
     const payload = { id: user.id, username: user.username };
     const token = await this.generateJwtToken(payload, '2h');
-    await this.setAccessTokenCookie(res, token, 2 * 60 * 60 * 1000);
+    await this.setAccessTokenCookie(res, token, this.cookieExpirationTime);
 
     return { message: 'User succesfully connected' };
   }
 
-  async logout(res: Response) {
+  async logout(res) {
     res.clearCookie('access_token');
+
     return { message: 'User succesfully disconnected' };
   }
 }
