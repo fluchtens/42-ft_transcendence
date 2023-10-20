@@ -1,62 +1,61 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { MainLink } from "../../components/MainLink";
+import { NavLink } from "../../components/NavLink";
+import { ProfileBtn } from "../../components/ProfileBtn";
+import { User } from "../../types/user.interface";
+import { getUserProfile } from "../../services/user.api";
 import { AiFillHome } from "react-icons/ai";
 import { IoGameController } from "react-icons/io5";
-import { GiPingPongBat } from "react-icons/gi";
 import { BsFillChatDotsFill } from "react-icons/bs";
 import styles from "./Header.module.scss";
-import { getUserProfile } from "../../services/user.api";
-import { NavLink } from "../../components/NavLink";
-import { User } from "../../types/user.interface";
-import { logoutUser } from "../../services/auth.api";
 
-function Header() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userData, setUserData] = useState<User | null>(null);
+export default function Header() {
+  const [user, setUser] = useState<User | null>(null);
 
   const handleLogout = async () => {
-    logoutUser();
-    setIsAuthenticated(false);
+    setUser(null);
   };
 
   useEffect(() => {
-    const handleLogin = async () => {
+    const getUser = async () => {
       const data = await getUserProfile();
       if (data && !data.toConfig) {
-        setIsAuthenticated(true);
-        setUserData(data);
+        true;
+        setUser(data);
+        console.log(data);
       }
     };
-    handleLogin();
+    getUser();
   }, []);
 
   return (
     <nav className={styles.navBar}>
-      <Link to="/" className={styles.mainLink}>
-        <GiPingPongBat className={styles.mainIcon} />
-        ft_transcendence
-      </Link>
-
       <ul className={styles.navList}>
-        <NavLink path="/" text="Home" icon={<AiFillHome />} />
-        <NavLink path="/game" text="Game" icon={<IoGameController />} />
-        <NavLink path="/chat" text="Chat" icon={<BsFillChatDotsFill />} />
-        {isAuthenticated && userData ? (
-          <li>
-            <button onClick={handleLogout} className={styles.logoutButton}>
-              {userData.username}
-            </button>
-          </li>
-        ) : (
-          <li>
-            <Link to="/login" className={styles.loginButton}>
-              Sign in
-            </Link>
-          </li>
-        )}
+        <li>
+          <MainLink />
+        </li>
+        <li>
+          <NavLink path="/" text="HOME" icon={<AiFillHome />} />
+        </li>
+        <li>
+          <NavLink path="/game" text="GAME" icon={<IoGameController />} />
+        </li>
+        <li>
+          <NavLink path="/chat" text="CHAT" icon={<BsFillChatDotsFill />} />
+        </li>
       </ul>
+      {user ? (
+        <ProfileBtn
+          username={user.username}
+          avatar={user.avatar}
+          onLogout={handleLogout}
+        />
+      ) : (
+        <Link to="/login" className={styles.loginButton}>
+          Sign in
+        </Link>
+      )}
     </nav>
   );
 }
-
-export default Header;
