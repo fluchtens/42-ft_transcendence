@@ -16,7 +16,6 @@ interface ProfileBtnProps {
 export function ProfileBtn({ username, avatar, onLogout }: ProfileBtnProps) {
   const [menu, setMenu] = useState(false);
   const navigate = useNavigate();
-  const avatarApiUrl = `${import.meta.env.VITE_BACK_URL}/user/avatar`;
 
   const handleMenu = () => {
     setMenu(!menu);
@@ -36,11 +35,7 @@ export function ProfileBtn({ username, avatar, onLogout }: ProfileBtnProps) {
   return (
     <div className={styles.container}>
       <button className={styles.button} onClick={handleMenu}>
-        {avatar ? (
-          <img src={`${avatarApiUrl}/${avatar}`} />
-        ) : (
-          <img src={defaultAvatar} />
-        )}
+        {avatar ? <img src={avatar} /> : <img src={defaultAvatar} />}
       </button>
       {menu && (
         <div className={styles.menu}>

@@ -41,4 +41,14 @@ async function getUserByUsername(username: string): Promise<User | null> {
   }
 }
 
-export { getUserProfile, getUserByUsername };
+function getUserAvatar(avatar: string): string {
+  if (!avatar) {
+    return "";
+  } else if (avatar.startsWith("https://")) {
+    return avatar;
+  } else {
+    return `${apiUrl}/avatar/${avatar}`;
+  }
+}
+
+export { getUserProfile, getUserByUsername, getUserAvatar };

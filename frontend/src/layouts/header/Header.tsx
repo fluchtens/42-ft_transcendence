@@ -4,7 +4,7 @@ import { MainLink } from "../../components/MainLink";
 import { NavLink } from "../../components/NavLink";
 import { ProfileBtn } from "../../components/ProfileBtn";
 import { User } from "../../types/user.interface";
-import { getUserProfile } from "../../services/user.api";
+import { getUserAvatar, getUserProfile } from "../../services/user.api";
 import { AiFillHome } from "react-icons/ai";
 import { IoGameController } from "react-icons/io5";
 import { BsFillChatDotsFill } from "react-icons/bs";
@@ -12,6 +12,7 @@ import styles from "./Header.module.scss";
 
 export default function Header() {
   const [user, setUser] = useState<User | null>(null);
+  const [avatar, setAvatar] = useState<string>("");
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -27,7 +28,7 @@ export default function Header() {
           return;
         }
         setUser(data);
-        console.log(data);
+        setAvatar(getUserAvatar(data.avatar));
       }
     };
     getUser();
@@ -52,7 +53,7 @@ export default function Header() {
       {user ? (
         <ProfileBtn
           username={user.username}
-          avatar={user.avatar}
+          avatar={avatar}
           onLogout={handleLogout}
         />
       ) : (

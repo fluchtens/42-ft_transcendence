@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getUserByUsername } from "../../services/user.api";
+import { getUserAvatar, getUserByUsername } from "../../services/user.api";
 import { useNavigate, useParams } from "react-router-dom";
 import { User } from "../../types/user.interface";
 import { FaUser, FaUserPlus, FaUserPen } from "react-icons/fa6";
@@ -10,8 +10,8 @@ import styles from "./UserProfile.module.scss";
 
 export default function UserProfile() {
   const [user, setUser] = useState<User | null>(null);
+  const [avatar, setAvatar] = useState<string>("");
   const [file, setFile] = useState(null);
-  const avatarUrl = `${import.meta.env.VITE_BACK_URL}/user/avatar`;
   const { username } = useParams();
   const navigate = useNavigate();
 
@@ -54,6 +54,7 @@ export default function UserProfile() {
         return;
       }
       setUser(data);
+      setAvatar(getUserAvatar(data.avatar));
     };
     getUser();
   }, []);
@@ -68,11 +69,7 @@ export default function UserProfile() {
           </h1>
         </div>
         <div className={styles.details}>
-          {user?.avatar ? (
-            <img src={`${avatarUrl}/${user.avatar}`} />
-          ) : (
-            <img src={defaultAvatar} />
-          )}
+          {avatar ? <img src={avatar} /> : <img src={defaultAvatar} />}
           <input type="file" onChange={handleFileChange} />
           <button onClick={handleUpload}>Télécharger</button>
           <ul className={styles.dataList}>
