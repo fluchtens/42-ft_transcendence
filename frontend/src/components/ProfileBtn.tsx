@@ -47,7 +47,7 @@ export function ProfileBtn({ username, avatar, onLogout }: ProfileBtnProps) {
             <FaUser className={styles.icon}></FaUser>
             Profile
           </Link>
-          <Link to="/" onClick={closeMenu} className={styles.link}>
+          <Link to="/settings" onClick={closeMenu} className={styles.link}>
             <IoSettings className={styles.icon}></IoSettings>
             Settings
           </Link>

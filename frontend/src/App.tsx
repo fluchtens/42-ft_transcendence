@@ -7,6 +7,7 @@ import Setup from "./pages/auth/Setup";
 import UserProfile from "./pages/user/UserProfile";
 import Game from "./pages/game/Game";
 import Chat from "./pages/chat/Chat";
+import Settings from "./pages/user/Settings";
 
 function App() {
   const router = createBrowserRouter([
@@ -30,6 +31,10 @@ function App() {
         {
           path: "/user/:username",
           element: <UserProfile />,
+        },
+        {
+          path: "/settings",
+          element: <Settings />,
         },
         {
           path: "/game",
