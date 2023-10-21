@@ -6,9 +6,9 @@ import { FaUser, FaUserPlus, FaUserPen } from "react-icons/fa6";
 import { PiFootprintsFill } from "react-icons/pi";
 import { convertDate } from "../../utils/date";
 import defaultAvatar from "/default_avatar.png";
-import styles from "./UserProfile.module.scss";
+import styles from "./Profile.module.scss";
 
-export default function UserProfile() {
+export default function Profile() {
   const [user, setUser] = useState<User | null>(null);
   const [avatar, setAvatar] = useState<string>("");
   const [file, setFile] = useState(null);
