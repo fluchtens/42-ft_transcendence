@@ -7,7 +7,6 @@
   gap: 2.5rem;
 
   .user {
-    // width: 25rem;
     border-radius: 1.875rem;
     background: $bg-secondary-color;
     box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
@@ -17,7 +16,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 0.25rem;
+      gap: 0.5rem;
       border-top-left-radius: 1.875rem;
       border-top-right-radius: 1.875rem;
       background: $extra-primary-color;
@@ -25,8 +24,8 @@
 
       .icon {
         margin: 0;
-        height: 1.25rem;
-        width: 1.25rem;
+        height: 1.15rem;
+        width: 1.15rem;
       }
 
       h1 {
@@ -69,7 +68,7 @@
           justify-content: left;
           align-items: center;
           gap: 0.5rem;
-          border-bottom: 1px solid $extra-primary-color;
+          // border-bottom: 1px solid $extra-primary-color;
 
           .dataIcon {
             padding: 0;

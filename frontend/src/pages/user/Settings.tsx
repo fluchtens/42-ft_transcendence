@@ -1,8 +1,8 @@
-import "./Settings.module.scss";
+import styles from "./Settings.module.scss";
 
 export default function Settings() {
   return (
-    <div>
+    <div className={styles.container}>
       <h1>Settings</h1>
     </div>
   );

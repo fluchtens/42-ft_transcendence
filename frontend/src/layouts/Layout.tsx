@@ -1,7 +1,6 @@
 import { Outlet, useLocation } from "react-router-dom";
-import Home from "../../pages/home/Home";
-import Footer from "../footer/Footer";
-import Header from "../header/Header";
+import Home from "../pages/home/Home";
+import Header from "./Header";
 import styles from "./Layout.module.scss";
 
 function Layout() {
@@ -17,9 +16,8 @@ function Layout() {
 
   return (
     <div className={styles.container}>
-      <header>{!isAuthPage(pathname) && <Header />}</header>
+      {!isAuthPage(pathname) && <Header />}
       <main>{isHomePage(pathname) ? <Home /> : <Outlet />}</main>
-      <footer>{!isAuthPage(pathname) && <Footer />}</footer>
     </div>
   );
 }

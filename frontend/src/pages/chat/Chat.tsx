@@ -1,7 +1,9 @@
+import styles from "./Chat.module.scss";
+
 function Chat() {
   return (
-    <div>
-      <h1>Chat</h1>
+    <div className={styles.container}>
+      <h1>Channels</h1>
     </div>
   );
 }

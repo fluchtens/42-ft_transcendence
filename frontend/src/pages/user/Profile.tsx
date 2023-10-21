@@ -64,9 +64,7 @@ export default function Profile() {
       <div className={styles.user}>
         <div className={styles.header}>
           <FaUser className={styles.icon} />
-          <h1>
-            [{user?.id}] {user?.username}
-          </h1>
+          <h1>Profile</h1>
         </div>
         <div className={styles.details}>
           {avatar ? <img src={avatar} /> : <img src={defaultAvatar} />}
