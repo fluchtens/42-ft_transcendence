@@ -10,7 +10,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { User } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Express } from 'express';
@@ -28,7 +27,7 @@ export class UserController {
 
   @Get('all')
   @UseGuards(JwtAuthGuard)
-  async getAllUsers(): Promise<User[]> {
+  async getAllUsers() {
     return this.userService.getAllUsers();
   }
 
