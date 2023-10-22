@@ -4,7 +4,7 @@ import { MainLink } from "../components/MainLink";
 import { NavLink } from "../components/NavLink";
 import { ProfileBtn } from "../components/ProfileBtn";
 import { User } from "../types/user.interface";
-import { getUserAvatar, getUserProfile } from "../services/user.api";
+import { getUserAvatar, getUser } from "../services/user.api";
 import { AiFillHome } from "react-icons/ai";
 import { IoGameController } from "react-icons/io5";
 import { BsFillChatDotsFill } from "react-icons/bs";
@@ -20,8 +20,8 @@ export default function Header() {
   };
 
   useEffect(() => {
-    const getUser = async () => {
-      const data = await getUserProfile();
+    const getUserData = async () => {
+      const data = await getUser();
       if (data) {
         if (data.fortyTwoId) {
           navigate("/setup");
@@ -31,7 +31,7 @@ export default function Header() {
         setAvatar(getUserAvatar(data.avatar));
       }
     };
-    getUser();
+    getUserData();
   }, []);
 
   return (

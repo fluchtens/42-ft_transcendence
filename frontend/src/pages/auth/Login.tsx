@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { GiPingPongBat } from "react-icons/gi";
 import styles from "./Auth.module.scss";
 import { loginUser } from "../../services/auth.api";
-import { getUserProfile } from "../../services/user.api";
+import { getUser } from "../../services/user.api";
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -45,7 +45,7 @@ function Login() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const data = await getUserProfile();
+      const data = await getUser();
       console.log(data);
       if (data) {
         navigate("/");

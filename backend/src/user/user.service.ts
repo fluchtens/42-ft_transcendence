@@ -1,10 +1,9 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { User } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -47,7 +46,7 @@ export class UserService {
     ) as Omit<User, Key>;
   }
 
-  async getProfile(req) {
+  async getUser(req) {
     if (req.user.fortyTwoId) {
       return req.user;
     }
@@ -79,7 +78,19 @@ export class UserService {
     return userData;
   }
 
-  async postAvatar(req, file) {
+  async getAvatar(filename: string, res) {
+    const filePath = path.resolve('./uploads', filename);
+    if (!fs.existsSync(filePath)) {
+      throw new NotFoundException('Avatar not found');
+    }
+    res.sendFile(filePath);
+  }
+
+  async postAvatar(req, file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('No avatar file provided');
+    }
+
     const user = await this.findUserAvatar(req.user.id);
     if (user && user.avatar) {
       const filePath = path.resolve('./uploads', user.avatar);
@@ -88,14 +99,7 @@ export class UserService {
       }
     }
     await this.updateUserAvatar(req.user.id, file.filename);
-    return { message: 'Avatar successfully updated' };
-  }
 
-  async getAvatar(filename: string, res) {
-    const filePath = path.resolve('./uploads', filename);
-    if (!fs.existsSync(filePath)) {
-      throw new NotFoundException('Avatar not found');
-    }
-    res.sendFile(filePath);
+    return { message: 'Avatar successfully updated' };
   }
 }

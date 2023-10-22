@@ -8,7 +8,9 @@ import {
   Req,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto, SetupDto } from './auth.dto';
+import { RegisterDto } from './dtos/RegisterDto';
+import { LoginDto } from './dtos/LoginDto';
+import { SetupDto } from './dtos/SetupDto';
 import { FortyTwoAuthGuard } from './guards/42-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 

@@ -9,7 +9,9 @@
     position: relative;
     width: 2.75rem;
     height: 2.75rem;
+    border: none;
     border: 0.1rem solid $extra-primary-color;
+    background-color: transparent;
     border-radius: 50%;
     cursor: pointer;
     overflow: hidden;
