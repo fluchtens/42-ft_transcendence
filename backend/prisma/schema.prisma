@@ -12,6 +12,8 @@ model User {
   id         Int    @id @default(autoincrement())
   username   String @unique @db.VarChar(255)
   fortyTwoId Int?   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   password String? @db.VarChar(255)
   twoFa    Boolean @default(false)
@@ -28,14 +30,13 @@ password String?   @db.VarChar(255)
 
 userId   Int
 user     User      @relation(fields: [userId], references: [id],  onDelete: Cascade)
-messageId String
-messages Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
-
+messages Message[]
 members Member[]
 
 CreatedAt DateTime @default(now())
 updatedAt DateTime @updatedAt
 
+@@index([userId])
 }
 
 model Message{
@@ -43,10 +44,12 @@ model Message{
   id    String @id @default(uuid())
   content String @db.Text()
 
-  Channels Channel[]
+  channelId String
+  channels Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
 
   CreatedAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  @@index([channelId])
 }
 
 model Member{
