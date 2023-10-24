@@ -4,19 +4,18 @@ import { diskStorage } from 'multer';
 import * as path from 'path';
 import * as fs from 'fs';
 
-const uploadDirectory = './uploads';
-if (!fs.existsSync(uploadDirectory)) {
-  fs.mkdirSync(uploadDirectory);
+const uploadPath = './uploads';
+if (!fs.existsSync(uploadPath)) {
+  fs.mkdirSync(uploadPath);
 }
 
 export const multerAvatarOptions = {
   storage: diskStorage({
-    destination: uploadDirectory,
+    destination: uploadPath,
     filename: (req, file, cb) => {
       const user = req.user as User;
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
       const fileExtension = path.extname(file.originalname);
-      const fileName = `${uniqueSuffix}-${user.id}${fileExtension}`;
+      const fileName = user.id + fileExtension;
       cb(null, fileName);
     },
   }),

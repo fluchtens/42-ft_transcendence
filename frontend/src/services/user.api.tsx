@@ -45,11 +45,8 @@ async function getUserByUsername(username: string): Promise<User | null> {
 function getUserAvatar(avatar: string): string {
   if (!avatar) {
     return "";
-  } else if (avatar.startsWith("https://")) {
-    return avatar;
-  } else {
-    return `${apiUrl}/avatar/${avatar}`;
   }
+  return `${apiUrl}/avatar/${avatar}`;
 }
 
 interface ApiRes {

@@ -10,6 +10,9 @@ import { SetupDto } from './dtos/SetupDto';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import * as fs from 'fs';
+import * as path from 'path';
+import fetch from 'node-fetch';
 
 @Injectable()
 export class AuthService {
@@ -52,6 +55,23 @@ export class AuthService {
     });
   }
 
+  private async downloadAvatar(fortyTwoId: number, fortyTwoAvatar: string) {
+    const response = await fetch(fortyTwoAvatar);
+    const buffer = await response.buffer();
+
+    const uploadPath = './uploads';
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath);
+    }
+
+    const fileExtension = path.extname(fortyTwoAvatar);
+    const fileName = `42-${fortyTwoId}${fileExtension}`;
+    const filePath = path.join(uploadPath, fileName);
+    fs.writeFileSync(filePath, buffer);
+
+    return fileName;
+  }
+
   async register(data: RegisterDto) {
     const { username, password } = data;
 
@@ -90,11 +110,11 @@ export class AuthService {
 
   async fortyTwoAuth(req, res) {
     const fortyTwoId: number = parseInt(req.user.id);
-    const avatar: string = req.user._json.image.link;
+    const fortyTwoAvatar: string = req.user._json.image.link;
 
     const user = await this.findUserByFortyTwoId(fortyTwoId);
     if (!user) {
-      const payload = { fortyTwoId, avatar };
+      const payload = { fortyTwoId, fortyTwoAvatar };
       const token = await this.generateJwtToken(payload, '2h');
       await this.setAccessTokenCookie(res, token, this.cookieExpirationTime);
 
@@ -110,7 +130,7 @@ export class AuthService {
 
   async setup(data: SetupDto, req, res) {
     const { username } = data;
-    const { fortyTwoId, avatar } = req.user;
+    const { fortyTwoId, fortyTwoAvatar } = req.user;
 
     if (!fortyTwoId) {
       throw new UnauthorizedException('Your account has already been set up');
@@ -121,8 +141,16 @@ export class AuthService {
       throw new ConflictException('This username is already taken');
     }
     user = await this.prismaService.user.create({
-      data: { username, fortyTwoId, avatar, password: null },
+      data: { username, fortyTwoId, password: null },
     });
+
+    if (fortyTwoAvatar) {
+      const avatar = await this.downloadAvatar(fortyTwoId, fortyTwoAvatar);
+      await this.prismaService.user.update({
+        where: { id: user.id },
+        data: { avatar },
+      });
+    }
 
     const payload = { id: user.id, username: user.username };
     const token = await this.generateJwtToken(payload, '2h');
