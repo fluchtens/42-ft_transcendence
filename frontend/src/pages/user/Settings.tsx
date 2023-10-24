@@ -5,6 +5,7 @@ import {
   postUserAvatar,
 } from "../../services/user.api";
 import { useNavigate } from "react-router-dom";
+import { Notify, notifySuccess, notifyError } from "../../utils/notifications";
 import defaultAvatar from "/default_avatar.png";
 import styles from "./Settings.module.scss";
 
@@ -30,8 +31,8 @@ export default function Settings() {
 
   const uploadAvatar = async () => {
     const data = await postUserAvatar(file);
-    if (!data) {
-      console.log("error");
+    if (data) {
+      data.success ? notifySuccess(data.message) : notifyError(data.message);
     }
   };
 
@@ -61,6 +62,7 @@ export default function Settings() {
       <button className={styles.saveButton} onClick={submitChanges}>
         Save Changes
       </button>
+      <Notify />
     </div>
   );
 }
