@@ -18,6 +18,10 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  /* -------------------------------------------------------------------------- */
+  /*                                   General                                  */
+  /* -------------------------------------------------------------------------- */
+
   @Post('register')
   async register(@Body() data: RegisterDto) {
     return this.authService.register(data);
@@ -27,6 +31,16 @@ export class AuthController {
   async login(@Body() data: LoginDto, @Res({ passthrough: true }) res) {
     return this.authService.login(data, res);
   }
+
+  @Get('logout')
+  @UseGuards(JwtAuthGuard)
+  async logout(@Res({ passthrough: true }) res) {
+    return this.authService.logout(res);
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                     42                                     */
+  /* -------------------------------------------------------------------------- */
 
   @Get('42Auth')
   @UseGuards(FortyTwoAuthGuard)
@@ -44,9 +58,13 @@ export class AuthController {
     return this.authService.setup(data, req, res);
   }
 
-  @Get('logout')
+  /* -------------------------------------------------------------------------- */
+  /*                                     2FA                                    */
+  /* -------------------------------------------------------------------------- */
+
+  @Get('2fa/generate')
   @UseGuards(JwtAuthGuard)
-  async logout(@Res({ passthrough: true }) res) {
-    return this.authService.logout(res);
+  async twoFaGenerate(@Req() req) {
+    return this.authService.twoFaGenerate(req);
   }
 }

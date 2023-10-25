@@ -36,6 +36,28 @@ export default function Settings() {
     }
   };
 
+  const generateTwoFa = async () => {
+    try {
+      const apiUrl: string = `${import.meta.env.VITE_BACK_URL}/auth`;
+      const response = await fetch(`${apiUrl}/2fa/generate`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        console.log(data.message);
+        notifyError(data.message);
+      }
+      console.log("secret", data.secret);
+      console.log("otpAuthUrl", data.otpAuthUrl);
+      console.log("qrcode", data.qrcode);
+      notifySuccess(data.message);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const submitChanges = async () => {
     uploadAvatar();
   };
@@ -56,12 +78,20 @@ export default function Settings() {
     <div className={styles.container}>
       <h1>User settings</h1>
 
+      <span>Public profile</span>
+
       {avatar ? <img src={avatar} /> : <img src={defaultAvatar} />}
       <input type="file" onChange={avatarSelection} />
 
       <button className={styles.saveButton} onClick={submitChanges}>
         Save Changes
       </button>
+
+      <span>Password and authentication</span>
+      <button className={styles.saveButton} onClick={generateTwoFa}>
+        Enable two-factor authentication
+      </button>
+
       <Notify />
     </div>
   );

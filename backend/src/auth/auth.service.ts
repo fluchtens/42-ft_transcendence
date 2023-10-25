@@ -1,6 +1,7 @@
 import {
   ConflictException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -13,6 +14,8 @@ import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
 import * as path from 'path';
 import fetch from 'node-fetch';
+import { authenticator } from 'otplib';
+import { toDataURL } from 'qrcode';
 
 @Injectable()
 export class AuthService {
@@ -24,6 +27,12 @@ export class AuthService {
 
   private readonly cookieExpirationTime = 2 * 60 * 60 * 1000;
 
+  private async findUserById(id: number) {
+    return this.prismaService.user.findUnique({
+      where: { id },
+    });
+  }
+
   private async findUserByUsername(username: string) {
     return this.prismaService.user.findUnique({
       where: { username },
@@ -33,6 +42,13 @@ export class AuthService {
   private async findUserByFortyTwoId(fortyTwoId: number) {
     return this.prismaService.user.findUnique({
       where: { fortyTwoId },
+    });
+  }
+
+  private async updateUserTwoFaSecret(id: number, twoFaSecret: string) {
+    return this.prismaService.user.update({
+      where: { id },
+      data: { twoFaSecret },
     });
   }
 
@@ -72,6 +88,10 @@ export class AuthService {
     return fileName;
   }
 
+  /* -------------------------------------------------------------------------- */
+  /*                                   General                                  */
+  /* -------------------------------------------------------------------------- */
+
   async register(data: RegisterDto) {
     const { username, password } = data;
 
@@ -107,6 +127,16 @@ export class AuthService {
 
     return { message: 'User succesfully connected' };
   }
+
+  async logout(res) {
+    res.clearCookie('access_token');
+
+    return { message: 'User succesfully disconnected' };
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                     42                                     */
+  /* -------------------------------------------------------------------------- */
 
   async fortyTwoAuth(req, res) {
     const fortyTwoId: number = parseInt(req.user.id);
@@ -159,9 +189,24 @@ export class AuthService {
     return { message: 'User succesfully connected' };
   }
 
-  async logout(res) {
-    res.clearCookie('access_token');
+  /* -------------------------------------------------------------------------- */
+  /*                                     2FA                                    */
+  /* -------------------------------------------------------------------------- */
 
-    return { message: 'User succesfully disconnected' };
+  async twoFaGenerate(req) {
+    const { id } = req.user;
+
+    const user = await this.findUserById(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const secret = authenticator.generateSecret();
+    const otpAuthUrl = authenticator.keyuri(id, 'ft_transcendence', secret);
+    await this.updateUserTwoFaSecret(id, secret);
+
+    const qrcode = await toDataURL(otpAuthUrl);
+
+    return { message: 'c generate bg', secret, otpAuthUrl, qrcode };
   }
 }

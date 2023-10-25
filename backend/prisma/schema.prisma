@@ -9,14 +9,15 @@ datasource db {
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
-  username   String   @unique @db.VarChar(255)
-  fortyTwoId Int?     @unique
-  avatar     String?  @db.VarChar(255)
-  twoFa      Boolean  @default(false)
-  password   String?  @db.VarChar(255)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  username    String   @unique @db.VarChar(255)
+  fortyTwoId  Int?     @unique
+  avatar      String?  @db.VarChar(255)
+  password    String?  @db.VarChar(255)
+  twoFa       Boolean  @default(false)
+  twoFaSecret String?  @db.VarChar(255)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   // friendIds Int[] @relation(?)
   // blockedIds
   // matchs @relation(?)
