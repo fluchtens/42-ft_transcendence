@@ -18,7 +18,7 @@ model User {
   password String? @db.VarChar(255)
   twoFa    Boolean @default(false)
 
-  merbers  Member[]
+  members  Member[]
   channels Channel[]
 }
 
@@ -74,3 +74,10 @@ enum MemberRole {
   MODERATOR
   GUEST
 }
+
+// Do after
+// enum MemberStatus {
+//   Default
+//   Muted
+
+// }
