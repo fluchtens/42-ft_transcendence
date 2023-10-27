@@ -10,6 +10,12 @@ interface AuthRes {
   message: string;
 }
 
+interface LoginRes {
+  success: boolean;
+  message: string;
+  twoFa: boolean;
+}
+
 interface TwoFaSetupRes {
   success: boolean;
   message: string;
@@ -29,7 +35,6 @@ async function registerUser({
 
     const data = await response.json();
     if (!response.ok) {
-      console.log("Error:", data.message);
       return { success: false, message: data.message };
     }
 
@@ -43,7 +48,7 @@ async function registerUser({
   }
 }
 
-async function loginUser({ username, password }: AuthUser): Promise<AuthRes> {
+async function loginUser({ username, password }: AuthUser): Promise<LoginRes> {
   try {
     const response = await fetch(`${API_URL}/login`, {
       method: "POST",
@@ -54,15 +59,16 @@ async function loginUser({ username, password }: AuthUser): Promise<AuthRes> {
 
     const data = await response.json();
     if (!response.ok) {
-      console.log("Error:", data.message);
-      return { success: false, message: data.message };
+      return { success: false, message: data.message, twoFa: false };
     }
-    return { success: true, message: data.message };
+
+    return { success: true, message: data.message, twoFa: data.twoFa };
   } catch (error) {
     console.error(error);
     return {
       success: false,
       message: "An error occurred while processing your request.",
+      twoFa: false,
     };
   }
 }
@@ -129,12 +135,12 @@ async function generateUserTwoFaQrCode(): Promise<TwoFaSetupRes> {
   }
 }
 
-async function enableUserTwoFa(token: string): Promise<AuthRes> {
+async function enableUserTwoFa(code: string): Promise<AuthRes> {
   try {
     const response = await fetch(`${API_URL}/2fa/enable`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token }),
+      body: JSON.stringify({ code }),
       credentials: "include",
     });
 
@@ -175,6 +181,31 @@ async function disableUserTwoFa(): Promise<AuthRes> {
   }
 }
 
+async function authUserTwoFa(code: string): Promise<AuthRes> {
+  try {
+    const response = await fetch(`${API_URL}/2fa/auth`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code }),
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    console.log(data);
+    if (!response.ok) {
+      return { success: false, message: data.message };
+    }
+
+    return { success: true, message: data.message };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      message: "An error occurred while processing your request.",
+    };
+  }
+}
+
 export {
   registerUser,
   loginUser,
@@ -183,4 +214,5 @@ export {
   generateUserTwoFaQrCode,
   enableUserTwoFa,
   disableUserTwoFa,
+  authUserTwoFa,
 };

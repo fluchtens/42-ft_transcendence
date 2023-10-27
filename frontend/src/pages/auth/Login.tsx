@@ -26,12 +26,18 @@ function Login() {
 
   const submitData = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const user = { username, password };
     const data = await loginUser(user);
-    if (data.success) {
-      navigate("/");
-    } else {
+    if (!data.success) {
       setErrorMessage(data.message);
+      return;
+    }
+
+    if (data.twoFa) {
+      navigate("/login/twofa");
+    } else {
+      navigate("/");
     }
   };
 
@@ -46,7 +52,6 @@ function Login() {
   useEffect(() => {
     const checkAuth = async () => {
       const data = await getUser();
-      console.log(data);
       if (data) {
         navigate("/");
       }

@@ -11,7 +11,7 @@ function Layout() {
   };
 
   const isAuthPage = (path: string) => {
-    return ["/login", "/register", "/setup"].includes(path);
+    return ["/login", "/register", "/setup", "/login/twofa"].includes(path);
   };
 
   return (

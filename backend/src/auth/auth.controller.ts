@@ -6,6 +6,7 @@ import {
   Get,
   UseGuards,
   Req,
+  Session,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dtos/RegisterDto';
@@ -23,13 +24,17 @@ export class AuthController {
   /* -------------------------------------------------------------------------- */
 
   @Post('register')
-  async register(@Body() data: RegisterDto) {
-    return this.authService.register(data);
+  async register(@Body() body: RegisterDto) {
+    return this.authService.register(body);
   }
 
   @Post('login')
-  async login(@Body() data: LoginDto, @Res({ passthrough: true }) res) {
-    return this.authService.login(data, res);
+  async login(
+    @Session() session,
+    @Body() body: LoginDto,
+    @Res({ passthrough: true }) res,
+  ) {
+    return this.authService.login(session, body, res);
   }
 
   @Get('logout')
@@ -51,11 +56,11 @@ export class AuthController {
   @Post('setup')
   @UseGuards(JwtAuthGuard)
   async setup(
-    @Body() data: SetupDto,
+    @Body() body: SetupDto,
     @Req() req,
     @Res({ passthrough: true }) res,
   ) {
-    return this.authService.setup(data, req, res);
+    return this.authService.setup(body, req, res);
   }
 
   /* -------------------------------------------------------------------------- */
@@ -78,5 +83,14 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   async disableTwoFa(@Req() req) {
     return this.authService.disableTwoFa(req);
+  }
+
+  @Post('2fa/auth')
+  async authTwoFa(
+    @Session() session,
+    @Body() body,
+    @Res({ passthrough: true }) res,
+  ) {
+    return this.authService.authTwoFa(session, body, res);
   }
 }

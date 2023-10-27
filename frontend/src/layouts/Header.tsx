@@ -28,10 +28,10 @@ export default function Header() {
     const getUserData = async () => {
       const data = await getUser();
       if (data) {
-        if (data.fortyTwoId) {
-          navigate("/setup");
-          return;
-        }
+        // if (data.fortyTwoId) {
+        //   navigate("/setup");
+        //   return;
+        // }
         setUser(data);
         setAvatar(getUserAvatar(data.avatar));
       }

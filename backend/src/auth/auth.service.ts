@@ -100,8 +100,8 @@ export class AuthService {
   /*                                   General                                  */
   /* -------------------------------------------------------------------------- */
 
-  async register(data: RegisterDto) {
-    const { username, password } = data;
+  async register(body: RegisterDto) {
+    const { username, password } = body;
 
     const user = await this.findUserByUsername(username);
     if (user) {
@@ -116,8 +116,8 @@ export class AuthService {
     return { message: 'User succesfully created' };
   }
 
-  async login(data: LoginDto, res) {
-    const { username, password } = data;
+  async login(session, body: LoginDto, res) {
+    const { username, password } = body;
 
     const user = await this.findUserByUsername(username);
     if (!user || user.fortyTwoId) {
@@ -127,6 +127,12 @@ export class AuthService {
     const matchPwd = await bcrypt.compare(password, user.password);
     if (!matchPwd) {
       throw new UnauthorizedException('Incorrect username or password');
+    }
+
+    if (user.twoFa) {
+      session.userId = user.id;
+      session.twoFa = true;
+      return { message: '2FA code required', twoFa: true };
     }
 
     const payload = { id: user.id };
@@ -166,8 +172,8 @@ export class AuthService {
     return res.redirect(this.configService.get('VITE_FRONT_URL'));
   }
 
-  async setup(data: SetupDto, req, res) {
-    const { username } = data;
+  async setup(body: SetupDto, req, res) {
+    const { username } = body;
     const { fortyTwoId, fortyTwoAvatar } = req.user;
 
     if (!fortyTwoId) {
@@ -221,7 +227,7 @@ export class AuthService {
 
   async enableTwoFa(req, body) {
     const { id } = req.user;
-    const { token } = body;
+    const { code } = body;
 
     const user = await this.findUserById(id);
     if (!user) {
@@ -233,7 +239,7 @@ export class AuthService {
     }
 
     const isValidToken = authenticator.verify({
-      token,
+      token: code,
       secret: user.twoFaSecret,
     });
     if (!isValidToken) {
@@ -258,5 +264,37 @@ export class AuthService {
     }
 
     return { message: '2FA successfully disabled' };
+  }
+
+  async authTwoFa(session, body, res) {
+    const { userId, twoFa } = session;
+    const { code } = body;
+
+    if (!userId || !twoFa) {
+      throw new UnauthorizedException();
+    }
+
+    const user = await this.findUserById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    } else if (!user.twoFa) {
+      throw new BadRequestException('2FA not enabled');
+    } else if (!user.twoFaSecret) {
+      throw new NotFoundException('2FA secret not found');
+    }
+
+    const isValidToken = authenticator.verify({
+      token: code,
+      secret: user.twoFaSecret,
+    });
+    if (!isValidToken) {
+      throw new UnauthorizedException('Invalid 2FA token');
+    }
+
+    const payload = { id: userId };
+    const token = await this.generateJwtToken(payload, '2h');
+    await this.setAccessTokenCookie(res, token, this.cookieExpirationTime);
+
+    return { message: 'User succesfully connected' };
   }
 }

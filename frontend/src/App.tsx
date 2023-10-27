@@ -9,6 +9,7 @@ import Game from "./pages/game/Game";
 import Chat from "./pages/chat/Chat";
 import Settings from "./pages/user/Settings";
 import TwoFaSetup from "./pages/user/TwoFaSetup";
+import TwoFaAuth from "./pages/auth/TwoFaAuth";
 
 function App() {
   const router = createBrowserRouter([
@@ -20,6 +21,10 @@ function App() {
         {
           path: "/login",
           element: <Login />,
+        },
+        {
+          path: "/login/twofa",
+          element: <TwoFaAuth />,
         },
         {
           path: "/register",
