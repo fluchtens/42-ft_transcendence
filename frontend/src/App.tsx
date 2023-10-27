@@ -8,6 +8,7 @@ import Profile from "./pages/user/Profile";
 import Game from "./pages/game/Game";
 import Chat from "./pages/chat/Chat";
 import Settings from "./pages/user/Settings";
+import TwoFaSetup from "./pages/user/TwoFaSetup";
 
 function App() {
   const router = createBrowserRouter([
@@ -35,6 +36,10 @@ function App() {
         {
           path: "/settings",
           element: <Settings />,
+        },
+        {
+          path: "/twofa/:qrcode",
+          element: <TwoFaSetup />,
         },
         {
           path: "/game",

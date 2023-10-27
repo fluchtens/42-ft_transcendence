@@ -1,21 +1,27 @@
-const apiUrl: string = `${import.meta.env.VITE_BACK_URL}/auth`;
+const API_URL: string = `${import.meta.env.VITE_BACK_URL}/auth`;
 
 interface AuthUser {
   username: string;
   password: string;
 }
 
-interface AuthResponse {
+interface AuthRes {
   success: boolean;
   message: string;
 }
 
-export const registerUser = async ({
+interface TwoFaSetupRes {
+  success: boolean;
+  message: string;
+  qrcode?: string;
+}
+
+async function registerUser({
   username,
   password,
-}: AuthUser): Promise<AuthResponse> => {
+}: AuthUser): Promise<AuthRes> {
   try {
-    const response = await fetch(`${apiUrl}/register`, {
+    const response = await fetch(`${API_URL}/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
@@ -26,6 +32,7 @@ export const registerUser = async ({
       console.log("Error:", data.message);
       return { success: false, message: data.message };
     }
+
     return { success: true, message: data.message };
   } catch (error) {
     console.error(error);
@@ -34,14 +41,11 @@ export const registerUser = async ({
       message: "An error occurred while processing your request.",
     };
   }
-};
+}
 
-export const loginUser = async ({
-  username,
-  password,
-}: AuthUser): Promise<AuthResponse> => {
+async function loginUser({ username, password }: AuthUser): Promise<AuthRes> {
   try {
-    const response = await fetch(`${apiUrl}/login`, {
+    const response = await fetch(`${API_URL}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
@@ -61,11 +65,11 @@ export const loginUser = async ({
       message: "An error occurred while processing your request.",
     };
   }
-};
+}
 
-export const setupUser = async (username: string): Promise<AuthResponse> => {
+async function setupUser(username: string): Promise<AuthRes> {
   try {
-    const response = await fetch(`${apiUrl}/setup`, {
+    const response = await fetch(`${API_URL}/setup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username }),
@@ -85,11 +89,11 @@ export const setupUser = async (username: string): Promise<AuthResponse> => {
       message: "An error occurred while processing your request.",
     };
   }
-};
+}
 
-export const logoutUser = async (): Promise<void> => {
+async function logoutUser(): Promise<void> {
   try {
-    const response = await fetch(`${apiUrl}/logout`, {
+    const response = await fetch(`${API_URL}/logout`, {
       method: "GET",
       credentials: "include",
     });
@@ -101,4 +105,82 @@ export const logoutUser = async (): Promise<void> => {
   } catch (error) {
     console.error(error);
   }
+}
+
+async function generateUserTwoFaQrCode(): Promise<TwoFaSetupRes> {
+  try {
+    const response = await fetch(`${API_URL}/2fa/generate`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      return { success: false, message: data.message };
+    }
+
+    return { success: true, message: data.message, qrcode: data.qrcode };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      message: "An error occurred while processing your request.",
+    };
+  }
+}
+
+async function enableUserTwoFa(token: string): Promise<AuthRes> {
+  try {
+    const response = await fetch(`${API_URL}/2fa/enable`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      return { success: false, message: data.message };
+    }
+
+    return { success: true, message: data.message };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      message: "An error occurred while processing your request.",
+    };
+  }
+}
+
+async function disableUserTwoFa(): Promise<AuthRes> {
+  try {
+    const response = await fetch(`${API_URL}/2fa/disable`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      return { success: false, message: data.message };
+    }
+
+    return { success: true, message: data.message };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      message: "An error occurred while processing your request.",
+    };
+  }
+}
+
+export {
+  registerUser,
+  loginUser,
+  setupUser,
+  logoutUser,
+  generateUserTwoFaQrCode,
+  enableUserTwoFa,
+  disableUserTwoFa,
 };

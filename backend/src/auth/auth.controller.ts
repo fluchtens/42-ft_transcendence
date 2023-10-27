@@ -64,7 +64,19 @@ export class AuthController {
 
   @Get('2fa/generate')
   @UseGuards(JwtAuthGuard)
-  async twoFaGenerate(@Req() req) {
-    return this.authService.twoFaGenerate(req);
+  async generateTwoFaQrCode(@Req() req) {
+    return this.authService.generateTwoFaQrCode(req);
+  }
+
+  @Post('2fa/enable')
+  @UseGuards(JwtAuthGuard)
+  async enableTwoFa(@Req() req, @Body() body) {
+    return this.authService.enableTwoFa(req, body);
+  }
+
+  @Get('2fa/disable')
+  @UseGuards(JwtAuthGuard)
+  async disableTwoFa(@Req() req) {
+    return this.authService.disableTwoFa(req);
   }
 }

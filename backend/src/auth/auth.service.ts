@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -42,6 +43,13 @@ export class AuthService {
   private async findUserByFortyTwoId(fortyTwoId: number) {
     return this.prismaService.user.findUnique({
       where: { fortyTwoId },
+    });
+  }
+
+  private async updateUserTwoFa(id: number, twoFa: boolean) {
+    return this.prismaService.user.update({
+      where: { id },
+      data: { twoFa },
     });
   }
 
@@ -193,20 +201,62 @@ export class AuthService {
   /*                                     2FA                                    */
   /* -------------------------------------------------------------------------- */
 
-  async twoFaGenerate(req) {
+  async generateTwoFaQrCode(req) {
     const { id } = req.user;
 
     const user = await this.findUserById(id);
     if (!user) {
       throw new NotFoundException('User not found');
+    } else if (user.twoFa) {
+      throw new BadRequestException('2FA already enabled');
     }
 
     const secret = authenticator.generateSecret();
     const otpAuthUrl = authenticator.keyuri(id, 'ft_transcendence', secret);
     await this.updateUserTwoFaSecret(id, secret);
-
     const qrcode = await toDataURL(otpAuthUrl);
 
-    return { message: 'c generate bg', secret, otpAuthUrl, qrcode };
+    return { message: '2FA QRCode successfully generated', qrcode };
+  }
+
+  async enableTwoFa(req, body) {
+    const { id } = req.user;
+    const { token } = body;
+
+    const user = await this.findUserById(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    } else if (user.twoFa) {
+      throw new BadRequestException('2FA already enabled');
+    } else if (!user.twoFaSecret) {
+      throw new NotFoundException('2FA secret not found');
+    }
+
+    const isValidToken = authenticator.verify({
+      token,
+      secret: user.twoFaSecret,
+    });
+    if (!isValidToken) {
+      throw new UnauthorizedException('Invalid 2FA token');
+    }
+    await this.updateUserTwoFa(id, true);
+
+    return { message: '2FA successfully enabled' };
+  }
+
+  async disableTwoFa(req) {
+    const { id } = req.user;
+
+    const user = await this.findUserById(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    } else if (!user.twoFa) {
+      throw new BadRequestException('2FA already disabled');
+    } else {
+      await this.updateUserTwoFa(id, false);
+      await this.updateUserTwoFaSecret(id, null);
+    }
+
+    return { message: '2FA successfully disabled' };
   }
 }
