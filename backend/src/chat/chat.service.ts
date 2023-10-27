@@ -141,31 +141,67 @@ export class ChatService{
   }
 
   async changeMemberRole(req: any, channelId: string, userId: number, newRole: string){
-    // const { user } = req;
-    // const memberRole : string = await this.findMemberRoleInChannel(channelId, Number(user.id));
-    // console.log(newRole);
-    // try {
-    //   const existingMember = await this.findMemberInChannel(channelId, userId);
-    //   if (!existingMember) {
-    //     throw new Error("User not found in channel");
-    //   }
-    //   const memberId = existingMember.id;
-    //   if (newRole)
-    //   const updatedMember = await this.prismaService.member.update({
-    //     where: {
-    //       id:memberId,
-    //     },
-    //     data: {
-    //       role:,
-    //     },
-    //   });
+    const { user } = req;
+    const memberRole : string = await this.findMemberRoleInChannel(channelId, Number(user.id));
+    try {
+      const existingMember = await this.findMemberInChannel(channelId, userId);
+      if (!existingMember) {
+        throw new Error("User not found in channel");
+      }
+      if (existingMember.role === newRole) {
+        throw new Error("This member already have this Role");
+      }
+      if (user.role === "GUEST"){
+        throw new Error("You have no permission!");
+      }
+      const memberId = existingMember.id;
+      switch (newRole)
+      {
+        case "ADMIN": {
+          if (memberRole !== "ADMIN")
+            throw new Error("You have no permission!");
+          const updatedMember = await this.prismaService.member.update({
+            where: {
+              id:memberId,
+            },
+            data: {
+              role: MemberRole.ADMIN,
+            },
+          });
+          return updatedMember;
+        }
+        case "MODERATOR": {
+          const updatedMember = await this.prismaService.member.update({
+            where: {
+              id: memberId,
+            },
+            data: {
+              role: MemberRole.MODERATOR,
+            },
+          });
+          return updatedMember;
+        }
+  
+        case "GUEST": {
+          const updatedMember = await this.prismaService.member.update({
+            where: {
+              id: memberId,
+            },
+            data: {
+              role: MemberRole.GUEST,
+            },
+          });
+          return updatedMember;
+        }
+        default:
+          throw new Error("Invalid role");
+      }
 
-    //   return updatedMember;
-    // }
-    // catch(error) {
-    //   console.error('error when changing roles', error);
-    //   throw error;
-    // }
+    }
+    catch(error) {
+      console.error('Error when changing roles', error);
+      throw error;
+    }
   }
 
 }
