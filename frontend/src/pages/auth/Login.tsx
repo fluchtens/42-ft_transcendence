@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { GiPingPongBat } from "react-icons/gi";
 import styles from "./Auth.module.scss";
 import { loginUser } from "../../services/auth.api";
 import { getUser } from "../../services/user.api";
+import { MainTitle } from "../../components/MainTitle";
 
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
 
   const changeUsername = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -18,10 +17,6 @@ function Login() {
 
   const changePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
-  };
-
-  const changeRememberStatus = () => {
-    setRememberMe(!rememberMe);
   };
 
   const submitData = async (e: React.FormEvent) => {
@@ -61,64 +56,44 @@ function Login() {
 
   return (
     <div className={styles.container}>
-      <Link to="/" className={styles.mainLink}>
-        <GiPingPongBat className={styles.icon} />
-        ft_transcendence
-      </Link>
-
+      <MainTitle />
       <form className={styles.form} onSubmit={submitData}>
         <h1>Sign in to your account</h1>
-
         {errorMessage && (
           <div className={styles.error}>
-            <p>{errorMessage}</p>
+            <p>
+              {Array.isArray(errorMessage) ? errorMessage[0] : errorMessage}
+            </p>
           </div>
         )}
-
         <div className={styles.input}>
-          <label htmlFor="username">Username :</label>
+          <label>Username :</label>
           <input
             type="text"
-            id="username"
             value={username}
             onChange={changeUsername}
             placeholder="Enter a username"
             required
           />
         </div>
-
         <div className={styles.input}>
-          <label htmlFor="password">Password :</label>
+          <label>Password :</label>
           <input
             type="password"
-            id="password"
             value={password}
             onChange={changePassword}
             placeholder="Enter a password"
             required
           />
         </div>
-
-        <div className={styles.checkbox}>
-          <input
-            type="checkbox"
-            id="rememberMe"
-            checked={rememberMe}
-            onChange={changeRememberStatus}
-          />
-          <label htmlFor="rememberMe">Remember me </label>
-        </div>
-
         <div className={styles.submitBtn}>
           <button type="submit">Sign in</button>
         </div>
-
         <div className={styles.fortyTwoBtn}>
           <button type="button" onClick={fortyTwoAuth}>
             Sign in with 42
           </button>
         </div>
-
         <p className={styles.help}>
           <span>Don’t have an account yet?</span>
           <Link to={"/register"} className={styles.link}>

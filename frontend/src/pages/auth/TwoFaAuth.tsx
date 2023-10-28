@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { GiPingPongBat } from "react-icons/gi";
+import { useNavigate } from "react-router-dom";
 import styles from "./Auth.module.scss";
 import { authUserTwoFa } from "../../services/auth.api";
 import { getUser } from "../../services/user.api";
+import { MainTitle } from "../../components/MainTitle";
 
 function TwoFaAuth() {
   const [token, setToken] = useState<string>("");
@@ -38,15 +38,13 @@ function TwoFaAuth() {
 
   return (
     <div className={styles.container}>
-      <Link to="/" className={styles.mainLink}>
-        <GiPingPongBat className={styles.icon} />
-        ft_transcendence
-      </Link>
-
+      <MainTitle />
       <form className={styles.form} onSubmit={submitData}>
         <h1>Two-factor authentication</h1>
-        <p>Authentication code :</p>
-
+        <p>
+          Open your two-factor authenticator app to view your authentication
+          code.
+        </p>
         {errorMessage && (
           <div className={styles.error}>
             <p>
@@ -54,8 +52,8 @@ function TwoFaAuth() {
             </p>
           </div>
         )}
-
         <div className={styles.input}>
+          <label>Authentication code :</label>
           <input
             type="text"
             value={token}
@@ -64,7 +62,6 @@ function TwoFaAuth() {
             required
           />
         </div>
-
         <div className={styles.submitBtn}>
           <button type="submit">Continue</button>
         </div>
