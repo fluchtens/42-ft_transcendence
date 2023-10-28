@@ -152,15 +152,14 @@ export class AuthService {
   /*                                     42                                     */
   /* -------------------------------------------------------------------------- */
 
-  async fortyTwoAuth(req, res) {
+  async fortyTwoAuth(req, session, res) {
     const fortyTwoId: number = parseInt(req.user.id);
     const fortyTwoAvatar: string = req.user._json.image.link;
 
     const user = await this.findUserByFortyTwoId(fortyTwoId);
     if (!user) {
-      const payload = { fortyTwoId, fortyTwoAvatar };
-      const token = await this.generateJwtToken(payload, '2h');
-      await this.setAccessTokenCookie(res, token, this.cookieExpirationTime);
+      session.fortyTwoId = fortyTwoId;
+      session.fortyTwoAvatar = fortyTwoAvatar;
 
       return res.redirect(
         this.configService.get('VITE_FRONT_URL') + '/register/setup',
@@ -174,12 +173,12 @@ export class AuthService {
     return res.redirect(this.configService.get('VITE_FRONT_URL'));
   }
 
-  async setup(body: SetupDto, req, res) {
+  async setup(session, body: SetupDto, res) {
+    const { fortyTwoId, fortyTwoAvatar } = session;
     const { username } = body;
-    const { fortyTwoId, fortyTwoAvatar } = req.user;
 
     if (!fortyTwoId) {
-      throw new UnauthorizedException('Your account has already been set up');
+      throw new UnauthorizedException('You are not logged in');
     }
 
     let user = await this.findUserByUsername(username);
@@ -273,7 +272,7 @@ export class AuthService {
     const { code } = body;
 
     if (!userId || !twoFa) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('You are not logged in');
     }
 
     const user = await this.findUserById(userId);

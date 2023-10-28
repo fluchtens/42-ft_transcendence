@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { MainNavLink } from "../components/MainNavLink";
 import { NavLink } from "../components/NavLink";
 import { ProfileBtn } from "../components/ProfileBtn";
@@ -14,7 +14,6 @@ export default function Header() {
   const [navMenu, setNavMenu] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
   const [avatar, setAvatar] = useState<string>("");
-  const navigate = useNavigate();
 
   const toggleNavMenu = () => {
     setNavMenu(!navMenu);
@@ -28,10 +27,6 @@ export default function Header() {
     const getUserData = async () => {
       const data = await getUser();
       if (data) {
-        // if (data.fortyTwoId) {
-        //   navigate("/setup");
-        //   return;
-        // }
         setUser(data);
         setAvatar(getUserAvatar(data.avatar));
       }

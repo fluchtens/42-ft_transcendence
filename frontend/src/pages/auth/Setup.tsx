@@ -16,22 +16,24 @@ function Setup() {
 
   const submitData = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const data = await setupUser(username);
-    if (data.success) {
-      navigate("/");
-    } else {
+    if (!data.success) {
       setErrorMessage(data.message);
+      return;
     }
+
+    navigate("/");
   };
 
   useEffect(() => {
-    const getUserData = async () => {
+    const checkAuth = async () => {
       const data = await getUser();
-      if (!data || !data.fortyTwoId) {
+      if (data) {
         navigate("/");
       }
     };
-    getUserData();
+    checkAuth();
   }, []);
 
   return (

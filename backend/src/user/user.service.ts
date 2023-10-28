@@ -47,9 +47,6 @@ export class UserService {
   }
 
   async getUser(req) {
-    if (req.user.fortyTwoId) {
-      return req.user;
-    }
     return this.getUserById(req.user.id);
   }
 

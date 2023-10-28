@@ -49,18 +49,21 @@ export class AuthController {
 
   @Get('42Auth')
   @UseGuards(FortyTwoAuthGuard)
-  fortyTwoAuth(@Req() req, @Res({ passthrough: true }) res) {
-    return this.authService.fortyTwoAuth(req, res);
+  fortyTwoAuth(
+    @Req() req,
+    @Session() session,
+    @Res({ passthrough: true }) res,
+  ) {
+    return this.authService.fortyTwoAuth(req, session, res);
   }
 
   @Post('setup')
-  @UseGuards(JwtAuthGuard)
   async setup(
+    @Session() session,
     @Body() body: SetupDto,
-    @Req() req,
     @Res({ passthrough: true }) res,
   ) {
-    return this.authService.setup(body, req, res);
+    return this.authService.setup(session, body, res);
   }
 
   /* -------------------------------------------------------------------------- */
