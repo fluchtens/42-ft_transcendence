@@ -18,8 +18,10 @@ model User {
   password String? @db.VarChar(255)
   twoFa    Boolean @default(false)
 
+  blockedUsers Int[] @default([0])
   members  Member[]
   channels Channel[]
+  messages Message[]
 }
 
 model Channel {
@@ -27,11 +29,15 @@ id       String    @id @default(uuid())
 name     String
 inviteCode String   @db.Text()
 password String?   @db.VarChar(255)
+type    ChannelType @default(public)
 
 userId   Int
 user     User      @relation(fields: [userId], references: [id],  onDelete: Cascade)
 messages Message[]
 members Member[]
+
+bannedUsers Int[] @default([0])
+silencedUsers Int[] @default([0])
 
 CreatedAt DateTime @default(now())
 updatedAt DateTime @updatedAt
@@ -40,15 +46,19 @@ updatedAt DateTime @updatedAt
 }
 
 model Message{
-
   id    String @id @default(uuid())
   content String @db.Text()
+  edited  Boolean @default(false)
+
+  userId Int
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   channelId String
   channels Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
 
   CreatedAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  @@index([userId])
   @@index([channelId])
 }
 
@@ -62,6 +72,7 @@ model Member{
   channelId String
   channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
 
+  silencedTime DateTime @default(now())
   CreatedAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -73,6 +84,12 @@ enum MemberRole {
   ADMIN
   MODERATOR
   GUEST
+}
+
+enum ChannelType {
+  public
+  private
+  protected
 }
 
 // Do after

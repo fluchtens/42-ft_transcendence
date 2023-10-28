@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { Member, MemberRole } from "@prisma/client";
+import { channel } from "diagnostics_channel";
 import { PrismaService } from "src/prisma/prisma.service";
 import { isErrored } from "stream";
 
@@ -53,10 +54,13 @@ export class ChatService{
     return null;
   }
   
-  async createChat(req, channelName){
+  async createChat(req, channelName: string){
     const { user } = req;
     console.log(user.id);
-
+    if (!user){
+      console.error("user invalid");
+      return null;
+    }
     const channel = await this.prismaService.channel.create({
       data : {
         name : channelName,
@@ -183,6 +187,8 @@ export class ChatService{
         }
   
         case "GUEST": {
+          if (existingMember.role == "MODERATOR" && user.role === "MODERATOR")
+            throw new Error("You have no permission");
           const updatedMember = await this.prismaService.member.update({
             where: {
               id: memberId,
@@ -203,5 +209,115 @@ export class ChatService{
       throw error;
     }
   }
+
+  async addMessage(req: any, channelId: string, messageContent: string) : Promise<null | any> {
+    const { user } = req;
+
+    if (!user || !channelId || !messageContent){
+      console.error('invalid input');
+      return null;
+    }
+    try {
+      const userData = this.findMemberInChannel(channelId, user.id);
+      const channelData = await this.prismaService.channel.findUnique({
+        where: {
+          id: channelId,
+        },
+      });
+      console.log((await userData).silencedTime);
+      if ((await userData).silencedTime > new Date()){
+        throw new Error ("You are muted!");
+      }
+      if (userData && channelData) {
+        const newMessage = await this.prismaService.message.create({
+          data: {
+            content: messageContent,
+            userId: user.id,
+            channelId: channelData.id,
+          },
+        });
+        await this.prismaService.channel.update({
+          where: {
+            id: channelId,
+          },
+          data: {
+            messages: {
+              connect: {
+                id: newMessage.id,
+              },
+            },
+          },
+        });
+        return newMessage;
+      }
+      throw new Error("no channelData or userData");
+    }
+    catch(error) {
+      console.error("error when add message", error);
+      throw error;
+    }
+  }
+
+  async changeMessage(req:any, messageId: string, newMessage: string) : Promise<null | any> {
+    const { user } = req;
+
+    if (!user || !messageId || !newMessage){
+      console.error('invalid input');
+      return null;
+    }
+    try {
+      const message = await this.prismaService.message.findUnique({
+        where: {
+          id: messageId,
+        },
+      });
+      if (!message)
+        throw new Error("Message not found");
+      if (message.userId !== user.id)
+        throw new Error("You cannot modify another user message");
+      const updateMessage = await this.prismaService.message.update({
+        where: {
+          id: messageId,
+        },
+        data: {
+          content: newMessage,
+          updatedAt: new Date(),
+          edited: true,
+        },
+      });
+      return updateMessage;
+    }
+    catch(error) {
+      console.error("error when add message", error);
+      throw error;
+    }
+  }
+
+  async deleteMessage(req: any, messageId: string) : Promise<null | any> {
+    const { user } = req;
+
+    if (!user || !messageId){
+      console.error('invalid input');
+      return null;
+    }
+    try {
+      const message = await this.prismaService.message.findUnique({
+        where: {
+          id: messageId,
+        },
+      });
+      if (!message)
+        throw new Error("Message not found");
+      const userRole = await this.findMemberRoleInChannel(message.channelId, user.id);
+      if (!(userRole == "MODERATOR" || userRole == "ADMIN") || message.userId !== user.id) {
+        throw new Error("You have no permission to delete the message")
+      }
+    }
+    catch(error) {
+      console.log('error when delete the message', error);
+      throw error;
+    }
+  }
+  // async deleteMessage
 
 }

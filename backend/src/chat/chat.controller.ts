@@ -38,4 +38,19 @@ export class ChatController {
     const { channelId, userId, newRole } = body;
     return this.chatService.changeMemberRole(req, channelId, userId, newRole);
   }
+
+  @Post('addMessage')
+  @UseGuards(JwtAuthGuard)
+  async addMessage(@Req() req: Request, @Body() body) {
+    const { channelId, messageContent } = body;
+    return this.chatService.addMessage(req, channelId, messageContent);
+  }
+
+  @Post('changeMessage')
+  @UseGuards(JwtAuthGuard)
+  async changeMessage(@Req() req: Request, @Body() body) {
+    const { messageId, newMessage } = body;
+    return this.chatService.changeMessage(req, messageId, newMessage);
+  }
+
 }
