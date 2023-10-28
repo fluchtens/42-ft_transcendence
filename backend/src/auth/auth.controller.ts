@@ -14,6 +14,7 @@ import { LoginDto } from './dtos/LoginDto';
 import { SetupDto } from './dtos/SetupDto';
 import { FortyTwoAuthGuard } from './guards/42-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { TwoFaDto } from './dtos/TwoFaDto';
 
 @Controller('auth')
 export class AuthController {
@@ -78,7 +79,7 @@ export class AuthController {
 
   @Post('2fa/enable')
   @UseGuards(JwtAuthGuard)
-  async enableTwoFa(@Req() req, @Body() body) {
+  async enableTwoFa(@Req() req, @Body() body: TwoFaDto) {
     return this.authService.enableTwoFa(req, body);
   }
 
@@ -91,7 +92,7 @@ export class AuthController {
   @Post('2fa/auth')
   async authTwoFa(
     @Session() session,
-    @Body() body,
+    @Body() body: TwoFaDto,
     @Res({ passthrough: true }) res,
   ) {
     return this.authService.authTwoFa(session, body, res);

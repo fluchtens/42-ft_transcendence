@@ -17,6 +17,7 @@ import * as path from 'path';
 import fetch from 'node-fetch';
 import { authenticator } from 'otplib';
 import { toDataURL } from 'qrcode';
+import { TwoFaDto } from './dtos/TwoFaDto';
 
 @Injectable()
 export class AuthService {
@@ -236,7 +237,7 @@ export class AuthService {
     return { message: '2FA QRCode successfully generated', qrcode };
   }
 
-  async enableTwoFa(req, body) {
+  async enableTwoFa(req, body: TwoFaDto) {
     const { id } = req.user;
     const { code } = body;
 
@@ -254,7 +255,7 @@ export class AuthService {
       secret: user.twoFaSecret,
     });
     if (!isValidToken) {
-      throw new UnauthorizedException('Invalid 2FA token');
+      throw new UnauthorizedException('Invalid 2FA code');
     }
     await this.updateUserTwoFa(id, true);
 
@@ -277,7 +278,7 @@ export class AuthService {
     return { message: '2FA successfully disabled' };
   }
 
-  async authTwoFa(session, body, res) {
+  async authTwoFa(session, body: TwoFaDto, res) {
     const { userId, twoFa } = session;
     const { code } = body;
 
@@ -299,7 +300,7 @@ export class AuthService {
       secret: user.twoFaSecret,
     });
     if (!isValidToken) {
-      throw new UnauthorizedException('Invalid 2FA token');
+      throw new UnauthorizedException('Invalid 2FA code');
     }
 
     const payload = { id: userId };

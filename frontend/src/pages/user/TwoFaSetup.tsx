@@ -22,9 +22,9 @@ function TwoFaSetup() {
   const enableTwoFa = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const data = await enableUserTwoFa(token);
-    if (!data.success) {
-      notifyError(data.message);
+    const { success, message } = await enableUserTwoFa(token);
+    if (!success) {
+      notifyError(Array.isArray(message) ? message[0] : message);
       return;
     }
 
@@ -58,7 +58,7 @@ function TwoFaSetup() {
           </div>
           <Separator />
           <div className={styles.buttons}>
-            <button className={styles.cancel} onClick={cancel}>
+            <button className={styles.cancel} type="button" onClick={cancel}>
               Cancel
             </button>
             <button className={styles.continue} type="submit">
