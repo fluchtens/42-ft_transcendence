@@ -55,7 +55,7 @@ export default function Settings() {
 
     if (data.qrcode) {
       const qrCodeBase64 = btoa(data.qrcode);
-      navigate(`/twofa/${qrCodeBase64}`);
+      navigate(`/settings/twofa/${qrCodeBase64}`);
     }
   };
 

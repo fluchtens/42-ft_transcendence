@@ -43,7 +43,7 @@ function App() {
           element: <Settings />,
         },
         {
-          path: "/twofa/:qrcode",
+          path: "/settings/twofa/:qrcode",
           element: <TwoFaSetup />,
         },
         {

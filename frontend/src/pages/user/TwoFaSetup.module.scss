@@ -1,0 +1,122 @@
+@import "../../styles/config.scss";
+
+.container {
+  max-width: 45rem;
+  padding: 2rem;
+  border-radius: $rounded-3xl;
+  background: $bg-secondary-color;
+  box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
+
+  form {
+    flex-direction: column;
+    display: flex;
+    align-items: left;
+    gap: 1rem;
+
+    h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: $text-secondary-color;
+    }
+
+    img {
+      width: 12rem;
+      height: 12rem;
+      border-radius: $rounded-lg;
+    }
+
+    .input {
+      label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+
+      input {
+        height: 2rem;
+        margin-top: 0.5rem;
+        padding-left: 1rem;
+        box-sizing: border-box;
+        border: none;
+        border-radius: $rounded;
+        outline: none;
+        background: $extra-tertiary-color;
+        font-size: 0.825rem;
+        color: $text-primary-color;
+      }
+    }
+
+    .buttons {
+      margin-left: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+
+      button {
+        width: 6rem;
+        padding: 0.5rem 0;
+        border: none;
+        border-radius: $rounded-lg;
+        transition: background-color 0.3s;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+
+      .cancel {
+        background: transparent;
+        color: $text-primary-color;
+
+        &:hover {
+          background: $extra-tertiary-color;
+        }
+      }
+
+      .continue {
+        background: $sucess-primary-color;
+        color: white;
+
+        &:hover {
+          background: $sucess-secondary-color;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    border-radius: $rounded-xl;
+
+    form {
+      align-items: center;
+
+      .input {
+        text-align: center;
+      }
+
+      .buttons {
+        margin-left: 0;
+      }
+    }
+  }
+}
