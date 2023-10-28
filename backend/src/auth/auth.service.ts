@@ -162,7 +162,9 @@ export class AuthService {
       const token = await this.generateJwtToken(payload, '2h');
       await this.setAccessTokenCookie(res, token, this.cookieExpirationTime);
 
-      return res.redirect(this.configService.get('VITE_FRONT_URL') + '/setup');
+      return res.redirect(
+        this.configService.get('VITE_FRONT_URL') + '/register/setup',
+      );
     }
 
     const payload = { id: user.id, username: user.username };

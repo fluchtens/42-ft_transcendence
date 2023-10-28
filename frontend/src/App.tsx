@@ -19,20 +19,20 @@ function App() {
       errorElement: <Error />,
       children: [
         {
+          path: "/register",
+          element: <Register />,
+        },
+        {
+          path: "/register/setup",
+          element: <Setup />,
+        },
+        {
           path: "/login",
           element: <Login />,
         },
         {
           path: "/login/twofa",
           element: <TwoFaAuth />,
-        },
-        {
-          path: "/register",
-          element: <Register />,
-        },
-        {
-          path: "/setup",
-          element: <Setup />,
         },
         {
           path: "/user/:username",
