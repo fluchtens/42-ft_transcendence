@@ -2,15 +2,15 @@ import { Link } from "react-router-dom";
 import styles from "./Error.module.scss";
 import errorLogo from "/cry.png";
 
-export default function Error() {
+function Error() {
   return (
     <div className={styles.container}>
       <div className={styles.error}>
-        <p className={styles.title}>
+        <h1>
           <span>4</span>
           <img src={errorLogo} />
           <span>4</span>
-        </p>
+        </h1>
         <h2>Oops! Page Not Be Found</h2>
         <p>
           Sorry but the page you are looking for does not exist, have been
@@ -23,3 +23,5 @@ export default function Error() {
     </div>
   );
 }
+
+export default Error;

@@ -1,4 +1,4 @@
-@import "../../styles/config.scss";
+@import "../styles/config.scss";
 
 .container {
   height: 100vh;
@@ -7,12 +7,12 @@
   align-items: center;
 
   .error {
-    max-width: 45rem;
+    max-width: 40rem;
     margin: auto;
     padding: 2rem;
     text-align: center;
 
-    .title {
+    h1 {
       margin: 0;
       display: flex;
       justify-content: center;
@@ -46,6 +46,35 @@
       font-size: 1rem;
       font-weight: 600;
       color: $text-primary-color;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    .error {
+      h1 {
+        span {
+          font-size: 8rem;
+        }
+
+        img {
+          width: 6rem;
+          height: 6rem;
+        }
+      }
+
+      h2 {
+        font-size: 1.125rem;
+      }
+
+      p {
+        font-size: 0.825rem;
+      }
+
+      .homeLink {
+        font-size: 0.9rem;
+      }
     }
   }
 }
