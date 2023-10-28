@@ -132,6 +132,7 @@ export class AuthService {
     if (user.twoFa) {
       session.userId = user.id;
       session.twoFa = true;
+
       return { message: '2FA code required', twoFa: true };
     }
 
@@ -163,6 +164,15 @@ export class AuthService {
 
       return res.redirect(
         this.configService.get('VITE_FRONT_URL') + '/register/setup',
+      );
+    }
+
+    if (user.twoFa) {
+      session.userId = user.id;
+      session.twoFa = true;
+
+      return res.redirect(
+        this.configService.get('VITE_FRONT_URL') + '/login/twofa',
       );
     }
 
