@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   Param,
@@ -14,10 +15,15 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Express } from 'express';
 import { multerAvatarOptions } from './middlewares/multer.options';
+import { UsernameDto } from './dtos/UsernameDto';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  /* -------------------------------------------------------------------------- */
+  /*                                   General                                  */
+  /* -------------------------------------------------------------------------- */
 
   @Get()
   @UseGuards(JwtAuthGuard)
@@ -42,6 +48,20 @@ export class UserController {
   async getUserByUsername(@Param('username') username: string) {
     return this.userService.getUserByUsername(username);
   }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                  Username                                  */
+  /* -------------------------------------------------------------------------- */
+
+  @Post('username')
+  @UseGuards(JwtAuthGuard)
+  async postUsername(@Req() req, @Body() body: UsernameDto) {
+    return this.userService.postUsername(req, body);
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                   Avatar                                   */
+  /* -------------------------------------------------------------------------- */
 
   @Get('avatar/:filename')
   async getAvatar(@Param('filename') filename: string, @Res() res) {

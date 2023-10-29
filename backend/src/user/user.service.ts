@@ -6,10 +6,15 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as fs from 'fs';
 import * as path from 'path';
+import { UsernameDto } from './dtos/UsernameDto';
 
 @Injectable()
 export class UserService {
   constructor(private readonly prismaService: PrismaService) {}
+
+  /* -------------------------------------------------------------------------- */
+  /*                                   Private                                  */
+  /* -------------------------------------------------------------------------- */
 
   private async findUserById(id: number) {
     return this.prismaService.user.findUnique({
@@ -30,6 +35,13 @@ export class UserService {
     });
   }
 
+  private async updateUserUsername(id: number, username: string) {
+    return this.prismaService.user.update({
+      where: { id },
+      data: { username },
+    });
+  }
+
   private async updateUserAvatar(id: number, avatar: string) {
     return this.prismaService.user.update({
       where: { id },
@@ -45,6 +57,10 @@ export class UserService {
       Object.entries(user).filter(([key]) => !keys.includes(key as Key)),
     ) as Omit<User, Key>;
   }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                   General                                  */
+  /* -------------------------------------------------------------------------- */
 
   async getUser(req) {
     return this.getUserById(req.user.id);
@@ -75,6 +91,29 @@ export class UserService {
     return userData;
   }
 
+  /* -------------------------------------------------------------------------- */
+  /*                                  Username                                  */
+  /* -------------------------------------------------------------------------- */
+
+  async postUsername(req, body: UsernameDto) {
+    const { username } = body;
+
+    const user = await this.getUserById(req.user.id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    } else if (user.username === username) {
+      throw new BadRequestException('You already have this username');
+    }
+
+    await this.updateUserUsername(req.user.id, username);
+
+    return { message: 'Username updated successfully' };
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                   Avatar                                   */
+  /* -------------------------------------------------------------------------- */
+
   async getAvatar(filename: string, res) {
     const filePath = path.resolve('./uploads', filename);
     if (!fs.existsSync(filePath)) {
@@ -89,14 +128,19 @@ export class UserService {
     }
 
     const user = await this.findUserAvatar(req.user.id);
-    if (user && user.avatar) {
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.avatar) {
       const filePath = path.resolve('./uploads', user.avatar);
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }
     }
+
     await this.updateUserAvatar(req.user.id, file.filename);
 
-    return { message: 'Avatar successfully updated' };
+    return { message: 'Avatar updated successfully' };
   }
 }

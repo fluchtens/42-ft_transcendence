@@ -27,6 +27,10 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
+  /* -------------------------------------------------------------------------- */
+  /*                                   Private                                  */
+  /* -------------------------------------------------------------------------- */
+
   private readonly cookieExpirationTime = 2 * 60 * 60 * 1000;
 
   private async findUserById(id: number) {

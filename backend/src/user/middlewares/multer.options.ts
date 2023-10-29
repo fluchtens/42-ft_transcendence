@@ -14,8 +14,9 @@ export const multerAvatarOptions = {
     destination: uploadPath,
     filename: (req, file, cb) => {
       const user = req.user as User;
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
       const fileExtension = path.extname(file.originalname);
-      const fileName = user.id + fileExtension;
+      const fileName = `${uniqueSuffix}-${user.id}${fileExtension}`;
       cb(null, fileName);
     },
   }),
