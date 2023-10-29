@@ -325,4 +325,35 @@ export class ChatService{
     }
   }
 
+  async deleteChannel(req: any, channelId: string) : Promise<null | any> {
+    const { user } = req;
+
+    if (!user || !channelId){
+      console.error('invalid input');
+      return null;
+    }
+    try {
+      const channel = await this.prismaService.channel.findUnique({
+        where: {
+          id: channelId,
+        },
+      });
+      if (!channel)
+        throw new Error("channel not found");
+      const userRole = await this.findMemberRoleInChannel(channelId, user.id);
+      if (!(userRole === "ADMIN") || channel.userId !== user.id) {
+        throw new Error("You have no permission to delete the channel")
+      }
+      await this.prismaService.channel.delete({
+        where: {
+          id: channelId,
+        },
+      });
+      return ("The channel was succefull deleted!");
+    }
+    catch(error) {
+      console.log('error when delete the channel', error);
+      throw error;
+    }
+  }
 }

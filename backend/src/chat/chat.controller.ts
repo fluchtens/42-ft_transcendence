@@ -60,4 +60,11 @@ export class ChatController {
     return this.chatService.deleteMessage(req, messageId);
   }
 
+  @Delete('channel/:id')
+  @UseGuards(JwtAuthGuard)
+  async deleteChannel(@Req() req: Request,
+  @Param('id') channelId: string) {
+    return this.chatService.deleteMessage(req, channelId);
+  }
+
 }
