@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -102,7 +103,9 @@ export class UserService {
     if (!user) {
       throw new NotFoundException('User not found');
     } else if (user.username === username) {
-      throw new BadRequestException('You already have this username');
+      throw new ConflictException('You already have this username');
+    } else if (await this.findUserByUsername(username)) {
+      throw new ConflictException('This username is already taken');
     }
 
     await this.updateUserUsername(req.user.id, username);
