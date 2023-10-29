@@ -5,7 +5,7 @@ import {
   postUserAvatar,
 } from "../../services/user.api";
 import { useNavigate } from "react-router-dom";
-import { Notify, notifySuccess, notifyError } from "../../utils/notifications";
+import { notifySuccess, notifyError } from "../../utils/notifications";
 import defaultAvatar from "/default_avatar.png";
 import styles from "./Settings.module.scss";
 import { User } from "../../types/user.interface";
@@ -105,7 +105,6 @@ export default function Settings() {
               Enable two-factor authentication
             </button>
           )}
-          <Notify />
         </div>
       )}
     </>
