@@ -187,7 +187,7 @@ export class ChatService{
         }
   
         case "GUEST": {
-          if (existingMember.role == "MODERATOR" && user.role === "MODERATOR")
+          if (existingMember.role === "MODERATOR" && user.role === "MODERATOR")
             throw new Error("You have no permission");
           const updatedMember = await this.prismaService.member.update({
             where: {
@@ -309,15 +309,20 @@ export class ChatService{
       if (!message)
         throw new Error("Message not found");
       const userRole = await this.findMemberRoleInChannel(message.channelId, user.id);
-      if (!(userRole == "MODERATOR" || userRole == "ADMIN") || message.userId !== user.id) {
+      if (!(userRole === "MODERATOR" || userRole === "ADMIN") || message.userId !== user.id) {
         throw new Error("You have no permission to delete the message")
       }
+      await this.prismaService.message.delete({
+        where: {
+          id: messageId,
+        },
+      });
+      return ("The message was succefull deleted!");
     }
     catch(error) {
       console.log('error when delete the message', error);
       throw error;
     }
   }
-  // async deleteMessage
 
 }

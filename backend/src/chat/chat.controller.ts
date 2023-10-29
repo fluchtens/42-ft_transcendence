@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Req, UseGuards } from "@nestjs/common";
 import { ChatService } from "./chat.service";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { Request } from "express";
@@ -51,6 +51,13 @@ export class ChatController {
   async changeMessage(@Req() req: Request, @Body() body) {
     const { messageId, newMessage } = body;
     return this.chatService.changeMessage(req, messageId, newMessage);
+  }
+
+  @Delete('message/:id')
+  @UseGuards(JwtAuthGuard)
+  async deleteMessage(@Req() req: Request,
+  @Param('id') messageId: string) {
+    return this.chatService.deleteMessage(req, messageId);
   }
 
 }
