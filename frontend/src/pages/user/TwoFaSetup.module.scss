@@ -15,26 +15,30 @@
 
     h1 {
       margin: 0;
-      font-size: 1.5rem;
-      font-weight: 600;
+      font-size: map-get($text-2xl, font-size);
+      line-height: map-get($text-2xl, line-height);
+      font-weight: $font-semibold;
       text-align: center;
     }
 
     h2 {
       margin: 0;
-      font-size: 1.125rem;
-      font-weight: 600;
+      font-size: map-get($text-lg, font-size);
+      line-height: map-get($text-lg, line-height);
+      font-weight: $font-semibold;
     }
 
     h3 {
       margin: 0;
-      font-size: 1rem;
-      font-weight: 500;
+      font-size: map-get($text-base, font-size);
+      line-height: map-get($text-base, line-height);
+      font-weight: $font-medium;
     }
 
     p {
       margin: 0;
-      font-size: 0.9rem;
+      font-size: map-get($text-sm, font-size);
+      line-height: map-get($text-sm, line-height);
       color: $text-secondary-color;
     }
 
@@ -47,8 +51,9 @@
     .input {
       label {
         display: block;
-        font-size: 0.9rem;
-        font-weight: 500;
+        font-size: map-get($text-sm, font-size);
+        line-height: map-get($text-sm, line-height);
+        font-weight: $font-medium;
       }
 
       input {
@@ -60,7 +65,8 @@
         border-radius: $rounded;
         outline: none;
         background: $extra-tertiary-color;
-        font-size: 0.825rem;
+        font-size: map-get($text-sm, font-size);
+        line-height: map-get($text-sm, line-height);
         color: $text-primary-color;
       }
     }
@@ -78,7 +84,8 @@
         border: none;
         border-radius: $rounded-lg;
         transition: background-color 0.3s;
-        font-size: 1rem;
+        font-size: map-get($text-base, font-size);
+        line-height: map-get($text-base, line-height);
         cursor: pointer;
       }
 
