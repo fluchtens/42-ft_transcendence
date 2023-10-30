@@ -1,27 +1,57 @@
-import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  Res,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { UserService } from './user.service';
-import { User } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Express } from 'express';
+import { multerAvatarOptions } from './middlewares/multer.options';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  async getUser(@Req() req) {
+    return this.userService.getUser(req);
+  }
+
   @Get('all')
   @UseGuards(JwtAuthGuard)
-  async getAllUsers(): Promise<User[]> {
+  async getAllUsers() {
     return this.userService.getAllUsers();
   }
 
-  @Get()
+  @Get('id/:id')
   @UseGuards(JwtAuthGuard)
-  async getProfile(@Req() req) {
-    return this.userService.getProfile(req);
+  async getUserById(@Param('id') id: string) {
+    return this.userService.getUserById(parseInt(id));
   }
 
-  @Get(':id')
+  @Get('username/:username')
   @UseGuards(JwtAuthGuard)
-  async getUser(@Param('id') id: string) {
-    return this.userService.getUser(parseInt(id));
+  async getUserByUsername(@Param('username') username: string) {
+    return this.userService.getUserByUsername(username);
+  }
+
+  @Get('avatar/:filename')
+  async getAvatar(@Param('filename') filename: string, @Res() res) {
+    return this.userService.getAvatar(filename, res);
+  }
+
+  @Post('avatar')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('avatar', multerAvatarOptions))
+  async postAvatar(@Req() req, @UploadedFile() file: Express.Multer.File) {
+    return this.userService.postAvatar(req, file);
   }
 }

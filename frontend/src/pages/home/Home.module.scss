@@ -1,38 +1,38 @@
-@import "../styles/config.scss";
+@import "../../styles/config.scss";
 
 .container {
   padding: 2.5rem;
-  background-color: $bg-secondary-color;
+  border-radius: 1.875rem;
+  background: $bg-secondary-color;
   box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
-  border-radius: 30px;
   text-align: center;
 
-  .title {
+  h1 {
     margin: 0;
     font-size: 2rem;
     font-weight: 600;
   }
 
-  .subtitle {
+  h2 {
     margin: 0.7rem 0 0 0;
     font-size: 1.125rem;
     font-weight: 400;
   }
 
   .playButton {
-    padding: 0.8rem 2rem;
     margin-top: 1.5rem;
+    padding: 0.8rem 2rem;
     display: inline-block;
-    background-color: #08a045;
     border-radius: 10px;
+    background: #08a045;
     font-size: 1.5rem;
     font-weight: 600;
     text-decoration: none;
     text-transform: uppercase;
     color: white;
-  }
 
-  .playButton:hover {
-    background-color: #6bbf59;
+    &:hover {
+      background-color: #6bbf59;
+    }
   }
 }

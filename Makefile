@@ -12,6 +12,7 @@ down:
 
 clean: down
 	rm -rf backend/prisma/migrations
+	rm -rf backend/uploads
 	docker system prune -a
 
 .PHONY: all

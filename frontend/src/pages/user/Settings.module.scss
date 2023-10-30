@@ -1,0 +1,43 @@
+@import "../../styles/config.scss";
+
+.container {
+  padding: 2rem;
+  flex-direction: column;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  border-radius: 1.875rem;
+  background: $bg-secondary-color;
+  box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
+
+  h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  img {
+    width: 12rem;
+    height: 12rem;
+    border: 3px solid $extra-primary-color;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .saveButton {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 3px;
+    background: #4caf50;
+    transition: background-color 0.3s;
+    font-size: 16px;
+    color: white;
+    cursor: pointer;
+
+    &:hover {
+      background: #45a049;
+    }
+  }
+}

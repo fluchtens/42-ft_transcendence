@@ -13,14 +13,12 @@ export const NavLink = ({ path, text, icon }: NavLinkProps) => {
   const isAcualPath = pathname === path;
 
   return (
-    <li>
-      <Link
-        to={path}
-        className={isAcualPath ? styles.actualPathLink : styles.link}
-      >
-        <span className={styles.icon}>{icon}</span>
-        {text}
-      </Link>
-    </li>
+    <Link
+      to={path}
+      className={isAcualPath ? styles.actualPathLink : styles.link}
+    >
+      <span className={styles.icon}>{icon}</span>
+      {text}
+    </Link>
   );
 };

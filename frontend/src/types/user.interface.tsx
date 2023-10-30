@@ -1,5 +1,9 @@
 export interface User {
   id: number;
+  fortyTwoId: number;
   username: string;
-  toConfig: boolean;
+  avatar: string;
+  twoFa: boolean;
+  createdAt: string;
+  updatedAt: string;
 }

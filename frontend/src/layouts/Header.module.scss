@@ -1,0 +1,38 @@
+@import "../styles/config.scss";
+
+header {
+  padding: 0 1.5rem;
+  background-color: $bg-secondary-color;
+  box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.1);
+
+  .navBar {
+    height: 4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .navList {
+      margin: 0;
+      padding: 0;
+      gap: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      list-style-type: none;
+    }
+
+    .loginButton {
+      padding: 0.5rem 0.625rem;
+      border-radius: 0.375rem;
+      background-color: $extra-secondary-color;
+      font-weight: 500;
+      text-decoration: none;
+      text-transform: uppercase;
+      color: white;
+
+      &:hover {
+        background-color: $extra-primary-color;
+      }
+    }
+  }
+}

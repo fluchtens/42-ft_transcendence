@@ -1,0 +1,51 @@
+@import "../../styles/config.scss";
+
+.container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .error {
+    max-width: 45rem;
+    margin: auto;
+    padding: 2rem;
+    text-align: center;
+
+    .title {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      span {
+        font-size: 10rem;
+        font-weight: 700;
+      }
+
+      img {
+        width: 8rem;
+        height: 8rem;
+      }
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    p {
+      margin-top: 0.8rem;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #939aa3;
+    }
+
+    .homeLink {
+      font-size: 1rem;
+      font-weight: 600;
+      color: $text-primary-color;
+    }
+  }
+}

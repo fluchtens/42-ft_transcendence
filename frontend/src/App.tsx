@@ -1,17 +1,20 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Layout from "./layouts/layout/Layout";
+import Layout from "./layouts/Layout";
+import Error from "./pages/error/Error";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Setup from "./pages/auth/Setup";
-import Game from "./pages/Game";
-import Chat from "./pages/Chat";
+import Profile from "./pages/user/Profile";
+import Game from "./pages/game/Game";
+import Chat from "./pages/chat/Chat";
+import Settings from "./pages/user/Settings";
 
 function App() {
   const router = createBrowserRouter([
     {
       path: "/",
       element: <Layout />,
-      // errorElement: <Error />,
+      errorElement: <Error />,
       children: [
         {
           path: "/login",
@@ -24,6 +27,14 @@ function App() {
         {
           path: "/setup",
           element: <Setup />,
+        },
+        {
+          path: "/user/:username",
+          element: <Profile />,
+        },
+        {
+          path: "/settings",
+          element: <Settings />,
         },
         {
           path: "/game",
