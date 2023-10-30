@@ -67,7 +67,7 @@ export class ChatService{
         inviteCode: "InviteCode",
         user: {
           connect: {
-            username: user.username
+            id: user.id
           },
         },
       },

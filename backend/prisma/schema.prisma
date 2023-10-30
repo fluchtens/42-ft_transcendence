@@ -9,36 +9,20 @@ datasource db {
 }
 
 model User {
-  id          Int      @id @default(autoincrement())
-  username    String   @unique @db.VarChar(255)
-  fortyTwoId  Int?     @unique
-  avatar      String?  @db.VarChar(255)
-  password    String?  @db.VarChar(255)
-  twoFa       Boolean  @default(false)
-  twoFaSecret String?  @db.VarChar(255)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  // friendIds Int[] @relation(?)
-  // blockedIds
-  // matchs @relation(?)
-  // wins Int
-  // losses Int
-  // mmr Int
-  // stats ...
-}
+  id           Int      @id @default(autoincrement())
+  username     String   @unique @db.VarChar(255)
+  fortyTwoId   Int?     @unique
+  avatar       String?  @db.VarChar(255)
+  password     String?  @db.VarChar(255)
+  twoFa        Boolean  @default(false)
+  twoFaSecret  String?  @db.VarChar(255)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  blockedUsers Int[]    @default([0])
 
-// model Channel {
-// id       Int    @id @default(autoincrement())
-// name, messagesList, userlist, adminlist, owner
-// }
-
-  password String? @db.VarChar(255)
-  twoFa    Boolean @default(false)
-
-  blockedUsers Int[]     @default([0])
-  members      Member[]
-  channels     Channel[]
-  messages     Message[]
+  members  Member[]
+  channels Channel[]
+  messages Message[]
 }
 
 model Channel {
