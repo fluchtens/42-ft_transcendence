@@ -1,23 +1,23 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./Auth.module.scss";
-import { setupUser } from "../../services/auth.api";
+import { authUserTwoFa } from "../../services/auth.api";
 import { getUser } from "../../services/user.api";
 import { MainTitle } from "../../components/MainTitle";
 
-function Setup() {
-  const [username, setUsername] = useState("");
+function TwoFaAuth() {
+  const [token, setToken] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
-  const changeUsername = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUsername(e.target.value);
+  const changeToken = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setToken(e.target.value);
   };
 
   const submitData = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const data = await setupUser(username);
+    const data = await authUserTwoFa(token);
     if (!data.success) {
       setErrorMessage(data.message);
       return;
@@ -40,8 +40,11 @@ function Setup() {
     <div className={styles.container}>
       <MainTitle />
       <form className={styles.form} onSubmit={submitData}>
-        <h1>Set up your new account</h1>
-        <p>Before using our services, please choose a unique username :</p>
+        <h1>Two-factor authentication</h1>
+        <p>
+          Open your two-factor authenticator app to view your authentication
+          code.
+        </p>
         {errorMessage && (
           <div className={styles.error}>
             <p>
@@ -50,11 +53,12 @@ function Setup() {
           </div>
         )}
         <div className={styles.input}>
+          <label>Authentication code :</label>
           <input
             type="text"
-            value={username}
-            onChange={changeUsername}
-            placeholder="Enter a username"
+            value={token}
+            onChange={changeToken}
+            placeholder="XXXXXX"
             required
           />
         </div>
@@ -66,4 +70,4 @@ function Setup() {
   );
 }
 
-export default Setup;
+export default TwoFaAuth;

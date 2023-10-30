@@ -1,17 +1,29 @@
 @import "../styles/config.scss";
 
-.link {
+.mainLink {
+  padding: 0.5rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 1.125rem;
+  font-size: 1.5rem;
   font-weight: 600;
   text-decoration: none;
   color: $text-primary-color;
 
   .icon {
-    margin-right: 0.625rem;
+    margin-right: 0.6rem;
     width: 2rem;
     height: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .mainLink {
+    font-size: 1.125rem;
+
+    .icon {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
   }
 }

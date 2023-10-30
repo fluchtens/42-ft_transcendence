@@ -8,7 +8,7 @@ interface NavLinkProps {
   icon: ReactNode;
 }
 
-export const NavLink = ({ path, text, icon }: NavLinkProps) => {
+const NavLink = ({ path, text, icon }: NavLinkProps) => {
   const { pathname } = useLocation();
   const isAcualPath = pathname === path;
 
@@ -22,3 +22,5 @@ export const NavLink = ({ path, text, icon }: NavLinkProps) => {
     </Link>
   );
 };
+
+export { NavLink };

@@ -13,7 +13,7 @@ interface ProfileBtnProps {
   onLogout: () => void;
 }
 
-export function ProfileBtn({ username, avatar, onLogout }: ProfileBtnProps) {
+const ProfileBtn = ({ username, avatar, onLogout }: ProfileBtnProps) => {
   const [menu, setMenu] = useState(false);
   const navigate = useNavigate();
 
@@ -59,4 +59,6 @@ export function ProfileBtn({ username, avatar, onLogout }: ProfileBtnProps) {
       )}
     </div>
   );
-}
+};
+
+export { ProfileBtn };
