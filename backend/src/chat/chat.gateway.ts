@@ -1,8 +1,9 @@
-import { OnModuleInit } from "@nestjs/common";
+import { OnModuleInit, UseGuards } from "@nestjs/common";
 import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
 import { env } from "process";
 
 import { Server } from 'socket.io'
+import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 
 @WebSocketGateway({
   namespace: 'socket',

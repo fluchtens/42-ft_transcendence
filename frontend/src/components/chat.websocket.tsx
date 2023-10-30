@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react"
-import { WebsocketContext } from "../services/chat.socket"
+import { WebsocketContext } from "../services/chat.socket";
 
 
 export const  Websocket = () => {
@@ -10,7 +10,7 @@ export const  Websocket = () => {
     socket.on('connect', () => {
       console.log('Connected!');
     });
-    socket.on('onMessage', (data) => {
+    socket.on('onMessage', (data: any) => {
       console.log('onMessage event received!');
       console.log(data);
     });
