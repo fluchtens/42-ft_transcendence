@@ -25,7 +25,7 @@
       align-items: left;
       gap: 0.5rem;
 
-      input[type="text"] {
+      input {
         width: 100%;
         height: 2rem;
         padding-left: 1rem;
@@ -72,6 +72,57 @@
         }
       }
     }
+  }
+}
+
+.authSettings {
+  flex-direction: column;
+  display: flex;
+  align-items: left;
+  gap: 2rem;
+
+  .changePassword {
+    flex-direction: column;
+    display: flex;
+    align-items: left;
+    gap: 0.5rem;
+
+    .inputText {
+      width: 15rem;
+      flex-direction: column;
+      display: flex;
+      align-items: left;
+      gap: 0.5rem;
+
+      label {
+        display: block;
+        font-size: map-get($text-sm, font-size);
+        line-height: map-get($text-sm, line-height);
+        font-weight: $font-medium;
+      }
+
+      input {
+        width: 100%;
+        height: 2rem;
+        padding-left: 1rem;
+        box-sizing: border-box;
+        border: none;
+        border-radius: $rounded;
+        outline: none;
+        background: $extra-tertiary-color;
+        font-size: map-get($text-sm, font-size);
+        line-height: map-get($text-sm, line-height);
+        color: $text-primary-color;
+      }
+    }
+  }
+
+  .twoFaAuth {
+    max-width: 35rem;
+    flex-direction: column;
+    display: flex;
+    align-items: left;
+    gap: 0.5rem;
   }
 }
 

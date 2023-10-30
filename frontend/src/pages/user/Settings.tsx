@@ -9,7 +9,7 @@ import {
   generateUserTwoFaQrCode,
 } from "../../services/auth.api";
 import { Separator } from "../../components/Separator";
-import { ProfileSettings } from "./SettingsCategory";
+import { AuthSettings, ProfileSettings } from "./SettingsCategory";
 
 function Settings() {
   const [category, setCategory] = useState<number>(0);
@@ -76,19 +76,7 @@ function Settings() {
           </div>
           <Separator />
           {category === 0 && <ProfileSettings />}
-          {category === 1 && (
-            <>
-              {user.twoFa ? (
-                <button className={styles.saveButton} onClick={disableTwoFa}>
-                  Disable two-factor authentication
-                </button>
-              ) : (
-                <button className={styles.saveButton} onClick={enableTwoFa}>
-                  Enable two-factor authentication
-                </button>
-              )}
-            </>
-          )}
+          {category === 1 && <AuthSettings />}
         </div>
       )}
     </>

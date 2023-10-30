@@ -19,6 +19,27 @@
     text-align: center;
   }
 
+  h2 {
+    margin: 0;
+    font-size: map-get($text-lg, font-size);
+    line-height: map-get($text-lg, line-height);
+    font-weight: $font-semibold;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: map-get($text-base, font-size);
+    line-height: map-get($text-base, line-height);
+    font-weight: $font-medium;
+  }
+
+  p {
+    margin: 0;
+    font-size: map-get($text-sm, font-size);
+    line-height: map-get($text-sm, line-height);
+    color: $text-secondary-color;
+  }
+
   .catButtons {
     display: flex;
     justify-content: center;
@@ -68,5 +89,11 @@
     &:hover {
       background: $sucess-secondary-color;
     }
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    border-radius: $rounded-xl;
   }
 }
