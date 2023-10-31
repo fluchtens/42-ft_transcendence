@@ -3,6 +3,7 @@ import Home from "../pages/home/Home";
 import Header from "./Header";
 import styles from "./Layout.module.scss";
 import { Notify } from "../utils/notifications";
+import Friends from "./Friends";
 
 function Layout() {
   const { pathname } = useLocation();
@@ -12,15 +13,23 @@ function Layout() {
   };
 
   const isAuthPage = (path: string) => {
-    return ["/login", "/login/twofa", "/register", "/register/setup"].includes(
-      path
-    );
+    const authPages = [
+      "/login",
+      "/login/twofa",
+      "/register",
+      "/register/setup",
+    ];
+
+    return authPages.includes(path);
   };
 
   return (
     <div className={styles.container}>
       {!isAuthPage(pathname) && <Header />}
-      <main>{isHomePage(pathname) ? <Home /> : <Outlet />}</main>
+      <div className={styles.main}>
+        <main>{isHomePage(pathname) ? <Home /> : <Outlet />}</main>
+        {!isAuthPage(pathname) && <Friends />}
+      </div>
       <Notify />
     </div>
   );

@@ -1,1 +1,68 @@
 @import "../styles/config.scss";
+
+.container {
+  width: 14rem;
+  padding: 1rem 0.75rem;
+  background: $bg-secondary-color;
+
+  ul {
+    max-height: calc(100vh - 6rem);
+    margin: 0;
+    padding: 0;
+    flex-direction: column;
+    display: flex;
+    list-style-type: none;
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+      width: 0;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: transparent;
+      border-radius: 4px;
+    }
+
+    li {
+      padding: 0.4rem 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      border-radius: $rounded-md;
+      cursor: pointer;
+
+      img {
+        width: 2.25rem;
+        height: 2.25rem;
+        position: relative;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+
+      .username {
+        margin: 0;
+        font-size: map-get($text-sm, font-size);
+        line-height: map-get($text-sm, line-height);
+        font-weight: $font-normal;
+      }
+
+      .status {
+        margin: 0;
+        font-size: map-get($text-xs, font-size);
+        line-height: map-get($text-xs, line-height);
+        font-weight: $font-normal;
+        color: #a9a9b1;
+      }
+
+      &:hover {
+        background: $extra-tertiary-color;
+      }
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .container {
+    display: none;
+  }
+}

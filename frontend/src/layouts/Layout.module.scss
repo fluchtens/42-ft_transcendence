@@ -5,9 +5,15 @@
   flex-direction: column;
   display: flex;
 
-  main {
-    margin: auto;
-    padding: 2rem;
+  .main {
+    min-height: calc(100vh - 4rem);
+    display: flex;
+
+    main {
+      margin: auto;
+      padding: 2rem;
+      // padding: 2rem;
+    }
   }
 }
 
