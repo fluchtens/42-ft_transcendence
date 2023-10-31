@@ -4,6 +4,7 @@ import styles from "./Auth.module.scss";
 import { registerUser } from "../../services/auth.api";
 import { getUser } from "../../services/user.api";
 import { MainTitle } from "../../components/MainTitle";
+import { notifySuccess } from "../../utils/notifications";
 
 function Register() {
   const [username, setUsername] = useState("");
@@ -30,6 +31,7 @@ function Register() {
     }
 
     navigate("/login");
+    notifySuccess(data.message);
   };
 
   useEffect(() => {

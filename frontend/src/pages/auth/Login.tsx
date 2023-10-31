@@ -4,6 +4,7 @@ import styles from "./Auth.module.scss";
 import { loginUser } from "../../services/auth.api";
 import { getUser } from "../../services/user.api";
 import { MainTitle } from "../../components/MainTitle";
+import { notifySuccess } from "../../utils/notifications";
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -33,6 +34,7 @@ function Login() {
       navigate("/login/twofa");
     } else {
       navigate("/");
+      notifySuccess(data.message);
     }
   };
 
