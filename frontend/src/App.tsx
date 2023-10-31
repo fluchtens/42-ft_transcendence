@@ -10,6 +10,7 @@ import Chat from "./pages/chat/Chat";
 import Settings from "./pages/user/Settings";
 import TwoFaSetup from "./pages/user/TwoFaSetup";
 import TwoFaAuth from "./pages/auth/TwoFaAuth";
+import GameElement from "./components/GameElement";
 
 function App() {
   const router = createBrowserRouter([
@@ -48,7 +49,7 @@ function App() {
         },
         {
           path: "/game",
-          element: <Game />,
+          element: <GameElement />,
         },
         {
           path: "/chat",
