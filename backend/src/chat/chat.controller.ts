@@ -3,7 +3,10 @@ import { ChatService } from "./chat.service";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { Request } from "express";
 import { MemberRole } from "@prisma/client";
+import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
 
+// Votre code ici
 
 @Controller('chat')
 export class ChatController {
@@ -21,6 +24,7 @@ export class ChatController {
   @Get('getChannels')
   @UseGuards(JwtAuthGuard)
   async getChannel(@Req() req: Request){
+    console.log(req.user);
     return this.chatService.getUserChannels(req);
   }
 
@@ -66,5 +70,4 @@ export class ChatController {
   @Param('id') channelId: string) {
     return this.chatService.deleteMessage(req, channelId);
   }
-
 }
