@@ -3,11 +3,14 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import * as bcrypt from 'bcryptjs';
 import * as fs from 'fs';
 import * as path from 'path';
 import { UsernameDto } from './dtos/UsernameDto';
+import { UpdatePwdDto } from './dtos/UpdatePwdDto';
 
 @Injectable()
 export class UserService {
@@ -47,6 +50,13 @@ export class UserService {
     return this.prismaService.user.update({
       where: { id },
       data: { avatar },
+    });
+  }
+
+  private async updateUserPassword(id: number, password: string) {
+    return this.prismaService.user.update({
+      where: { id },
+      data: { password },
     });
   }
 
@@ -96,10 +106,10 @@ export class UserService {
   /*                                  Username                                  */
   /* -------------------------------------------------------------------------- */
 
-  async postUsername(req, body: UsernameDto) {
+  async changeUsername(req, body: UsernameDto) {
     const { username } = body;
 
-    const user = await this.getUserById(req.user.id);
+    const user = await this.findUserById(req.user.id);
     if (!user) {
       throw new NotFoundException('User not found');
     } else if (user.username === username) {
@@ -111,6 +121,30 @@ export class UserService {
     await this.updateUserUsername(req.user.id, username);
 
     return { message: 'Username updated successfully' };
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                  Password                                  */
+  /* -------------------------------------------------------------------------- */
+
+  async changePassword(req, body: UpdatePwdDto) {
+    const { id } = req.user;
+    const { password, newPassword } = body;
+
+    const user = await this.findUserById(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const matchPwd = await bcrypt.compare(password, user.password);
+    if (!matchPwd) {
+      throw new UnauthorizedException("Old password isn't valid");
+    }
+
+    const hashedPwd = await bcrypt.hash(newPassword, 10);
+    await this.updateUserPassword(id, hashedPwd);
+
+    return { message: 'Password updated successfully' };
   }
 
   /* -------------------------------------------------------------------------- */

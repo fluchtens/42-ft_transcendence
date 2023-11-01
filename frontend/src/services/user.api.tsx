@@ -7,6 +7,10 @@ interface ApiRes {
   message: string;
 }
 
+/* -------------------------------------------------------------------------- */
+/*                                   General                                  */
+/* -------------------------------------------------------------------------- */
+
 const getUser = async (): Promise<User | null> => {
   try {
     const response = await fetch(`${apiUrl}/`, {
@@ -64,6 +68,10 @@ const getAllUsers = async (): Promise<User[] | null> => {
   }
 };
 
+/* -------------------------------------------------------------------------- */
+/*                                  Username                                  */
+/* -------------------------------------------------------------------------- */
+
 async function postUsername(username: string): Promise<ApiRes> {
   try {
     const response = await fetch(`${apiUrl}/username`, {
@@ -74,7 +82,6 @@ async function postUsername(username: string): Promise<ApiRes> {
     });
 
     const data = await response.json();
-    console.log(data);
     if (!response.ok) {
       return { success: false, message: data.message };
     }
@@ -89,6 +96,41 @@ async function postUsername(username: string): Promise<ApiRes> {
   }
 }
 
+/* -------------------------------------------------------------------------- */
+/*                                  Password                                  */
+/* -------------------------------------------------------------------------- */
+
+async function putUserPassword(
+  password: string,
+  newPassword: string
+): Promise<ApiRes> {
+  try {
+    const response = await fetch(`${apiUrl}/password`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password, newPassword }),
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      return { success: false, message: data.message };
+    }
+
+    return { success: true, message: data.message };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      message: "An error occurred while processing your request.",
+    };
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                   Avatar                                   */
+/* -------------------------------------------------------------------------- */
+
 function getUserAvatar(avatar: string): string {
   if (!avatar) {
     return "";
@@ -101,7 +143,7 @@ async function postUserAvatar(file: any): Promise<ApiRes> {
     const formData = new FormData();
     formData.append("avatar", file);
 
-    const response = await fetch("http://localhost:3000/user/avatar", {
+    const response = await fetch(`${apiUrl}/avatar`, {
       method: "POST",
       body: formData,
       credentials: "include",
@@ -127,6 +169,7 @@ export {
   getUserByUsername,
   getAllUsers,
   postUsername,
+  putUserPassword,
   getUserAvatar,
   postUserAvatar,
 };

@@ -13,14 +13,9 @@ function Layout() {
   };
 
   const isAuthPage = (path: string) => {
-    const authPages = [
-      "/login",
-      "/login/twofa",
-      "/register",
-      "/register/setup",
-    ];
+    const authPages = ["/login", "/register"];
 
-    return authPages.includes(path);
+    return authPages.some((authPage) => path.startsWith(authPage));
   };
 
   return (

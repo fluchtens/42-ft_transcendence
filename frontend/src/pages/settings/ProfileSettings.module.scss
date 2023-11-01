@@ -11,19 +11,18 @@
     align-items: left;
     gap: 2.5rem;
 
-    label {
-      display: block;
-      font-size: map-get($text-sm, font-size);
-      line-height: map-get($text-sm, line-height);
-      font-weight: $font-medium;
-    }
-
     .inputText {
-      width: 15rem;
       flex-direction: column;
       display: flex;
       align-items: left;
       gap: 0.5rem;
+
+      label {
+        display: block;
+        font-size: map-get($text-sm, font-size);
+        line-height: map-get($text-sm, line-height);
+        font-weight: $font-medium;
+      }
 
       input {
         width: 100%;
@@ -38,6 +37,15 @@
         line-height: map-get($text-sm, line-height);
         color: $text-primary-color;
       }
+
+      p {
+        margin: 0;
+        padding: 0 0.25rem;
+        font-size: map-get($text-xs, font-size);
+        line-height: map-get($text-xs, line-height);
+        font-weight: $font-normal;
+        color: $text-secondary-color;
+      }
     }
 
     .inputFile {
@@ -46,6 +54,13 @@
       display: flex;
       align-items: center;
       gap: 0.5rem;
+
+      label {
+        display: block;
+        font-size: map-get($text-sm, font-size);
+        line-height: map-get($text-sm, line-height);
+        font-weight: $font-medium;
+      }
 
       img {
         width: 12rem;
@@ -73,61 +88,30 @@
       }
     }
   }
-}
 
-.authSettings {
-  flex-direction: column;
-  display: flex;
-  align-items: left;
-  gap: 2rem;
+  button {
+    margin-top: 0.5rem;
+    margin-right: auto;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: $rounded-lg;
+    background: $sucess-primary-color;
+    transition: background-color 0.3s;
+    font-size: map-get($text-base, font-size);
+    line-height: map-get($text-base, line-height);
+    color: white;
+    cursor: pointer;
 
-  .changePassword {
-    flex-direction: column;
-    display: flex;
-    align-items: left;
-    gap: 0.5rem;
-
-    .inputText {
-      width: 15rem;
-      flex-direction: column;
-      display: flex;
-      align-items: left;
-      gap: 0.5rem;
-
-      label {
-        display: block;
-        font-size: map-get($text-sm, font-size);
-        line-height: map-get($text-sm, line-height);
-        font-weight: $font-medium;
-      }
-
-      input {
-        width: 100%;
-        height: 2rem;
-        padding-left: 1rem;
-        box-sizing: border-box;
-        border: none;
-        border-radius: $rounded;
-        outline: none;
-        background: $extra-tertiary-color;
-        font-size: map-get($text-sm, font-size);
-        line-height: map-get($text-sm, line-height);
-        color: $text-primary-color;
-      }
+    &:hover {
+      background: $sucess-secondary-color;
     }
-  }
-
-  .twoFaAuth {
-    max-width: 35rem;
-    flex-direction: column;
-    display: flex;
-    align-items: left;
-    gap: 0.5rem;
   }
 }
 
 @media (max-width: 768px) {
   .profileSettings {
+    text-align: center;
+
     .dataToSubmit {
       flex-direction: column;
       align-items: center;
@@ -137,6 +121,11 @@
         align-items: center;
         gap: 0.5rem;
       }
+    }
+
+    button {
+      margin-top: 1rem;
+      margin-right: 0;
     }
   }
 }

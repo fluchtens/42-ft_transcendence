@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Post,
+  Put,
   Req,
   Res,
   UploadedFile,
@@ -16,6 +17,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Express } from 'express';
 import { multerAvatarOptions } from './middlewares/multer.options';
 import { UsernameDto } from './dtos/UsernameDto';
+import { UpdatePwdDto } from './dtos/UpdatePwdDto';
 
 @Controller('user')
 export class UserController {
@@ -56,7 +58,17 @@ export class UserController {
   @Post('username')
   @UseGuards(JwtAuthGuard)
   async postUsername(@Req() req, @Body() body: UsernameDto) {
-    return this.userService.postUsername(req, body);
+    return this.userService.changeUsername(req, body);
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                  Password                                  */
+  /* -------------------------------------------------------------------------- */
+
+  @Put('password')
+  @UseGuards(JwtAuthGuard)
+  async putPassword(@Req() req, @Body() body: UpdatePwdDto) {
+    return this.userService.changePassword(req, body);
   }
 
   /* -------------------------------------------------------------------------- */

@@ -1,0 +1,124 @@
+@import "../../styles/config.scss";
+
+.authSettings {
+  flex-direction: column;
+  display: flex;
+  align-items: left;
+  gap: 0.5rem;
+
+  .changePassword {
+    flex-direction: column;
+    display: flex;
+    align-items: left;
+    gap: 0.5rem;
+
+    .inputText {
+      flex-direction: column;
+      display: flex;
+      align-items: left;
+      gap: 0.25rem;
+
+      label {
+        display: block;
+        font-size: map-get($text-sm, font-size);
+        line-height: map-get($text-sm, line-height);
+        font-weight: $font-medium;
+      }
+
+      input {
+        width: 100%;
+        height: 2rem;
+        padding-left: 1rem;
+        box-sizing: border-box;
+        border: none;
+        border-radius: $rounded;
+        outline: none;
+        background: $extra-tertiary-color;
+        font-size: map-get($text-sm, font-size);
+        line-height: map-get($text-sm, line-height);
+        color: $text-primary-color;
+      }
+    }
+
+    button {
+      margin-top: 0.5rem;
+      margin-right: auto;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: $rounded-lg;
+      background: $sucess-primary-color;
+      transition: background-color 0.3s;
+      font-size: map-get($text-base, font-size);
+      line-height: map-get($text-base, line-height);
+      color: white;
+      cursor: pointer;
+
+      &:hover {
+        background: $sucess-secondary-color;
+      }
+    }
+  }
+
+  .toggleTwoFa {
+    margin-top: 2rem;
+    flex-direction: column;
+    display: flex;
+    align-items: left;
+    gap: 0.5rem;
+
+    p {
+      color: $text-secondary-color;
+    }
+
+    button {
+      margin-top: 0.5rem;
+      margin-right: auto;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: $rounded-lg;
+      transition: background-color 0.3s;
+      font-size: map-get($text-base, font-size);
+      line-height: map-get($text-base, line-height);
+      color: white;
+      cursor: pointer;
+    }
+
+    .disableBtm {
+      background: #762c2d;
+
+      &:hover {
+        background: #da3633;
+      }
+    }
+
+    .enableBtn {
+      background: $sucess-primary-color;
+
+      &:hover {
+        background: $sucess-secondary-color;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .authSettings {
+    .changePassword {
+      text-align: center;
+
+      button {
+        margin-top: 1rem;
+        margin-right: 0;
+      }
+    }
+
+    .toggleTwoFa {
+      text-align: center;
+
+      button {
+        margin-top: 1rem;
+        margin-right: 0;
+      }
+    }
+  }
+}

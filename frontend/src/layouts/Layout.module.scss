@@ -10,17 +10,19 @@
     display: flex;
 
     main {
+      max-width: 64rem;
       margin: auto;
-      padding: 2rem;
-      // padding: 2rem;
-    }
-  }
-}
-
-@media (max-width: 768px) {
-  .container {
-    main {
       padding: 1rem;
     }
   }
 }
+
+// @media (max-width: 768px) {
+//   .container {
+//     .main {
+//       main {
+//         // padding: 2rem;
+//       }
+//     }
+//   }
+// }
