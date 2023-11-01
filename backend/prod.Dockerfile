@@ -15,9 +15,6 @@ COPY ./ ./
 # Setups prisma
 RUN npx prisma generate
 
-# Setups class-validator
-RUN pnpm i --save class-validator class-transformer
-
 # Exposes port
 EXPOSE 3000
 EXPOSE 5555
