@@ -4,7 +4,7 @@ import {
   getUser,
   getUserAvatar,
   postUserAvatar,
-  postUsername,
+  putUserUsername,
 } from "../../services/user.api";
 import { User } from "../../types/user.interface";
 import { notifyError, notifySuccess } from "../../utils/notifications";
@@ -42,7 +42,7 @@ function ProfileSettings() {
     e.preventDefault();
 
     if (username && user?.username !== username) {
-      const { success, message } = await postUsername(username);
+      const { success, message } = await putUserUsername(username);
       const formatMessage = Array.isArray(message) ? message[0] : message;
       success ? notifySuccess(message) : notifyError(formatMessage);
     }

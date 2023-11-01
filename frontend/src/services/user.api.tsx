@@ -72,10 +72,10 @@ const getAllUsers = async (): Promise<User[] | null> => {
 /*                                  Username                                  */
 /* -------------------------------------------------------------------------- */
 
-async function postUsername(username: string): Promise<ApiRes> {
+async function putUserUsername(username: string): Promise<ApiRes> {
   try {
     const response = await fetch(`${apiUrl}/username`, {
-      method: "POST",
+      method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username }),
       credentials: "include",
@@ -168,7 +168,7 @@ export {
   getUser,
   getUserByUsername,
   getAllUsers,
-  postUsername,
+  putUserUsername,
   putUserPassword,
   getUserAvatar,
   postUserAvatar,

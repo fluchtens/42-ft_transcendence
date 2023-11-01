@@ -55,9 +55,9 @@ export class UserController {
   /*                                  Username                                  */
   /* -------------------------------------------------------------------------- */
 
-  @Post('username')
+  @Put('username')
   @UseGuards(JwtAuthGuard)
-  async postUsername(@Req() req, @Body() body: UsernameDto) {
+  async putUsername(@Req() req, @Body() body: UsernameDto) {
     return this.userService.changeUsername(req, body);
   }
 
