@@ -86,19 +86,4 @@ export class UserController {
   async postAvatar(@Req() req, @UploadedFile() file: Express.Multer.File) {
     return this.userService.postAvatar(req, file);
   }
-
-  /* -------------------------------------------------------------------------- */
-  /*                                 Friendship                                 */
-  /* -------------------------------------------------------------------------- */
-
-  // @Get('friend/:userId')
-  // async getFriends(@Param('userId') userId: number) {
-  //   return this.userService.getFriends(2);
-  // }
-
-  // @Post('friend/add')
-  // @UseGuards(JwtAuthGuard)
-  // async addFriend(@Req() req, @Body() body: { friendId: number }) {
-  //   return this.userService.addFriend(req.user.id, body.friendId);
-  // }
 }
