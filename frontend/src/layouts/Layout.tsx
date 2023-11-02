@@ -3,7 +3,7 @@ import Home from "../pages/home/Home";
 import Header from "./Header";
 import styles from "./Layout.module.scss";
 import { Notify } from "../utils/notifications";
-// import Friends from "./Friends";
+import Friends from "./Friends";
 
 function Layout() {
   const { pathname } = useLocation();
@@ -23,7 +23,7 @@ function Layout() {
       {!isAuthPage(pathname) && <Header />}
       <div className={styles.main}>
         <main>{isHomePage(pathname) ? <Home /> : <Outlet />}</main>
-        {/* {!isAuthPage(pathname) && <Friends />} */}
+        {!isAuthPage(pathname) && <Friends />}
       </div>
       <Notify />
     </div>
