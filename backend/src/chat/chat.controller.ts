@@ -12,6 +12,14 @@ import { Server, Socket } from 'socket.io';
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  async getCookie(@Req() req: Request) {
+    const cookie = req.cookies;
+    console.log(cookie);
+    return cookie;
+  }
+
   @Post('createChannel')
   @UseGuards(JwtAuthGuard)
   async createChannel(@Req() req: Request,
@@ -24,7 +32,7 @@ export class ChatController {
   @Get('getChannels')
   @UseGuards(JwtAuthGuard)
   async getChannel(@Req() req: Request){
-    console.log(req.user);
+    console.log('chanalzlael')
     return this.chatService.getUserChannels(req);
   }
 

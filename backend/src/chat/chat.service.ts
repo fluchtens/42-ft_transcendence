@@ -83,36 +83,35 @@ export class ChatService{
 
     return channel;
   }
-  @UseGuards(JwtAuthGuard)
   async getUserChannels(req): Promise<any> {
     const { user } = req;
-    // const userId = user.id;
-    console.log(user);
-    // try {
-    //   const userInfo = await this.prismaService.user.findUnique({
-    //     where: {
-    //       id: userId,
-    //     },
-    //     include: {
-    //       members: {
-    //         include: {
-    //           channel: true,
-    //         }
-    //       }
-    //     }
-    //   });
-    //   if (userInfo) {
-    //     const userChannels = userInfo.members.map((member) => member.channel);
-    //     return userChannels;
-    //   }
-    //   else {
-    //     return [];
-    //   }
-    // }
-    // catch (error) {
-    //   console.error('Error when getUserChannels: ', error);
-    //   throw error;
-    // }
+    const userId = user.id;
+    // console.log(user);
+    try {
+      const userInfo = await this.prismaService.user.findUnique({
+        where: {
+          id: userId,
+        },
+        include: {
+          members: {
+            include: {
+              channel: true,
+            }
+          }
+        }
+      });
+      if (userInfo) {
+        const userChannels = userInfo.members.map((member) => member.channel);
+        return userChannels;
+      }
+      else {
+        return [];
+      }
+    }
+    catch (error) {
+      console.error('Error when getUserChannels: ', error);
+      throw error;
+    }
   }
 
   async addMember(req: any, channelId: string, userId: number): Promise<any>{

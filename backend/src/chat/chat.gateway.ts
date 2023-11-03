@@ -15,44 +15,31 @@ import { ExecutionContextHost } from "@nestjs/core/helpers/execution-context-hos
 @WebSocketGateway({
   namespace: 'socket',
   cors: {
-    origin: ["http://localhost"]
-  }
+    origin: ["http://localhost"],
+    credentials: true,
+  },
+  // cookie: true
 })
 export class ChatGateway implements OnModuleInit {
 
   constructor(
-    // private readonly chatService: ChatService,
-    // private readonly jwtAuthGuard: JwtAuthGuard,
-    // private chatController: ChatController
-    // @Inject(forwardRef(() => JwtAuthGuard)) private readonly jwtAuthGuard: JwtAuthGuard,
-
+    private readonly authService: AuthService
   ) {}
   @WebSocketServer()
   server: Server;
 
-  // handleConnection(client: Socket, @Req() req: Request, ...args: any[]) {
-  //   const executionContext = new ExecutionContextHost([client, req, ...args]);
-  //   // console.log(executionContext);
-  //   const context = executionContext;
-  //   const jwtAuthGuard = new JwtAuthGuard()
-  //   const canActivateResult = jwtAuthGuard.canActivate(context);
-  //   console.log(canActivateResult);
-  //   // const jwtAuthGuard = new JwtAuthGuard(); // Instanciez votre JwtAuthGuard ici si nécessaire
-  
-  //   // // Utilisez le contexte pour appeler canActivate avec JwtAuthGuard
-  //   // const canActivateResult = jwtAuthGuard.canActivate(context);
-  //   // if (canActivateResult) {
-  //   //   // Authentification réussie, continuez
-  //   //   console.log("Verification succefful");
-  //   // } else {
-  //   //   console.log("Verification failed");
-  //   //   // Authentification échouée, gestion des erreurs
-  //   // }
-  //   console.log(client);
-  //   // console.log(test);
-  //   console.log("handleConnection");
-  //   const cookies = client['handshake']['headers']['cookie'];
-  //   }
+  async handleConnection(client: Socket, @Req() req: Request, ...args: any[]) {
+    // console.log(test);
+    console.log("handleConnection");
+    const token = client['handshake']['headers']['cookie'];
+    console.log(client);
+    console.log(token)
+    // const decodedToken = await this.authService.verifyJwt(token);
+    // console.log(decodedToken);
+    // if (decodedToken){
+    //   console.log("d")
+    // }
+    }
 
   onModuleInit() {
     this.server.on('connection', (socket) => {
