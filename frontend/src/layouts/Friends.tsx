@@ -1,8 +1,9 @@
 import defaultAvatar from "/default_avatar.png";
 import styles from "./Friends.module.scss";
 import { useEffect, useState } from "react";
-import { getAllUsers, getUserAvatar } from "../services/user.api";
+import { getUser, getUserAvatar } from "../services/user.api";
 import { User } from "../types/user.interface";
+import { getUserFriends } from "../services/friendship.api";
 
 interface UserElementProps {
   username: string;
@@ -20,32 +21,44 @@ const UserElement = ({ username, avatar }: UserElementProps) => (
 );
 
 function Friends() {
-  const [users, setUsers] = useState<User[] | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [friends, setFriends] = useState<User[] | null>(null);
 
   useEffect(() => {
-    const getUsersData = async () => {
-      const data = await getAllUsers();
-      if (data) {
-        data.map((data) => (data.avatarUrl = getUserAvatar(data.avatar)));
-        setUsers(data);
-        console.log(data);
+    const getUserData = async () => {
+      const userData = await getUser();
+      if (!userData) {
+        return;
       }
+      setUser(userData);
+
+      const friendsData = await getUserFriends(userData.id);
+      if (!friendsData) {
+        return;
+      }
+      friendsData.map((user) => (user.avatarUrl = getUserAvatar(user.avatar)));
+      setFriends(friendsData);
     };
-    getUsersData();
+
+    getUserData();
   }, []);
 
   return (
-    <div className={styles.container}>
-      <ul>
-        {users?.map((user, index) => (
-          <UserElement
-            key={index}
-            username={user.username}
-            avatar={user.avatarUrl}
-          />
-        ))}
-      </ul>
-    </div>
+    <>
+      {user && (
+        <div className={styles.container}>
+          <ul>
+            {friends?.map((user, index) => (
+              <UserElement
+                key={index}
+                username={user.username}
+                avatar={user.avatarUrl}
+              />
+            ))}
+          </ul>
+        </div>
+      )}
+    </>
   );
 }
 
