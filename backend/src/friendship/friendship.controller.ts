@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Req,
   UseGuards,
@@ -20,7 +21,7 @@ export class FriendshipController {
   /* -------------------------------------------------------------------------- */
 
   @Get(':userId')
-  async getFriends(@Param('userId') userId: string) {
+  async getFriends(@Param('userId', ParseIntPipe) userId: string) {
     return this.friendshipService.getFriends(parseInt(userId));
   }
 

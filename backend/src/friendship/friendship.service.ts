@@ -15,26 +15,76 @@ export class FriendshipService {
   /* -------------------------------------------------------------------------- */
 
   private async findUserById(id: number) {
-    return this.prismaService.user.findUnique({
-      where: { id },
-    });
+    try {
+      const user = await this.prismaService.user.findUnique({
+        where: { id },
+      });
+
+      return user;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
-  private async findRelationship(senderId: number, receiverId: number) {
-    return this.prismaService.friendship.findFirst({
-      where: {
-        OR: [
-          {
-            senderId: senderId,
-            receiverId: receiverId,
+  private async findUserRelation(senderId: number, receiverId: number) {
+    try {
+      const friendship = await this.prismaService.friendship.findFirst({
+        where: {
+          OR: [
+            {
+              senderId: senderId,
+              receiverId: receiverId,
+            },
+            {
+              senderId: receiverId,
+              receiverId: senderId,
+            },
+          ],
+        },
+      });
+
+      return friendship;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  private async findUserFriends(id: number) {
+    try {
+      const friends = await this.prismaService.user.findUnique({
+        where: { id },
+        include: {
+          addedFriends: {
+            where: { status: true },
+            select: {
+              receiver: {
+                select: {
+                  id: true,
+                  username: true,
+                  avatar: true,
+                },
+              },
+            },
           },
-          {
-            senderId: receiverId,
-            receiverId: senderId,
+          acceptedFriends: {
+            where: { status: true },
+            select: {
+              sender: {
+                select: {
+                  id: true,
+                  username: true,
+                  avatar: true,
+                },
+              },
+            },
           },
-        ],
-      },
-    });
+        },
+      });
+
+      return friends;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
   /* -------------------------------------------------------------------------- */
@@ -42,39 +92,7 @@ export class FriendshipService {
   /* -------------------------------------------------------------------------- */
 
   async getFriends(userId: number) {
-    if (userId > 2147483647) {
-      throw new BadRequestException('Invalid userId');
-    }
-
-    const user = await this.prismaService.user.findUnique({
-      where: { id: userId },
-      include: {
-        addedFriends: {
-          where: { status: true },
-          select: {
-            receiver: {
-              select: {
-                id: true,
-                username: true,
-                avatar: true,
-              },
-            },
-          },
-        },
-        acceptedFriends: {
-          where: { status: true },
-          select: {
-            sender: {
-              select: {
-                id: true,
-                username: true,
-                avatar: true,
-              },
-            },
-          },
-        },
-      },
-    });
+    const user = await this.findUserFriends(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -101,7 +119,7 @@ export class FriendshipService {
       throw new NotFoundException('User not found');
     }
 
-    const friendship = await this.findRelationship(senderId, receiverId);
+    const friendship = await this.findUserRelation(senderId, receiverId);
     if (friendship) {
       throw new BadRequestException('You are already friends with this user');
     }
@@ -130,7 +148,7 @@ export class FriendshipService {
       throw new NotFoundException('User not found');
     }
 
-    const friendship = await this.findRelationship(senderId, receiverId);
+    const friendship = await this.findUserRelation(senderId, receiverId);
     if (!friendship) {
       throw new BadRequestException('You are not friends with this user');
     }
