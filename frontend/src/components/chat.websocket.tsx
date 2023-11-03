@@ -23,7 +23,7 @@ export const  Websocket = () => {
   }, []);
 
   const onSubmit = () => {
-    socket.emit('newMessage', value);
+    socket.emit('join', value);
     setValue('');
   }
   return (

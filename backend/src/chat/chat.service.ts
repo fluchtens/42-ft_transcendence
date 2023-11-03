@@ -9,8 +9,7 @@ import { isErrored } from "stream";
 
 @Injectable()
 export class ChatService{
-  constructor(private readonly prismaService: PrismaService,
-  private readonly jwtService: JwtService) {}
+  constructor(private readonly prismaService: PrismaService) {}
   
   async findMemberRoleInChannel(channelId : string, userId : number): Promise<string | null>{
     try {
