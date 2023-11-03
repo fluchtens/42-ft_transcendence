@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -42,46 +41,51 @@ export class FriendshipService {
   /*                                   General                                  */
   /* -------------------------------------------------------------------------- */
 
-  // async getFriends(userId: number) {
-  //   const user = await this.prismaService.user.findUnique({
-  //     where: { id: userId },
-  //     include: {
-  //       addedFriends: {
-  //         where: { status: true },
-  //         select: {
-  //           receiver: {
-  //             select: {
-  //               id: true,
-  //               username: true,
-  //               avatar: true,
-  //             },
-  //           },
-  //         },
-  //       },
-  //       acceptedFriends: {
-  //         where: { status: true },
-  //         select: {
-  //           sender: {
-  //             select: {
-  //               id: true,
-  //               username: true,
-  //               avatar: true,
-  //             },
-  //           },
-  //         },
-  //       },
-  //     },
-  //   });
+  async getFriends(userId: number) {
+    if (userId > 2147483647) {
+      throw new BadRequestException('Invalid userId');
+    }
 
-  //   const friends = [
-  //     ...user.userFriends.map((friendship) => friendship.friend),
-  //     ...user.friendUserFriends.map((friendship) => friendship.user),
-  //   ];
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+      include: {
+        addedFriends: {
+          where: { status: true },
+          select: {
+            receiver: {
+              select: {
+                id: true,
+                username: true,
+                avatar: true,
+              },
+            },
+          },
+        },
+        acceptedFriends: {
+          where: { status: true },
+          select: {
+            sender: {
+              select: {
+                id: true,
+                username: true,
+                avatar: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
-  //   console.log(friends);
+    const friends = [
+      ...user.addedFriends.map((user) => user.receiver),
+      ...user.acceptedFriends.map((user) => user.sender),
+    ];
 
-  //   return friends;
-  // }
+    return { friends };
+  }
 
   async addFriend(req, body: FriendshipDto) {
     const { id } = req.user;
@@ -99,7 +103,7 @@ export class FriendshipService {
 
     const friendship = await this.findRelationship(senderId, receiverId);
     if (friendship) {
-      throw new BadRequestException('You are already friends');
+      throw new BadRequestException('You are already friends with this user');
     }
 
     await this.prismaService.friendship.create({
@@ -110,5 +114,33 @@ export class FriendshipService {
     });
 
     return { message: 'Friend request sent' };
+  }
+
+  async removeFriend(req, body: FriendshipDto) {
+    const { id } = req.user;
+    const senderId = id;
+    const { receiverId } = body;
+
+    if (senderId === receiverId) {
+      throw new BadRequestException("You can't send yourself a friend request");
+    }
+
+    const receiverUser = await this.findUserById(receiverId);
+    if (!receiverUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    const friendship = await this.findRelationship(senderId, receiverId);
+    if (!friendship) {
+      throw new BadRequestException('You are not friends with this user');
+    }
+
+    await this.prismaService.friendship.delete({
+      where: {
+        id: friendship.id,
+      },
+    });
+
+    return { message: 'Friend removed successfully' };
   }
 }
