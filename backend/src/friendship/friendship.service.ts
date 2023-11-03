@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { FriendshipDto } from './dtos/FriendshipDto';
@@ -13,6 +14,12 @@ export class FriendshipService {
   /* -------------------------------------------------------------------------- */
   /*                                   Private                                  */
   /* -------------------------------------------------------------------------- */
+
+  private async findUserById(id: number) {
+    return this.prismaService.user.findUnique({
+      where: { id },
+    });
+  }
 
   private async findRelationship(senderId: number, receiverId: number) {
     return this.prismaService.friendship.findFirst({
@@ -78,48 +85,29 @@ export class FriendshipService {
 
   async addFriend(req, body: FriendshipDto) {
     const { id } = req.user;
+    const senderId = id;
     const { receiverId } = body;
 
-    if (id === receiverId) {
+    if (senderId === receiverId) {
       throw new BadRequestException("You can't send yourself a friend request");
     }
 
-    const friendship = await this.findRelationship(id, receiverId);
+    const receiverUser = await this.findUserById(receiverId);
+    if (!receiverUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    const friendship = await this.findRelationship(senderId, receiverId);
     if (friendship) {
       throw new BadRequestException('You are already friends');
     }
 
-    // const addedFriend = await this.prismaService.friendship.findUnique({
-    //   where: {
-    //     senderId_receiverId: {
-    //       senderId: id,
-    //       receiverId: receiverId,
-    //     },
-    //   },
-    // });
-
-    // const acceptedFriend = await this.prismaService.friendship.findUnique({
-    //   where: {
-    //     senderId_receiverId: {
-    //       senderId: receiverId,
-    //       receiverId: id,
-    //     },
-    //   },
-    // });
-
-    // console.log(addedFriend);
-    // console.log(acceptedFriend);
-
-    // if (addedFriend || acceptedFriend) {
-    //   throw new BadRequestException('Already friends');
-    // }
-
-    // await this.prismaService.friendship.create({
-    //   data: {
-    //     sender: { connect: { id: id } },
-    //     receiver: { connect: { id: receiverId } },
-    //   },
-    // });
+    await this.prismaService.friendship.create({
+      data: {
+        sender: { connect: { id: senderId } },
+        receiver: { connect: { id: receiverId } },
+      },
+    });
 
     return { message: 'Friend request sent' };
   }
