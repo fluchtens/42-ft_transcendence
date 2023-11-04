@@ -50,25 +50,13 @@ export class FriendshipService {
     }
   }
 
-  private async findFriendshipStatus(
-    senderId: number,
-    receiverId: number,
-    status: FriendshipStatus,
-  ) {
+  private async findPendingRequest(senderId: number, receiverId: number) {
     try {
       const friendship = await this.prismaService.friendship.findFirst({
         where: {
-          OR: [
-            {
-              senderId: senderId,
-              receiverId: receiverId,
-            },
-            {
-              senderId: receiverId,
-              receiverId: senderId,
-            },
-          ],
-          status,
+          senderId: senderId,
+          receiverId: receiverId,
+          status: FriendshipStatus.PENDING,
         },
       });
 
@@ -138,11 +126,7 @@ export class FriendshipService {
   /*                                  Requests                                  */
   /* -------------------------------------------------------------------------- */
 
-  async addFriend(req, body: FriendshipDto) {
-    const { id } = req.user;
-    const senderId = id;
-    const { receiverId } = body;
-
+  async sendFriendRequest(senderId: number, receiverId: number) {
     if (senderId === receiverId) {
       throw new BadRequestException("You can't be friends with yourself");
     }
@@ -176,7 +160,7 @@ export class FriendshipService {
     return { message: 'Friend request sent' };
   }
 
-  async acceptFriend(receiverId: number, senderId: number) {
+  async acceptFriendRequest(receiverId: number, senderId: number) {
     if (receiverId === senderId) {
       throw new BadRequestException("You can't be friends with yourself");
     }
@@ -186,11 +170,7 @@ export class FriendshipService {
       throw new NotFoundException('User not found');
     }
 
-    const friendship = await this.findFriendshipStatus(
-      senderId,
-      receiverId,
-      FriendshipStatus.PENDING,
-    );
+    const friendship = await this.findPendingRequest(senderId, receiverId);
     if (!friendship) {
       throw new BadRequestException(
         'You have not received an invitation from this user',
@@ -209,26 +189,18 @@ export class FriendshipService {
   /*                                 Management                                 */
   /* -------------------------------------------------------------------------- */
 
-  async removeFriend(req, body: FriendshipDto) {
-    const { id } = req.user;
-    const senderId = id;
-    const { receiverId } = body;
-
-    if (senderId === receiverId) {
-      throw new BadRequestException("You can't send yourself a friend request");
+  async removeFriend(reqUserId: number, targetUserId: number) {
+    if (reqUserId === targetUserId) {
+      throw new BadRequestException("You can't delete yourself");
     }
 
-    const receiverUser = await this.findUserById(receiverId);
-    if (!receiverUser) {
+    const targetUser = await this.findUserById(targetUserId);
+    if (!targetUser) {
       throw new NotFoundException('User not found');
     }
 
-    const friendship = await this.findFriendshipStatus(
-      senderId,
-      receiverId,
-      FriendshipStatus.ACCEPTED,
-    );
-    if (!friendship) {
+    const friendship = await this.findFriendship(reqUserId, targetUserId);
+    if (!friendship || friendship.status !== FriendshipStatus.ACCEPTED) {
       throw new BadRequestException('You are not friends with this user');
     }
 

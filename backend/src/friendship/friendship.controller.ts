@@ -31,19 +31,20 @@ export class FriendshipController {
   /*                                  Requests                                  */
   /* -------------------------------------------------------------------------- */
 
-  @Post('add')
+  @Post('send')
   @UseGuards(JwtAuthGuard)
-  async addFriend(@Req() req, @Body() body: FriendshipDto) {
-    return this.friendshipService.addFriend(req, body);
+  async sendFriendRequest(@Req() req, @Body() body: FriendshipDto) {
+    const { id } = req.user;
+    const { receiverId } = body;
+    return this.friendshipService.sendFriendRequest(id, receiverId);
   }
 
   @Patch('accept')
   @UseGuards(JwtAuthGuard)
-  async acceptFriend(@Req() req, @Body() body: UserDto) {
+  async acceptFriendRequest(@Req() req, @Body() body: UserDto) {
     const { id } = req.user;
-    const receiverId: number = parseInt(id);
     const { senderId } = body;
-    return this.friendshipService.acceptFriend(receiverId, senderId);
+    return this.friendshipService.acceptFriendRequest(id, senderId);
   }
 
   /* -------------------------------------------------------------------------- */
@@ -53,6 +54,8 @@ export class FriendshipController {
   @Delete('remove')
   @UseGuards(JwtAuthGuard)
   async removeFriend(@Req() req, @Body() body: FriendshipDto) {
-    return this.friendshipService.removeFriend(req, body);
+    const { id } = req.user;
+    const { receiverId } = body;
+    return this.friendshipService.removeFriend(id, receiverId);
   }
 }
