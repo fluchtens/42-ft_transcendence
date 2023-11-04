@@ -58,4 +58,12 @@ export class FriendshipController {
     const { receiverId } = body;
     return this.friendshipService.removeFriend(id, receiverId);
   }
+
+  @Patch('block')
+  @UseGuards(JwtAuthGuard)
+  async blockUser(@Req() req, @Body() body: FriendshipDto) {
+    const { id } = req.user;
+    const { receiverId } = body;
+    return this.friendshipService.blockUser(id, receiverId);
+  }
 }
