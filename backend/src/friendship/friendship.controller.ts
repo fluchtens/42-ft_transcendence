@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { FriendshipService } from './friendship.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { FriendshipDto, UserDto } from './dtos/FriendshipDto';
+import { UserIdDto } from 'src/user/dtos/UserIdDto';
 
 @Controller('friendship')
 export class FriendshipController {
@@ -33,18 +33,18 @@ export class FriendshipController {
 
   @Post('send')
   @UseGuards(JwtAuthGuard)
-  async sendFriendRequest(@Req() req, @Body() body: FriendshipDto) {
+  async sendFriendRequest(@Req() req, @Body() body: UserIdDto) {
     const { id } = req.user;
-    const { receiverId } = body;
-    return this.friendshipService.sendFriendRequest(id, receiverId);
+    const { userId } = body;
+    return this.friendshipService.sendFriendRequest(id, userId);
   }
 
   @Patch('accept')
   @UseGuards(JwtAuthGuard)
-  async acceptFriendRequest(@Req() req, @Body() body: UserDto) {
+  async acceptFriendRequest(@Req() req, @Body() body: UserIdDto) {
     const { id } = req.user;
-    const { senderId } = body;
-    return this.friendshipService.acceptFriendRequest(id, senderId);
+    const { userId } = body;
+    return this.friendshipService.acceptFriendRequest(id, userId);
   }
 
   /* -------------------------------------------------------------------------- */
@@ -53,17 +53,17 @@ export class FriendshipController {
 
   @Delete('remove')
   @UseGuards(JwtAuthGuard)
-  async removeFriend(@Req() req, @Body() body: FriendshipDto) {
+  async removeFriend(@Req() req, @Body() body: UserIdDto) {
     const { id } = req.user;
-    const { receiverId } = body;
-    return this.friendshipService.removeFriend(id, receiverId);
+    const { userId } = body;
+    return this.friendshipService.removeFriend(id, userId);
   }
 
   @Patch('block')
   @UseGuards(JwtAuthGuard)
-  async blockUser(@Req() req, @Body() body: FriendshipDto) {
+  async blockUser(@Req() req, @Body() body: UserIdDto) {
     const { id } = req.user;
-    const { receiverId } = body;
-    return this.friendshipService.blockUser(id, receiverId);
+    const { userId } = body;
+    return this.friendshipService.blockUser(id, userId);
   }
 }

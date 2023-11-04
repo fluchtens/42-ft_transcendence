@@ -4,7 +4,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { FriendshipDto, UserDto } from './dtos/FriendshipDto';
 import { FriendshipStatus } from '@prisma/client';
 
 @Injectable()
