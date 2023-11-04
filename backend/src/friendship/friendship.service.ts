@@ -4,7 +4,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { FriendshipDto } from './dtos/FriendshipDto';
+import { FriendshipDto, UserDto } from './dtos/FriendshipDto';
+import { FriendshipStatus } from '@prisma/client';
 
 @Injectable()
 export class FriendshipService {
@@ -26,7 +27,7 @@ export class FriendshipService {
     }
   }
 
-  private async findUserRelation(senderId: number, receiverId: number) {
+  private async findFriendship(senderId: number, receiverId: number) {
     try {
       const friendship = await this.prismaService.friendship.findFirst({
         where: {
@@ -49,13 +50,41 @@ export class FriendshipService {
     }
   }
 
-  private async findUserFriends(id: number) {
+  private async findFriendshipStatus(
+    senderId: number,
+    receiverId: number,
+    status: FriendshipStatus,
+  ) {
+    try {
+      const friendship = await this.prismaService.friendship.findFirst({
+        where: {
+          OR: [
+            {
+              senderId: senderId,
+              receiverId: receiverId,
+            },
+            {
+              senderId: receiverId,
+              receiverId: senderId,
+            },
+          ],
+          status,
+        },
+      });
+
+      return friendship;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  private async findFriends(id: number) {
     try {
       const friends = await this.prismaService.user.findUnique({
         where: { id },
         include: {
           addedFriends: {
-            where: { status: true },
+            where: { status: FriendshipStatus.ACCEPTED },
             select: {
               receiver: {
                 select: {
@@ -67,7 +96,7 @@ export class FriendshipService {
             },
           },
           acceptedFriends: {
-            where: { status: true },
+            where: { status: FriendshipStatus.ACCEPTED },
             select: {
               sender: {
                 select: {
@@ -92,7 +121,7 @@ export class FriendshipService {
   /* -------------------------------------------------------------------------- */
 
   async getFriends(userId: number) {
-    const user = await this.findUserFriends(userId);
+    const user = await this.findFriends(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -105,13 +134,17 @@ export class FriendshipService {
     return { friends };
   }
 
+  /* -------------------------------------------------------------------------- */
+  /*                                  Requests                                  */
+  /* -------------------------------------------------------------------------- */
+
   async addFriend(req, body: FriendshipDto) {
     const { id } = req.user;
     const senderId = id;
     const { receiverId } = body;
 
     if (senderId === receiverId) {
-      throw new BadRequestException("You can't send yourself a friend request");
+      throw new BadRequestException("You can't be friends with yourself");
     }
 
     const receiverUser = await this.findUserById(receiverId);
@@ -119,20 +152,62 @@ export class FriendshipService {
       throw new NotFoundException('User not found');
     }
 
-    const friendship = await this.findUserRelation(senderId, receiverId);
+    const friendship = await this.findFriendship(senderId, receiverId);
     if (friendship) {
-      throw new BadRequestException('You are already friends with this user');
+      if (friendship.status === FriendshipStatus.PENDING) {
+        throw new BadRequestException(
+          'A friend request is already pending with this user',
+        );
+      } else if (friendship.status === FriendshipStatus.ACCEPTED) {
+        throw new BadRequestException('You are already friends with this user');
+      } else if (friendship.status === FriendshipStatus.BLOCKED) {
+        throw new BadRequestException('This user is blocked');
+      }
     }
 
     await this.prismaService.friendship.create({
       data: {
         sender: { connect: { id: senderId } },
         receiver: { connect: { id: receiverId } },
+        status: FriendshipStatus.PENDING,
       },
     });
 
     return { message: 'Friend request sent' };
   }
+
+  async acceptFriend(receiverId: number, senderId: number) {
+    if (receiverId === senderId) {
+      throw new BadRequestException("You can't be friends with yourself");
+    }
+
+    const senderUser = await this.findUserById(senderId);
+    if (!senderUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    const friendship = await this.findFriendshipStatus(
+      senderId,
+      receiverId,
+      FriendshipStatus.PENDING,
+    );
+    if (!friendship) {
+      throw new BadRequestException(
+        'You have not received an invitation from this user',
+      );
+    }
+
+    await this.prismaService.friendship.update({
+      where: { id: friendship.id },
+      data: { status: FriendshipStatus.ACCEPTED },
+    });
+
+    return { message: `You are now friends with ${senderUser.username}` };
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                 Management                                 */
+  /* -------------------------------------------------------------------------- */
 
   async removeFriend(req, body: FriendshipDto) {
     const { id } = req.user;
@@ -148,15 +223,17 @@ export class FriendshipService {
       throw new NotFoundException('User not found');
     }
 
-    const friendship = await this.findUserRelation(senderId, receiverId);
+    const friendship = await this.findFriendshipStatus(
+      senderId,
+      receiverId,
+      FriendshipStatus.ACCEPTED,
+    );
     if (!friendship) {
       throw new BadRequestException('You are not friends with this user');
     }
 
     await this.prismaService.friendship.delete({
-      where: {
-        id: friendship.id,
-      },
+      where: { id: friendship.id },
     });
 
     return { message: 'Friend removed successfully' };

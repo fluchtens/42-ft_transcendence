@@ -1,16 +1,18 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { FriendshipService } from './friendship.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { FriendshipDto } from './dtos/FriendshipDto';
+import { FriendshipDto, UserDto } from './dtos/FriendshipDto';
 
 @Controller('friendship')
 export class FriendshipController {
@@ -25,13 +27,30 @@ export class FriendshipController {
     return this.friendshipService.getFriends(parseInt(userId));
   }
 
+  /* -------------------------------------------------------------------------- */
+  /*                                  Requests                                  */
+  /* -------------------------------------------------------------------------- */
+
   @Post('add')
   @UseGuards(JwtAuthGuard)
   async addFriend(@Req() req, @Body() body: FriendshipDto) {
     return this.friendshipService.addFriend(req, body);
   }
 
-  @Post('remove')
+  @Patch('accept')
+  @UseGuards(JwtAuthGuard)
+  async acceptFriend(@Req() req, @Body() body: UserDto) {
+    const { id } = req.user;
+    const receiverId: number = parseInt(id);
+    const { senderId } = body;
+    return this.friendshipService.acceptFriend(receiverId, senderId);
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                 Management                                 */
+  /* -------------------------------------------------------------------------- */
+
+  @Delete('remove')
   @UseGuards(JwtAuthGuard)
   async removeFriend(@Req() req, @Body() body: FriendshipDto) {
     return this.friendshipService.removeFriend(req, body);

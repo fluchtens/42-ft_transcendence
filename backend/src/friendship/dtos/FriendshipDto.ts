@@ -5,3 +5,9 @@ export class FriendshipDto {
   @IsNumber({}, { message: 'receiverId must be a number' })
   receiverId: number;
 }
+
+export class UserDto {
+  @IsNotEmpty({ message: 'senderId cannot be empty' })
+  @IsNumber({}, { message: 'senderId must be a number' })
+  senderId: number;
+}

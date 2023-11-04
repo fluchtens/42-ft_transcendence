@@ -26,16 +26,22 @@ model User {
 }
 
 model Friendship {
-  id         Int      @id @default(autoincrement())
-  sender     User     @relation("sender", fields: [senderId], references: [id])
+  id         Int              @id @default(autoincrement())
+  sender     User             @relation("sender", fields: [senderId], references: [id])
   senderId   Int
-  receiver   User     @relation("receiver", fields: [receiverId], references: [id])
+  receiver   User             @relation("receiver", fields: [receiverId], references: [id])
   receiverId Int
-  status     Boolean  @default(true)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  status     FriendshipStatus
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
 
   @@unique([senderId, receiverId])
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  BLOCKED
 }
 
 model Channel {
