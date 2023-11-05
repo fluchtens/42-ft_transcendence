@@ -1,28 +1,17 @@
+import { AuthRes } from "../types/api.interface";
+
 const API_URL: string = `${import.meta.env.VITE_BACK_URL}/auth`;
+
+/* -------------------------------------------------------------------------- */
+/*                                   General                                  */
+/* -------------------------------------------------------------------------- */
 
 interface AuthUser {
   username: string;
   password: string;
 }
 
-interface AuthRes {
-  success: boolean;
-  message: string;
-}
-
-interface LoginRes {
-  success: boolean;
-  message: string;
-  twoFa: boolean;
-}
-
-interface TwoFaSetupRes {
-  success: boolean;
-  message: string;
-  qrcode?: string;
-}
-
-async function registerUser({
+async function userRegistrationApi({
   username,
   password,
 }: AuthUser): Promise<AuthRes> {
@@ -48,7 +37,16 @@ async function registerUser({
   }
 }
 
-async function loginUser({ username, password }: AuthUser): Promise<LoginRes> {
+interface LoginRes {
+  success: boolean;
+  message: string;
+  twoFa: boolean;
+}
+
+async function userLoginApi({
+  username,
+  password,
+}: AuthUser): Promise<LoginRes> {
   try {
     const response = await fetch(`${API_URL}/login`, {
       method: "POST",
@@ -73,7 +71,27 @@ async function loginUser({ username, password }: AuthUser): Promise<LoginRes> {
   }
 }
 
-async function setupUser(username: string): Promise<AuthRes> {
+async function userLogoutApi(): Promise<void> {
+  try {
+    const response = await fetch(`${API_URL}/logout`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.error(data.message);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                     42                                     */
+/* -------------------------------------------------------------------------- */
+
+async function setupUserApi(username: string): Promise<AuthRes> {
   try {
     const response = await fetch(`${API_URL}/setup`, {
       method: "POST",
@@ -84,7 +102,6 @@ async function setupUser(username: string): Promise<AuthRes> {
 
     const data = await response.json();
     if (!response.ok) {
-      console.log("Error:", data.message);
       return { success: false, message: data.message };
     }
     return { success: true, message: data.message };
@@ -97,23 +114,17 @@ async function setupUser(username: string): Promise<AuthRes> {
   }
 }
 
-async function logoutUser(): Promise<void> {
-  try {
-    const response = await fetch(`${API_URL}/logout`, {
-      method: "GET",
-      credentials: "include",
-    });
+/* -------------------------------------------------------------------------- */
+/*                                     2FA                                    */
+/* -------------------------------------------------------------------------- */
 
-    const data = await response.json();
-    if (!response.ok) {
-      console.log(data.message);
-    }
-  } catch (error) {
-    console.error(error);
-  }
+interface TwoFaSetupRes {
+  success: boolean;
+  message: string;
+  qrcode?: string;
 }
 
-async function generateUserTwoFaQrCode(): Promise<TwoFaSetupRes> {
+async function generateTwoFaQrCodeApi(): Promise<TwoFaSetupRes> {
   try {
     const response = await fetch(`${API_URL}/2fa/generate`, {
       method: "GET",
@@ -135,7 +146,7 @@ async function generateUserTwoFaQrCode(): Promise<TwoFaSetupRes> {
   }
 }
 
-async function enableUserTwoFa(code: string): Promise<AuthRes> {
+async function enableTwoFaApi(code: string): Promise<AuthRes> {
   try {
     const response = await fetch(`${API_URL}/2fa/enable`, {
       method: "POST",
@@ -159,7 +170,7 @@ async function enableUserTwoFa(code: string): Promise<AuthRes> {
   }
 }
 
-async function disableUserTwoFa(): Promise<AuthRes> {
+async function disableTwoFaApi(): Promise<AuthRes> {
   try {
     const response = await fetch(`${API_URL}/2fa/disable`, {
       method: "GET",
@@ -181,7 +192,7 @@ async function disableUserTwoFa(): Promise<AuthRes> {
   }
 }
 
-async function authUserTwoFa(code: string): Promise<AuthRes> {
+async function authUserTwoFaApi(code: string): Promise<AuthRes> {
   try {
     const response = await fetch(`${API_URL}/2fa/auth`, {
       method: "POST",
@@ -191,7 +202,6 @@ async function authUserTwoFa(code: string): Promise<AuthRes> {
     });
 
     const data = await response.json();
-    console.log(data);
     if (!response.ok) {
       return { success: false, message: data.message };
     }
@@ -207,12 +217,12 @@ async function authUserTwoFa(code: string): Promise<AuthRes> {
 }
 
 export {
-  registerUser,
-  loginUser,
-  setupUser,
-  logoutUser,
-  generateUserTwoFaQrCode,
-  enableUserTwoFa,
-  disableUserTwoFa,
-  authUserTwoFa,
+  userRegistrationApi,
+  userLoginApi,
+  userLogoutApi,
+  setupUserApi,
+  generateTwoFaQrCodeApi,
+  enableTwoFaApi,
+  disableTwoFaApi,
+  authUserTwoFaApi,
 };

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getUser } from "../../services/user.api";
+import { getUserApi } from "../../services/user.api";
 import { useNavigate } from "react-router-dom";
 import styles from "./Settings.module.scss";
 import { User } from "../../types/user.interface";
@@ -29,7 +29,7 @@ function Settings() {
 
   useEffect(() => {
     const getUserData = async () => {
-      const data = await getUser();
+      const data = await getUserApi();
       if (!data) {
         navigate("/");
         return;

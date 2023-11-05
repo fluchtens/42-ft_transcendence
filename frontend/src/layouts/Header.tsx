@@ -4,7 +4,7 @@ import { MainNavLink } from "../components/MainNavLink";
 import { NavLink } from "../components/NavLink";
 import { ProfileBtn } from "../components/ProfileBtn";
 import { User } from "../types/user.interface";
-import { getUserAvatar, getUser } from "../services/user.api";
+import { getUserAvatar, getUserApi } from "../services/user.api";
 import { AiFillHome } from "react-icons/ai";
 import { IoGameController } from "react-icons/io5";
 import { BsFillChatDotsFill } from "react-icons/bs";
@@ -25,7 +25,7 @@ export default function Header() {
 
   useEffect(() => {
     const getUserData = async () => {
-      const data = await getUser();
+      const data = await getUserApi();
       if (data) {
         setUser(data);
         setAvatar(getUserAvatar(data.avatar));

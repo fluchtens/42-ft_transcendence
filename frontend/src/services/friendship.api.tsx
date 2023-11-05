@@ -1,11 +1,7 @@
+import { AuthRes } from "../types/api.interface";
 import { User } from "../types/user.interface";
 
 const API_URL: string = `${import.meta.env.VITE_BACK_URL}/friendship`;
-
-interface AuthRes {
-  success: boolean;
-  message: string;
-}
 
 async function getFriendsApi(userId: number): Promise<User[] | null> {
   try {

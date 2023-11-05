@@ -5,7 +5,7 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import { getUser } from "../services/user.api";
+import { getUserApi } from "../services/user.api";
 import { User } from "../types/user.interface";
 
 interface AuthContextProps {
@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   useEffect(() => {
     const getUserData = async () => {
-      const data = await getUser();
+      const data = await getUserApi();
       if (data) {
         setUser(data);
       }

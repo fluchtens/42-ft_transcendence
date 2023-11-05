@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./Auth.module.scss";
-import { setupUser } from "../../services/auth.api";
-import { getUser } from "../../services/user.api";
+import { setupUserApi } from "../../services/auth.api";
+import { getUserApi } from "../../services/user.api";
 import { MainTitle } from "../../components/MainTitle";
 
 function Setup() {
@@ -17,7 +17,7 @@ function Setup() {
   const submitData = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const data = await setupUser(username);
+    const data = await setupUserApi(username);
     if (!data.success) {
       setErrorMessage(data.message);
       return;
@@ -28,7 +28,7 @@ function Setup() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const data = await getUser();
+      const data = await getUserApi();
       if (data) {
         navigate("/");
       }

@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  getUser,
+  getUserApi,
   getUserAvatar,
-  postUserAvatar,
-  putUserUsername,
+  updateAvatarApi,
+  updateUsernameApi,
 } from "../../services/user.api";
 import { User } from "../../types/user.interface";
 import { notifyError, notifySuccess } from "../../utils/notifications";
@@ -42,13 +42,13 @@ function ProfileSettings() {
     e.preventDefault();
 
     if (username && user?.username !== username) {
-      const { success, message } = await putUserUsername(username);
+      const { success, message } = await updateUsernameApi(username);
       const formatMessage = Array.isArray(message) ? message[0] : message;
       success ? notifySuccess(message) : notifyError(formatMessage);
     }
 
     if (file) {
-      const { success, message } = await postUserAvatar(file);
+      const { success, message } = await updateAvatarApi(file);
       success ? notifySuccess(message) : notifyError(message);
     }
 
@@ -56,7 +56,7 @@ function ProfileSettings() {
   };
 
   const getUserData = async () => {
-    const data = await getUser();
+    const data = await getUserApi();
     if (!data) {
       navigate("/");
       return;

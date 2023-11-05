@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styles from "./Auth.module.scss";
-import { registerUser } from "../../services/auth.api";
-import { getUser } from "../../services/user.api";
+import { userRegistrationApi } from "../../services/auth.api";
+import { getUserApi } from "../../services/user.api";
 import { MainTitle } from "../../components/MainTitle";
 import { notifySuccess } from "../../utils/notifications";
 
@@ -24,7 +24,7 @@ function Register() {
     e.preventDefault();
 
     const user = { username, password };
-    const data = await registerUser(user);
+    const data = await userRegistrationApi(user);
     if (!data.success) {
       setErrorMessage(data.message);
       return;
@@ -36,7 +36,7 @@ function Register() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const data = await getUser();
+      const data = await getUserApi();
       if (data) {
         navigate("/");
       }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getUserAvatar, getUserByUsername } from "../../services/user.api";
+import { getUserAvatar, getUserByUsernameApi } from "../../services/user.api";
 import { useNavigate, useParams } from "react-router-dom";
 import { User } from "../../types/user.interface";
 import { FaUser, FaUserPlus, FaUserPen } from "react-icons/fa6";
@@ -19,7 +19,7 @@ export default function Profile() {
       if (!username) {
         return;
       }
-      const data = await getUserByUsername(username);
+      const data = await getUserByUsernameApi(username);
       if (!data) {
         navigate("/");
         return;

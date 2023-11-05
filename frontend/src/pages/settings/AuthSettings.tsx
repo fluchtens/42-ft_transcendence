@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getUser, putUserPassword } from "../../services/user.api";
+import { getUserApi, updatePasswordApi } from "../../services/user.api";
 import { User } from "../../types/user.interface";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import styles from "./AuthSettings.module.scss";
 import {
-  disableUserTwoFa,
-  generateUserTwoFaQrCode,
+  disableTwoFaApi,
+  generateTwoFaQrCodeApi,
 } from "../../services/auth.api";
 import { Separator } from "../../components/Separator";
 
@@ -52,7 +52,7 @@ function AuthSettings() {
     e.preventDefault();
 
     if (newPwd === confirmNewPwd) {
-      const { success, message } = await putUserPassword(actualPwd, newPwd);
+      const { success, message } = await updatePasswordApi(actualPwd, newPwd);
       const formatMessage = Array.isArray(message) ? message[0] : message;
       success ? notifySuccess(message) : notifyError(formatMessage);
     } else {
@@ -66,7 +66,7 @@ function AuthSettings() {
   };
 
   const enableTwoFa = async () => {
-    const data = await generateUserTwoFaQrCode();
+    const data = await generateTwoFaQrCodeApi();
     if (!data.success) {
       notifyError(data.message);
       return;
@@ -79,7 +79,7 @@ function AuthSettings() {
   };
 
   const disableTwoFa = async () => {
-    const data = await disableUserTwoFa();
+    const data = await disableTwoFaApi();
     if (!data.success) {
       notifyError(data.message);
       return;
@@ -90,7 +90,7 @@ function AuthSettings() {
   };
 
   const getUserData = async () => {
-    const data = await getUser();
+    const data = await getUserApi();
     if (!data) {
       navigate("/");
       return;

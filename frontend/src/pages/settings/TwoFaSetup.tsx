@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { notifyError } from "../../utils/notifications";
 import { useState } from "react";
-import { enableUserTwoFa } from "../../services/auth.api";
+import { enableTwoFaApi } from "../../services/auth.api";
 import { Separator } from "../../components/Separator";
 import styles from "./TwoFaSetup.module.scss";
 
@@ -22,7 +22,7 @@ function TwoFaSetup() {
   const enableTwoFa = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const { success, message } = await enableUserTwoFa(token);
+    const { success, message } = await enableTwoFaApi(token);
     if (!success) {
       notifyError(Array.isArray(message) ? message[0] : message);
       return;

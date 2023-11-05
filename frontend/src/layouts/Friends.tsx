@@ -2,9 +2,9 @@ import defaultAvatar from "/default_avatar.png";
 import styles from "./Friends.module.scss";
 import { useEffect, useState } from "react";
 import {
-  getUser,
+  getUserApi,
   getUserAvatar,
-  getUserByUsername,
+  getUserByUsernameApi,
 } from "../services/user.api";
 import { User } from "../types/user.interface";
 import {
@@ -45,7 +45,7 @@ function Friends() {
       return;
     }
 
-    const userData = await getUserByUsername(addUser);
+    const userData = await getUserByUsernameApi(addUser);
     if (!userData) {
       notifyError("User not found");
       setAddUser("");
@@ -63,7 +63,7 @@ function Friends() {
 
   useEffect(() => {
     const getData = async () => {
-      const user = await getUser();
+      const user = await getUserApi();
       if (!user) return;
 
       const friends = await getFriendsApi(user.id);

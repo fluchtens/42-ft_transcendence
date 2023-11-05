@@ -11,7 +11,7 @@ interface ApiRes {
 /*                                   General                                  */
 /* -------------------------------------------------------------------------- */
 
-const getUser = async (): Promise<User | null> => {
+const getUserApi = async (): Promise<User | null> => {
   try {
     const response = await fetch(`${apiUrl}/`, {
       method: "GET",
@@ -30,7 +30,7 @@ const getUser = async (): Promise<User | null> => {
   }
 };
 
-async function getUserByUsername(username: string): Promise<User | null> {
+async function getUserByUsernameApi(username: string): Promise<User | null> {
   try {
     const response = await fetch(`${apiUrl}/username/${username}`, {
       method: "GET",
@@ -49,7 +49,7 @@ async function getUserByUsername(username: string): Promise<User | null> {
   }
 }
 
-const getAllUsers = async (): Promise<User[] | null> => {
+const getAllUsersApi = async (): Promise<User[] | null> => {
   try {
     const response = await fetch(`${apiUrl}/all`, {
       method: "GET",
@@ -72,7 +72,7 @@ const getAllUsers = async (): Promise<User[] | null> => {
 /*                                  Username                                  */
 /* -------------------------------------------------------------------------- */
 
-async function putUserUsername(username: string): Promise<ApiRes> {
+async function updateUsernameApi(username: string): Promise<ApiRes> {
   try {
     const response = await fetch(`${apiUrl}/username`, {
       method: "PUT",
@@ -100,7 +100,7 @@ async function putUserUsername(username: string): Promise<ApiRes> {
 /*                                  Password                                  */
 /* -------------------------------------------------------------------------- */
 
-async function putUserPassword(
+async function updatePasswordApi(
   password: string,
   newPassword: string
 ): Promise<ApiRes> {
@@ -138,7 +138,7 @@ function getUserAvatar(avatar: string): string {
   return `${apiUrl}/avatar/${avatar}`;
 }
 
-async function postUserAvatar(file: any): Promise<ApiRes> {
+async function updateAvatarApi(file: any): Promise<ApiRes> {
   try {
     const formData = new FormData();
     formData.append("avatar", file);
@@ -165,11 +165,11 @@ async function postUserAvatar(file: any): Promise<ApiRes> {
 }
 
 export {
-  getUser,
-  getUserByUsername,
-  getAllUsers,
-  putUserUsername,
-  putUserPassword,
+  getUserApi,
+  getUserByUsernameApi,
+  getAllUsersApi,
+  updateUsernameApi,
+  updatePasswordApi,
   getUserAvatar,
-  postUserAvatar,
+  updateAvatarApi,
 };
