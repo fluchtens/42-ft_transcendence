@@ -24,7 +24,7 @@ async function getFriendsApi(userId: number): Promise<User[] | null> {
 
 async function sendFriendRequestApi(userId: number): Promise<AuthRes> {
   try {
-    const response = await fetch(`${API_URL}/send`, {
+    const response = await fetch(`${API_URL}/request/send`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId }),

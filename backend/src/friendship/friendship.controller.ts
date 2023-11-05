@@ -27,37 +27,6 @@ export class FriendshipController {
     return this.friendshipService.getFriends(parseInt(userId));
   }
 
-  /* -------------------------------------------------------------------------- */
-  /*                                  Requests                                  */
-  /* -------------------------------------------------------------------------- */
-
-  // @Get('requests')
-  // @UseGuards(JwtAuthGuard)
-  // async getFriendRequests(@Req() req) {
-  //   const { id } = req.user;
-  //   return this.friendshipService.getFriendRequests(id);
-  // }
-
-  @Post('send')
-  @UseGuards(JwtAuthGuard)
-  async sendFriendRequest(@Req() req, @Body() body: UserIdDto) {
-    const { id } = req.user;
-    const { userId } = body;
-    return this.friendshipService.sendFriendRequest(id, userId);
-  }
-
-  @Patch('accept')
-  @UseGuards(JwtAuthGuard)
-  async acceptFriendRequest(@Req() req, @Body() body: UserIdDto) {
-    const { id } = req.user;
-    const { userId } = body;
-    return this.friendshipService.acceptFriendRequest(id, userId);
-  }
-
-  /* -------------------------------------------------------------------------- */
-  /*                                 Management                                 */
-  /* -------------------------------------------------------------------------- */
-
   @Delete('remove')
   @UseGuards(JwtAuthGuard)
   async removeFriend(@Req() req, @Body() body: UserIdDto) {
@@ -72,5 +41,32 @@ export class FriendshipController {
     const { id } = req.user;
     const { userId } = body;
     return this.friendshipService.blockUser(id, userId);
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                  Requests                                  */
+  /* -------------------------------------------------------------------------- */
+
+  @Get('request/pending')
+  @UseGuards(JwtAuthGuard)
+  async getFriendRequests(@Req() req) {
+    const { id } = req.user;
+    return this.friendshipService.getFriendRequests(id);
+  }
+
+  @Post('request/send')
+  @UseGuards(JwtAuthGuard)
+  async sendFriendRequest(@Req() req, @Body() body: UserIdDto) {
+    const { id } = req.user;
+    const { userId } = body;
+    return this.friendshipService.sendFriendRequest(id, userId);
+  }
+
+  @Patch('request/accept')
+  @UseGuards(JwtAuthGuard)
+  async acceptFriendRequest(@Req() req, @Body() body: UserIdDto) {
+    const { id } = req.user;
+    const { userId } = body;
+    return this.friendshipService.acceptFriendRequest(id, userId);
   }
 }
