@@ -1,9 +1,18 @@
 import defaultAvatar from "/default_avatar.png";
 import styles from "./Friends.module.scss";
 import { useEffect, useState } from "react";
-import { getUser, getUserAvatar } from "../services/user.api";
+import {
+  getUser,
+  getUserAvatar,
+  getUserByUsername,
+} from "../services/user.api";
 import { User } from "../types/user.interface";
-import { getUserFriends } from "../services/friendship.api";
+import {
+  getFriendsApi,
+  sendFriendRequestApi,
+} from "../services/friendship.api";
+import { notifyError, notifySuccess } from "../utils/notifications";
+import { AddFriendBar } from "../components/AddFriendBar";
 
 interface UserElementProps {
   username: string;
@@ -23,30 +32,62 @@ const UserElement = ({ username, avatar }: UserElementProps) => (
 function Friends() {
   const [user, setUser] = useState<User | null>(null);
   const [friends, setFriends] = useState<User[] | null>(null);
+  const [addUser, setAddUser] = useState<string>("");
+
+  const changeAddUser = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAddUser(e.target.value);
+  };
+
+  const sendFriendRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!addUser) {
+      return;
+    }
+
+    const userData = await getUserByUsername(addUser);
+    if (!userData) {
+      notifyError("User not found");
+      setAddUser("");
+      return;
+    }
+
+    const { success, message } = await sendFriendRequestApi(userData.id);
+    if (!success) {
+      notifyError(message);
+    } else {
+      notifySuccess(message);
+    }
+    setAddUser("");
+  };
 
   useEffect(() => {
-    const getUserData = async () => {
-      const userData = await getUser();
-      if (!userData) {
-        return;
-      }
-      setUser(userData);
+    const getData = async () => {
+      const user = await getUser();
+      if (!user) return;
 
-      const friendsData = await getUserFriends(userData.id);
-      if (!friendsData) {
-        return;
-      }
-      friendsData.map((user) => (user.avatarUrl = getUserAvatar(user.avatar)));
-      setFriends(friendsData);
+      const friends = await getFriendsApi(user.id);
+      if (!friends) return;
+      friends.map(
+        (friend) => (friend.avatarUrl = getUserAvatar(friend.avatar))
+      );
+
+      setUser(user);
+      setFriends(friends);
     };
 
-    getUserData();
+    getData();
   }, []);
 
   return (
     <>
       {user && (
         <div className={styles.container}>
+          <AddFriendBar
+            value={addUser}
+            onChange={changeAddUser}
+            onSubmit={sendFriendRequest}
+          />
           <ul>
             {friends?.map((user, index) => (
               <UserElement

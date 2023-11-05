@@ -31,6 +31,13 @@ export class FriendshipController {
   /*                                  Requests                                  */
   /* -------------------------------------------------------------------------- */
 
+  // @Get('requests')
+  // @UseGuards(JwtAuthGuard)
+  // async getFriendRequests(@Req() req) {
+  //   const { id } = req.user;
+  //   return this.friendshipService.getFriendRequests(id);
+  // }
+
   @Post('send')
   @UseGuards(JwtAuthGuard)
   async sendFriendRequest(@Req() req, @Body() body: UserIdDto) {

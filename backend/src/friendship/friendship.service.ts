@@ -103,6 +103,21 @@ export class FriendshipService {
     }
   }
 
+  private async findFriendRequests(userId: number) {
+    try {
+      const requests = await this.prismaService.friendship.findMany({
+        where: {
+          receiverId: userId,
+          status: FriendshipStatus.PENDING,
+        },
+      });
+
+      return requests;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
   /* -------------------------------------------------------------------------- */
   /*                                   General                                  */
   /* -------------------------------------------------------------------------- */
@@ -118,7 +133,12 @@ export class FriendshipService {
       ...user.acceptedFriends.map((user) => user.sender),
     ];
 
-    return { friends };
+    return friends;
+  }
+
+  async getFriendRequests(userId: number) {
+    const requests = await this.findFriendRequests(userId);
+    return requests;
   }
 
   /* -------------------------------------------------------------------------- */
@@ -156,7 +176,7 @@ export class FriendshipService {
       },
     });
 
-    return { message: 'Friend request sent' };
+    return { message: `Friend request sent to ${receiverUser.username}` };
   }
 
   async acceptFriendRequest(receiverId: number, senderId: number) {
