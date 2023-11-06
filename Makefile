@@ -1,11 +1,14 @@
-all: run
+all: build
 
 install:
 	cd backend && npm install && npx prisma generate
 	cd frontend && npm install
 
-run: down
+build: clean
 	docker-compose up --build
+
+up:
+	docker-compose up
 
 down:
 	docker-compose down --rmi all --volumes
