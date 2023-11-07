@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   getUserApi,
-  getUserAvatar,
   updateAvatarApi,
   updateUsernameApi,
 } from "../../services/user.api";
@@ -14,7 +13,6 @@ import styles from "./ProfileSettings.module.scss";
 
 function ProfileSettings() {
   const [user, setUser] = useState<User | null>(null);
-  const [avatar, setAvatar] = useState<string>("");
   const [username, setUsername] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const navigate = useNavigate();
@@ -31,7 +29,9 @@ function ProfileSettings() {
       const reader = new FileReader();
       reader.onloadend = () => {
         if (reader.result) {
-          setAvatar(reader.result as string);
+          if (user) {
+            user.avatar = reader.result as string;
+          }
         }
       };
       reader.readAsDataURL(selectedFile);
@@ -63,7 +63,6 @@ function ProfileSettings() {
     }
     setUser(data);
     setUsername(data.username);
-    setAvatar(getUserAvatar(data.avatar));
   };
 
   useEffect(() => {
@@ -90,7 +89,11 @@ function ProfileSettings() {
             </div>
             <div className={styles.inputFile}>
               <label>Profile picture</label>
-              {avatar ? <img src={avatar} /> : <img src={defaultAvatar} />}
+              {user.avatar ? (
+                <img src={user.avatar} />
+              ) : (
+                <img src={defaultAvatar} />
+              )}
               <label className={styles.chooseFile}>
                 <input type="file" onChange={avatarSelection} />
                 Edit

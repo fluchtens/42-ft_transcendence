@@ -118,6 +118,15 @@ export class FriendshipService {
     }
   }
 
+  private exclude<User, Key extends keyof User>(
+    user: User,
+    keys: Key[],
+  ): Omit<User, Key> {
+    return Object.fromEntries(
+      Object.entries(user).filter(([key]) => !keys.includes(key as Key)),
+    ) as Omit<User, Key>;
+  }
+
   /* -------------------------------------------------------------------------- */
   /*                                   General                                  */
   /* -------------------------------------------------------------------------- */
@@ -133,7 +142,14 @@ export class FriendshipService {
       ...user.acceptedFriends.map((user) => user.sender),
     ];
 
-    return friends;
+    const friendsData = friends.map((user) => {
+      if (user.avatar) {
+        user.avatar = `${process.env.VITE_BACK_URL}/user/avatar/${user.avatar}`;
+      }
+      return user;
+    });
+
+    return friendsData;
   }
 
   async removeFriend(reqUserId: number, targetUserId: number) {

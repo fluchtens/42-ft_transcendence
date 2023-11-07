@@ -2,8 +2,8 @@ import defaultAvatar from "/default_avatar.png";
 import styles from "./Friends.module.scss";
 import { useEffect, useState } from "react";
 import {
+  getAllUsersApi,
   getUserApi,
-  getUserAvatar,
   getUserByUsernameApi,
 } from "../services/user.api";
 import { User } from "../types/user.interface";
@@ -68,9 +68,9 @@ function Friends() {
 
       const friends = await getFriendsApi(user.id);
       if (!friends) return;
-      friends.map(
-        (friend) => (friend.avatarUrl = getUserAvatar(friend.avatar))
-      );
+
+      // const friends = await getAllUsersApi();
+      // if (!friends) return;
 
       setUser(user);
       setFriends(friends);
@@ -93,7 +93,7 @@ function Friends() {
               <UserElement
                 key={index}
                 username={user.username}
-                avatar={user.avatarUrl}
+                avatar={user.avatar}
               />
             ))}
           </ul>

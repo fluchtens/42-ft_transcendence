@@ -83,9 +83,14 @@ export class UserService {
       throw new NotFoundException('No users found');
     }
 
-    const usersData = users.map((user) =>
-      this.exclude(user, ['fortyTwoId', 'password']),
-    );
+    const usersData = users.map((user) => {
+      const userData = this.exclude(user, ['fortyTwoId', 'password']);
+      if (userData.avatar) {
+        userData.avatar = `${process.env.VITE_BACK_URL}/user/avatar/${userData.avatar}`;
+      }
+      return userData;
+    });
+
     return usersData;
   }
 
@@ -96,6 +101,9 @@ export class UserService {
     }
 
     const userData = this.exclude(user, ['fortyTwoId', 'password']);
+    if (userData.avatar) {
+      userData.avatar = `${process.env.VITE_BACK_URL}/user/avatar/${userData.avatar}`;
+    }
     return userData;
   }
 
@@ -106,6 +114,9 @@ export class UserService {
     }
 
     const userData = this.exclude(user, ['fortyTwoId', 'password']);
+    if (userData.avatar) {
+      userData.avatar = `${process.env.VITE_BACK_URL}/user/avatar/${userData.avatar}`;
+    }
     return userData;
   }
 

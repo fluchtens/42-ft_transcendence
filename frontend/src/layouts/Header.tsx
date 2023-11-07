@@ -4,7 +4,7 @@ import { MainNavLink } from "../components/MainNavLink";
 import { NavLink } from "../components/NavLink";
 import { ProfileBtn } from "../components/ProfileBtn";
 import { User } from "../types/user.interface";
-import { getUserAvatar, getUserApi } from "../services/user.api";
+import { getUserApi } from "../services/user.api";
 import { AiFillHome } from "react-icons/ai";
 import { IoGameController } from "react-icons/io5";
 import { BsFillChatDotsFill } from "react-icons/bs";
@@ -13,7 +13,6 @@ import styles from "./Header.module.scss";
 export default function Header() {
   const [navMenu, setNavMenu] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
-  const [avatar, setAvatar] = useState<string>("");
 
   const toggleNavMenu = () => {
     setNavMenu(!navMenu);
@@ -28,7 +27,6 @@ export default function Header() {
       const data = await getUserApi();
       if (data) {
         setUser(data);
-        setAvatar(getUserAvatar(data.avatar));
       }
     };
     getUserData();
@@ -54,7 +52,7 @@ export default function Header() {
         {user ? (
           <ProfileBtn
             username={user.username}
-            avatar={avatar}
+            avatar={user.avatar}
             onLogout={handleLogout}
           />
         ) : (
