@@ -1,33 +1,25 @@
-import defaultAvatar from "/default_avatar.png";
 import styles from "./Friends.module.scss";
 import { useEffect, useState } from "react";
-import { getUserApi, getUserByUsernameApi } from "../services/user.api";
+import {
+  getUserApi,
+  getUserByIdApi,
+  getUserByUsernameApi,
+} from "../services/user.api";
 import { User } from "../types/user.interface";
 import {
+  getFriendRequestsApi,
   getFriendsApi,
   sendFriendRequestApi,
 } from "../services/friendship.api";
 import { notifyError, notifySuccess } from "../utils/notifications";
 import { AddFriendBar } from "../components/AddFriendBar";
-
-interface UserElementProps {
-  username: string;
-  avatar: string;
-}
-
-const UserElement = ({ username, avatar }: UserElementProps) => (
-  <li>
-    {avatar ? <img src={avatar} /> : <img src={defaultAvatar} />}
-    <div>
-      <p className={styles.username}>{username}</p>
-      <p className={styles.status}>In game</p>
-    </div>
-  </li>
-);
+import { UserBtn } from "../components/UserBtn";
 
 function Friends() {
   const [user, setUser] = useState<User | null>(null);
   const [friends, setFriends] = useState<User[] | null>(null);
+  const [friendReq, setFriendReq] = useState(null);
+  const [usersReq, setUsersReq] = useState<User[] | null>(null);
   const [addUser, setAddUser] = useState<string>("");
 
   const changeAddUser = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,8 +57,20 @@ function Friends() {
       const friends = await getFriendsApi(user.id);
       if (!friends) return;
 
+      const friendRequests = await getFriendRequestsApi();
+      if (!friendRequests) return;
+
+      const usersReq = await Promise.all(
+        friendRequests.map(async (request: any) => {
+          const user = await getUserByIdApi(request.senderId);
+          return user;
+        })
+      );
+
       setUser(user);
       setFriends(friends);
+      setFriendReq(friendRequests);
+      setUsersReq(usersReq);
     };
 
     getData();
@@ -82,12 +86,23 @@ function Friends() {
             onSubmit={sendFriendRequest}
           />
           <ul>
-            {friends?.map((user, index) => (
-              <UserElement
-                key={index}
-                username={user.username}
-                avatar={user.avatar}
-              />
+            {usersReq?.map((user) => (
+              <li key={user.id}>
+                <UserBtn
+                  friend={false}
+                  username={user.username}
+                  avatar={user.avatar}
+                />
+              </li>
+            ))}
+            {friends?.map((user) => (
+              <li key={user.id}>
+                <UserBtn
+                  friend={true}
+                  username={user.username}
+                  avatar={user.avatar}
+                />
+              </li>
             ))}
           </ul>
         </div>

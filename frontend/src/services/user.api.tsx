@@ -30,6 +30,25 @@ const getUserApi = async (): Promise<User | null> => {
   }
 };
 
+async function getUserByIdApi(id: string): Promise<User | null> {
+  try {
+    const response = await fetch(`${apiUrl}/id/${id}`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
 async function getUserByUsernameApi(username: string): Promise<User | null> {
   try {
     const response = await fetch(`${apiUrl}/username/${username}`, {
@@ -166,6 +185,7 @@ async function updateAvatarApi(file: any): Promise<ApiRes> {
 
 export {
   getUserApi,
+  getUserByIdApi,
   getUserByUsernameApi,
   getAllUsersApi,
   updateUsernameApi,
