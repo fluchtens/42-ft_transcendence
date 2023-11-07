@@ -34,8 +34,11 @@ const ProfileBtn = ({ username, avatar, onLogout }: ProfileBtnProps) => {
 
   return (
     <div className={styles.container}>
-      <button className={styles.button} onClick={handleMenu}>
-        {avatar ? <img src={avatar} /> : <img src={defaultAvatar} />}
+      <button className={styles.userBtn} onClick={handleMenu}>
+        <p>{username}</p>
+        <div className={styles.avatar}>
+          {avatar ? <img src={avatar} /> : <img src={defaultAvatar} />}
+        </div>
       </button>
       {menu && (
         <div className={styles.menu}>
