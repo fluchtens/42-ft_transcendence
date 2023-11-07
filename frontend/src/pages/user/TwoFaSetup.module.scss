@@ -1,0 +1,129 @@
+@import "../../styles/config.scss";
+
+.container {
+  max-width: 45rem;
+  padding: 2rem;
+  border-radius: $rounded-3xl;
+  background: $bg-secondary-color;
+  box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
+
+  form {
+    flex-direction: column;
+    display: flex;
+    align-items: left;
+    gap: 1rem;
+
+    h1 {
+      margin: 0;
+      font-size: map-get($text-2xl, font-size);
+      line-height: map-get($text-2xl, line-height);
+      font-weight: $font-semibold;
+      text-align: center;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: map-get($text-lg, font-size);
+      line-height: map-get($text-lg, line-height);
+      font-weight: $font-semibold;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: map-get($text-base, font-size);
+      line-height: map-get($text-base, line-height);
+      font-weight: $font-medium;
+    }
+
+    p {
+      margin: 0;
+      font-size: map-get($text-sm, font-size);
+      line-height: map-get($text-sm, line-height);
+      color: $text-secondary-color;
+    }
+
+    img {
+      width: 12rem;
+      height: 12rem;
+      border-radius: $rounded-lg;
+    }
+
+    .input {
+      label {
+        display: block;
+        font-size: map-get($text-sm, font-size);
+        line-height: map-get($text-sm, line-height);
+        font-weight: $font-medium;
+      }
+
+      input {
+        height: 2rem;
+        margin-top: 0.5rem;
+        padding-left: 1rem;
+        box-sizing: border-box;
+        border: none;
+        border-radius: $rounded;
+        outline: none;
+        background: $extra-tertiary-color;
+        font-size: map-get($text-sm, font-size);
+        line-height: map-get($text-sm, line-height);
+        color: $text-primary-color;
+      }
+    }
+
+    .buttons {
+      margin-left: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+
+      button {
+        width: 6rem;
+        padding: 0.5rem 0;
+        border: none;
+        border-radius: $rounded-lg;
+        transition: background-color 0.3s;
+        font-size: map-get($text-base, font-size);
+        line-height: map-get($text-base, line-height);
+        cursor: pointer;
+      }
+
+      .cancel {
+        background: transparent;
+        color: $text-primary-color;
+
+        &:hover {
+          background: $extra-tertiary-color;
+        }
+      }
+
+      .continue {
+        background: $sucess-primary-color;
+        color: white;
+
+        &:hover {
+          background: $sucess-secondary-color;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    border-radius: $rounded-xl;
+
+    form {
+      align-items: center;
+
+      .input {
+        text-align: center;
+      }
+
+      .buttons {
+        margin-left: 0;
+      }
+    }
+  }
+}

@@ -1,0 +1,102 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique @db.VarChar(255)
+  fortyTwoId   Int?     @unique
+  avatar       String?  @db.VarChar(255)
+  password     String?  @db.VarChar(255)
+  twoFa        Boolean  @default(false)
+  twoFaSecret  String?  @db.VarChar(255)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  blockedUsers Int[]    @default([0])
+
+  members  Member[]
+  channels Channel[]
+  messages Message[]
+}
+
+model Channel {
+  id         String      @id @default(uuid())
+  name       String
+  inviteCode String      @db.Text()
+  password   String?     @db.VarChar(255)
+  type       ChannelType @default(public)
+
+  userId   Int
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages Message[]
+  members  Member[]
+
+  bannedUsers   Int[] @default([0])
+  silencedUsers Int[] @default([0])
+
+  CreatedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Message {
+  id      String  @id @default(uuid())
+  content String  @db.Text()
+  edited  Boolean @default(false)
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  channelId String
+  channels  Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  CreatedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([channelId])
+}
+
+model Member {
+  id   String     @id @default(uuid())
+  role MemberRole @default(GUEST)
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  channelId String
+  channel   Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  silencedTime DateTime @default(now())
+  CreatedAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+  @@index([channelId])
+}
+
+enum MemberRole {
+  ADMIN
+  MODERATOR
+  GUEST
+}
+
+enum ChannelType {
+  public
+  private
+  protected
+}
+
+// Do after
+// enum MemberStatus {
+//   Default
+//   Muted
+
+// }
