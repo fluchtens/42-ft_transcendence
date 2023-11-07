@@ -1,11 +1,7 @@
 import defaultAvatar from "/default_avatar.png";
 import styles from "./Friends.module.scss";
 import { useEffect, useState } from "react";
-import {
-  getAllUsersApi,
-  getUserApi,
-  getUserByUsernameApi,
-} from "../services/user.api";
+import { getUserApi, getUserByUsernameApi } from "../services/user.api";
 import { User } from "../types/user.interface";
 import {
   getFriendsApi,
@@ -68,9 +64,6 @@ function Friends() {
 
       const friends = await getFriendsApi(user.id);
       if (!friends) return;
-
-      // const friends = await getAllUsersApi();
-      // if (!friends) return;
 
       setUser(user);
       setFriends(friends);
