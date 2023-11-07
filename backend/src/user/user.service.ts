@@ -79,7 +79,14 @@ export class UserService {
 
   async getAllUsers() {
     const users = await this.prismaService.user.findMany();
-    return users;
+    if (!users) {
+      throw new NotFoundException('No users found');
+    }
+
+    const usersData = users.map((user) =>
+      this.exclude(user, ['fortyTwoId', 'password']),
+    );
+    return usersData;
   }
 
   async getUserById(id: number) {
