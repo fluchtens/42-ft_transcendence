@@ -1,4 +1,4 @@
-import { Injectable, UseGuards } from "@nestjs/common";
+import { Injectable, NotFoundException, UseGuards } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { Member, MemberRole } from "@prisma/client";
 import { channel } from "diagnostics_channel";
@@ -54,39 +54,40 @@ export class ChatService{
     return null;
   }
   
-  async createChat(req, channelName: string){
-    const { user } = req;
-    console.log(user.id);
-    if (!user){
+  async createChannel(userId: number, channelName: string){
+    if (!userId){
       console.error("user invalid");
       return null;
     }
-    const channel = await this.prismaService.channel.create({
-      data : {
-        name : channelName,
-        inviteCode: "InviteCode",
-        user: {
-          connect: {
-            id: user.id
+    try {
+      const channel = await this.prismaService.channel.create({
+        data : {
+          name : channelName,
+          inviteCode: "InviteCode",
+          user: {
+            connect: {
+              id: userId
+            },
           },
         },
-      },
-    });
-  
-    const member = await this.prismaService.member.create({
-      data: {
-        role: 'ADMIN',
-        userId: user.id,
-        channelId: channel.id,
-      },
-    });
+      });
 
-    return channel;
+      const member = await this.prismaService.member.create({
+        data: {
+          role: 'ADMIN',
+          userId: userId,
+          channelId: channel.id,
+        },
+      });
+
+      return channel;
+    }
+    catch (error) {
+      console.error("create channel ", error.message);
+      throw new NotFoundException();
+    }
   }
-  async getUserChannels(req): Promise<any> {
-    const { user } = req;
-    const userId = user.id;
-    // console.log(user);
+  async getUserChannels(userId: any): Promise<any> {
     try {
       const userInfo = await this.prismaService.user.findUnique({
         where: {

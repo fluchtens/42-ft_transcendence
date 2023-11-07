@@ -10,24 +10,30 @@ export const  Websocket = () => {
     socket.on('connect', () => {
       console.log('Connected!');
     });
-    socket.on('onMessage', (data: any) => {
-      console.log('onMessage event received!');
+    socket.on('sendMessage', (data: any) => {
+      console.log('sendMessage event received!');
       console.log(data);
     });
 
     return () => {
       console.log('Unregistering Events...');
       socket.off('connect');
-      socket.off('onMessage');
+      socket.off('sendMessage');
     };
   }, []);
 
   const onSubmit = () => {
-    socket.emit('join', value);
+    console.log(value);
+    socket.emit('createChannel', value);
     setValue('');
   }
   return (
     <div>
+        <div>
+    <ul>
+     
+    </ul>
+  </div>
       <div>
         <h1> Websocket </h1>
         <input type="text" value={value} onChange={(e) => setValue(e.target.value)}/>
