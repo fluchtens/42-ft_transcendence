@@ -87,6 +87,17 @@ export class ChatService{
       throw new NotFoundException();
     }
   }
+
+  async getAllChannels() {
+    try {
+      const channels = await this.prismaService.channel.findMany();
+      return channels;
+    }
+    catch (error) {
+      throw new NotFoundException(error.message);
+    }
+  }
+
   async getUserChannels(userId: any): Promise<any> {
     try {
       const userInfo = await this.prismaService.user.findUnique({

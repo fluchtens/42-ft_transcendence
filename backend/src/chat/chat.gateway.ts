@@ -5,7 +5,7 @@ import { Request} from "express";
 import { env } from "process";
 
 import { Server } from 'socket.io'
-import { Socket } from "socket.io-client";
+import { Socket } from "socket.io";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { ChatService } from "./chat.service";
 import { ChatController } from "./chat.controller";
@@ -13,6 +13,7 @@ import { AuthService } from "src/auth/auth.service";
 import { ExecutionContextHost } from "@nestjs/core/helpers/execution-context-host";
 import cookieParser from "cookie-parser";
 import { UserService } from "src/user/user.service";
+import { RoomsService } from "./room.service";
 
 @WebSocketGateway({
   namespace: 'socket',
@@ -28,6 +29,7 @@ export class ChatGateway implements OnModuleInit {
     private readonly authService: AuthService,
     private readonly chatService: ChatService,
     private readonly userService: UserService,
+    private readonly roomService: RoomsService,
   ) {}
   @WebSocketServer()
   server: Server;
@@ -44,7 +46,7 @@ export class ChatGateway implements OnModuleInit {
       }
       const decodedToken = await this.authService.verifyJwt(token);
       console.log(decodedToken.id);
-      client.auth = decodedToken.id
+      client.handshake.auth.userId = decodedToken.id;
     }
     catch (error) {
       console.error('not connected', error.message);
@@ -67,10 +69,29 @@ export class ChatGateway implements OnModuleInit {
   // @SubscribeMessage('findAllMessages')
   // async findAll(@Req() req) {
   // }
+  async InitRoom(client: Socket) {
+    try {
+      const channels = await this.chatService.getUserChannels(Number(client.auth));
+      channels.forEach((channel) => {
+        if (!this.roomService.getRoomClients(channel.id)) {
+          this.roomService.createRoom(channel.id);
+        }
+        this.roomService.joinRooms(client, channel.id);
+        console.log(channel.id);
+      });
+    }
+    catch (error){
+      console.error("chat init rooms error socket io", error.message);
+    }
+  }
 
-  @SubscribeMessage('join')
-  async joinRoom( @ConnectedSocket() client: Socket,
-  ) {
+  createRoom(roomName: string) {
+    this.roomService.createRoom(roomName);
+  }
+
+  joinRoom(client: Socket, roomName: string) {
+
+    client.emit('joinedRoom', roomName);
   }
 
   @SubscribeMessage('createChannel')
@@ -94,7 +115,9 @@ export class ChatGateway implements OnModuleInit {
   async getChannels(@ConnectedSocket() client: Socket) {
     const userId = Number(client.auth);
     const channels = await this.chatService.getUserChannels(userId);
-    console.log(channels);
+    channels.forEach((channel) => {
+      console.log(channel.id);
+    });
   }
   @SubscribeMessage('join')
   joinChannel(@MessageBody('name') name: string,

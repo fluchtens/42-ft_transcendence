@@ -24,7 +24,8 @@ export const  Websocket = () => {
 
   const onSubmit = () => {
     console.log(value);
-    socket.emit('createChannel', value);
+    // socket.emit('createChannel', value);
+    socket.emit('getChannels');
     setValue('');
   }
   return (
