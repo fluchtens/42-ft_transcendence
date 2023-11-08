@@ -21,7 +21,6 @@ import { RoomsService } from "./room.service";
     origin: ["http://localhost"],
     credentials: true,
   },
-  // cookie: true
 })
 export class ChatGateway implements OnModuleInit {
 
@@ -37,7 +36,7 @@ export class ChatGateway implements OnModuleInit {
   async handleConnection(client: Socket, @Req() req: Request, ...args: any[]) {
     try {
       console.log("handleConnection");
-      const cookie = client['handshake']['headers']['cookie'];
+      const cookie = client.handshake.headers.cookie;
       let token = null;
       if (cookie)
         token = cookie.substring("access_token=".length);
@@ -45,13 +44,13 @@ export class ChatGateway implements OnModuleInit {
         throw new Error("access_token not found");
       }
       const decodedToken = await this.authService.verifyJwt(token);
-      console.log(decodedToken.id);
       client.handshake.auth.userId = decodedToken.id;
+      await this.InitRooms(client);
     }
     catch (error) {
       console.error('not connected', error.message);
     }
-    }
+  }
 
   onModuleInit() {
     this.server.on('connection', (socket) => {
@@ -69,15 +68,15 @@ export class ChatGateway implements OnModuleInit {
   // @SubscribeMessage('findAllMessages')
   // async findAll(@Req() req) {
   // }
-  async InitRoom(client: Socket) {
+
+  async InitRooms(client: Socket) {
     try {
-      const channels = await this.chatService.getUserChannels(Number(client.auth));
+      const channels = await this.chatService.getUserChannels(Number(client.handshake.auth.userId));
       channels.forEach((channel) => {
         if (!this.roomService.getRoomClients(channel.id)) {
           this.roomService.createRoom(channel.id);
         }
         this.roomService.joinRooms(client, channel.id);
-        console.log(channel.id);
       });
     }
     catch (error){
@@ -89,14 +88,9 @@ export class ChatGateway implements OnModuleInit {
     this.roomService.createRoom(roomName);
   }
 
-  joinRoom(client: Socket, roomName: string) {
-
-    client.emit('joinedRoom', roomName);
-  }
-
   @SubscribeMessage('createChannel')
   async createChannel(@ConnectedSocket() client: Socket,@MessageBody() channelName: string) {
-    const userId = Number(client.auth);
+    const userId = Number(client.handshake.auth.userId);
     if (!channelName){
       try {
         const user = await this.userService.getUserById(userId);
@@ -113,7 +107,7 @@ export class ChatGateway implements OnModuleInit {
 
   @SubscribeMessage('getChannels')
   async getChannels(@ConnectedSocket() client: Socket) {
-    const userId = Number(client.auth);
+    const userId = Number(client.handshake.auth.userId);
     const channels = await this.chatService.getUserChannels(userId);
     channels.forEach((channel) => {
       console.log(channel.id);
@@ -130,7 +124,7 @@ export class ChatGateway implements OnModuleInit {
   async typing(@MessageBody('isTyping') isTyping: boolean, 
     @ConnectedSocket() client: Socket,
     ){
-      const name = await this.userService.getUserById(Number(client.auth));
+      const name = await this.userService.getUserById(Number(client.handshake.auth.userId));
       this.server.emit('typing', { name, isTyping });
   }
 
