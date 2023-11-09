@@ -30,7 +30,7 @@ const getUserApi = async (): Promise<User | null> => {
   }
 };
 
-async function getUserByIdApi(id: string): Promise<User | null> {
+async function getUserByIdApi(id: number): Promise<User | null> {
   try {
     const response = await fetch(`${apiUrl}/id/${id}`, {
       method: "GET",

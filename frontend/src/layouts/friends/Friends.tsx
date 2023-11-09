@@ -1,24 +1,24 @@
-import styles from "./Friends.module.scss";
 import { useEffect, useState } from "react";
+import { User } from "../../types/user.interface";
+import { Friendship } from "../../types/friendship.interface";
 import {
   getUserApi,
   getUserByIdApi,
   getUserByUsernameApi,
-} from "../services/user.api";
-import { User } from "../types/user.interface";
+} from "../../services/user.api";
 import {
   getFriendRequestsApi,
   getFriendsApi,
   sendFriendRequestApi,
-} from "../services/friendship.api";
-import { notifyError, notifySuccess } from "../utils/notifications";
-import { AddFriendBar } from "../components/AddFriendBar";
-import { UserBtn } from "../components/UserBtn";
+} from "../../services/friendship.api";
+import { AddFriendBar } from "./AddFriendBar";
+import { UserElement } from "./UserElement";
+import { notifyError, notifySuccess } from "../../utils/notifications";
+import styles from "./Friends.module.scss";
 
 function Friends() {
   const [user, setUser] = useState<User | null>(null);
   const [friends, setFriends] = useState<User[] | null>(null);
-  const [friendReq, setFriendReq] = useState(null);
   const [usersReq, setUsersReq] = useState<User[] | null>(null);
   const [addUser, setAddUser] = useState<string>("");
 
@@ -28,10 +28,7 @@ function Friends() {
 
   const sendFriendRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!addUser) {
-      return;
-    }
+    if (!addUser) return;
 
     const userData = await getUserByUsernameApi(addUser);
     if (!userData) {
@@ -41,38 +38,35 @@ function Friends() {
     }
 
     const { success, message } = await sendFriendRequestApi(userData.id);
-    if (!success) {
-      notifyError(message);
-    } else {
-      notifySuccess(message);
-    }
+    success ? notifySuccess(message) : notifyError(message);
     setAddUser("");
   };
 
-  useEffect(() => {
-    const getData = async () => {
-      const user = await getUserApi();
-      if (!user) return;
+  const getData = async () => {
+    const user = await getUserApi();
+    if (!user) return;
+    setUser(user);
 
-      const friends = await getFriendsApi(user.id);
-      if (!friends) return;
+    const friends = await getFriendsApi(user.id);
+    if (!friends || !friends.length) return;
+    setFriends(friends);
 
-      const friendRequests = await getFriendRequestsApi();
-      if (!friendRequests) return;
-
+    const friendReq = await getFriendRequestsApi();
+    if (friendReq && friendReq.length) {
       const usersReq = await Promise.all(
-        friendRequests.map(async (request: any) => {
+        friendReq.map(async (request: Friendship) => {
           const user = await getUserByIdApi(request.senderId);
-          return user;
+          if (user) {
+            user.friendship = request;
+            return user;
+          }
         })
       );
+      setUsersReq(usersReq as User[]);
+    }
+  };
 
-      setUser(user);
-      setFriends(friends);
-      setFriendReq(friendRequests);
-      setUsersReq(usersReq);
-    };
-
+  useEffect(() => {
     getData();
   }, []);
 
@@ -88,16 +82,18 @@ function Friends() {
           <ul>
             {usersReq?.map((user) => (
               <li key={user.id}>
-                <UserBtn
+                <UserElement
                   friend={false}
+                  id={user.id}
                   username={user.username}
                   avatar={user.avatar}
+                  cb={getData}
                 />
               </li>
             ))}
             {friends?.map((user) => (
               <li key={user.id}>
-                <UserBtn
+                <UserElement
                   friend={true}
                   username={user.username}
                   avatar={user.avatar}

@@ -1,9 +1,9 @@
 import { Outlet, useLocation } from "react-router-dom";
 import Home from "../pages/home/Home";
 import Header from "./Header";
-import styles from "./Layout.module.scss";
+import Friends from "./friends/Friends";
 import { Notify } from "../utils/notifications";
-import Friends from "./Friends";
+import styles from "./Layout.module.scss";
 
 function Layout() {
   const { pathname } = useLocation();
