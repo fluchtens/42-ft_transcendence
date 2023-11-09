@@ -9,12 +9,12 @@ export class RoomsService {
     this.rooms.set(roomName, new Set());
   }
 
-  joinRooms(socket: Socket, roomName: string) : void{
-    // socket.join(roomName);
-    // this.rooms.get(roomName).add(socket);
+  joinRoom(socket: Socket, roomName: string) : void{
+    socket.join(roomName);
+    this.rooms.get(roomName).add(socket);
   }
 
-  leavecRoom(socket: Socket, roomName: string) : void {
+  leaveRoom(socket: Socket, roomName: string) : void {
     socket.leave(roomName);
     this.rooms.get(roomName).delete(socket);
   }

@@ -1,15 +1,30 @@
-import { Injectable, NotFoundException, UseGuards } from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
-import { Member, MemberRole } from "@prisma/client";
-import { channel } from "diagnostics_channel";
-import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { Channel, Member, MemberRole, Message } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
-import { isErrored } from "stream";
 
 
 @Injectable()
 export class ChatService{
   constructor(private readonly prismaService: PrismaService) {}
+  
+  
+
+  async getChannelById(channelId: string): Promise<Channel> {
+    try {
+      const channel = await this.prismaService.channel.findUnique({
+        where: {
+          id: channelId
+        },
+      });
+      if (!channel) {
+        throw new NotFoundException('Channel not found');
+      }
+      return channel;
+    }
+    catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
   
   async findMemberRoleInChannel(channelId : string, userId : number): Promise<string | null>{
     try {
@@ -126,6 +141,20 @@ export class ChatService{
     }
   }
 
+  async getMessagesByChannel(channelId: string) {
+    try {
+      const messages = await this.prismaService.message.findMany({
+        where: {
+          channelId: channelId,
+        },
+      });
+      return messages;
+    }
+    catch (error) {
+      throw error;
+    }
+  }
+
   async addMember(req: any, channelId: string, userId: number): Promise<any>{
     if (!(userId || channelId)) {
       console.log("channelId or UserId invalid");
@@ -222,29 +251,27 @@ export class ChatService{
     }
   }
 
-  async addMessage(req: any, channelId: string, messageContent: string) : Promise<null | any> {
-    const { user } = req;
+  async addMessage(userId: number, channelId: string, messageContent: string) : Promise<Message | null> {
 
-    if (!user || !channelId || !messageContent){
+    if (!userId || !channelId || !messageContent){
       console.error('invalid input');
       return null;
     }
     try {
-      const userData = this.findMemberInChannel(channelId, user.id);
+      const userData = await this.findMemberInChannel(channelId, userId);
       const channelData = await this.prismaService.channel.findUnique({
         where: {
           id: channelId,
         },
       });
-      console.log((await userData).silencedTime);
-      if ((await userData).silencedTime > new Date()){
+      if (userData.silencedTime > new Date()){
         throw new Error ("You are muted!");
       }
       if (userData && channelData) {
         const newMessage = await this.prismaService.message.create({
           data: {
             content: messageContent,
-            userId: user.id,
+            userId: userId,
             channelId: channelData.id,
           },
         });
@@ -366,6 +393,25 @@ export class ChatService{
     catch(error) {
       console.log('error when delete the channel', error);
       throw error;
+    }
+  }
+
+  async checkIfUserCanJoinChannel(userId: number, channelId: string): Promise<boolean> {
+    try {
+      const member = await this.prismaService.member.findFirst({
+        where: {
+          userId: userId,
+          channelId: channelId,
+        },
+      });
+      if (member){
+        return true;
+      }
+      return false;
+    }
+    catch(error){
+      console.error(error.message);
+      return false;
     }
   }
 }

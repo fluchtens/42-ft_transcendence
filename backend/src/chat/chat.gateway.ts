@@ -14,6 +14,8 @@ import { ExecutionContextHost } from "@nestjs/core/helpers/execution-context-hos
 import cookieParser from "cookie-parser";
 import { UserService } from "src/user/user.service";
 import { RoomsService } from "./room.service";
+import { SendMessageDto } from "./dtos/gateway.dtos";
+import { channel } from "diagnostics_channel";
 
 @WebSocketGateway({
   namespace: 'socket',
@@ -32,6 +34,35 @@ export class ChatGateway implements OnModuleInit {
   ) {}
   @WebSocketServer()
   server: Server;
+
+  async getMessagesInRoom(channelId: string) {
+    const messages = await this.chatService.getMessagesByChannel(channelId);
+  }
+
+  async sendMessageToChannel(channelId: string, message: string): Promise<void> {
+    const channelClients = this.roomService.getRoomClients(channelId);
+
+    if (channelClients) {
+      channelClients.forEach((client) => {
+        client.emit('sendMessage', {channelId, message});
+      });
+    }
+  }
+
+  async InitRooms(client: Socket) {
+    try {
+      const channels = await this.chatService.getUserChannels(Number(client.handshake.auth.userId));
+      channels.forEach((channel) => {
+        if (!this.roomService.getRoomClients(channel.id)) {
+          this.roomService.createRoom(channel.id);
+        }
+        this.roomService.joinRoom(client, channel.id);
+      });
+    }
+    catch (error){
+      console.error("chat init rooms error socket io", error.message);
+    }
+  }
 
   async handleConnection(client: Socket, @Req() req: Request, ...args: any[]) {
     try {
@@ -59,34 +90,63 @@ export class ChatGateway implements OnModuleInit {
     });
   }
 
+  @SubscribeMessage('getAllChannels')
+  async handleGetAllChannels(client: Socket): Promise<void> {
+    const userId = client.handshake.auth.userId;
+    try {
+      const channels = await this.chatService.getUserChannels(userId);
+      client.emit('allChannels', channels);
+    }
+    catch(error) {
+      console.error('error getting all channels:', error.message);
+    }
+  }
+
+  @SubscribeMessage('joinChannel')
+  async handleJoinChannel(client: Socket, @MessageBody() channelId: string) {
+    try {
+      const userId = client.handshake.auth.userID
+      console.log(userId);
+      // const canJoin = await this.chatService.checkIfUserCanJoinChannel(userId, channelId);
+      // if (canJoin) {
+      //   client.join(channelId);
+      //   client.emit('channelJoined', channelId);
+      // }
+      // else {
+      //   client.emit('channelJoinError', 'You have no primission to join the channel.')
+      // }
+    }
+    catch(error) {
+      console.error('Error joining channel:', error.message);
+      client.emit('channelJoinError', 'An error occurred while joining the channel.');
+    }
+  }
+
   @SubscribeMessage('sendMessage')
-  async handleSendMessage(client: Socket, payload): Promise<void> {
+  async handleSendMessage(client: Socket, @MessageBody() sendMessageDto: SendMessageDto): Promise<void> {
     console.log('sendMessage');
+    const { userId, channelId, message } = sendMessageDto;
+    if (userId && channelId && message) {
+      try {
+        const channel = await this.chatService.getChannelById(channelId);
+        if (channel) {
+          const messageSend = await this.chatService.addMessage(userId, channelId, message);
+          if (!messageSend)
+            throw new Error("Message cannot be send");
+          console.log(messageSend);
+          this.server.emit('newMessage', {userId, message });
+        }
+      }
+      catch (error){
+        console.error("sendMessage error", error.message);
+      }
+    }
     return ;
   }
  
   // @SubscribeMessage('findAllMessages')
   // async findAll(@Req() req) {
   // }
-
-  async InitRooms(client: Socket) {
-    try {
-      const channels = await this.chatService.getUserChannels(Number(client.handshake.auth.userId));
-      channels.forEach((channel) => {
-        if (!this.roomService.getRoomClients(channel.id)) {
-          this.roomService.createRoom(channel.id);
-        }
-        this.roomService.joinRooms(client, channel.id);
-      });
-    }
-    catch (error){
-      console.error("chat init rooms error socket io", error.message);
-    }
-  }
-
-  createRoom(roomName: string) {
-    this.roomService.createRoom(roomName);
-  }
 
   @SubscribeMessage('createChannel')
   async createChannel(@ConnectedSocket() client: Socket,@MessageBody() channelName: string) {
@@ -113,12 +173,6 @@ export class ChatGateway implements OnModuleInit {
       console.log(channel.id);
     });
   }
-  @SubscribeMessage('join')
-  joinChannel(@MessageBody('name') name: string,
-   @ConnectedSocket() client: Socket,
-   ){
-    console.log('join')
-   }
 
   @SubscribeMessage('typing')
   async typing(@MessageBody('isTyping') isTyping: boolean, 
