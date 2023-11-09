@@ -11,7 +11,6 @@ import { LoginDto } from './dtos/LoginDto';
 import { SetupDto } from './dtos/SetupDto';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
 import * as path from 'path';
 import fetch from 'node-fetch';
@@ -24,7 +23,6 @@ export class AuthService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
   ) {}
 
   /* -------------------------------------------------------------------------- */
@@ -67,7 +65,7 @@ export class AuthService {
 
   private async generateJwtToken(payload: any, expiresIn: string) {
     const token = await this.jwtService.signAsync(payload, {
-      secret: this.configService.get('JWT_SECRET'),
+      secret: process.env.JWT_SECRET,
       expiresIn: expiresIn,
     });
 
@@ -167,25 +165,21 @@ export class AuthService {
       session.fortyTwoId = fortyTwoId;
       session.fortyTwoAvatar = fortyTwoAvatar;
 
-      return res.redirect(
-        this.configService.get('VITE_FRONT_URL') + '/register/setup',
-      );
+      return res.redirect(process.env.VITE_FRONT_URL + '/register/setup');
     }
 
     if (user.twoFa) {
       session.userId = user.id;
       session.twoFa = true;
 
-      return res.redirect(
-        this.configService.get('VITE_FRONT_URL') + '/login/twofa',
-      );
+      return res.redirect(process.env.VITE_FRONT_URL + '/login/twofa');
     }
 
     const payload = { id: user.id, username: user.username };
     const token = await this.generateJwtToken(payload, '2h');
     await this.setAccessTokenCookie(res, token, this.cookieExpirationTime);
 
-    return res.redirect(this.configService.get('VITE_FRONT_URL'));
+    return res.redirect(process.env.VITE_FRONT_URL);
   }
 
   async setup(session, body: SetupDto, res) {
