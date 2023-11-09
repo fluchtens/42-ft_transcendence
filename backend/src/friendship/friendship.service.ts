@@ -197,9 +197,14 @@ export class FriendshipService {
       if (friendship.status === FriendshipStatus.BLOCKED) {
         throw new BadRequestException('This user is already blocked');
       }
+
       await this.prismaService.friendship.update({
         where: { id: friendship.id },
-        data: { status: FriendshipStatus.BLOCKED },
+        data: {
+          sender: { connect: { id: reqUserId } },
+          receiver: { connect: { id: targetUserId } },
+          status: FriendshipStatus.BLOCKED,
+        },
       });
     }
 
@@ -235,16 +240,25 @@ export class FriendshipService {
         throw new BadRequestException('You are already friends with this user');
       } else if (friendship.status === FriendshipStatus.BLOCKED) {
         throw new BadRequestException('This user is blocked');
+      } else if (friendship.status === FriendshipStatus.DECLINED) {
+        await this.prismaService.friendship.update({
+          where: { id: friendship.id },
+          data: {
+            sender: { connect: { id: senderId } },
+            receiver: { connect: { id: receiverId } },
+            status: FriendshipStatus.PENDING,
+          },
+        });
       }
+    } else {
+      await this.prismaService.friendship.create({
+        data: {
+          sender: { connect: { id: senderId } },
+          receiver: { connect: { id: receiverId } },
+          status: FriendshipStatus.PENDING,
+        },
+      });
     }
-
-    await this.prismaService.friendship.create({
-      data: {
-        sender: { connect: { id: senderId } },
-        receiver: { connect: { id: receiverId } },
-        status: FriendshipStatus.PENDING,
-      },
-    });
 
     return { message: `Friend request sent to ${receiverUser.username}` };
   }
@@ -272,5 +286,32 @@ export class FriendshipService {
     });
 
     return { message: `You are now friends with ${senderUser.username}` };
+  }
+
+  async declineFriendRequest(receiverId: number, senderId: number) {
+    if (receiverId === senderId) {
+      throw new BadRequestException("You can't be friends with yourself");
+    }
+
+    const senderUser = await this.findUserById(senderId);
+    if (!senderUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    const friendship = await this.findPendingRequest(senderId, receiverId);
+    if (!friendship) {
+      throw new BadRequestException(
+        'You have not received an invitation from this user',
+      );
+    }
+
+    await this.prismaService.friendship.update({
+      where: { id: friendship.id },
+      data: { status: FriendshipStatus.DECLINED },
+    });
+
+    return {
+      message: `You have deleted the friend request of ${senderUser.username}`,
+    };
   }
 }

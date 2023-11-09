@@ -92,9 +92,31 @@ async function acceptFriendRequestApi(userId: number): Promise<AuthRes> {
   }
 }
 
+async function declineFriendRequestApi(userId: number): Promise<AuthRes> {
+  try {
+    const response = await fetch(`${API_URL}/request/decline`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId }),
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      return { success: false, message: data.message };
+    }
+
+    return { success: true, message: data.message };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: ERR_MSG };
+  }
+}
+
 export {
   getFriendsApi,
   getFriendRequestsApi,
   sendFriendRequestApi,
   acceptFriendRequestApi,
+  declineFriendRequestApi,
 };

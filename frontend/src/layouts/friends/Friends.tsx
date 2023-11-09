@@ -48,8 +48,11 @@ function Friends() {
     setUser(user);
 
     const friends = await getFriendsApi(user.id);
-    if (!friends || !friends.length) return;
-    setFriends(friends);
+    if (!friends || !friends.length) {
+      setFriends(null);
+    } else {
+      setFriends(friends);
+    }
 
     const friendReq = await getFriendRequestsApi();
     if (friendReq && friendReq.length) {

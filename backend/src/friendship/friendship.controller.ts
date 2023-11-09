@@ -69,4 +69,12 @@ export class FriendshipController {
     const { userId } = body;
     return this.friendshipService.acceptFriendRequest(id, userId);
   }
+
+  @Patch('request/decline')
+  @UseGuards(JwtAuthGuard)
+  async declineFriendRequest(@Req() req, @Body() body: UserIdDto) {
+    const { id } = req.user;
+    const { userId } = body;
+    return this.friendshipService.declineFriendRequest(id, userId);
+  }
 }

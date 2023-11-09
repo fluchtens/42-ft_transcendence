@@ -3,7 +3,10 @@ import styles from "./UserElement.module.scss";
 import { AiFillCheckCircle } from "react-icons/ai";
 import { AiFillCloseCircle } from "react-icons/ai";
 import { notifyError, notifySuccess } from "../../utils/notifications";
-import { acceptFriendRequestApi } from "../../services/friendship.api";
+import {
+  acceptFriendRequestApi,
+  declineFriendRequestApi,
+} from "../../services/friendship.api";
 
 interface UserElementProps {
   friend: boolean;
@@ -23,6 +26,13 @@ const UserElement = ({
   const acceptFriendRequest = async () => {
     if (!id || !cb) return;
     const { success, message } = await acceptFriendRequestApi(id);
+    success ? notifySuccess(message) : notifyError(message);
+    cb();
+  };
+
+  const declineFriendRequest = async () => {
+    if (!id || !cb) return;
+    const { success, message } = await declineFriendRequestApi(id);
     success ? notifySuccess(message) : notifyError(message);
     cb();
   };
@@ -47,7 +57,7 @@ const UserElement = ({
             <button onClick={acceptFriendRequest}>
               <AiFillCheckCircle className={styles.accept} />
             </button>
-            <button>
+            <button onClick={declineFriendRequest}>
               <AiFillCloseCircle className={styles.decline} />
             </button>
           </div>
