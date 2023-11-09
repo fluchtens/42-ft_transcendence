@@ -1,8 +1,8 @@
 import { Outlet, useLocation } from "react-router-dom";
-import Home from "../pages/home/Home";
-import Header from "./Header";
-import Friends from "./friends/Friends";
-import { Notify } from "../utils/notifications";
+import Home from "../../pages/home/Home";
+import Header from "../header/Header";
+import Friends from "../friends/Friends";
+import { Notify } from "../../utils/notifications";
 import styles from "./Layout.module.scss";
 
 function Layout() {

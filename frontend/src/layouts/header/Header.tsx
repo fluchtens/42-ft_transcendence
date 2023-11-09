@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { MainNavLink } from "../components/MainNavLink";
-import { NavLink } from "../components/NavLink";
-import { ProfileBtn } from "../components/ProfileBtn";
-import { User } from "../types/user.interface";
-import { getUserApi } from "../services/user.api";
+import { MainNavLink } from "./MainNavLink";
+import { NavLink } from "./NavLink";
+import { ProfileBtn } from "./ProfileBtn";
+import { User } from "../../types/user.interface";
+import { getUserApi } from "../../services/user.api";
 import { AiFillHome } from "react-icons/ai";
 import { IoGameController } from "react-icons/io5";
 import { BsFillChatDotsFill } from "react-icons/bs";

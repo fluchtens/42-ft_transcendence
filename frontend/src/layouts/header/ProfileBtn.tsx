@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { userLogoutApi } from "../services/auth.api";
+import { userLogoutApi } from "../../services/auth.api";
 import { IoSettings } from "react-icons/io5";
 import { FaUser } from "react-icons/fa6";
 import { FaSignOutAlt } from "react-icons/fa";
