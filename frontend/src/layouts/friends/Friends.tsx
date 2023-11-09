@@ -63,6 +63,8 @@ function Friends() {
         })
       );
       setUsersReq(usersReq as User[]);
+    } else {
+      setUsersReq(null);
     }
   };
 
