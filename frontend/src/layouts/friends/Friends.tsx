@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { User } from "../../types/user.interface";
 import { Friendship } from "../../types/friendship.interface";
 import {
+  getAllUsersApi,
   getUserApi,
   getUserByIdApi,
   getUserByUsernameApi,
@@ -47,7 +48,8 @@ function Friends() {
     if (!user) return;
     setUser(user);
 
-    const friends = await getFriendsApi(user.id);
+    // const friends = await getFriendsApi(user.id);
+    const friends = await getAllUsersApi();
     if (!friends || !friends.length) {
       setFriends(null);
     } else {

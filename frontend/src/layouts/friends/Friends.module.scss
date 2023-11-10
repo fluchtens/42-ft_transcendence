@@ -2,6 +2,7 @@
 
 .container {
   width: 14rem;
+  max-height: calc(100vh - 6rem);
   padding: 1rem 0.75rem;
   flex-direction: column;
   display: flex;
@@ -9,7 +10,6 @@
   background: $bg-secondary-color;
 
   ul {
-    max-height: calc(100vh - 6rem);
     margin: 0;
     padding: 0;
     flex-direction: column;
@@ -17,14 +17,11 @@
     gap: 0.2rem;
     list-style-type: none;
     overflow-y: auto;
+    scrollbar-width: none; // Firefox
+    -ms-overflow-style: none; // IE (Internet Explorer) and Edge
 
     &::-webkit-scrollbar {
-      width: 0;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: transparent;
-      border-radius: 4px;
+      display: none; // WebKit-based browsers like Opera, Chrome, and Safari
     }
   }
 }
