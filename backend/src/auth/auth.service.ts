@@ -1,8 +1,6 @@
 import {
   BadRequestException,
   ConflictException,
-  HttpException,
-  HttpStatus,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -124,9 +122,9 @@ export class AuthService {
     return { message: 'User succesfully disconnected' };
   }
 
-  async verifyJwt(token: string) : Promise<any> {
+  async verifyJwt(token: string): Promise<any> {
     try {
-      const actoken = "access_token=" + token
+      const actoken = 'access_token=' + token;
       console.log(actoken);
       // const ver = await this.jwtService.verify(token);
       console.log('test');
@@ -135,8 +133,7 @@ export class AuthService {
       return decodedToken;
       // const user = await this.findUserById(decodedToken.user.id)
       //check user
-    }
-    catch (error){
+    } catch (error) {
       console.log('error', error);
     }
   }
@@ -237,7 +234,7 @@ export class AuthService {
       throw new NotFoundException('2FA secret not found');
     }
 
-    const isValidToken = authenticator.verify({ 
+    const isValidToken = authenticator.verify({
       token: code,
       secret: user.twoFaSecret,
     });
