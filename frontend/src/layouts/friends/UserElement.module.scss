@@ -61,10 +61,11 @@
     }
 
     .username {
-      width: 6rem;
+      width: 6.25rem;
       margin: 0;
       overflow: hidden;
       text-overflow: ellipsis;
+      white-space: nowrap;
       font-size: map-get($text-sm, font-size);
       line-height: map-get($text-sm, line-height);
       font-weight: $font-normal;
@@ -75,9 +76,10 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    gap: 0.4rem;
 
     button {
-      padding: 0.45rem 0.3rem;
+      padding: 0.4rem 0;
       display: flex;
       justify-content: center;
       align-items: center;
