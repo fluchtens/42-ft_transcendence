@@ -23,15 +23,15 @@ export const  Websocket = () => {
   }, []);
 
   const onSubmit = () => {
-    console.log(value);
+    console.log("test");
     // socket.emit('createChannel', value);
     socket.emit('getAllChannels');
-    socket.on('allChannels', (channels) => {
-      console.log('Received all channels:', channels);
-      channels.forEach((channel: any) => {
-       socket.emit('joinChannel', channel.id);
-      });
-    })
+    // socket.on('allChannels', (channels) => {
+    //   console.log('Received all channels:', channels);
+    //   channels.forEach((channel: any) => {
+    //    socket.emit('joinChannel', channel.id);
+    //   });
+    // })
     setValue('');
   }
   return (

@@ -114,6 +114,8 @@ export class ChatService{
   }
 
   async getUserChannels(userId: any): Promise<any> {
+    if (!userId)
+      throw new BadRequestException("userId not found");
     try {
       const userInfo = await this.prismaService.user.findUnique({
         where: {
