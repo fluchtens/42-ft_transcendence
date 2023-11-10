@@ -17,50 +17,70 @@ export class UserService {
   constructor(private readonly prismaService: PrismaService) {}
 
   /* -------------------------------------------------------------------------- */
-  /*                                   Private                                  */
+  /*                                    Utils                                   */
   /* -------------------------------------------------------------------------- */
 
-  private async findUserById(id: number) {
+  async findUserById(id: number) {
     return this.prismaService.user.findUnique({
       where: { id },
     });
   }
 
-  private async findUserByUsername(username: string) {
+  async findUserByUsername(username: string) {
     return this.prismaService.user.findUnique({
       where: { username },
     });
   }
 
-  private async findUserAvatar(id: number) {
+  async findUserByFortyTwoId(fortyTwoId: number) {
+    return this.prismaService.user.findUnique({
+      where: { fortyTwoId },
+    });
+  }
+
+  async findUserAvatar(id: number) {
     return this.prismaService.user.findUnique({
       where: { id },
       select: { avatar: true },
     });
   }
 
-  private async updateUserUsername(id: number, username: string) {
+  async updateUserUsername(id: number, username: string) {
     return this.prismaService.user.update({
       where: { id },
       data: { username },
     });
   }
 
-  private async updateUserAvatar(id: number, avatar: string) {
+  async updateUserAvatar(id: number, avatar: string) {
     return this.prismaService.user.update({
       where: { id },
       data: { avatar },
     });
   }
 
-  private async updateUserPassword(id: number, password: string) {
+  async updateUserPassword(id: number, password: string) {
     return this.prismaService.user.update({
       where: { id },
       data: { password },
     });
   }
 
-  private exclude<User, Key extends keyof User>(
+  async updateUserTwoFa(id: number, twoFa: boolean) {
+    return this.prismaService.user.update({
+      where: { id },
+      data: { twoFa },
+    });
+  }
+
+  async updateUserTwoFaSecret(id: number, twoFaSecret: string) {
+    return this.prismaService.user.update({
+      where: { id },
+      data: { twoFaSecret },
+    });
+  }
+
+  exclude<User, Key extends keyof User>(
     user: User,
     keys: Key[],
   ): Omit<User, Key> {
