@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react"
-import { WebsocketContext } from "../services/chat.socket"
+import { WebsocketContext } from "../services/chat.socket";
 
 
 export const  Websocket = () => {
@@ -10,24 +10,37 @@ export const  Websocket = () => {
     socket.on('connect', () => {
       console.log('Connected!');
     });
-    socket.on('onMessage', (data) => {
-      console.log('onMessage event received!');
+    socket.on('sendMessage', (data: any) => {
+      console.log('sendMessage event received!');
       console.log(data);
     });
 
     return () => {
       console.log('Unregistering Events...');
       socket.off('connect');
-      socket.off('onMessage');
+      socket.off('sendMessage');
     };
   }, []);
 
   const onSubmit = () => {
-    socket.emit('newMessage', value);
+    console.log("test");
+    // socket.emit('createChannel', value);
+    socket.emit('getAllChannels');
+    // socket.on('allChannels', (channels) => {
+    //   console.log('Received all channels:', channels);
+    //   channels.forEach((channel: any) => {
+    //    socket.emit('joinChannel', channel.id);
+    //   });
+    // })
     setValue('');
   }
   return (
     <div>
+        <div>
+    <ul>
+     
+    </ul>
+  </div>
       <div>
         <h1> Websocket </h1>
         <input type="text" value={value} onChange={(e) => setValue(e.target.value)}/>

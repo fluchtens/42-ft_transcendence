@@ -1,9 +1,13 @@
-import styles from "./Chat.module.scss";
+import { Websocket } from "../../components/chat.websocket";
+import { socket, WebsocketPovider } from "../../services/chat.socket";
 
 function Chat() {
   return (
-    <div className={styles.container}>
-      <h1>Channels</h1>
+    <div>
+      <h1>Chat</h1>
+      <WebsocketPovider value={socket}>
+        <Websocket />
+      </WebsocketPovider>
     </div>
   );
 }
