@@ -33,9 +33,8 @@ export class UserService {
 
   async findUserByUsername(username: string) {
     try {
-      const lowercaseUsername = username.toLowerCase();
       const user = await this.prismaService.user.findUnique({
-        where: { username: lowercaseUsername },
+        where: { username },
       });
       return user;
     } catch (error) {
