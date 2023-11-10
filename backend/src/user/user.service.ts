@@ -21,21 +21,36 @@ export class UserService {
   /* -------------------------------------------------------------------------- */
 
   async findUserById(id: number) {
-    return this.prismaService.user.findUnique({
-      where: { id },
-    });
+    try {
+      const user = await this.prismaService.user.findUnique({
+        where: { id },
+      });
+      return user;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
   async findUserByUsername(username: string) {
-    return this.prismaService.user.findUnique({
-      where: { username },
-    });
+    try {
+      const user = await this.prismaService.user.findUnique({
+        where: { username },
+      });
+      return user;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
   async findUserByFortyTwoId(fortyTwoId: number) {
-    return this.prismaService.user.findUnique({
-      where: { fortyTwoId },
-    });
+    try {
+      const user = await this.prismaService.user.findUnique({
+        where: { fortyTwoId },
+      });
+      return user;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
   async findUserAvatar(id: number) {

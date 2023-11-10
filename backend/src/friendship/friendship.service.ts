@@ -5,26 +5,18 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { FriendshipStatus } from '@prisma/client';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class FriendshipService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly userService: UserService,
+  ) {}
 
   /* -------------------------------------------------------------------------- */
   /*                                   Private                                  */
   /* -------------------------------------------------------------------------- */
-
-  private async findUserById(id: number) {
-    try {
-      const user = await this.prismaService.user.findUnique({
-        where: { id },
-      });
-
-      return user;
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
-  }
 
   private async findFriendship(senderId: number, receiverId: number) {
     try {
@@ -157,7 +149,7 @@ export class FriendshipService {
       throw new BadRequestException("You can't delete yourself");
     }
 
-    const targetUser = await this.findUserById(targetUserId);
+    const targetUser = await this.userService.findUserById(targetUserId);
     if (!targetUser) {
       throw new NotFoundException('User not found');
     }
@@ -179,7 +171,7 @@ export class FriendshipService {
       throw new BadRequestException("You can't block yourself");
     }
 
-    const targetUser = await this.findUserById(targetUserId);
+    const targetUser = await this.userService.findUserById(targetUserId);
     if (!targetUser) {
       throw new NotFoundException('User not found');
     }
@@ -225,7 +217,7 @@ export class FriendshipService {
       throw new BadRequestException("You can't be friends with yourself");
     }
 
-    const receiverUser = await this.findUserById(receiverId);
+    const receiverUser = await this.userService.findUserById(receiverId);
     if (!receiverUser) {
       throw new NotFoundException('User not found');
     }
@@ -268,7 +260,7 @@ export class FriendshipService {
       throw new BadRequestException("You can't be friends with yourself");
     }
 
-    const senderUser = await this.findUserById(senderId);
+    const senderUser = await this.userService.findUserById(senderId);
     if (!senderUser) {
       throw new NotFoundException('User not found');
     }
@@ -293,7 +285,7 @@ export class FriendshipService {
       throw new BadRequestException("You can't be friends with yourself");
     }
 
-    const senderUser = await this.findUserById(senderId);
+    const senderUser = await this.userService.findUserById(senderId);
     if (!senderUser) {
       throw new NotFoundException('User not found');
     }
