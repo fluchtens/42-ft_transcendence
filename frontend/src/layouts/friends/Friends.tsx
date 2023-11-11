@@ -15,6 +15,9 @@ import { AddFriendBar } from "./AddFriendBar";
 import { UserElement } from "./UserElement";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import styles from "./Friends.module.scss";
+import { io } from "socket.io-client";
+
+const socket = io("http://localhost:3000");
 
 function Friends() {
   const [user, setUser] = useState<User | null>(null);
@@ -73,6 +76,15 @@ function Friends() {
   };
 
   useEffect(() => {
+    const addNewRequest = async (payload: any) => {
+      const user = await getUserByIdApi(payload.senderId);
+      if (!user) return;
+
+      setUsersReq([...(usersReq || []), user]);
+    };
+
+    socket.on("friendRequest", addNewRequest);
+
     getData();
   }, []);
 

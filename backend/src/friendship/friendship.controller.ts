@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   Param,
   ParseIntPipe,
   Patch,
@@ -13,10 +14,15 @@ import {
 import { FriendshipService } from './friendship.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UserIdDto } from 'src/user/dtos/UserIdDto';
+import { FriendshipGateway } from './friendship.gateway';
 
 @Controller('friendship')
 export class FriendshipController {
-  constructor(private readonly friendshipService: FriendshipService) {}
+  constructor(
+    private readonly friendshipService: FriendshipService,
+    @Inject(FriendshipGateway)
+    private readonly friendshipGateway: FriendshipGateway,
+  ) {}
 
   /* -------------------------------------------------------------------------- */
   /*                                   General                                  */
@@ -59,6 +65,10 @@ export class FriendshipController {
   async sendFriendRequest(@Req() req, @Body() body: UserIdDto) {
     const { id } = req.user;
     const { userId } = body;
+
+    const payload = { senderId: id, receiverId: userId };
+    this.friendshipGateway.handleFriendRequest(null, payload);
+
     return this.friendshipService.sendFriendRequest(id, userId);
   }
 
