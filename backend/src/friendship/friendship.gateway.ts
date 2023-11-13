@@ -3,23 +3,29 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({
+  namespace: 'friendship',
   cors: {
     origin: ['http://localhost'],
     credentials: true,
   },
 })
 export class FriendshipGateway {
-  @WebSocketServer() server: Server;
+  @WebSocketServer()
+  server: Server;
 
-  handleConnection(client: any, ...args: any[]): any {
-    console.log('Client connected to FriendshipGateway:', client.id);
+  handleConnection(client: Socket) {
+    console.log(`FriendshipGateway: Client connected: ${client.id}`);
   }
 
-  @SubscribeMessage('friendRequest')
-  handleFriendRequest(client: any, payload: any): void {
-    this.server.emit('friendRequest', payload);
+  handleDisconnect(client: Socket) {
+    console.log(`FriendshipGateway: Client disconnected: ${client.id}`);
+  }
+
+  @SubscribeMessage('reloadList')
+  handleReloadList() {
+    this.server.emit('reloadList');
   }
 }

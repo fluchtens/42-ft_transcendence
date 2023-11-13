@@ -20,7 +20,6 @@ import { FriendshipGateway } from './friendship.gateway';
 export class FriendshipController {
   constructor(
     private readonly friendshipService: FriendshipService,
-    @Inject(FriendshipGateway)
     private readonly friendshipGateway: FriendshipGateway,
   ) {}
 
@@ -65,11 +64,9 @@ export class FriendshipController {
   async sendFriendRequest(@Req() req, @Body() body: UserIdDto) {
     const { id } = req.user;
     const { userId } = body;
-
-    const payload = { senderId: id, receiverId: userId };
-    this.friendshipGateway.handleFriendRequest(null, payload);
-
-    return this.friendshipService.sendFriendRequest(id, userId);
+    const res = await this.friendshipService.sendFriendRequest(id, userId);
+    this.friendshipGateway.handleReloadList();
+    return res;
   }
 
   @Patch('request/accept')
@@ -77,7 +74,9 @@ export class FriendshipController {
   async acceptFriendRequest(@Req() req, @Body() body: UserIdDto) {
     const { id } = req.user;
     const { userId } = body;
-    return this.friendshipService.acceptFriendRequest(id, userId);
+    const res = await this.friendshipService.acceptFriendRequest(id, userId);
+    this.friendshipGateway.handleReloadList();
+    return res;
   }
 
   @Patch('request/decline')

@@ -17,7 +17,7 @@ import { notifyError, notifySuccess } from "../../utils/notifications";
 import styles from "./Friends.module.scss";
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:3000");
+const socket = io("http://localhost:3000/friendship");
 
 function Friends() {
   const [user, setUser] = useState<User | null>(null);
@@ -29,7 +29,7 @@ function Friends() {
     setAddUser(e.target.value);
   };
 
-  const sendFriendRequest = async (e: React.FormEvent) => {
+  const sendRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!addUser) return;
 
@@ -58,10 +58,10 @@ function Friends() {
       setFriends(friends);
     }
 
-    const friendReq = await getFriendRequestsApi();
-    if (friendReq && friendReq.length) {
+    const requests = await getFriendRequestsApi();
+    if (requests && requests.length) {
       const usersReq = await Promise.all(
-        friendReq.map(async (request: Friendship) => {
+        requests.map(async (request: Friendship) => {
           const user = await getUserByIdApi(request.senderId);
           if (user) {
             user.friendship = request;
@@ -76,16 +76,12 @@ function Friends() {
   };
 
   useEffect(() => {
-    const addNewRequest = async (payload: any) => {
-      const user = await getUserByIdApi(payload.senderId);
-      if (!user) return;
-
-      setUsersReq([...(usersReq || []), user]);
-    };
-
-    socket.on("friendRequest", addNewRequest);
-
     getData();
+    socket.on("reloadList", getData);
+
+    return () => {
+      socket.off("reloadList", getData);
+    };
   }, []);
 
   return (
@@ -95,7 +91,7 @@ function Friends() {
           <AddFriendBar
             value={addUser}
             onChange={changeAddUser}
-            onSubmit={sendFriendRequest}
+            onSubmit={sendRequest}
           />
           <ul>
             {usersReq?.map((user) => (
