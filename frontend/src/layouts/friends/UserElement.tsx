@@ -10,31 +10,20 @@ import {
 
 interface UserElementProps {
   friend: boolean;
-  id?: number;
+  id: number;
   username: string;
   avatar: string;
-  cb?: () => void;
 }
 
-const UserElement = ({
-  friend,
-  id,
-  username,
-  avatar,
-  cb,
-}: UserElementProps) => {
+const UserElement = ({ friend, id, username, avatar }: UserElementProps) => {
   const acceptFriendRequest = async () => {
-    if (!id || !cb) return;
     const { success, message } = await acceptFriendRequestApi(id);
     success ? notifySuccess(message) : notifyError(message);
-    cb();
   };
 
   const declineFriendRequest = async () => {
-    if (!id || !cb) return;
     const { success, message } = await declineFriendRequestApi(id);
     success ? notifySuccess(message) : notifyError(message);
-    cb();
   };
 
   return (

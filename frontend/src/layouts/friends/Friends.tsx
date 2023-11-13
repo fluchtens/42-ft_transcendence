@@ -101,7 +101,6 @@ function Friends() {
                   id={user.id}
                   username={user.username}
                   avatar={user.avatar}
-                  cb={getData}
                 />
               </li>
             ))}
@@ -109,6 +108,7 @@ function Friends() {
               <li key={user.id}>
                 <UserElement
                   friend={true}
+                  id={user.id}
                   username={user.username}
                   avatar={user.avatar}
                 />

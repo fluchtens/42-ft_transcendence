@@ -64,8 +64,10 @@ export class FriendshipController {
   async sendFriendRequest(@Req() req, @Body() body: UserIdDto) {
     const { id } = req.user;
     const { userId } = body;
+
     const res = await this.friendshipService.sendFriendRequest(id, userId);
     this.friendshipGateway.handleReloadList();
+
     return res;
   }
 
@@ -74,8 +76,10 @@ export class FriendshipController {
   async acceptFriendRequest(@Req() req, @Body() body: UserIdDto) {
     const { id } = req.user;
     const { userId } = body;
+
     const res = await this.friendshipService.acceptFriendRequest(id, userId);
     this.friendshipGateway.handleReloadList();
+
     return res;
   }
 
@@ -84,6 +88,10 @@ export class FriendshipController {
   async declineFriendRequest(@Req() req, @Body() body: UserIdDto) {
     const { id } = req.user;
     const { userId } = body;
-    return this.friendshipService.declineFriendRequest(id, userId);
+
+    const res = await this.friendshipService.declineFriendRequest(id, userId);
+    this.friendshipGateway.handleReloadList();
+
+    return res;
   }
 }
