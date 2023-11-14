@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { userLogoutApi } from "../../services/auth.api";
 import { IoSettings } from "react-icons/io5";
@@ -16,13 +16,10 @@ interface ProfileBtnProps {
 const ProfileBtn = ({ username, avatar, onLogout }: ProfileBtnProps) => {
   const [menu, setMenu] = useState(false);
   const navigate = useNavigate();
+  const contextMenuRef = useRef<HTMLDivElement>(null);
 
   const handleMenu = () => {
     setMenu(!menu);
-  };
-
-  const closeMenu = () => {
-    setMenu(false);
   };
 
   const handleLogout = async () => {
@@ -32,8 +29,19 @@ const ProfileBtn = ({ username, avatar, onLogout }: ProfileBtnProps) => {
     navigate("/");
   };
 
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (contextMenuRef.current) {
+        if (!contextMenuRef.current.contains(e.target as Node)) {
+          setMenu(false);
+        }
+      }
+    };
+    document.addEventListener("mousedown", handler);
+  }, []);
+
   return (
-    <div className={styles.container}>
+    <div className={styles.container} ref={contextMenuRef}>
       <button className={styles.userBtn} onClick={handleMenu}>
         <p>{username}</p>
         <div className={styles.avatar}>
@@ -44,13 +52,13 @@ const ProfileBtn = ({ username, avatar, onLogout }: ProfileBtnProps) => {
         <div className={styles.menu}>
           <Link
             to={`/user/${username}`}
-            onClick={closeMenu}
+            onClick={handleMenu}
             className={styles.link}
           >
             <FaUser className={styles.icon}></FaUser>
             Profile
           </Link>
-          <Link to="/settings" onClick={closeMenu} className={styles.link}>
+          <Link to="/settings" onClick={handleMenu} className={styles.link}>
             <IoSettings className={styles.icon}></IoSettings>
             Settings
           </Link>
