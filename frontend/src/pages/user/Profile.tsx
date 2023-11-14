@@ -26,7 +26,7 @@ export default function Profile() {
       setUser(data);
     };
     getUser();
-  }, []);
+  }, [username]);
 
   return (
     <>
