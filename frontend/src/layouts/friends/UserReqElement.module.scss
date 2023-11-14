@@ -1,0 +1,81 @@
+@import "../../styles/config.scss";
+
+.requestContainer {
+  .requestBtn {
+    width: 100%;
+    padding: 0.4rem 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    border: none;
+    border-radius: $rounded-md;
+    background: $extra-tertiary-color;
+    text-align: left;
+    cursor: pointer;
+
+    .userInfo {
+      display: flex;
+      justify-content: left;
+      align-items: center;
+      gap: 0.75rem;
+
+      img {
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+
+      .username {
+        width: 6.25rem;
+        margin: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: map-get($text-sm, font-size);
+        line-height: map-get($text-sm, line-height);
+        font-weight: $font-normal;
+      }
+    }
+  }
+
+  .buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.4rem;
+
+    button {
+      padding: 0.4rem 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+
+      .accept {
+        width: 1.25rem;
+        height: 1.25rem;
+        transition: color 0.3s;
+        color: $sucess-primary-color;
+
+        &:hover {
+          color: $sucess-secondary-color;
+        }
+      }
+
+      .decline {
+        width: 1.25rem;
+        height: 1.25rem;
+        transition: color 0.3s;
+        color: rgb(231, 76, 60, 0.9);
+
+        &:hover {
+          color: rgb(231, 76, 60);
+        }
+      }
+    }
+  }
+}

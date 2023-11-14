@@ -17,6 +17,7 @@ import { UserElement } from "./UserElement";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import styles from "./Friends.module.scss";
 import { io } from "socket.io-client";
+import { UserReqElement } from "./UserReqElement";
 
 const socket = io("http://localhost:3000/friendship");
 
@@ -25,9 +26,14 @@ function Friends() {
   const [friends, setFriends] = useState<User[] | null>(null);
   const [usersReq, setUsersReq] = useState<User[] | null>(null);
   const [addUser, setAddUser] = useState<string>("");
+  const [contextMenu, setContextMenu] = useState<number | null>(null);
 
   const changeAddUser = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAddUser(e.target.value);
+  };
+
+  const toggleContextMenu = (userId: number) => {
+    setContextMenu(contextMenu === userId ? null : userId);
   };
 
   const sendRequest = async (e: React.FormEvent) => {
@@ -97,21 +103,22 @@ function Friends() {
           <ul>
             {usersReq?.map((user) => (
               <li key={user.id}>
-                <UserElement
-                  friend={false}
+                <UserReqElement
                   id={user.id}
                   username={user.username}
                   avatar={user.avatar}
+                  contextMenu={contextMenu === user.id}
+                  toggleContextMenu={() => toggleContextMenu(user.id)}
                 />
               </li>
             ))}
             {friends?.map((user) => (
               <li key={user.id}>
                 <UserElement
-                  friend={true}
-                  id={user.id}
                   username={user.username}
                   avatar={user.avatar}
+                  contextMenu={contextMenu === user.id}
+                  toggleContextMenu={() => toggleContextMenu(user.id)}
                 />
               </li>
             ))}

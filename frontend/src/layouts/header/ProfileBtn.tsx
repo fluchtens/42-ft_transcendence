@@ -15,8 +15,8 @@ interface ProfileBtnProps {
 
 const ProfileBtn = ({ username, avatar, onLogout }: ProfileBtnProps) => {
   const [menu, setMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const contextMenuRef = useRef<HTMLDivElement>(null);
 
   const handleMenu = () => {
     setMenu(!menu);
@@ -31,8 +31,8 @@ const ProfileBtn = ({ username, avatar, onLogout }: ProfileBtnProps) => {
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (contextMenuRef.current) {
-        if (!contextMenuRef.current.contains(e.target as Node)) {
+      if (menuRef.current) {
+        if (!menuRef.current.contains(e.target as Node)) {
           setMenu(false);
         }
       }
@@ -41,7 +41,7 @@ const ProfileBtn = ({ username, avatar, onLogout }: ProfileBtnProps) => {
   }, []);
 
   return (
-    <div className={styles.container} ref={contextMenuRef}>
+    <div className={styles.container} ref={menuRef}>
       <button className={styles.userBtn} onClick={handleMenu}>
         <p>{username}</p>
         <div className={styles.avatar}>
