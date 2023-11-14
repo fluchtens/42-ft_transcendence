@@ -8,7 +8,7 @@ import { Server, Socket } from 'socket.io';
 @WebSocketGateway({
   namespace: 'friendship',
   cors: {
-    origin: ['http://localhost'],
+    origin: process.env.VITE_FRONT_URL,
     credentials: true,
   },
 })

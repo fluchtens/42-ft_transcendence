@@ -1,74 +1,83 @@
 @import "../../styles/config.scss";
 
 .friendContainer {
-  padding: 0.4rem 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  border-radius: $rounded-md;
-  cursor: pointer;
-
-  img {
-    width: 2.25rem;
-    height: 2.25rem;
-    position: relative;
-    border-radius: 50%;
-    object-fit: cover;
-  }
-
-  .username {
-    margin: 0;
-    font-size: map-get($text-sm, font-size);
-    line-height: map-get($text-sm, line-height);
-    font-weight: $font-normal;
-  }
-
-  .status {
-    margin: 0;
-    font-size: map-get($text-xs, font-size);
-    line-height: map-get($text-xs, line-height);
-    font-weight: $font-normal;
-    color: #a9a9b1;
-  }
-
-  &:hover {
-    background: $extra-tertiary-color;
-  }
-}
-
-.requestContainer {
-  padding: 0.4rem 0.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.75rem;
-  border-radius: $rounded-md;
-  background: $extra-tertiary-color;
-  cursor: pointer;
-
-  .userInfo {
+  .friendBtn {
+    width: 100%;
+    padding: 0.4rem 0.5rem;
     display: flex;
-    justify-content: left;
     align-items: center;
     gap: 0.75rem;
+    border: none;
+    border-radius: $rounded-md;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
 
     img {
       width: 2.25rem;
       height: 2.25rem;
-      position: relative;
       border-radius: 50%;
       object-fit: cover;
     }
 
     .username {
-      width: 6.25rem;
       margin: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
       font-size: map-get($text-sm, font-size);
       line-height: map-get($text-sm, line-height);
       font-weight: $font-normal;
+      color: $text-primary-color;
+    }
+
+    .status {
+      margin: 0;
+      font-size: map-get($text-xs, font-size);
+      line-height: map-get($text-xs, line-height);
+      font-weight: $font-normal;
+      color: #a9a9b1;
+    }
+
+    &:hover {
+      background: $extra-tertiary-color;
+    }
+  }
+}
+
+.requestContainer {
+  .requestBtn {
+    width: 100%;
+    padding: 0.4rem 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    border: none;
+    border-radius: $rounded-md;
+    background: $extra-tertiary-color;
+    cursor: pointer;
+
+    .userInfo {
+      display: flex;
+      justify-content: left;
+      align-items: center;
+      gap: 0.75rem;
+
+      img {
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+
+      .username {
+        width: 6.25rem;
+        margin: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: map-get($text-sm, font-size);
+        line-height: map-get($text-sm, line-height);
+        font-weight: $font-normal;
+      }
     }
   }
 

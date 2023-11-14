@@ -7,6 +7,8 @@ import {
   acceptFriendRequestApi,
   declineFriendRequestApi,
 } from "../../services/friendship.api";
+import { useState } from "react";
+import { UserContextMenu } from "./UserContextMenu";
 
 interface UserElementProps {
   friend: boolean;
@@ -16,6 +18,12 @@ interface UserElementProps {
 }
 
 const UserElement = ({ friend, id, username, avatar }: UserElementProps) => {
+  const [contextMenu, setContextMenu] = useState<boolean>(false);
+
+  const toggleContextMenu = () => {
+    setContextMenu(!contextMenu);
+  };
+
   const acceptFriendRequest = async () => {
     const { success, message } = await acceptFriendRequestApi(id);
     success ? notifySuccess(message) : notifyError(message);
@@ -30,26 +38,36 @@ const UserElement = ({ friend, id, username, avatar }: UserElementProps) => {
     <>
       {friend ? (
         <div className={styles.friendContainer}>
-          {avatar ? <img src={avatar} /> : <img src={defaultAvatar} />}
-          <div>
-            <p className={styles.username}>{username}</p>
-            <p className={styles.status}>Status</p>
-          </div>
+          <button className={styles.friendBtn} onClick={toggleContextMenu}>
+            {avatar ? <img src={avatar} /> : <img src={defaultAvatar} />}
+            <div>
+              <p className={styles.username}>{username}</p>
+              <p className={styles.status}>Status</p>
+            </div>
+          </button>
+          {contextMenu && (
+            <UserContextMenu username={username} cb={toggleContextMenu} />
+          )}
         </div>
       ) : (
         <div className={styles.requestContainer}>
-          <div className={styles.userInfo}>
-            {avatar ? <img src={avatar} /> : <img src={defaultAvatar} />}
-            <p className={styles.username}>{username}</p>
-          </div>
-          <div className={styles.buttons}>
-            <button onClick={acceptFriendRequest}>
-              <AiFillCheckCircle className={styles.accept} />
-            </button>
-            <button onClick={declineFriendRequest}>
-              <AiFillCloseCircle className={styles.decline} />
-            </button>
-          </div>
+          <button className={styles.requestBtn} onClick={toggleContextMenu}>
+            <div className={styles.userInfo}>
+              {avatar ? <img src={avatar} /> : <img src={defaultAvatar} />}
+              <p className={styles.username}>{username}</p>
+            </div>
+            <div className={styles.buttons}>
+              <button onClick={acceptFriendRequest}>
+                <AiFillCheckCircle className={styles.accept} />
+              </button>
+              <button onClick={declineFriendRequest}>
+                <AiFillCloseCircle className={styles.decline} />
+              </button>
+            </div>
+          </button>
+          {contextMenu && (
+            <UserContextMenu username={username} cb={toggleContextMenu} />
+          )}
         </div>
       )}
     </>
