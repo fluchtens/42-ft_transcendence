@@ -32,12 +32,16 @@ export class FriendshipController {
     return this.friendshipService.getFriends(parseInt(userId));
   }
 
-  @Delete('remove')
+  @Patch('remove')
   @UseGuards(JwtAuthGuard)
   async removeFriend(@Req() req, @Body() body: UserIdDto) {
     const { id } = req.user;
     const { userId } = body;
-    return this.friendshipService.removeFriend(id, userId);
+
+    const res = await this.friendshipService.removeFriend(id, userId);
+    this.friendshipGateway.handleReloadList();
+
+    return res;
   }
 
   @Patch('block')
@@ -45,7 +49,11 @@ export class FriendshipController {
   async blockUser(@Req() req, @Body() body: UserIdDto) {
     const { id } = req.user;
     const { userId } = body;
-    return this.friendshipService.blockUser(id, userId);
+
+    const res = await this.friendshipService.blockUser(id, userId);
+    this.friendshipGateway.handleReloadList();
+
+    return res;
   }
 
   /* -------------------------------------------------------------------------- */

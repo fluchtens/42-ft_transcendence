@@ -7,31 +7,27 @@ import {
   acceptFriendRequestApi,
   declineFriendRequestApi,
 } from "../../services/friendship.api";
-import { useState } from "react";
 import { UserContextMenu } from "./UserContextMenu";
+import { User } from "../../types/user.interface";
 
 interface UserReqElementProps {
-  id: number;
-  username: string;
-  avatar: string;
+  user: User;
   contextMenu: boolean;
   toggleContextMenu: () => void;
 }
 
 const UserReqElement = ({
-  id,
-  username,
-  avatar,
+  user,
   contextMenu,
   toggleContextMenu,
 }: UserReqElementProps) => {
   const acceptFriendRequest = async () => {
-    const { success, message } = await acceptFriendRequestApi(id);
+    const { success, message } = await acceptFriendRequestApi(user.id);
     success ? notifySuccess(message) : notifyError(message);
   };
 
   const declineFriendRequest = async () => {
-    const { success, message } = await declineFriendRequestApi(id);
+    const { success, message } = await declineFriendRequestApi(user.id);
     success ? notifySuccess(message) : notifyError(message);
   };
 
@@ -39,8 +35,12 @@ const UserReqElement = ({
     <div className={styles.requestContainer}>
       <button className={styles.requestBtn} onClick={toggleContextMenu}>
         <div className={styles.userInfo}>
-          {avatar ? <img src={avatar} /> : <img src={defaultAvatar} />}
-          <p className={styles.username}>{username}</p>
+          {user.avatar ? (
+            <img src={user.avatar} />
+          ) : (
+            <img src={defaultAvatar} />
+          )}
+          <p className={styles.username}>{user.username}</p>
         </div>
         <div className={styles.buttons}>
           <button onClick={acceptFriendRequest}>
@@ -51,9 +51,7 @@ const UserReqElement = ({
           </button>
         </div>
       </button>
-      {contextMenu && (
-        <UserContextMenu username={username} cb={toggleContextMenu} />
-      )}
+      {contextMenu && <UserContextMenu user={user} cb={toggleContextMenu} />}
     </div>
   );
 };

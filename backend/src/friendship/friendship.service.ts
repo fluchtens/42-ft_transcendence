@@ -159,8 +159,13 @@ export class FriendshipService {
       throw new BadRequestException('You are not friends with this user');
     }
 
-    await this.prismaService.friendship.delete({
+    await this.prismaService.friendship.update({
       where: { id: friendship.id },
+      data: {
+        sender: { connect: { id: reqUserId } },
+        receiver: { connect: { id: targetUserId } },
+        status: FriendshipStatus.DELETED,
+      },
     });
 
     return { message: 'Friend removed successfully' };
@@ -232,7 +237,7 @@ export class FriendshipService {
         throw new BadRequestException('You are already friends with this user');
       } else if (friendship.status === FriendshipStatus.BLOCKED) {
         throw new BadRequestException('This user is blocked');
-      } else if (friendship.status === FriendshipStatus.DECLINED) {
+      } else {
         await this.prismaService.friendship.update({
           where: { id: friendship.id },
           data: {

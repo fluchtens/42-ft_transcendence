@@ -57,8 +57,8 @@ function Friends() {
     if (!user) return;
     setUser(user);
 
-    const friends = await getAllUsersApi();
-    // const friends = await getFriendsApi(user.id);
+    // const friends = await getAllUsersApi();
+    const friends = await getFriendsApi(user.id);
     if (!friends || !friends.length) {
       setFriends(null);
     } else {
@@ -104,9 +104,7 @@ function Friends() {
             {usersReq?.map((user) => (
               <li key={user.id}>
                 <UserReqElement
-                  id={user.id}
-                  username={user.username}
-                  avatar={user.avatar}
+                  user={user}
                   contextMenu={contextMenu === user.id}
                   toggleContextMenu={() => toggleContextMenu(user.id)}
                 />
@@ -115,8 +113,7 @@ function Friends() {
             {friends?.map((user) => (
               <li key={user.id}>
                 <UserElement
-                  username={user.username}
-                  avatar={user.avatar}
+                  user={user}
                   contextMenu={contextMenu === user.id}
                   toggleContextMenu={() => toggleContextMenu(user.id)}
                 />

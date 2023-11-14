@@ -1,35 +1,29 @@
 import defaultAvatar from "/default_avatar.png";
 import styles from "./UserElement.module.scss";
-import { useState } from "react";
 import { UserContextMenu } from "./UserContextMenu";
+import { User } from "../../types/user.interface";
 
 interface UserElementProps {
-  username: string;
-  avatar: string;
+  user: User;
   contextMenu: boolean;
   toggleContextMenu: () => void;
 }
 
 const UserElement = ({
-  username,
-  avatar,
+  user,
   contextMenu,
   toggleContextMenu,
-}: UserElementProps) => {
-  return (
-    <div className={styles.friendContainer}>
-      <button className={styles.friendBtn} onClick={toggleContextMenu}>
-        {avatar ? <img src={avatar} /> : <img src={defaultAvatar} />}
-        <div>
-          <p className={styles.username}>{username}</p>
-          <p className={styles.status}>Status</p>
-        </div>
-      </button>
-      {contextMenu && (
-        <UserContextMenu username={username} cb={toggleContextMenu} />
-      )}
-    </div>
-  );
-};
+}: UserElementProps) => (
+  <div className={styles.friendContainer}>
+    <button className={styles.friendBtn} onClick={toggleContextMenu}>
+      {user.avatar ? <img src={user.avatar} /> : <img src={defaultAvatar} />}
+      <div>
+        <p className={styles.username}>{user.username}</p>
+        <p className={styles.status}>Status</p>
+      </div>
+    </button>
+    {contextMenu && <UserContextMenu user={user} cb={toggleContextMenu} />}
+  </div>
+);
 
 export { UserElement };
