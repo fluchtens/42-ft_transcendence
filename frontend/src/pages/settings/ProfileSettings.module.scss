@@ -10,7 +10,6 @@
     display: flex;
     justify-content: space-between;
     align-items: left;
-    gap: 2.5rem;
 
     .inputText {
       flex-direction: column;
@@ -26,7 +25,7 @@
       }
 
       input {
-        width: 100%;
+        width: 20rem;
         height: 2rem;
         padding-left: 1rem;
         box-sizing: border-box;
@@ -119,6 +118,12 @@
       flex-direction: column;
       align-items: center;
       gap: 1rem;
+
+      .inputText {
+        input {
+          width: 100%;
+        }
+      }
     }
 
     button {

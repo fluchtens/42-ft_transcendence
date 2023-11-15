@@ -25,7 +25,7 @@
       }
 
       input {
-        width: 100%;
+        width: 20rem;
         height: 2rem;
         padding-left: 1rem;
         box-sizing: border-box;
@@ -107,6 +107,12 @@
   .authSettings {
     .changePassword {
       text-align: center;
+
+      .inputText {
+        input {
+          width: 100%;
+        }
+      }
 
       button {
         margin-top: 1rem;
