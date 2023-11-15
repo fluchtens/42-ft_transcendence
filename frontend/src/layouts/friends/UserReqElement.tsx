@@ -21,12 +21,14 @@ const UserReqElement = ({
   contextMenu,
   toggleContextMenu,
 }: UserReqElementProps) => {
-  const acceptFriendRequest = async () => {
+  const acceptFriendRequest = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     const { success, message } = await acceptFriendRequestApi(user.id);
     success ? notifySuccess(message) : notifyError(message);
   };
 
-  const declineFriendRequest = async () => {
+  const declineFriendRequest = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     const { success, message } = await declineFriendRequestApi(user.id);
     success ? notifySuccess(message) : notifyError(message);
   };
