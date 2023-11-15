@@ -12,13 +12,13 @@ import { Server, Socket } from 'socket.io';
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
-  // @Get()
-  // @UseGuards(JwtAuthGuard)
-  // async getCookie(@Req() req: Request) {
-  //   const cookie = req.cookies;
-  //   console.log(cookie);
-  //   return cookie;
-  // }
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  async getCookie(@Req() req: Request) {
+    const cookie = req.cookies;
+    console.log(cookie);
+    return cookie;
+  }
 
   // @Post('createChannel')
   // @UseGuards(JwtAuthGuard)

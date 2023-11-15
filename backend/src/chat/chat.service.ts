@@ -26,6 +26,24 @@ export class ChatService{
     }
   }
   
+  async getChannelMembers(channelId: string) {
+    try {
+      const channelMembers = await this.prismaService.member.findMany({
+        where: {
+          channelId: channelId,
+        },
+        include: {
+          user: true,
+        },
+      });
+      return channelMembers;
+    }
+    catch (error) {
+      console.error('Error getting channel members:', error.message);
+      throw error;
+    }
+  }
+
   async findMemberRoleInChannel(channelId : string, userId : number): Promise<string | null>{
     try {
       const channel = await this.prismaService.channel.findUnique({
