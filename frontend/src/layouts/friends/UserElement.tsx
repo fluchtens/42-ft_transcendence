@@ -22,7 +22,7 @@ const UserElement = ({
       {user.avatar ? <img src={user.avatar} /> : <img src={defaultAvatar} />}
       <div>
         <p className={styles.username}>{user.username}</p>
-        <p className={styles.status}>Status</p>
+        <p className={styles.status}>{user.status}</p>
       </div>
     </button>
     {contextMenu && <UserContextMenu user={user} cb={toggleContextMenu} />}
