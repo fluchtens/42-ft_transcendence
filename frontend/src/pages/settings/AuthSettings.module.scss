@@ -4,7 +4,6 @@
   flex-direction: column;
   display: flex;
   align-items: left;
-  gap: 0.5rem;
 
   .changePassword {
     flex-direction: column;
@@ -36,6 +35,7 @@
         background: $extra-tertiary-color;
         font-size: map-get($text-sm, font-size);
         line-height: map-get($text-sm, line-height);
+        font-weight: $font-normal;
         color: $text-primary-color;
       }
     }
@@ -48,8 +48,9 @@
       border-radius: $rounded-lg;
       background: $sucess-primary-color;
       transition: background-color 0.3s;
-      font-size: map-get($text-base, font-size);
-      line-height: map-get($text-base, line-height);
+      font-size: map-get($text-sm, font-size);
+      line-height: map-get($text-sm, line-height);
+      font-weight: $font-normal;
       color: white;
       cursor: pointer;
 
@@ -77,8 +78,9 @@
       border: none;
       border-radius: $rounded-lg;
       transition: background-color 0.3s;
-      font-size: map-get($text-base, font-size);
-      line-height: map-get($text-base, line-height);
+      font-size: map-get($text-sm, font-size);
+      line-height: map-get($text-sm, line-height);
+      font-weight: $font-normal;
       color: white;
       cursor: pointer;
     }

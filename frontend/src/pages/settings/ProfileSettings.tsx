@@ -100,7 +100,6 @@ function ProfileSettings() {
               </label>
             </div>
           </div>
-          {/* <Separator /> */}
           <button onClick={submitData}>Update profile</button>
         </form>
       )}

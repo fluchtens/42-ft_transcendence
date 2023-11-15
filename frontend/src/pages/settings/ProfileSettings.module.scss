@@ -8,6 +8,7 @@
 
   .dataToSubmit {
     display: flex;
+    justify-content: space-between;
     align-items: left;
     gap: 2.5rem;
 
@@ -35,6 +36,7 @@
         background: $extra-tertiary-color;
         font-size: map-get($text-sm, font-size);
         line-height: map-get($text-sm, line-height);
+        font-weight: $font-normal;
         color: $text-primary-color;
       }
 
@@ -97,8 +99,9 @@
     border-radius: $rounded-lg;
     background: $sucess-primary-color;
     transition: background-color 0.3s;
-    font-size: map-get($text-base, font-size);
-    line-height: map-get($text-base, line-height);
+    font-size: map-get($text-sm, font-size);
+    line-height: map-get($text-sm, line-height);
+    font-weight: $font-normal;
     color: white;
     cursor: pointer;
 
@@ -116,11 +119,6 @@
       flex-direction: column;
       align-items: center;
       gap: 1rem;
-
-      .inputText {
-        align-items: center;
-        gap: 0.5rem;
-      }
     }
 
     button {
