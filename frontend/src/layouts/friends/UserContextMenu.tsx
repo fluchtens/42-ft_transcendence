@@ -28,7 +28,7 @@ const UserContextMenu = ({ user, cb }: UserContextMenuProps) => {
         View user profile
       </Link>
       <button onClick={blockUser}>Block all communication</button>
-      <button onClick={removeFriend}>Unfriend</button>
+      <button onClick={removeFriend}>Remove friend</button>
     </div>
   );
 };

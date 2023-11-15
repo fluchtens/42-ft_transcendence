@@ -15,7 +15,10 @@ const UserElement = ({
   toggleContextMenu,
 }: UserElementProps) => (
   <div className={styles.friendContainer}>
-    <button className={styles.friendBtn} onClick={toggleContextMenu}>
+    <button
+      className={`${styles.friendBtn} ${contextMenu ? styles.activeBtn : ""}`}
+      onClick={toggleContextMenu}
+    >
       {user.avatar ? <img src={user.avatar} /> : <img src={defaultAvatar} />}
       <div>
         <p className={styles.username}>{user.username}</p>
