@@ -19,7 +19,9 @@ import styles from "./Friends.module.scss";
 import { io } from "socket.io-client";
 import { UserReqElement } from "./UserReqElement";
 
-const socket = io("http://localhost:3000/friendship");
+const socket = io(`${import.meta.env.VITE_BACK_URL}/friendship`, {
+  withCredentials: true,
+});
 
 function Friends() {
   const [user, setUser] = useState<User | null>(null);

@@ -138,6 +138,14 @@ export class AuthService {
     }
   }
 
+  verifyAccessToken(token: string): any {
+    const decodedToken = this.jwtService.verify(token, {
+      secret: process.env.JWT_SECRET,
+    });
+
+    return decodedToken;
+  }
+
   /* -------------------------------------------------------------------------- */
   /*                                     42                                     */
   /* -------------------------------------------------------------------------- */
