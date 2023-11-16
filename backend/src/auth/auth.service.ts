@@ -204,6 +204,8 @@ export class AuthService {
     const token = await this.generateJwtToken(payload, '2h');
     await this.setAccessTokenCookie(res, token, this.cookieExpirationTime);
 
+    res.clearCookie('connect.sid');
+
     return { message: 'User succesfully connected' };
   }
 
