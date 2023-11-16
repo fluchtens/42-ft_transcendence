@@ -11,7 +11,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { UsernameDto } from './dtos/UsernameDto';
 import { UpdatePwdDto } from './dtos/UpdatePwdDto';
-import { UserStatus } from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -94,17 +93,6 @@ export class UserService {
       where: { id },
       data: { twoFaSecret },
     });
-  }
-
-  async updateUserStatus(id: number, status: UserStatus) {
-    try {
-      await this.prismaService.user.update({
-        where: { id },
-        data: { status },
-      });
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
   }
 
   exclude<User, Key extends keyof User>(

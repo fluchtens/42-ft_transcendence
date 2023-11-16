@@ -16,7 +16,6 @@ model User {
   password        String?      @db.VarChar(255)
   twoFa           Boolean      @default(false)
   twoFaSecret     String?      @db.VarChar(255)
-  status          UserStatus   @default(OFFLINE)
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
   addedFriends    Friendship[] @relation("sender")
@@ -24,12 +23,6 @@ model User {
   members         Member[]
   channels        Channel[]
   messages        Message[]
-}
-
-enum UserStatus {
-  OFFLINE
-  ONLINE
-  INGAME
 }
 
 model Friendship {

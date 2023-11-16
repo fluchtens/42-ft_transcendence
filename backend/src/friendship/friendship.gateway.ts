@@ -3,10 +3,14 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { UserStatus } from '@prisma/client';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
 import { UserService } from 'src/user/user.service';
+
+interface UserStatus {
+  status: 'Online' | 'In game';
+  sockets: Set<string>;
+}
 
 @WebSocketGateway({
   namespace: 'friendship',
@@ -16,13 +20,43 @@ import { UserService } from 'src/user/user.service';
   },
 })
 export class FriendshipGateway {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly userService: UserService,
-  ) {}
+  private userStatus: Map<number, UserStatus> = new Map();
+
+  constructor(private readonly authService: AuthService) {}
 
   @WebSocketServer()
   server: Server;
+
+  private addSocketToUser(userId: number, socketId: string): void {
+    let userObject = this.userStatus.get(userId);
+    if (!userObject) {
+      userObject = {
+        status: 'Online',
+        sockets: new Set<string>(),
+      };
+      this.userStatus.set(userId, userObject);
+    }
+
+    userObject.sockets.add(socketId);
+    this.userStatus.set(userId, userObject);
+  }
+
+  private removeSocketFromUser(userId: number, socketId: string) {
+    const userObject = this.userStatus.get(userId);
+    if (userObject) {
+      userObject.sockets.delete(socketId);
+
+      if (userObject.sockets.size === 0) {
+        this.userStatus.delete(userId);
+      } else {
+        this.userStatus.set(userId, userObject);
+      }
+    }
+  }
+
+  public getUserStatus() {
+    return this.userStatus;
+  }
 
   handleConnection(client: Socket) {
     try {
@@ -40,7 +74,10 @@ export class FriendshipGateway {
       client.handshake.auth.userId = decodedToken.id;
 
       const userId = client.handshake.auth.userId;
-      this.userService.updateUserStatus(userId, UserStatus.ONLINE);
+      const socketId = client.id;
+
+      this.addSocketToUser(userId, socketId);
+      this.server.emit('reloadList');
     } catch (error) {
       client.disconnect(true);
       console.error(`client ${client.id} disconnected`, error.message);
@@ -49,7 +86,10 @@ export class FriendshipGateway {
 
   handleDisconnect(client: Socket) {
     const userId = client.handshake.auth.userId;
-    this.userService.updateUserStatus(userId, UserStatus.OFFLINE);
+    const socketId = client.id;
+
+    this.removeSocketFromUser(userId, socketId);
+    this.server.emit('reloadList');
   }
 
   @SubscribeMessage('reloadList')
