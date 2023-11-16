@@ -12,7 +12,7 @@ import * as gm from './tmp_game_logic'
 
 
 // TODO question
-// should UserStatus be kept up to date by service or controller??
+// UserStatus should be set only by the service and not the controller
 
 enum UserStatus { Normal, Waiting, Playing } // TODO must stay in sync with frontend
 
@@ -20,6 +20,7 @@ class UserData {
 	public sockets = new Set<Socket>();
 	public rooms = new Set<string>();
 	public status = UserStatus.Normal;
+	public rating = 0; // TODO get from db or something
 
 	private _gameRoom : string | null = null;
 	get gameRoom() { return this._gameRoom; }
@@ -62,10 +63,15 @@ class MMQueue { // Matchmaking queue
 	public options = {
 		widenRate: 5, // points per second
 		initialRange: 50, // +/-
-		refreshRate: 15, // per sec
+		refreshRate: 2, // per sec
 	}
-	public onMatch = ([userId1, userId2] : [string, string]) => {};
 	private _intervalHandle : any = null; // what type is returned by `setInterval`? TODO
+
+	constructor (
+		public onMatch : ((userId1: string, userId2: string) => undefined) 
+			= ( (id1, id2) => {} ) 
+	)
+	{}
 
 	add(userId, userRating, autolaunch = true) {
 		this.matchRequests.set(userId, {timestamp: Date.now(), rating: userRating});
@@ -74,17 +80,17 @@ class MMQueue { // Matchmaking queue
 		}
 	}
 
-	del(userId, autostop = true) {
+	del(userId) {
 		this.matchRequests.delete(userId);
-		if (autostop && this.matchRequests.size == 1) {
-			this.stop();
-		}
 	}
 
 	launch () {
 			this._intervalHandle = setInterval( () => {
+				console.log('queue: handling matches');
 				let matches = this.makeMatches();
-				matches.forEach( (match) => {this.onMatch(match);} );
+				matches.forEach( (ids) => {this.onMatch(ids[0], ids[1])} );
+				if (this.matchRequests.size < 2)
+					clearInterval(this._intervalHandle!);
 			}, 1000 / this.options.refreshRate);
 	}
 
@@ -92,41 +98,34 @@ class MMQueue { // Matchmaking queue
 			clearInterval(this._intervalHandle);
 	}
 
-	makeMatches() {
+	makeMatches(autostop = true) {
 		let sorted = [...this.matchRequests].sort(
 			( [, {rating: rating1}] , [, {rating:rating2}] ) => (rating1 - rating2)
 		).map( 
 			( [userId, {timestamp, rating}] ) => ({timestamp, rating, userId})
 	  );
 
-		function isMatch(req1, req2) {
+		let isMatch = (req1, req2) => {
 			let [initRg, wRate] = [this.options.initialRange, this.options.widenRate];
 			let minRating1 = req2.rating - (initRg + wRate * ( Date.now() - req2.timestamp ) / 1000);
 			let maxRating2 = req1.rating + (initRg + wRate * ( Date.now() - req1.timestamp ) / 1000);
-			return ( req1.rating < minRating1 && maxRating2 < req2.rating );
+			console.log('matching:', req1, req2, minRating1, maxRating2);
+			return ( minRating1 < req1.rating && req2.rating < maxRating2 );
 		}
 
 		let matches = [];
 		for (let i = sorted.length - 2; i >= 0; --i) {
 			let [req1, req2] = sorted.slice(i, 2);
 			if ( isMatch(req1, req2) ) {
-				sorted.splice(i, 2);
+				i--; // skip
+				this.matchRequests.delete(req1.userId);
+				this.matchRequests.delete(req2.userId);
 				matches.push([req1.userId, req2.userId]);
 			}
 		}
 		return matches;
 	}
 }
-
-
-
-			
-		
-
-
-
-
-
 
 // should be 2 classes
 class GameService {
@@ -145,14 +144,28 @@ class GameService {
 	users = new Map<string, UserData>(); // userId to runtime states
 	socketUsers = new Map<string, string>(); // sockId to owning userId
 
-	// queue = new Queue(...) ...
+	queue = new MMQueue();
 
 	// TESTING
 	constructor() {
 		this.invites.set('test1', {host: new UserData('dog')});
 		this.invites.set('test2', {host: new UserData('god')});
+
+		let alice = new UserData('alice');
+		let bob = new UserData('bob');
+		alice.rating = 1100;
+		bob.rating = 1000;
+		this.users.set('bob', bob);
+		this.users.set('alice', alice);
 	}
 	// END TESTING
+
+	queueSetCallback(callback) {
+		this.queue.onMatch = (userId1, userId2) =>  {
+			let {gameRoom, game} = this.launchGame(userId1, userId2); // TODO this in ctor problems?
+			callback({gameRoom, game});
+		}
+	}
 
 	bindSocket ( sock: Socket, userId: string ) {
 		this.socketUsers.set(sock.id, userId);
@@ -182,7 +195,7 @@ class GameService {
 			deletions.user = true;
 			this.users.delete(userId);
 			deletions.invite = this.lobbyCancelInvite(userId);
-			// TODO remove people from queue 
+			this.queue.del(userId);
 		}
 		return deletions;
 	}
@@ -232,22 +245,16 @@ class GameService {
 		return id;
 	}
 
-	lobbyJoinGame (
-		userId: string,
-	 	inviteName: string,
-	 	startTime: number = Date.now()) : gm.GameState
-	{
-		let pending = this.invites.get(inviteName);
-		if (! pending ) throw new Error('No such game invite');
+	launchGame(userId1, userId2, startTime = Date.now()) {
+		let player1 = this.users.get(userId1);
+		let player2 = this.users.get(userId2);
+		console.log('players', player1?.id, player2?.id);
+		if (!player1 || !player2)
+			throw new Error("no such active user");
 
-		let joiner = this.users.get(userId);
-		if (!joiner) throw new Error("no such active user");
-
-		// create game and remove invite
 		let gameId = this.genId();
 		let game = new gm.GameState(startTime);
 		this.games.set(gameId, game);
-		this.invites.delete(inviteName);
 
 		let bindPlayer = (user, whichP) => {
 			user.status = UserStatus.Playing;
@@ -255,11 +262,47 @@ class GameService {
 			user.gameRoom = gameId;
 			this.userGames.set(user.id, {p: whichP, gameId: gameId});
 		}
-		bindPlayer(joiner, gm.WhichPlayer.P1);
-		bindPlayer(pending.host, gm.WhichPlayer.P2);
+		bindPlayer(player1, gm.WhichPlayer.P1);
+		bindPlayer(player2, gm.WhichPlayer.P2);
 
-		// 		return this.games.running.get(gameRoom)! ;
-		return this.games.get(gameId) ;
+		return {gameRoom: gameId, game};
+	}
+
+	lobbyJoinGame (
+		userId: string,
+	 	inviteName: string,
+	 	startTime: number = Date.now())
+	{
+		let pending = this.invites.get(inviteName);
+		if (! pending ) throw new Error('No such game invite');
+
+		let joiner = this.users.get(userId);
+		if (!joiner) throw new Error("no such active user");
+
+		this.invites.delete(inviteName);
+		return this.launchGame(pending.host.id, joiner.id, startTime);
+	}
+
+	joinQueue(userId) {
+		let user = this.users.get(userId);
+		if (!user)
+			throw new Error("no such active user");
+		if (user.status != UserStatus.Normal)
+			throw new Error("can't join queue while busy");
+
+		user.status = UserStatus.Waiting;
+		this.queue.add(user.id, user.rating);
+	}
+
+	leaveQueue(userId) {
+		let user = this.users.get(userId);
+		if (!user)
+			throw new Error("no such active user");
+		if (user.status != UserStatus.Normal)
+			throw new Error("can't join queue while busy");
+
+		user.status = UserStatus.Normal;
+		this.queue.del(user.id);
 	}
 }
 
@@ -273,6 +316,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	gameService = new GameService(); // TODO use nest module system
 
+	constructor() {
+		this.gameService.queueSetCallback( ({gameRoom, game}) => {
+			this.server.to(gameRoom).emit('statusChange', UserStatus.Playing);
+		});
+	}
+			
 	@WebSocketServer()
 	server: Server;
 
@@ -346,14 +395,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		console.log(`${userData.id} created game ${gameName}`);
 	}
 
-	@SubscribeMessage('joinQueue') 
-	joinQueue(sock: Socket) {
-		// TODO 
-		let userData = this._wantStatus(sock, [UserStatus.Normal]);
-
-		console.log(`${userData.id} joined the queue`);
-	}
-
 	@SubscribeMessage('cancel')
 	cancel(sock: Socket) {
 		let userData = this._wantStatus(sock, [UserStatus.Waiting]);
@@ -361,8 +402,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		if (this.gameService.lobbyCancelInvite(userData.id))
 			this._pushGameList();
 
-		// TODO
-		// this.gameService.cancelQueue
+		this.gameService.leaveQueue(userData.id);
 		
 		userData.status = UserStatus.Normal;
 		this.server.to(userData.userRoom).emit('statusChange', UserStatus.Normal);
@@ -374,10 +414,18 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 		this.gameService.lobbyJoinGame(userData.id, gameId);
 		
-		userData.status = UserStatus.Playing;
 		this.server.to(userData.gameRoom).emit('statusChange', UserStatus.Playing);
 	}
 
+	@SubscribeMessage('joinQueue')
+	joinQueue(sock: Socket) {
+		let userData = this._wantStatus(sock, [UserStatus.Normal]);
+
+		console.log(`${userData.id} joined the queue`);
+
+		this.gameService.joinQueue(userData.id);
+		this.server.to(userData.userRoom).emit('statusChange', UserStatus.Waiting);
+	}
 }
 
 // 	@SubscribeMessage('joinLobby')
