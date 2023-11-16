@@ -152,12 +152,10 @@ export class FriendshipService {
     });
 
     friendsData.sort((a, b) => {
-      if (a.status === 'Online' && b.status !== 'Online') {
-        return -1;
-      }
-      if (a.status !== 'Online' && b.status === 'Online') {
-        return 1;
-      }
+      if (a.status === 'In game' && b.status !== 'In game') return -1;
+      if (a.status !== 'In game' && b.status === 'In game') return 1;
+      if (a.status === 'Online' && b.status !== 'Online') return -1;
+      if (a.status !== 'Online' && b.status === 'Online') return 1;
       return 0;
     });
 
