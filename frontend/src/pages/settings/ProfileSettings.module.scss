@@ -40,8 +40,7 @@
       }
 
       p {
-        margin: 0;
-        padding: 0 0.25rem;
+        margin-left: 0.25rem;
         font-size: map-get($text-xs, font-size);
         line-height: map-get($text-xs, line-height);
         font-weight: $font-normal;

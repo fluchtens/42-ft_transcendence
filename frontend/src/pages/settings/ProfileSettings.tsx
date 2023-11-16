@@ -71,7 +71,6 @@ function ProfileSettings() {
                 required
               />
               <p>Your username is your unique identifier on our platform.</p>
-              <p>{user.username}</p>
             </div>
             <div className={styles.inputFile}>
               <label>Profile picture</label>
