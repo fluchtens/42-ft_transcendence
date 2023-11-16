@@ -65,7 +65,12 @@ export class FriendshipGateway {
         throw new Error('No cookies found');
       }
 
-      const token = cookie.substring('access_token='.length);
+      const cookies = cookie.split(';').map((cookie) => cookie.trim());
+      const jwtCookie = cookies.find((cookie) =>
+        cookie.startsWith('access_token='),
+      );
+
+      const token = jwtCookie.substring('access_token='.length);
       if (!token) {
         throw new Error('access_token not found');
       }
