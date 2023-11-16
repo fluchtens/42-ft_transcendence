@@ -10,6 +10,7 @@ import Chat from "./pages/chat/Chat";
 import Settings from "./pages/settings/Settings";
 import TwoFaSetup from "./pages/settings/TwoFaSetup";
 import TwoFaAuth from "./pages/auth/TwoFaAuth";
+import { AuthProvider } from "./utils/useAuth";
 
 function App() {
   const router = createBrowserRouter([
@@ -59,7 +60,9 @@ function App() {
   ]);
   return (
     <>
-      <RouterProvider router={router} />
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
     </>
   );
 }

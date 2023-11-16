@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styles from "./Auth.module.scss";
 import { userLoginApi } from "../../services/auth.api";
-import { getUserApi } from "../../services/user.api";
 import { MainTitle } from "../../components/MainTitle";
 import { notifySuccess } from "../../utils/notifications";
+import { useAuth } from "../../utils/useAuth";
 
 function Login() {
+  const { user, refreshUser } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -36,6 +37,8 @@ function Login() {
       navigate("/");
       notifySuccess(data.message);
     }
+
+    await refreshUser();
   };
 
   const fortyTwoAuth = async () => {
@@ -47,14 +50,11 @@ function Login() {
   };
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const data = await getUserApi();
-      if (data) {
-        navigate("/");
-      }
-    };
-    checkAuth();
-  }, []);
+    if (user) {
+      navigate("/");
+      return;
+    }
+  }, [user]);
 
   return (
     <div className={styles.container}>

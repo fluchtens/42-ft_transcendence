@@ -4,8 +4,10 @@ import { useState } from "react";
 import { enableTwoFaApi } from "../../services/auth.api";
 import { Separator } from "../../components/Separator";
 import styles from "./TwoFaSetup.module.scss";
+import { useAuth } from "../../utils/useAuth";
 
 function TwoFaSetup() {
+  const { refreshUser } = useAuth();
   const [token, setToken] = useState<string>("");
   const { qrcode } = useParams();
   const qrCodeData = qrcode ? atob(qrcode) : null;
@@ -28,6 +30,7 @@ function TwoFaSetup() {
       return;
     }
 
+    await refreshUser();
     navigate(`/settings`);
   };
 

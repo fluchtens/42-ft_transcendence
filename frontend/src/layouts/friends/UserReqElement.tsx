@@ -45,12 +45,12 @@ const UserReqElement = ({
           <p className={styles.username}>{user.username}</p>
         </div>
         <div className={styles.buttons}>
-          <button onClick={acceptFriendRequest}>
+          <div onClick={acceptFriendRequest}>
             <AiFillCheckCircle className={styles.accept} />
-          </button>
-          <button onClick={declineFriendRequest}>
+          </div>
+          <div onClick={declineFriendRequest}>
             <AiFillCloseCircle className={styles.decline} />
-          </button>
+          </div>
         </div>
       </button>
       {contextMenu && <UserContextMenu user={user} cb={toggleContextMenu} />}

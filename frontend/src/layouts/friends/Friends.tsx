@@ -1,12 +1,7 @@
 import { useEffect, useState } from "react";
 import { User } from "../../types/user.interface";
 import { Friendship } from "../../types/friendship.interface";
-import {
-  getAllUsersApi,
-  getUserApi,
-  getUserByIdApi,
-  getUserByUsernameApi,
-} from "../../services/user.api";
+import { getUserByIdApi, getUserByUsernameApi } from "../../services/user.api";
 import {
   getFriendRequestsApi,
   getFriendsApi,
@@ -18,13 +13,15 @@ import { notifyError, notifySuccess } from "../../utils/notifications";
 import styles from "./Friends.module.scss";
 import { io } from "socket.io-client";
 import { UserReqElement } from "./UserReqElement";
+import { useAuth } from "../../utils/useAuth";
 
 const socket = io(`${import.meta.env.VITE_BACK_URL}/friendship`, {
   withCredentials: true,
 });
 
 function Friends() {
-  const [user, setUser] = useState<User | null>(null);
+  const { user } = useAuth();
+  // const [user, setUser] = useState<User | null>(null);
   const [friends, setFriends] = useState<User[] | null>(null);
   const [usersReq, setUsersReq] = useState<User[] | null>(null);
   const [addUser, setAddUser] = useState<string>("");
@@ -55,9 +52,7 @@ function Friends() {
   };
 
   const getData = async () => {
-    const user = await getUserApi();
     if (!user) return;
-    setUser(user);
 
     // const friends = await getAllUsersApi();
     const friends = await getFriendsApi(user.id);
@@ -85,13 +80,14 @@ function Friends() {
   };
 
   useEffect(() => {
+    if (!user) return;
     getData();
     socket.on("reloadList", getData);
 
     return () => {
       socket.off("reloadList", getData);
     };
-  }, []);
+  }, [user]);
 
   return (
     <>

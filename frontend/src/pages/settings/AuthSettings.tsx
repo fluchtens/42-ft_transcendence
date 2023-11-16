@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getUserApi, updatePasswordApi } from "../../services/user.api";
-import { User } from "../../types/user.interface";
+import { updatePasswordApi } from "../../services/user.api";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import styles from "./AuthSettings.module.scss";
 import {
@@ -9,6 +8,7 @@ import {
   generateTwoFaQrCodeApi,
 } from "../../services/auth.api";
 import { Separator } from "../../components/Separator";
+import { useAuth } from "../../utils/useAuth";
 
 interface InputTextProps {
   label: string;
@@ -30,7 +30,7 @@ const TextInput = ({ label, value, onChange }: InputTextProps) => (
 );
 
 function AuthSettings() {
-  const [user, setUser] = useState<User | null>(null);
+  const { user, refreshUser } = useAuth();
   const [actualPwd, setActualPwd] = useState<string>("");
   const [newPwd, setNewPwd] = useState<string>("");
   const [confirmNewPwd, setConfirmNewPwd] = useState<string>("");
@@ -62,7 +62,7 @@ function AuthSettings() {
     setActualPwd("");
     setNewPwd("");
     setConfirmNewPwd("");
-    getUserData();
+    await refreshUser();
   };
 
   const enableTwoFa = async () => {
@@ -85,22 +85,13 @@ function AuthSettings() {
       return;
     }
 
-    getUserData();
+    await refreshUser();
     notifySuccess(data.message);
   };
 
-  const getUserData = async () => {
-    const data = await getUserApi();
-    if (!data) {
-      navigate("/");
-      return;
-    }
-    setUser(data);
-  };
-
   useEffect(() => {
-    getUserData();
-  }, []);
+    if (!user) return;
+  }, [user]);
 
   return (
     <>

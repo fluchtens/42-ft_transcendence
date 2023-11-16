@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./Auth.module.scss";
 import { setupUserApi } from "../../services/auth.api";
-import { getUserApi } from "../../services/user.api";
 import { MainTitle } from "../../components/MainTitle";
+import { useAuth } from "../../utils/useAuth";
 
 function Setup() {
+  const { user } = useAuth();
   const [username, setUsername] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
@@ -27,14 +28,11 @@ function Setup() {
   };
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const data = await getUserApi();
-      if (data) {
-        navigate("/");
-      }
-    };
-    checkAuth();
-  }, []);
+    if (user) {
+      navigate("/");
+      return;
+    }
+  }, [user]);
 
   return (
     <div className={styles.container}>
