@@ -1,14 +1,24 @@
 @import "../../styles/config.scss";
 
 .container {
-  // min-height: calc(100vh - 10rem);
   padding: 2rem;
   border-radius: $rounded-xl;
   background: $bg-secondary-color;
 
   .settings {
+    margin: 0;
+    padding: 0;
+    max-height: calc(100vh - 10rem);
     flex-direction: column;
     display: flex;
     gap: 2rem;
+    list-style-type: none;
+    overflow-y: auto;
+    scrollbar-width: none; // Firefox
+    -ms-overflow-style: none; // IE (Internet Explorer) and Edge
+
+    &::-webkit-scrollbar {
+      display: none; // WebKit-based browsers like Opera, Chrome, and Safari
+    }
   }
 }

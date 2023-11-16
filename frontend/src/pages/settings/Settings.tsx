@@ -27,10 +27,14 @@ function Settings() {
     <>
       {user && (
         <div className={styles.container}>
-          <div className={styles.settings}>
-            <ProfileSettings />
-            <AuthSettings />
-          </div>
+          <ul className={styles.settings}>
+            <li>
+              <ProfileSettings />
+            </li>
+            <li>
+              <AuthSettings />
+            </li>
+          </ul>
         </div>
       )}
     </>
