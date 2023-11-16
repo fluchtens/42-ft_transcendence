@@ -1,8 +1,12 @@
 
 export class SendMessageDto {
-  userId: number;
   channelId: string;
   message: string;
+}
+
+export class AddMemberDto {
+  channelId: string;
+  memberId: number;
 }
 
 export class Messages {

@@ -1,18 +1,23 @@
 import { useState } from "react";
+import { Socket } from "socket.io-client";
 
 interface ChannelComponentProps {
   channel: ChannelData;
+  socket: Socket;
 }
 
-const ChannelComponent: React.FC<ChannelComponentProps> = ({ channel }) => {
+const ChannelComponent: React.FC<ChannelComponentProps> = ({ channel, socket }) => {
+  console.log("ChannelComponent is being rendered:", channel.channelId);
   const [messageInput, setMessageInput] = useState('');
 
   const onSendMessage = () => {
-    console.log(`Sending message: ${messageInput}`);
-    //fonction to send a message, do after
-    setMessageInput('');
+    if (channel.channelId) {
+      socket.emit('sendMessage', { channelId: channel.channelId, message: messageInput });
+      console.log("Message sent!");
+      setMessageInput('');
+    }
   };
-  
+
   return (
     <div className="channel-container">
       <div className="channel-header">

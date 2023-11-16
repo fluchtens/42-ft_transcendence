@@ -6,7 +6,7 @@ import ChannelComponent from "./Channel";
 export const  Websocket = () => {
 
   const [channelIds, setChannelIds] = useState<string[]>();
-  const [channelsData, setChannelsData] = useState<ChannelData[]>();
+  const [channelsData, setChannelsData] = useState<ChannelData[]>([]);
   const socket : any = useContext(WebsocketContext);
   useEffect(() => {
     socket.on('connect', () => {
@@ -27,7 +27,7 @@ export const  Websocket = () => {
       setChannelIds(channelIds);
       console.log(channelIds);
     });
-  
+    socket.emit('getAllChannels');
     // Nettoyer les écouteurs d'événements lorsque le composant est démonté
     return () => {
       socket.off('allChannels');
@@ -43,6 +43,8 @@ export const  Websocket = () => {
       // Écouter l'événement pour chaque channelId
       channelIds.forEach((channelId) => {
         socket.on(`channelData:${channelId}`, (channelData: ChannelData) => {
+          console.log(`Received channelData for channelId ${channelId}`);
+          
           // Mettez à jour l'état local avec les données du canal
           setChannelsData((prevChannelsData) => {
             if (prevChannelsData) {
@@ -50,22 +52,26 @@ export const  Websocket = () => {
               const channelIndex = updatedChannels.findIndex(
                 (channel) => channel.channelId === channelId
               );
-
+  
               if (channelIndex !== -1) {
                 updatedChannels[channelIndex] = channelData;
               } else {
                 updatedChannels.push(channelData);
               }
-
+  
+              console.log("Updated channelsData:", updatedChannels);
               return updatedChannels;
             }
+            return [];
           });
         });
       });
     }
-  
+    console.log(channelsData);
     // Nettoyer les écouteurs d'événements lorsque le composant est démonté
     return () => {
+      console.log(channelsData);
+
       if (channelIds) {
         channelIds.forEach((channelId) => {
           socket.off(`channelData:${channelId}`);
@@ -74,23 +80,20 @@ export const  Websocket = () => {
     };
   }, [channelIds]);
 
+  useEffect(() => {
+    console.log(channelsData);
+  }, [channelsData]);
+
   return (
     <div>
-        <div>
-    <ul>
-     
-    </ul>
-  </div>
-      {/* <div>
-        <h1> Websocket </h1>
-        <input type="text" value={value} onChange={(e) => setValue(e.target.value)}/>
-        <button onClick={onSubmit}>Submit</button>
-      </div> */}
       <div>
         {channelsData &&
-            channelsData.map((channel) => (
-              <ChannelComponent key={channel.channelId} channel={channel} />
-              ))}
+            channelsData.map((channel) => {
+              console.log("Calling ChannelComponent for channel:", channel);
+              return (
+                <ChannelComponent key={channel.channelId} channel={channel} socket={socket}/>
+              )
+            })}
       </div>
     </div>
   )

@@ -14,7 +14,7 @@ import { ExecutionContextHost } from "@nestjs/core/helpers/execution-context-hos
 import cookieParser from "cookie-parser";
 import { UserService } from "src/user/user.service";
 import { RoomsService } from "./room.service";
-import { SendMessageDto, ChannelData, Messages } from "./dtos/gateway.dtos";
+import { SendMessageDto, ChannelData, Messages, AddMemberDto } from "./dtos/gateway.dtos";
 import { channel } from "diagnostics_channel";
 
 @WebSocketGateway({
@@ -164,6 +164,7 @@ export class ChatGateway implements OnModuleInit {
       try {
         // console.log(`ChannelIdjon${channelId}`);
         const ChannelData : ChannelData = await this.getChannelData(client, channelId);
+        console.log('joinChannel');
         client.emit(`channelData:${channelId}`, ChannelData);
       }
       catch(error) {
@@ -176,27 +177,28 @@ export class ChatGateway implements OnModuleInit {
     }
   }
 
-//   // @SubscribeMessage('sendMessage')
-//   // async handleSendMessage(client: Socket, @MessageBody() sendMessageDto: SendMessageDto): Promise<void> {
-//   //   console.log('sendMessage');
-//   //   const { userId, channelId, message } = sendMessageDto;
-//   //   if (userId && channelId && message) {
-//   //     try {
-//   //       const channel = await this.chatService.getChannelById(channelId);
-//   //       if (channel) {
-//   //         const messageSend = await this.chatService.addMessage(userId, channelId, message);
-//   //         if (!messageSend)
-//   //           throw new Error("Message cannot be send");
-//   //         console.log(messageSend);
-//   //         this.server.emit('newMessage', {userId, message });
-//   //       }
-//   //     }
-//   //     catch (error){
-//   //       console.error("sendMessage error", error.message);
-//   //     }
-//   //   }
-//   //   return ;
-//   // }
+  @SubscribeMessage('sendMessage')
+  async handleSendMessage(@ConnectedSocket() client: Socket, @MessageBody() sendMessageDto: SendMessageDto): Promise<void> {
+    console.log('sendMessage');
+    const userId = client.handshake.auth.userId;
+    const { channelId, message } = sendMessageDto;
+    if (userId && channelId && message) {
+      try {
+        const channel = await this.chatService.getChannelById(channelId);
+        if (channel) {
+          const messageSend = await this.chatService.addMessage(userId, channelId, message);
+          if (!messageSend)
+            throw new Error("Message cannot be send");
+          console.log(messageSend);
+          this.server.emit('newMessage', {userId, message });
+        }
+      }
+      catch (error){
+        console.error("sendMessage error", error.message);
+      }
+    }
+    return ;
+  }
  
 //   // // @SubscribeMessage('findAllMessages')
 //   // // async findAll(@Req() req) {
@@ -217,6 +219,28 @@ export class ChatGateway implements OnModuleInit {
         }
       }
       this.chatService.createChannel(userId, channelName);
+    }
+   else {
+    console.log("User ID not available.");
+   }
+  }
+
+  @SubscribeMessage('addMember')
+  async addMember(@ConnectedSocket() client: Socket, @MessageBody() addMemberDto: AddMemberDto) {
+    const userId = Number(client.handshake.auth.userId);
+    if (userId) {
+      const {channelId, memberId} = addMemberDto;
+      if (channelId && memberId) {
+        const result = await this.chatService.addMember(userId, channelId, memberId);
+        if (result) {
+          const message = userId + " have added " + memberId;
+          await this.chatService.addMessage(userId, channelId, message);
+          client.emit("newMessage", message)
+        }
+      }
+      else {
+        console.error("channelId or memberId not found, addMemberFail");
+      }
     }
    else {
     console.log("User ID not available.");

@@ -175,21 +175,20 @@ export class ChatService{
     }
   }
 
-  async addMember(req: any, channelId: string, userId: number): Promise<any>{
-    if (!(userId || channelId)) {
+  async addMember(userId: number, channelId: string, memberId: number): Promise<any>{
+    if (!(userId || channelId || memberId)) {
       console.log("channelId or UserId invalid");
       return;
     }
-    if (await this.findMemberInChannel(channelId, userId)){
+    if (await this.findMemberInChannel(channelId, memberId)){
       return "The user is already in the channel.";
     }
-    const { user } = req;
-    const memberRole : string = await this.findMemberRoleInChannel(channelId, Number(user.id));
+    const memberRole : string = await this.findMemberRoleInChannel(channelId, userId);
     if (memberRole) {
       try {
         const newMember = await this.prismaService.member.create({
           data : {
-            userId: userId,
+            userId: memberId,
             channelId: channelId
           }
         });
