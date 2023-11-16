@@ -70,6 +70,7 @@
       font-weight: $font-normal;
       text-decoration: none;
       color: $text-primary-color;
+      transition: color 0.3s ease, background-color 0.3s ease;
 
       &:hover {
         background: $extra-secondary-color;
@@ -94,6 +95,8 @@
       line-height: map-get($text-sm, line-height);
       font-weight: $font-normal;
       color: $text-primary-color;
+      transition: color 0.3s ease, background-color 0.3s ease;
+      white-space: nowrap;
       cursor: pointer;
 
       &:hover {
