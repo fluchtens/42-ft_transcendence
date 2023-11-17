@@ -10,29 +10,36 @@ import { User } from "../types/user.interface";
 
 interface AuthContextProps {
   user: User | null;
+  refreshUser: () => void;
 }
+
+const AuthContext = createContext<AuthContextProps>({
+  user: null,
+  refreshUser: () => {},
+});
 
 interface AuthProviderProps {
   children: ReactNode;
 }
 
-const AuthContext = createContext<AuthContextProps>({ user: null });
-
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
 
+  const refreshUser = async () => {
+    const data = await getUserApi();
+    if (!data) return;
+    setUser(data);
+    return data;
+  };
+
   useEffect(() => {
-    const getUserData = async () => {
-      const data = await getUserApi();
-      if (data) {
-        setUser(data);
-      }
-    };
-    getUserData();
+    refreshUser();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ user, refreshUser }}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 

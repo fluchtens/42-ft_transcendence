@@ -8,8 +8,8 @@
 
   .dataToSubmit {
     display: flex;
+    justify-content: space-between;
     align-items: left;
-    gap: 2.5rem;
 
     .inputText {
       flex-direction: column;
@@ -25,7 +25,7 @@
       }
 
       input {
-        width: 100%;
+        width: 20rem;
         height: 2rem;
         padding-left: 1rem;
         box-sizing: border-box;
@@ -35,12 +35,12 @@
         background: $extra-tertiary-color;
         font-size: map-get($text-sm, font-size);
         line-height: map-get($text-sm, line-height);
+        font-weight: $font-normal;
         color: $text-primary-color;
       }
 
       p {
-        margin: 0;
-        padding: 0 0.25rem;
+        margin-left: 0.25rem;
         font-size: map-get($text-xs, font-size);
         line-height: map-get($text-xs, line-height);
         font-weight: $font-normal;
@@ -97,8 +97,9 @@
     border-radius: $rounded-lg;
     background: $sucess-primary-color;
     transition: background-color 0.3s;
-    font-size: map-get($text-base, font-size);
-    line-height: map-get($text-base, line-height);
+    font-size: map-get($text-sm, font-size);
+    line-height: map-get($text-sm, line-height);
+    font-weight: $font-normal;
     color: white;
     cursor: pointer;
 
@@ -118,8 +119,9 @@
       gap: 1rem;
 
       .inputText {
-        align-items: center;
-        gap: 0.5rem;
+        input {
+          width: 100%;
+        }
       }
     }
 

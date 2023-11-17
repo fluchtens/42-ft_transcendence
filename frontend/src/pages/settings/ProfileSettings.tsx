@@ -1,21 +1,15 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  getUserApi,
-  updateAvatarApi,
-  updateUsernameApi,
-} from "../../services/user.api";
-import { User } from "../../types/user.interface";
+import { updateAvatarApi, updateUsernameApi } from "../../services/user.api";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import { Separator } from "../../components/Separator";
 import defaultAvatar from "/default_avatar.png";
 import styles from "./ProfileSettings.module.scss";
+import { useAuth } from "../../utils/useAuth";
 
 function ProfileSettings() {
-  const [user, setUser] = useState<User | null>(null);
+  const { user, refreshUser } = useAuth();
   const [username, setUsername] = useState("");
   const [file, setFile] = useState<File | null>(null);
-  const navigate = useNavigate();
 
   const changeUsername = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value);
@@ -52,22 +46,13 @@ function ProfileSettings() {
       success ? notifySuccess(message) : notifyError(message);
     }
 
-    getUserData();
-  };
-
-  const getUserData = async () => {
-    const data = await getUserApi();
-    if (!data) {
-      navigate("/");
-      return;
-    }
-    setUser(data);
-    setUsername(data.username);
+    await refreshUser();
   };
 
   useEffect(() => {
-    getUserData();
-  }, []);
+    if (!user) return;
+    setUsername(user.username);
+  }, [user]);
 
   return (
     <>
@@ -100,7 +85,6 @@ function ProfileSettings() {
               </label>
             </div>
           </div>
-          {/* <Separator /> */}
           <button onClick={submitData}>Update profile</button>
         </form>
       )}

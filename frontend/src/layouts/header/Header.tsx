@@ -3,34 +3,30 @@ import { Link } from "react-router-dom";
 import { MainNavLink } from "./MainNavLink";
 import { NavLink } from "./NavLink";
 import { ProfileBtn } from "./ProfileBtn";
-import { User } from "../../types/user.interface";
-import { getUserApi } from "../../services/user.api";
 import { AiFillHome } from "react-icons/ai";
 import { IoGameController } from "react-icons/io5";
 import { BsFillChatDotsFill } from "react-icons/bs";
 import styles from "./Header.module.scss";
+import { useAuth } from "../../utils/useAuth";
 
 export default function Header() {
+  const { user, refreshUser } = useAuth();
   const [navMenu, setNavMenu] = useState<boolean>(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(Boolean(user));
 
   const toggleNavMenu = () => {
     setNavMenu(!navMenu);
   };
 
   const handleLogout = async () => {
-    setUser(null);
+    await refreshUser();
+    setIsLoggedIn(false);
+    window.location.reload();
   };
 
   useEffect(() => {
-    const getUserData = async () => {
-      const data = await getUserApi();
-      if (data) {
-        setUser(data);
-      }
-    };
-    getUserData();
-  }, []);
+    setIsLoggedIn(Boolean(user));
+  }, [user]);
 
   return (
     <header>
@@ -49,7 +45,7 @@ export default function Header() {
             </li>
           </ul>
         </div>
-        {user ? (
+        {user && isLoggedIn ? (
           <ProfileBtn
             username={user.username}
             avatar={user.avatar}

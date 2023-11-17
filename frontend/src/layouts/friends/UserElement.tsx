@@ -1,69 +1,61 @@
 import defaultAvatar from "/default_avatar.png";
 import styles from "./UserElement.module.scss";
-import { AiFillCheckCircle } from "react-icons/ai";
-import { AiFillCloseCircle } from "react-icons/ai";
-import { notifyError, notifySuccess } from "../../utils/notifications";
-import {
-  acceptFriendRequestApi,
-  declineFriendRequestApi,
-} from "../../services/friendship.api";
+import { UserContextMenu } from "./UserContextMenu";
+import { User } from "../../types/user.interface";
 
 interface UserElementProps {
-  friend: boolean;
-  id?: number;
-  username: string;
-  avatar: string;
-  cb?: () => void;
+  user: User;
+  contextMenu: boolean;
+  toggleContextMenu: () => void;
 }
 
 const UserElement = ({
-  friend,
-  id,
-  username,
-  avatar,
-  cb,
+  user,
+  contextMenu,
+  toggleContextMenu,
 }: UserElementProps) => {
-  const acceptFriendRequest = async () => {
-    if (!id || !cb) return;
-    const { success, message } = await acceptFriendRequestApi(id);
-    success ? notifySuccess(message) : notifyError(message);
-    cb();
-  };
-
-  const declineFriendRequest = async () => {
-    if (!id || !cb) return;
-    const { success, message } = await declineFriendRequestApi(id);
-    success ? notifySuccess(message) : notifyError(message);
-    cb();
-  };
+  const isInGame = user.status === "In game";
+  const isOnline = user.status === "Online";
+  const isOffline = user.status === "Offline";
 
   return (
-    <>
-      {friend ? (
-        <div className={styles.friendContainer}>
-          {avatar ? <img src={avatar} /> : <img src={defaultAvatar} />}
-          <div>
-            <p className={styles.username}>{username}</p>
-            <p className={styles.status}>Status</p>
-          </div>
+    <div className={styles.friendContainer}>
+      <button
+        className={`${styles.friendBtn} ${contextMenu ? styles.activeBtn : ""}`}
+        onClick={toggleContextMenu}
+      >
+        {user.avatar ? <img src={user.avatar} /> : <img src={defaultAvatar} />}
+        <div>
+          {isInGame && (
+            <>
+              <p className={`${styles.username} ${styles.ingame}`}>
+                {user.username}
+              </p>
+              <p className={`${styles.status} ${styles.ingame}`}>
+                {user.status}
+              </p>
+            </>
+          )}
+          {isOnline && (
+            <>
+              <p className={`${styles.username} ${styles.online}`}>
+                {user.username}
+              </p>
+              <p className={`${styles.status} ${styles.online}`}>
+                {user.status}
+              </p>
+            </>
+          )}
+          {isOffline && (
+            <>
+              <p className={styles.username}>{user.username}</p>
+              <p className={styles.status}>{user.status}</p>
+            </>
+          )}
         </div>
-      ) : (
-        <div className={styles.requestContainer}>
-          <div className={styles.userInfo}>
-            {avatar ? <img src={avatar} /> : <img src={defaultAvatar} />}
-            <p className={styles.username}>{username}</p>
-          </div>
-          <div className={styles.buttons}>
-            <button onClick={acceptFriendRequest}>
-              <AiFillCheckCircle className={styles.accept} />
-            </button>
-            <button onClick={declineFriendRequest}>
-              <AiFillCloseCircle className={styles.decline} />
-            </button>
-          </div>
-        </div>
-      )}
-    </>
+      </button>
+      {contextMenu && <UserContextMenu user={user} cb={toggleContextMenu} />}
+    </div>
   );
 };
 

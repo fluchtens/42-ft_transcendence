@@ -6,53 +6,19 @@
   background: $bg-secondary-color;
 
   .settings {
+    margin: 0;
+    padding: 0;
+    max-height: calc(100vh - 10rem);
+    flex-direction: column;
     display: flex;
-    justify-content: center;
-    align-items: left;
     gap: 2rem;
+    list-style-type: none;
+    overflow-y: auto;
+    scrollbar-width: none; // Firefox
+    -ms-overflow-style: none; // IE (Internet Explorer) and Edge
 
-    .categories {
-      min-width: 15rem;
-      flex-direction: column;
-      display: flex;
-      align-items: left;
-      gap: 0.25rem;
-
-      button {
-        width: 100%;
-        padding: 0.5rem 1rem;
-        border: none;
-        border-radius: $rounded-md;
-        transition: background-color 0.3s;
-        font-size: map-get($text-base, font-size);
-        line-height: map-get($text-base, line-height);
-        text-align: left;
-        cursor: pointer;
-      }
-
-      .notActive {
-        background: transparent;
-        color: $text-primary-color;
-
-        &:hover {
-          background: $extra-tertiary-color;
-          color: white;
-        }
-      }
-
-      .isActive {
-        background: $extra-tertiary-color;
-        color: white;
-      }
-    }
-  }
-}
-
-@media (max-width: 768px) {
-  .container {
-    .settings {
-      flex-direction: column;
-      gap: 1rem;
+    &::-webkit-scrollbar {
+      display: none; // WebKit-based browsers like Opera, Chrome, and Safari
     }
   }
 }

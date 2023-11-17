@@ -6,6 +6,7 @@ export interface User {
   avatar: string;
   avatarUrl: string;
   twoFa: boolean;
+  status: string;
   createdAt: string;
   updatedAt: string;
   friendship: Friendship;

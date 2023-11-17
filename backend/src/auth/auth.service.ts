@@ -138,6 +138,14 @@ export class AuthService {
     }
   }
 
+  verifyAccessToken(token: string): any {
+    const decodedToken = this.jwtService.verify(token, {
+      secret: process.env.JWT_SECRET,
+    });
+
+    return decodedToken;
+  }
+
   /* -------------------------------------------------------------------------- */
   /*                                     42                                     */
   /* -------------------------------------------------------------------------- */
@@ -195,6 +203,8 @@ export class AuthService {
     const payload = { id: user.id, username: user.username };
     const token = await this.generateJwtToken(payload, '2h');
     await this.setAccessTokenCookie(res, token, this.cookieExpirationTime);
+
+    res.clearCookie('connect.sid');
 
     return { message: 'User succesfully connected' };
   }

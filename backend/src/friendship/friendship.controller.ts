@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   Param,
   ParseIntPipe,
   Patch,
@@ -13,10 +14,14 @@ import {
 import { FriendshipService } from './friendship.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UserIdDto } from 'src/user/dtos/UserIdDto';
+import { FriendshipGateway } from './friendship.gateway';
 
 @Controller('friendship')
 export class FriendshipController {
-  constructor(private readonly friendshipService: FriendshipService) {}
+  constructor(
+    private readonly friendshipService: FriendshipService,
+    private readonly friendshipGateway: FriendshipGateway,
+  ) {}
 
   /* -------------------------------------------------------------------------- */
   /*                                   General                                  */
@@ -27,12 +32,16 @@ export class FriendshipController {
     return this.friendshipService.getFriends(parseInt(userId));
   }
 
-  @Delete('remove')
+  @Patch('remove')
   @UseGuards(JwtAuthGuard)
   async removeFriend(@Req() req, @Body() body: UserIdDto) {
     const { id } = req.user;
     const { userId } = body;
-    return this.friendshipService.removeFriend(id, userId);
+
+    const res = await this.friendshipService.removeFriend(id, userId);
+    this.friendshipGateway.handleReloadList();
+
+    return res;
   }
 
   @Patch('block')
@@ -40,7 +49,11 @@ export class FriendshipController {
   async blockUser(@Req() req, @Body() body: UserIdDto) {
     const { id } = req.user;
     const { userId } = body;
-    return this.friendshipService.blockUser(id, userId);
+
+    const res = await this.friendshipService.blockUser(id, userId);
+    this.friendshipGateway.handleReloadList();
+
+    return res;
   }
 
   /* -------------------------------------------------------------------------- */
@@ -59,7 +72,11 @@ export class FriendshipController {
   async sendFriendRequest(@Req() req, @Body() body: UserIdDto) {
     const { id } = req.user;
     const { userId } = body;
-    return this.friendshipService.sendFriendRequest(id, userId);
+
+    const res = await this.friendshipService.sendFriendRequest(id, userId);
+    this.friendshipGateway.handleReloadList();
+
+    return res;
   }
 
   @Patch('request/accept')
@@ -67,7 +84,11 @@ export class FriendshipController {
   async acceptFriendRequest(@Req() req, @Body() body: UserIdDto) {
     const { id } = req.user;
     const { userId } = body;
-    return this.friendshipService.acceptFriendRequest(id, userId);
+
+    const res = await this.friendshipService.acceptFriendRequest(id, userId);
+    this.friendshipGateway.handleReloadList();
+
+    return res;
   }
 
   @Patch('request/decline')
@@ -75,6 +96,10 @@ export class FriendshipController {
   async declineFriendRequest(@Req() req, @Body() body: UserIdDto) {
     const { id } = req.user;
     const { userId } = body;
-    return this.friendshipService.declineFriendRequest(id, userId);
+
+    const res = await this.friendshipService.declineFriendRequest(id, userId);
+    this.friendshipGateway.handleReloadList();
+
+    return res;
   }
 }
