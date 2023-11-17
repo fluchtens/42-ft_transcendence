@@ -6,7 +6,7 @@ import { MainTitle } from "../../components/MainTitle";
 import { useAuth } from "../../utils/useAuth";
 
 function Setup() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [username, setUsername] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
@@ -24,7 +24,9 @@ function Setup() {
       return;
     }
 
+    await refreshUser();
     navigate("/");
+    window.location.reload();
   };
 
   useEffect(() => {

@@ -25,6 +25,7 @@ function TwoFaAuth() {
     }
 
     navigate("/");
+    window.location.reload();
   };
 
   useEffect(() => {

@@ -36,6 +36,7 @@ function Login() {
     } else {
       navigate("/");
       notifySuccess(data.message);
+      window.location.reload();
     }
 
     await refreshUser();

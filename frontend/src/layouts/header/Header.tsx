@@ -21,6 +21,7 @@ export default function Header() {
   const handleLogout = async () => {
     await refreshUser();
     setIsLoggedIn(false);
+    window.location.reload();
   };
 
   useEffect(() => {
