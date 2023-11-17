@@ -122,22 +122,6 @@ export class AuthService {
     return { message: 'User succesfully disconnected' };
   }
 
-  async verifyJwt(token: string): Promise<any> {
-    try {
-      const actoken = 'access_token=' + token;
-      console.log(actoken);
-      // const ver = await this.jwtService.verify(token);
-      console.log('test');
-      const decodedToken = await this.jwtService.decode(token);
-      console.log(decodedToken);
-      return decodedToken;
-      // const user = await this.findUserById(decodedToken.user.id)
-      //check user
-    } catch (error) {
-      console.log('error', error);
-    }
-  }
-
   verifyAccessToken(token: string): any {
     const decodedToken = this.jwtService.verify(token, {
       secret: process.env.JWT_SECRET,

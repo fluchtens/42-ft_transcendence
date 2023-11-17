@@ -89,15 +89,21 @@ export class ChatGateway implements OnModuleInit {
 
   async handleConnection(@ConnectedSocket() client: Socket) {
     try {
-      console.log("handleConnection");
       const cookie = client.handshake.headers.cookie;
-      let token = null;
-      if (cookie)
-        token = cookie.substring("access_token=".length);
-      if (token === null) {
-        throw new Error(", access_token not found");
+      if (!cookie) {
+        throw new Error('No cookies found');
       }
-      const decodedToken = await this.authService.verifyJwt(token);
+
+      const cookies = cookie.split(';').map((cookie) => cookie.trim());
+      const jwtCookie = cookies.find((cookie) =>
+        cookie.startsWith('access_token='),
+      );
+
+      const token = jwtCookie.substring('access_token='.length);
+      if (!token) {
+        throw new Error('access_token not found');
+      }
+      const decodedToken =  this.authService.verifyAccessToken(token);
       client.handshake.auth.userId = decodedToken.id;
       // await this.InitRooms(client);
     }
