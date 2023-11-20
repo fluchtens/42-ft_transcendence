@@ -29,7 +29,11 @@ const AddChannelBar = ({ name, changeName }: AddChannelBarProps) => {
         </button>
       </form>
       {modal && (
-        <CreateChannel name={name} changeName={changeName} close={closeModal} />
+        <CreateChannel
+          name={name}
+          changeName={changeName}
+          closeModal={closeModal}
+        />
       )}
     </>
   );

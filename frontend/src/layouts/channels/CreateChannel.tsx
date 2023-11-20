@@ -1,14 +1,19 @@
 import { useState } from "react";
 import { Modal } from "../../components/Modal";
 import styles from "./CreateChannel.module.scss";
+import { notifySuccess } from "../../utils/notifications";
 
 interface CreateChannelProps {
   name: string;
   changeName: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  close: () => void;
+  closeModal: () => void;
 }
 
-const CreateChannel = ({ name, changeName, close }: CreateChannelProps) => {
+const CreateChannel = ({
+  name,
+  changeName,
+  closeModal,
+}: CreateChannelProps) => {
   const [type, setType] = useState<string>("public");
   const [password, setPassword] = useState<string>("");
   console.log(password);
@@ -21,9 +26,15 @@ const CreateChannel = ({ name, changeName, close }: CreateChannelProps) => {
     setPassword(e.target.value);
   };
 
+  const submitData = (e: React.FormEvent) => {
+    e.preventDefault();
+    closeModal();
+    notifySuccess("Channel successfully created");
+  };
+
   return (
     <Modal>
-      <form className={styles.form}>
+      <form className={styles.form} onSubmit={submitData}>
         <h1>Create Channel</h1>
         <div className={styles.types}>
           <label>Channel Type</label>
@@ -86,7 +97,7 @@ const CreateChannel = ({ name, changeName, close }: CreateChannelProps) => {
           )}
         </div>
         <div className={styles.buttons}>
-          <button type="button" onClick={close}>
+          <button type="button" onClick={closeModal}>
             Cancel
           </button>
           <button type="submit">Create Channel</button>

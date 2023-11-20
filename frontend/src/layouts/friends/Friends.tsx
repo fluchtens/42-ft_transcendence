@@ -21,7 +21,6 @@ const socket = io(`${import.meta.env.VITE_BACK_URL}/friendship`, {
 
 function Friends() {
   const { user } = useAuth();
-  // const [user, setUser] = useState<User | null>(null);
   const [friends, setFriends] = useState<User[] | null>(null);
   const [usersReq, setUsersReq] = useState<User[] | null>(null);
   const [addUser, setAddUser] = useState<string>("");
