@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 
 interface ChannelComponentProps {
@@ -9,6 +9,7 @@ interface ChannelComponentProps {
 const ChannelComponent: React.FC<ChannelComponentProps> = ({ channel, socket }) => {
   console.log("ChannelComponent is being rendered:", channel.channelId);
   const [messageInput, setMessageInput] = useState('');
+  const [newMessages, setNewMessages] = useState<Messages[]>([]);
 
   const onSendMessage = () => {
     if (channel.channelId) {
@@ -18,6 +19,15 @@ const ChannelComponent: React.FC<ChannelComponentProps> = ({ channel, socket }) 
     }
   };
 
+  useEffect(() => {
+    socket.on(`${channel.channelId}/message`, (message: Messages) => {
+      setNewMessages((prevMessages) => [...prevMessages, message]);
+    });
+    return () => {
+      socket.off(`${channel.channelId}/message`);
+    }
+  }, [channel]);
+
   return (
     <div className="channel-container">
       <div className="channel-header">
@@ -25,6 +35,11 @@ const ChannelComponent: React.FC<ChannelComponentProps> = ({ channel, socket }) 
       </div>
       <div className="message-list">
         {channel.messages.map((message, index) => (
+          <div key={index} className="message">
+            {message.userId}: {message.content}
+          </div>
+        ))}
+         {newMessages.map((message, index) => (
           <div key={index} className="message">
             {message.userId}: {message.content}
           </div>

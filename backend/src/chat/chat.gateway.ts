@@ -114,14 +114,11 @@ export class ChatGateway implements OnModuleInit {
   }
 
   handleDisconnect(client: Socket) {
-    // const userId = client.handshake.auth.userId;
-    // const socketId = client.id;
-
-    // this.roomService.leaveRoom()
-    // this.server.emit('reloadList');
+    this.roomService.disconnectClient(client);
+    console.log(`client ${client.id} disconnected`);
   }
-  onM
-  oduleInit() {
+
+  onModuleInit() {
     this.server.on('connection', (socket) => {
       console.log(socket.id);
       console.log('Connected, dunno if initRoomsWork');
@@ -178,9 +175,7 @@ export class ChatGateway implements OnModuleInit {
     const userId = client.handshake.auth.userId;
     if (userId) {
       try {
-        // console.log(`ChannelIdjon${channelId}`);
         const ChannelData : ChannelData = await this.getChannelData(client, channelId);
-        console.log('joinChannel');
         client.emit(`channelData:${channelId}`, ChannelData);
       }
       catch(error) {
@@ -193,13 +188,17 @@ export class ChatGateway implements OnModuleInit {
     }
   }
 
-  @SubscribeMessage(':channelId/sendMessage')
+  @SubscribeMessage('message')
+  async messageEvent() {
+    console.log('messageEvent');
+  }
+
+  @SubscribeMessage('sendMessage')
   async handleSendMessage(@ConnectedSocket() client: Socket,
-  @MessageBody() message: string,
-  @Param('channelId') channelId: string
+  @MessageBody() messageDto: SendMessageDto,
   ): Promise<void> {
-    console.log('sendMessage');
     const userId = client.handshake.auth.userId;
+    const {channelId, message} = messageDto;
     if (userId && channelId && message) {
       try {
         const channel = await this.chatService.getChannelById(channelId);
@@ -207,8 +206,7 @@ export class ChatGateway implements OnModuleInit {
           const messageSend = await this.chatService.addMessage(userId, channelId, message);
           if (!messageSend)
             throw new Error("Message cannot be send");
-          console.log(messageSend);
-          this.server.emit('newMessage', {userId, message });
+          this.server.to(channelId).emit(`${channelId}/message`, messageSend);
         }
       }
       catch (error){
@@ -218,6 +216,10 @@ export class ChatGateway implements OnModuleInit {
     return ;
   }
 
+  @SubscribeMessage(':channelId/message')
+  async newMessage(client: Socket) {
+    console.log('message event');
+  }
   @SubscribeMessage('createChannel')
   async createChannel(@ConnectedSocket() client: Socket, @MessageBody() channelName: string) {
     const userId = Number(client.handshake.auth.userId);

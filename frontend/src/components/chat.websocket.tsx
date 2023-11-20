@@ -7,7 +7,6 @@ export const  Websocket = () => {
 
   const [channelIds, setChannelIds] = useState<string[]>();
   const [channelsData, setChannelsData] = useState<ChannelData[]>([]);
-  const [messagesData, setMessagesData] = useState<Messages[]>([]);
 
   const socket : any = useContext(WebsocketContext);socket.on(`messages`)
   useEffect(() => {
@@ -42,7 +41,6 @@ export const  Websocket = () => {
         socket.emit('joinChannel', channelId);
       });
 
-      // Écouter l'événement pour chaque channelId
       channelIds.forEach((channelId) => {
         socket.on(`channelData:${channelId}`, (channelData: ChannelData) => {
           console.log(`Received channelData for channelId ${channelId}`);
@@ -64,10 +62,6 @@ export const  Websocket = () => {
             }
             return [];
           });
-        });
-        socket.on(`messages:${channelId}`, (messages: Messages) => {
-          console.log(`received message on ${channelId}`);
-          setMessagesData((prevMessages) => [...prevMessages, messages]);
         });
       });
     }
