@@ -1,6 +1,6 @@
 import { useAuth } from "../../utils/useAuth";
 import { ChannelElement } from "./ChannelElement";
-import { CreateChannel } from "./CreateChannel";
+import { AddChannelBar } from "./AddChannelBar";
 import styles from "./Channels.module.scss";
 
 const channelsData = [
@@ -33,7 +33,7 @@ function Channels() {
     <>
       {user && (
         <div className={styles.container}>
-          <CreateChannel />
+          <AddChannelBar />
           <ul>
             {channelsData.map((channel) => (
               <li key={channel.id}>
