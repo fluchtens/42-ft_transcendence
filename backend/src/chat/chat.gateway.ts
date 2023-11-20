@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Inject, OnModuleInit, Req, UseGuards, forwardRef} from "@nestjs/common";
+import { BadRequestException, Body, Inject, OnModuleInit, Param, Req, UseGuards, forwardRef} from "@nestjs/common";
 
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
 import { Request} from "express";
@@ -49,20 +49,21 @@ export class ChatGateway implements OnModuleInit {
 //     }
 //   }
 
-//   async InitRooms(client: Socket) {
-//     try {
-//       const channels = await this.chatService.getUserChannels(Number(client.handshake.auth.userId));
-//       channels.forEach((channel) => {
-//         if (!this.roomService.getRoomClients(channel.id)) {
-//           this.roomService.createRoom(channel.id);
-//         }
-//         this.roomService.joinRoom(client, channel.id);
-//       });
-//     }
-//     catch (error){
-//       console.error("chat init rooms error socket io", error.message);
-//     }
-//   }
+  async InitRooms(client: Socket) {
+    try {
+      const channels = await this.chatService.getUserChannels(Number(client.handshake.auth.userId));
+      channels.forEach((channel) => {
+        if (!this.roomService.getRoomClients(channel.id)) {
+          this.roomService.createRoom(channel.id);
+        }
+        this.roomService.joinRoom(client, channel.id);
+      });
+    }
+    catch (error){
+      console.error("chat init rooms error socket io", error.message);
+    }
+  }
+
   async getChannelData(client: Socket, channelId: string): Promise<ChannelData> {
     let channelData: ChannelData;
     try {
@@ -112,10 +113,19 @@ export class ChatGateway implements OnModuleInit {
     }
   }
 
-  onModuleInit() {
+  handleDisconnect(client: Socket) {
+    // const userId = client.handshake.auth.userId;
+    // const socketId = client.id;
+
+    // this.roomService.leaveRoom()
+    // this.server.emit('reloadList');
+  }
+  onM
+  oduleInit() {
     this.server.on('connection', (socket) => {
       console.log(socket.id);
-      console.log('Connected');
+      console.log('Connected, dunno if initRoomsWork');
+      this.InitRooms(socket);
     });
   }
 
@@ -183,11 +193,13 @@ export class ChatGateway implements OnModuleInit {
     }
   }
 
-  @SubscribeMessage('sendMessage')
-  async handleSendMessage(@ConnectedSocket() client: Socket, @MessageBody() sendMessageDto: SendMessageDto): Promise<void> {
+  @SubscribeMessage(':channelId/sendMessage')
+  async handleSendMessage(@ConnectedSocket() client: Socket,
+  @MessageBody() message: string,
+  @Param('channelId') channelId: string
+  ): Promise<void> {
     console.log('sendMessage');
     const userId = client.handshake.auth.userId;
-    const { channelId, message } = sendMessageDto;
     if (userId && channelId && message) {
       try {
         const channel = await this.chatService.getChannelById(channelId);
@@ -205,10 +217,6 @@ export class ChatGateway implements OnModuleInit {
     }
     return ;
   }
- 
-//   // // @SubscribeMessage('findAllMessages')
-//   // // async findAll(@Req() req) {
-//   // // }
 
   @SubscribeMessage('createChannel')
   async createChannel(@ConnectedSocket() client: Socket, @MessageBody() channelName: string) {

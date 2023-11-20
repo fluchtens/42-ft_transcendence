@@ -7,14 +7,16 @@ export const  Websocket = () => {
 
   const [channelIds, setChannelIds] = useState<string[]>();
   const [channelsData, setChannelsData] = useState<ChannelData[]>([]);
-  const socket : any = useContext(WebsocketContext);
+  const [messagesData, setMessagesData] = useState<Messages[]>([]);
+
+  const socket : any = useContext(WebsocketContext);socket.on(`messages`)
   useEffect(() => {
     socket.on('connect', () => {
       console.log('Connected!');
     });
     socket.on('channels', () => {
       console.log("channels Connection");
-    })
+    });
     return () => {
       console.log('Unregistering Events...');
       socket.off('connect');
@@ -44,8 +46,6 @@ export const  Websocket = () => {
       channelIds.forEach((channelId) => {
         socket.on(`channelData:${channelId}`, (channelData: ChannelData) => {
           console.log(`Received channelData for channelId ${channelId}`);
-          
-          // Mettez à jour l'état local avec les données du canal
           setChannelsData((prevChannelsData) => {
             if (prevChannelsData) {
               const updatedChannels = [...prevChannelsData];
@@ -65,13 +65,13 @@ export const  Websocket = () => {
             return [];
           });
         });
+        socket.on(`messages:${channelId}`, (messages: Messages) => {
+          console.log(`received message on ${channelId}`);
+          setMessagesData((prevMessages) => [...prevMessages, messages]);
+        });
       });
     }
-    console.log(channelsData);
-    // Nettoyer les écouteurs d'événements lorsque le composant est démonté
     return () => {
-      console.log(channelsData);
-
       if (channelIds) {
         channelIds.forEach((channelId) => {
           socket.off(`channelData:${channelId}`);

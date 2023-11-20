@@ -14,10 +14,16 @@ export class RoomsService {
     this.rooms.get(roomName).add(socket);
   }
 
+  sendMessage(roomName: string, eventName: string, data: any): void {
+
+  }
+
   leaveRoom(socket: Socket, roomName: string) : void {
     socket.leave(roomName);
     this.rooms.get(roomName).delete(socket);
   }
+
+  // disconnectClient(socket)
 
   getRoomClients(roomName: string): Set<Socket> {
     return this.rooms.get(roomName);
