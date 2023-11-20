@@ -1,5 +1,11 @@
 import styles from "./Modal.module.scss";
 
-const Modal = () => <div className={styles.modal}></div>;
+interface ModalProps {
+  children: React.ReactNode;
+}
+
+const Modal = ({ children }: ModalProps) => (
+  <div className={styles.modal}>{children}</div>
+);
 
 export { Modal };

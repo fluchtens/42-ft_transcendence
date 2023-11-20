@@ -2,38 +2,22 @@ import { useAuth } from "../../utils/useAuth";
 import { ChannelElement } from "./ChannelElement";
 import { AddChannelBar } from "./AddChannelBar";
 import styles from "./Channels.module.scss";
-
-const channelsData = [
-  { id: 1, name: "Creators Area ", status: "Public" },
-  { id: 2, name: "Project Lumos", status: "Password" },
-  { id: 3, name: "Les momos", status: "Private" },
-  { id: 4, name: "fluchten's channel", status: "Private" },
-  { id: 1, name: "Creators Area ", status: "Public" },
-  { id: 2, name: "Project Lumos", status: "Password" },
-  { id: 3, name: "Les momos", status: "Private" },
-  { id: 4, name: "fluchten's channel", status: "Private" },
-  { id: 1, name: "Creators Area ", status: "Public" },
-  { id: 2, name: "Project Lumos", status: "Password" },
-  { id: 3, name: "Les momos", status: "Private" },
-  { id: 4, name: "fluchten's channel", status: "Private" },
-  { id: 1, name: "Creators Area ", status: "Public" },
-  { id: 2, name: "Project Lumos", status: "Password" },
-  { id: 3, name: "Les momos", status: "Private" },
-  { id: 4, name: "fluchten's channel", status: "Private" },
-  { id: 1, name: "Creators Area ", status: "Public" },
-  { id: 2, name: "Project Lumos", status: "Password" },
-  { id: 3, name: "Les momos", status: "Private" },
-  { id: 4, name: "fluchten's channel", status: "Private" },
-];
+import { useState } from "react";
+import { channelsData } from "./_chat.dummy.data";
 
 function Channels() {
+  const [newChannel, setNewChannel] = useState<string>("");
   const { user } = useAuth();
+
+  const changeNewChannel = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewChannel(e.target.value);
+  };
 
   return (
     <>
       {user && (
         <div className={styles.container}>
-          <AddChannelBar />
+          <AddChannelBar name={newChannel} changeName={changeNewChannel} />
           <ul>
             {channelsData.map((channel) => (
               <li key={channel.id}>

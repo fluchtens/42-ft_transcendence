@@ -4,27 +4,33 @@ import { useState } from "react";
 import { CreateChannel } from "./CreateChannel";
 
 interface AddChannelBarProps {
-  value: string;
+  name: string;
+  changeName: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const AddChannelBar = ({ value }: AddChannelBarProps) => {
+const AddChannelBar = ({ name, changeName }: AddChannelBarProps) => {
   const [modal, setModal] = useState<boolean>(false);
 
-  const submitData = (e: React.FormEvent) => {
+  const openModal = (e: React.FormEvent) => {
     e.preventDefault();
-
     setModal(true);
+  };
+
+  const closeModal = () => {
+    setModal(false);
   };
 
   return (
     <>
-      <form className={styles.addFriend} onSubmit={submitData}>
-        <input type="text" value={value} required />
+      <form className={styles.addFriend} onSubmit={openModal}>
+        <input type="text" value={name} onChange={changeName} required />
         <button type="submit">
           <FaPlus className={styles.icon} />
         </button>
       </form>
-      {modal && <CreateChannel name={value} />}
+      {modal && (
+        <CreateChannel name={name} changeName={changeName} close={closeModal} />
+      )}
     </>
   );
 };
