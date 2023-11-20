@@ -5,28 +5,28 @@ import ChannelComponent from "./Channel";
 
 export const  Websocket = () => {
 
-  const [channelIds, setChannelIds] = useState<string[]>();
+  const [channelIds, setChannelIds] = useState<string[]>([]);
   const [channelsData, setChannelsData] = useState<ChannelData[]>([]);
+  const [channelName, setChannelName] = useState('');
 
   const socket : any = useContext(WebsocketContext);socket.on(`messages`)
   useEffect(() => {
     socket.on('connect', () => {
       console.log('Connected!');
     });
-    socket.on('channels', () => {
-      console.log("channels Connection");
+    socket.on('newChannel', (channelId: string) => {
+      setChannelIds((prevChannelsIds) => [...prevChannelsIds, channelId]);
     });
     return () => {
       console.log('Unregistering Events...');
       socket.off('connect');
-      socket.off('allChannels');
+      socket.off('newChannel');
     };
   }, []);
 
   useEffect(() => {
     socket.on('allChannels', (channelIds: string[]) => {
       setChannelIds(channelIds);
-      console.log(channelIds);
     });
     socket.emit('getAllChannels');
     // Nettoyer les écouteurs d'événements lorsque le composant est démonté
@@ -34,6 +34,11 @@ export const  Websocket = () => {
       socket.off('allChannels');
     };
   }, []);
+
+  const onCreateChannel = () => {
+    socket.emit('createChannel', channelName);
+    setChannelName('');
+  };
 
   useEffect(() => {
     if (channelIds) {
@@ -43,7 +48,6 @@ export const  Websocket = () => {
 
       channelIds.forEach((channelId) => {
         socket.on(`channelData:${channelId}`, (channelData: ChannelData) => {
-          console.log(`Received channelData for channelId ${channelId}`);
           setChannelsData((prevChannelsData) => {
             if (prevChannelsData) {
               const updatedChannels = [...prevChannelsData];
@@ -56,8 +60,6 @@ export const  Websocket = () => {
               } else {
                 updatedChannels.push(channelData);
               }
-  
-              console.log("Updated channelsData:", updatedChannels);
               return updatedChannels;
             }
             return [];
@@ -74,16 +76,17 @@ export const  Websocket = () => {
     };
   }, [channelIds]);
 
-  useEffect(() => {
-    console.log(channelsData);
-  }, [channelsData]);
-
   return (
     <div>
       <div>
+        <input type="text" placeholder="Name your channel" value={channelName} onChange={(e) => setChannelName(e.target.value)} />
+        <button onClick={onCreateChannel}>
+          CreateNewChannel
+        </button>
+      </div>
+      <div>
         {channelsData &&
             channelsData.map((channel) => {
-              console.log("Calling ChannelComponent for channel:", channel);
               return (
                 <ChannelComponent key={channel.channelId} channel={channel} socket={socket}/>
               )

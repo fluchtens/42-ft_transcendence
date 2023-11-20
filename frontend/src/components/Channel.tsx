@@ -7,14 +7,12 @@ interface ChannelComponentProps {
 }
 
 const ChannelComponent: React.FC<ChannelComponentProps> = ({ channel, socket }) => {
-  console.log("ChannelComponent is being rendered:", channel.channelId);
   const [messageInput, setMessageInput] = useState('');
   const [newMessages, setNewMessages] = useState<Messages[]>([]);
 
   const onSendMessage = () => {
     if (channel.channelId) {
       socket.emit('sendMessage', { channelId: channel.channelId, message: messageInput });
-      console.log("Message sent!");
       setMessageInput('');
     }
   };

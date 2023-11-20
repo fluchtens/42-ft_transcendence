@@ -121,7 +121,6 @@ export class ChatGateway implements OnModuleInit {
   onModuleInit() {
     this.server.on('connection', (socket) => {
       console.log(socket.id);
-      console.log('Connected, dunno if initRoomsWork');
       this.InitRooms(socket);
     });
   }
@@ -149,7 +148,7 @@ export class ChatGateway implements OnModuleInit {
     if (userId) {
       try {
         const ChannelData : ChannelData = await this.getChannelData(client, channelId);
-        console.log(ChannelData);
+        // console.log(ChannelData);
       }
       catch(error) {
         console.error('error getting all channels:', error.message);
@@ -188,11 +187,6 @@ export class ChatGateway implements OnModuleInit {
     }
   }
 
-  @SubscribeMessage('message')
-  async messageEvent() {
-    console.log('messageEvent');
-  }
-
   @SubscribeMessage('sendMessage')
   async handleSendMessage(@ConnectedSocket() client: Socket,
   @MessageBody() messageDto: SendMessageDto,
@@ -216,10 +210,6 @@ export class ChatGateway implements OnModuleInit {
     return ;
   }
 
-  @SubscribeMessage(':channelId/message')
-  async newMessage(client: Socket) {
-    console.log('message event');
-  }
   @SubscribeMessage('createChannel')
   async createChannel(@ConnectedSocket() client: Socket, @MessageBody() channelName: string) {
     const userId = Number(client.handshake.auth.userId);
@@ -234,7 +224,8 @@ export class ChatGateway implements OnModuleInit {
           throw new BadRequestException;
         }
       }
-      this.chatService.createChannel(userId, channelName);
+      const channelData = await this.chatService.createChannel(userId, channelName);
+      client.emit('newChannel', channelData.id);
     }
    else {
     console.log("User ID not available.");
