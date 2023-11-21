@@ -433,4 +433,93 @@ export class ChatService{
       return false;
     }
   }
+
+  async updateChannelWithPassword(userId: number, channelId: string, password: string) {
+    try {
+      const channelData = await this.getChannelById(channelId);
+      if (channelData.userId === userId) {
+        await this.prismaService.channel.update({
+          where: {
+            id: channelId
+          },
+          data : {
+            password: password
+          },
+        });
+      }
+    }
+    catch(error) {
+      console.error(error);
+      throw error
+    }
+
+  }
+
+  async verifyChannelPassword(channelId: string, password: string): Promise<boolean> {
+    const channel = await this.prismaService.channel.findUnique({ where: { id: channelId } });
+    return channel?.password === password;
+  }
+
+  async removePasswordFromChannel(userId: number, channelId: string, password: string): Promise<string> {
+    try {
+      const channelData = await this.getChannelById(channelId);
+      if (channelData.userId === userId) {
+        if (await this.verifyChannelPassword(channelId, password)) {
+          await this.prismaService.channel.update({
+            where: {
+              id: channelId
+            },
+            data : {
+              password: null
+            },
+          });
+          return ("Password successful removed"); 
+        }
+        return ("Password verification failed");
+      }
+      return ("You are not the channel Owner");
+    }
+    catch(error) {
+      console.error(error);
+      throw error
+    }
+  }
+
+  async updateChannelVisibility(userId: number, channelId: string, isPublic: boolean): Promise<string> {
+    try {
+      const channelData = await this.getChannelById(channelId);
+      if (channelData.userId === userId) {
+        await this.prismaService.channel.update({
+          where: {
+            id: channelId
+          },
+          data : {
+            public: isPublic
+          },
+        });
+        return ("Visibility changed");
+      }
+      return ("Only the channel owner can change the visibility");
+    }
+    catch(error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
+  async isChannelPublic(channelId: string) : Promise<boolean> {
+    try {
+      const channel = await this.prismaService.channel.findUnique({
+        where: {
+          id: channelId
+        },
+      });
+      return channel?.public || false;
+    }
+    catch(error) {
+      console.error(error);
+      throw error;
+    }
+  }
+  
 }

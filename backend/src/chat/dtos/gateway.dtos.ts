@@ -26,6 +26,8 @@ export class ChannelData {
   channelId: string;
   channelName: string;
   inviteCode?: string;
+  public: boolean;
+  protected: boolean;
   messages: Messages [];
   members: any [];
 }
