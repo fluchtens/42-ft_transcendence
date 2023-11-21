@@ -4,9 +4,20 @@ export class SendMessageDto {
   message: string;
 }
 
+export class CreateChannelDto {
+  channelName: string;
+  isPublic: boolean;
+  password?: string;
+}
+
 export class AddMemberDto {
   channelId: string;
   memberId: number;
+}
+
+export class GetChannelDto {
+  channelId: string;
+  password?: string;
 }
 
 export class Messages {

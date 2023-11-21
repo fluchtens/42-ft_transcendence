@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Inject, OnModuleInit, Param, Req, UseGuards, forwardRef} from "@nestjs/common";
+import { BadGatewayException, BadRequestException, Body, Inject, OnModuleInit, Param, Req, UseGuards, forwardRef} from "@nestjs/common";
 
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
 import { Request} from "express";
@@ -14,8 +14,9 @@ import { ExecutionContextHost } from "@nestjs/core/helpers/execution-context-hos
 import cookieParser from "cookie-parser";
 import { UserService } from "src/user/user.service";
 import { RoomsService } from "./room.service";
-import { SendMessageDto, ChannelData, Messages, AddMemberDto } from "./dtos/gateway.dtos";
+import { SendMessageDto, ChannelData, Messages, AddMemberDto, CreateChannelDto, GetChannelDto } from "./dtos/gateway.dtos";
 import { channel } from "diagnostics_channel";
+import * as bcrypt from 'bcryptjs';
 
 @WebSocketGateway({
   namespace: 'socket',
@@ -42,7 +43,8 @@ export class ChatGateway implements OnModuleInit {
         if (!this.roomService.getRoomClients(channel.id)) {
           this.roomService.createRoom(channel.id);
         }
-        this.roomService.joinRoom(client, channel.id);
+        if (!channel.password)
+         this.roomService.joinRoom(client, channel.id);
       });
     }
     catch (error){
@@ -50,25 +52,32 @@ export class ChatGateway implements OnModuleInit {
     }
   }
 
-  async getChannelData(client: Socket, channelId: string): Promise<ChannelData> {
+  async getChannelData(client: Socket, channelId: string, password?: string): Promise<ChannelData> {
     let channelData: ChannelData;
     try {
+      const channelInfo = await this.chatService.getChannelById(channelId, password);
+      channelData = new ChannelData();
+      channelData.inviteCode = channelInfo.inviteCode;
+      channelData.channelId = channelInfo.id;
+      channelData.channelName = channelInfo.name;
+      channelData.public = channelInfo.public;
+      if (channelInfo.password === "true"){
+        if (!password){
+          channelData.protected = true;
+          channelData.messages = [];
+          channelData.members = [];
+          return channelData;
+        }
+      }
+      if (!channelInfo.password)
+      channelData.protected = false;
+      const channelMembers = await this.chatService.getChannelMembers(channelId);
+      channelData.members = channelMembers;
       const messagesRaw = await this.chatService.getMessagesByChannel(channelId);
       const messages: Messages[] = messagesRaw.map(rawMessage => {
         return new Messages(rawMessage.id, rawMessage.content, rawMessage.edited, rawMessage.userId);
       });
-
-      const channelInfo = await this.chatService.getChannelById(channelId);
-      const channelMembers = await this.chatService.getChannelMembers(channelId);
-      channelData = new ChannelData();
-      channelData.channelId = channelInfo.id;
-      channelData.channelName = channelInfo.name;
-      channelData.inviteCode = channelInfo.inviteCode;
-      channelData.public = channelInfo.public;
       channelData.messages = messages;
-      channelData.members = channelMembers;
-      if (channelInfo.password) 
-      channelData.protected = true;
     }
     catch (error) {
       console.error("error getChannelData", error);
@@ -129,29 +138,14 @@ export class ChatGateway implements OnModuleInit {
       console.error('User ID not available.');
     }
   }
-  
-  @SubscribeMessage('getChannelData')
-  async channelData(@ConnectedSocket() client: Socket, @MessageBody() channelId: string) {
-    const userId = client.handshake.auth.userId;
-    if (userId) {
-      try {
-        const ChannelData : ChannelData = await this.getChannelData(client, channelId);
-        // console.log(ChannelData);
-      }
-      catch(error) {
-        console.error('error getting all channels:', error.message);
-      }
-    } else {
-      console.error('User ID not available.');
-    }
-  }
 
   @SubscribeMessage('joinChannel')
-  async handleJoinChannel(@ConnectedSocket() client: Socket, @MessageBody() channelId: string) {
+  async handleJoinChannel(@ConnectedSocket() client: Socket, @MessageBody() getChannelDto: GetChannelDto) {
     const userId = client.handshake.auth.userId;
+    const { channelId, password } = getChannelDto;
     if (userId) {
       try {
-        const ChannelData : ChannelData = await this.getChannelData(client, channelId);
+        const ChannelData : ChannelData = await this.getChannelData(client, channelId, password);
         client.emit(`channelData:${channelId}`, ChannelData);
       }
       catch(error) {
@@ -188,8 +182,10 @@ export class ChatGateway implements OnModuleInit {
   }
 
   @SubscribeMessage('createChannel')
-  async createChannel(@ConnectedSocket() client: Socket, @MessageBody() channelName: string) {
+  async createChannel(@ConnectedSocket() client: Socket, @MessageBody() createChannelDto: CreateChannelDto) {
     const userId = Number(client.handshake.auth.userId);
+    let { channelName } = createChannelDto;
+    const { isPublic, password } = createChannelDto;
     if (userId) {
       if (!channelName){
         try {
@@ -201,10 +197,17 @@ export class ChatGateway implements OnModuleInit {
           throw new BadRequestException;
         }
       }
-      const channelData = await this.chatService.createChannel(userId, channelName);
-      this.roomService.createRoom(channelData.id);
-      this.roomService.joinRoom(client, channelData.id);
-      client.emit('newChannel', channelData.id);
+      try {
+        console.log(password);
+        const channelData = await this.chatService.createChannel(userId, channelName, isPublic, password);
+        this.roomService.createRoom(channelData.id);
+        this.roomService.joinRoom(client, channelData.id);
+        client.emit('newChannel', channelData.id);
+      }
+      catch (error) {
+        console.error('createchannel error', error.message);
+        throw new BadRequestException;
+      }
     }
    else {
     console.log("User ID not available.");

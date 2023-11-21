@@ -1,7 +1,8 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { Channel, Member, MemberRole, Message } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
-
+import { v4 as uuidv4 } from "uuid"
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class ChatService{
@@ -9,7 +10,7 @@ export class ChatService{
   
   
 
-  async getChannelById(channelId: string): Promise<Channel> {
+  async getChannelById(channelId: string, password?: string): Promise<Partial<Channel>> {
     try {
       const channel = await this.prismaService.channel.findUnique({
         where: {
@@ -18,6 +19,25 @@ export class ChatService{
       });
       if (!channel) {
         throw new NotFoundException('Channel not found');
+      }
+      const sanitizedChannel: Partial<Channel> = {
+        id: channel.id,
+        name: channel.name,
+        public: channel.public,
+        password: "true",
+      };
+      if (channel.password) {
+        if (!password) {
+          return sanitizedChannel;
+        }
+        const matchPwd = await bcrypt.compare(password, channel.password)
+        console.log(password);
+        if (matchPwd){
+          return channel
+        }
+        else {
+          throw new BadRequestException("wrong password");
+        }
       }
       return channel;
     }
@@ -87,33 +107,58 @@ export class ChatService{
     return null;
   }
   
-  async createChannel(userId: number, channelName: string){
+  async createChannel(userId: number, channelName: string, isPublic: boolean, password ?: string){
     if (!userId){
       console.error("user invalid");
       return null;
     }
     try {
-      const channel = await this.prismaService.channel.create({
-        data : {
-          name : channelName,
-          inviteCode: "InviteCode",
-          user: {
-            connect: {
-              id: userId
+      if (password) {
+        const hashedPwd = await bcrypt.hash(password, 10);
+        const channel = await this.prismaService.channel.create({
+          data : {
+            name : channelName,
+            inviteCode: uuidv4(),
+            password: hashedPwd,
+            public: isPublic,
+            user: {
+              connect: {
+                id: userId
+              },
             },
           },
-        },
-      });
-
-      const member = await this.prismaService.member.create({
-        data: {
-          role: 'ADMIN',
-          userId: userId,
-          channelId: channel.id,
-        },
-      });
-
-      return channel;
+        });
+        const member = await this.prismaService.member.create({
+          data: {
+            role: 'ADMIN',
+            userId: userId,
+            channelId: channel.id,
+          },
+        });
+        return channel;
+      }
+      else {
+        const channel = await this.prismaService.channel.create({
+          data : {
+            name : channelName,
+            inviteCode: uuidv4(),
+            public: isPublic,
+            user: {
+              connect: {
+                id: userId
+              },
+            },
+          },
+        });
+        const member = await this.prismaService.member.create({
+          data: {
+            role: 'ADMIN',
+            userId: userId,
+            channelId: channel.id,
+          },
+        });
+        return channel;
+      }
     }
     catch (error) {
       console.error("create channel ", error.message);
