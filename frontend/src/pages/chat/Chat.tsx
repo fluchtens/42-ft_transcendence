@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-// import { Websocket } from "../../components/chat.websocket";
-// import { socket, WebsocketPovider } from "../../services/chat.socket";
 import { useAuth } from "../../utils/useAuth";
 import { useParams } from "react-router-dom";
 import styles from "./Chat.module.scss";
@@ -8,18 +6,41 @@ import {
   channelsData,
   messagesData,
 } from "../../layouts/channels/_chat.dummy.data";
-import { IoSettings } from "react-icons/io5";
-import { HiUsers } from "react-icons/hi2";
 import { getUserByIdApi } from "../../services/user.api";
 import { Message } from "../../types/message.interface";
-import defaultAvatar from "/default_avatar.png";
 import { ChatHeader } from "./ChatHeader";
+import { MessageElement } from "./MessageElement";
+import { MessageInput } from "./MessageInput";
+// import { Websocket } from "../../components/chat.websocket";
+// import { socket, WebsocketPovider } from "../../services/chat.socket";
 
 function Chat() {
   const [channel, setChannel] = useState<any | null>(null);
   const [messages, setMessages] = useState<any | null>(null);
+  const [newMessage, setNewMessage] = useState<string>("");
   const { user } = useAuth();
   const { id } = useParams();
+
+  const changeNewMessage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewMessage(e.target.value);
+  };
+
+  const sendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !newMessage) return;
+
+    const newMessageObject: Message = {
+      id: "24533452345",
+      content: newMessage,
+      userId: user.id,
+      user: user,
+    };
+
+    setMessages((prevMessages: Message[]) =>
+      prevMessages ? [...prevMessages, newMessageObject] : [newMessageObject]
+    );
+    setNewMessage("");
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,7 +51,7 @@ function Chat() {
       setChannel(channelData);
 
       const messages: Message[] = messagesData;
-      if (!messages) return;
+      if (!messages || !messages.length) return;
 
       const messagesWithUsers = await Promise.all(
         messages.map(async (message: Message) => {
@@ -53,27 +74,26 @@ function Chat() {
         <div className={styles.container}>
           <div className={styles.chat}>
             <ChatHeader title={channel.name} />
-
-            <ul className={styles.test}>
+            <ul>
               {messages &&
-                messages.map((message: Message) => (
-                  <li>
-                    <div className={styles.avatar}>
-                      {message.user && message.user.avatar ? (
-                        <img src={message.user.avatar} />
-                      ) : (
-                        <img src={defaultAvatar} />
-                      )}
-                    </div>
-                    <div className={styles.texts}>
-                      {message.user && (
-                        <p className={styles.user}>{message.user.username}</p>
-                      )}
-                      <p className={styles.content}>{message.content}</p>
-                    </div>
-                  </li>
-                ))}
+                messages.map(
+                  (message: Message) =>
+                    message.user && (
+                      <li key={message.id}>
+                        <MessageElement
+                          avatar={message.user.avatar}
+                          username={message.user.username}
+                          content={message.content}
+                        />
+                      </li>
+                    )
+                )}
             </ul>
+            <MessageInput
+              content={newMessage}
+              onChange={changeNewMessage}
+              onSubmit={sendMessage}
+            />
           </div>
         </div>
       )}

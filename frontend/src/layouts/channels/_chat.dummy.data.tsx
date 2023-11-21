@@ -25,95 +25,122 @@ export const channelsData = [
 
 export const messagesData: Message[] = [
   {
+    id: "1",
     content: "Salut tout le monde !",
     userId: 1,
   },
   {
+    id: "2",
     content: "Ça va bien, et toi ?",
     userId: 2,
   },
-  { content: "Oui, ça va aussi. Quoi de neuf ?", userId: 3 },
   {
+    id: "3",
+    content: "Oui, ça va aussi. Quoi de neuf ?",
+    userId: 3,
+  },
+  {
+    id: "4",
     content:
       "Rien de spécial, juste en train de travailler sur un nouveau projet.",
     userId: 1,
   },
-  { content: "Ah, c'est génial ! De quoi s'agit-il ?", userId: 2 },
   {
+    id: "5",
+    content: "Ah, c'est génial ! De quoi s'agit-il ?",
+    userId: 2,
+  },
+  {
+    id: "6",
     content:
       "C'est un projet de développement web. Je travaille sur la création d'un site interactif.",
     userId: 1,
   },
   {
+    id: "7",
     content: "Intéressant ! J'adorerais en savoir plus à ce sujet.",
     userId: 3,
   },
   {
+    id: "8",
     content:
       "Bien sûr ! Je peux partager quelques détails. Quand es-tu disponible pour une discussion rapide ?",
     userId: 1,
   },
   {
+    id: "9",
     content: "Je suis libre cet après-midi. À quelle heure ça te convient ?",
     userId: 2,
   },
   {
+    id: "10",
     content: "15 heures ? Ça vous va ?",
     userId: 1,
   },
   {
+    id: "11",
     content: "Parfait pour moi !",
     userId: 2,
   },
   {
+    id: "12",
     content:
       "D'accord, nous nous retrouverons à 15 heures. Hâte d'en discuter !",
     userId: 3,
   },
   {
-    content: "Salut tout le monde !",
+    id: "13",
+    content: "Salut tout le monde ! Je peux me joindre à la discussion ?",
+    userId: 4,
+  },
+  {
+    id: "14",
+    content:
+      "Bien sûr ! Nous parlons d'un nouveau projet de développement web.",
     userId: 1,
   },
   {
-    content: "Ça va bien, et toi ?",
+    id: "15",
+    content:
+      "C'est passionnant ! J'ai également de l'expérience dans le développement web.",
+    userId: 4,
+  },
+  {
+    id: "16",
+    content:
+      "Super ! Nous serions ravis d'avoir tes idées. On se retrouve à 15 heures.",
     userId: 2,
   },
-  { content: "Oui, ça va aussi. Quoi de neuf ?", userId: 3 },
   {
-    content:
-      "Rien de spécial, juste en train de travailler sur un nouveau projet.",
-    userId: 1,
-  },
-  { content: "Ah, c'est génial ! De quoi s'agit-il ?", userId: 2 },
-  {
-    content:
-      "C'est un projet de développement web. Je travaille sur la création d'un site interactif.",
-    userId: 1,
+    id: "17",
+    content: "15 heures me va parfaitement. À tout à l'heure !",
+    userId: 4,
   },
   {
-    content: "Intéressant ! J'adorerais en savoir plus à ce sujet.",
+    id: "18",
+    content:
+      "Bonjour tout le monde ! J'ai entendu parler du projet de développement web. Puis-je participer aussi ?",
+    userId: 5,
+  },
+  {
+    id: "19",
+    content: "Salut ! Bien sûr, plus on est de fous, plus on rit !",
     userId: 3,
   },
   {
+    id: "20",
     content:
-      "Bien sûr ! Je peux partager quelques détails. Quand es-tu disponible pour une discussion rapide ?",
+      "Absolument ! Plus d'idées sont toujours les bienvenues. Rejoins-nous à 15 heures.",
     userId: 1,
   },
   {
-    content: "Je suis libre cet après-midi. À quelle heure ça te convient ?",
+    id: "21",
+    content: "Génial, merci ! Je serai là.",
+    userId: 5,
+  },
+  {
+    id: "22",
+    content: "La discussion va être passionnante avec autant de participants.",
     userId: 2,
-  },
-  {
-    content: "15 heures ? Ça vous va ?",
-    userId: 1,
-  },
-  {
-    content: "Parfait pour moi !",
-    userId: 2,
-  },
-  {
-    content:
-      "D'accord, nous nous retrouverons à 15 heures. Hâte d'en discuter !",
-    userId: 3,
   },
 ];
