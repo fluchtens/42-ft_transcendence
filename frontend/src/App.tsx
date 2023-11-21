@@ -52,7 +52,7 @@ function App() {
           element: <GameElement />,
         },
         {
-          path: "/chat",
+          path: "/chat/:id",
           element: <Chat />,
         },
       ],
