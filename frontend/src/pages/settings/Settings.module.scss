@@ -1,6 +1,7 @@
 @import "../../styles/config.scss";
 
 .container {
+  min-height: calc(100vh - 10rem);
   padding: 2rem;
   border-radius: $rounded-xl;
   background: $bg-secondary-color;

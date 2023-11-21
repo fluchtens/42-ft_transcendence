@@ -52,6 +52,11 @@ const UserElement = ({
               <p className={styles.status}>{user.status}</p>
             </>
           )}
+          {!isInGame && !isOnline && !isOffline && (
+            <>
+              <p className={styles.username}>{user.username}</p>
+            </>
+          )}
         </div>
       </button>
       {contextMenu && <UserContextMenu user={user} cb={toggleContextMenu} />}
