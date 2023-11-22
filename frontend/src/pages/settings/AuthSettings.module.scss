@@ -106,13 +106,9 @@
 @media (max-width: 768px) {
   .authSettings {
     .changePassword {
+      align-items: center;
+      gap: 0.5rem;
       text-align: center;
-
-      .inputText {
-        input {
-          width: 100%;
-        }
-      }
 
       button {
         margin-top: 1rem;
