@@ -14,7 +14,7 @@ import { ExecutionContextHost } from "@nestjs/core/helpers/execution-context-hos
 import cookieParser from "cookie-parser";
 import { UserService } from "src/user/user.service";
 import { RoomsService } from "./room.service";
-import { SendMessageDto, ChannelData, Messages, AddMemberDto, CreateChannelDto, GetChannelDto } from "./dtos/gateway.dtos";
+import { SendMessageDto, ChannelData, Messages, AddMemberDto, CreateChannelDto, GetChannelDto, DeleteMessageDto, ChangeMessageDto } from "./dtos/gateway.dtos";
 import { channel } from "diagnostics_channel";
 import * as bcrypt from 'bcryptjs';
 
@@ -26,17 +26,21 @@ import * as bcrypt from 'bcryptjs';
   },
 })
 export class ChatGateway implements OnModuleInit {
-
+  
   constructor(
     private readonly authService: AuthService,
     private readonly chatService: ChatService,
     private readonly userService: UserService,
     private readonly roomService: RoomsService,
   ) {}
+
+  private connectedUsers: Map<string, Set<string>> = new Map();
+
   @WebSocketServer()
   server: Server;
 
   async InitRooms(client: Socket) {
+    const userId: string = String(client.handshake.auth.userId);
     try {
       const channels = await this.chatService.getUserChannels(Number(client.handshake.auth.userId));
       channels.forEach((channel) => {
@@ -46,16 +50,32 @@ export class ChatGateway implements OnModuleInit {
         if (!channel.password)
          this.roomService.joinRoom(client, channel.id);
       });
+      if (!this.roomService.getRoomClients(userId)) {
+        this.roomService.createRoom(userId);
+      }
+      this.roomService.joinRoom(client, userId);
     }
     catch (error){
       console.error("chat init rooms error socket io", error.message);
     }
   }
 
+  verifyUserConnection(socket: Socket, channelId: string) : boolean {
+    if (!channelId) {
+      return false;
+    }
+    const connectedUsersSet = this.connectedUsers.get(channelId);
+    if (!connectedUsersSet || !connectedUsersSet.has(socket.id)) {
+      return false;
+    }
+    return true;
+  }
+
   async getChannelData(client: Socket, channelId: string, password?: string): Promise<ChannelData> {
     let channelData: ChannelData;
     try {
-      const channelInfo = await this.chatService.getChannelById(channelId, password);
+      const connection : boolean = this.verifyUserConnection(client, channelId);
+      const channelInfo = await this.chatService.getChannelById(channelId, password, connection);
       channelData = new ChannelData();
       channelData.inviteCode = channelInfo.inviteCode;
       channelData.channelId = channelInfo.id;
@@ -69,8 +89,17 @@ export class ChatGateway implements OnModuleInit {
           return channelData;
         }
       }
+      else {
+        this.roomService.joinRoom(client, channelId);
+        let connectedUsersSet = this.connectedUsers.get(channelId);
+        if (!connectedUsersSet) {
+          connectedUsersSet = new Set<string>();
+          this.connectedUsers.set(channelId, connectedUsersSet);
+        }
+        connectedUsersSet.add(client.id);
+      }
       if (!channelInfo.password)
-      channelData.protected = false;
+        channelData.protected = false;
       const channelMembers = await this.chatService.getChannelMembers(channelId);
       channelData.members = channelMembers;
       const messagesRaw = await this.chatService.getMessagesByChannel(channelId);
@@ -112,6 +141,14 @@ export class ChatGateway implements OnModuleInit {
 
   handleDisconnect(client: Socket) {
     this.roomService.disconnectClient(client);
+    this.connectedUsers.forEach((usersSet, channelId) => {
+      if (usersSet.has(client.id)) {
+        usersSet.delete(client.id);
+        if (usersSet.size === 0) {
+          this.connectedUsers.delete(channelId);
+        }
+      }
+    });
     console.log(`client ${client.id} disconnected`);
   }
 
@@ -139,8 +176,8 @@ export class ChatGateway implements OnModuleInit {
     }
   }
 
-  @SubscribeMessage('joinChannel')
-  async handleJoinChannel(@ConnectedSocket() client: Socket, @MessageBody() getChannelDto: GetChannelDto) {
+  @SubscribeMessage('joinRoom')
+  async handleJoinRoom(@ConnectedSocket() client: Socket, @MessageBody() getChannelDto: GetChannelDto) {
     const userId = client.handshake.auth.userId;
     const { channelId, password } = getChannelDto;
     if (userId) {
@@ -149,7 +186,7 @@ export class ChatGateway implements OnModuleInit {
         client.emit(`channelData:${channelId}`, ChannelData);
       }
       catch(error) {
-        console.error('Error joining channel:', error.message);
+        console.error('Error joining room:', error.message);
         client.emit('channelJoinError', 'An error occurred while joining the channel.');
       }
     }
@@ -179,6 +216,54 @@ export class ChatGateway implements OnModuleInit {
       }
     }
     return ;
+  }
+
+  @SubscribeMessage('deleteMessage')
+  async handleDeleteMessage(@ConnectedSocket() client: Socket, @MessageBody() deleteMessageDto: DeleteMessageDto) {
+    const { messageId, channelId } = deleteMessageDto;
+    const userId = client.handshake.auth.userId;
+    if (userId) {
+      try {
+        console.log('here');
+        const message = await this.chatService.deleteMessage(userId, messageId);
+        if (message) {
+          this.server.to(channelId).emit(`${channelId}/messageDeleted`, messageId);
+        }
+        else {
+          console.log("failed to delete message")
+        }
+      }
+      catch(error) {
+        console.error(error);
+      }
+    }
+   else {
+    console.log("UserID not available.");
+   }
+  }
+
+  @SubscribeMessage('updateMessage')
+  async handleUpdateMessage(@ConnectedSocket() client: Socket, @MessageBody() changeMessageDto: ChangeMessageDto) {
+    const { messageId, newMessage } = changeMessageDto;
+    const userId = client.handshake.auth.userId;
+    if (userId) {
+      try {
+        const message = await this.chatService.changeMessage(userId, messageId, newMessage);
+        if (message) {
+          const channelData = await this.getChannelData(client, message.channelId);
+          this.server.to(message.channelId).emit(`channelData:${message.channelId}`, channelData);
+        }
+        else {
+          console.log("failed to update message")
+        }
+      }
+      catch(error) {
+        console.error(error);
+      }
+    }
+   else {
+    console.log("UserID not available.");
+   }
   }
 
   @SubscribeMessage('createChannel')
@@ -223,8 +308,11 @@ export class ChatGateway implements OnModuleInit {
         const result = await this.chatService.addMember(userId, channelId, memberId);
         if (result) {
           const message = userId + " have added " + memberId;
-          await this.chatService.addMessage(userId, channelId, message);
-          client.emit(`${channelId}/message`, message);
+          const members = await this.chatService.getChannelMembers(channelId);
+          const messageData = await this.chatService.addMessage(userId, channelId, message);
+          this.server.to(channelId).emit(`${channelId}/message`, messageData);
+          this.server.to(channelId).emit(`${channelId}/members`, members);
+          this.server.to(String(memberId)).emit('newChannel', channelId);
         }
       }
       else {

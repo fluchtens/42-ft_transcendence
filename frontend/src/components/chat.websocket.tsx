@@ -1,6 +1,8 @@
 import { useContext, useEffect, useState } from "react"
 import { WebsocketContext } from "../services/chat.socket";
 import ChannelComponent from "./Channel";
+import { User } from "../types/user.interface";
+import { getUserApi } from "../services/user.api";
 
 
 export const  Websocket = () => {
@@ -8,9 +10,24 @@ export const  Websocket = () => {
   const [channelIds, setChannelIds] = useState<string[]>([]);
   const [channelsData, setChannelsData] = useState<ChannelData[]>([]);
   const [channelName, setChannelName] = useState('');
+  const [userData, setUserData] = useState<User>({} as User);
 
-  const socket : any = useContext(WebsocketContext);socket.on(`messages`)
+  const socket : any = useContext(WebsocketContext);
+
+
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const user = await getUserApi();
+        if (user)
+         setUserData(user);
+      } catch (error) {
+        console.error("Error when getUserData:", error);
+      }
+    };
+    
+    fetchData();
+
     socket.on('connect', () => {
       console.log('Connected!');
     });
@@ -29,27 +46,25 @@ export const  Websocket = () => {
       setChannelIds(channelIds);
     });
     socket.emit('getAllChannels');
-    // Nettoyer les écouteurs d'événements lorsque le composant est démonté
     return () => {
       socket.off('allChannels');
     };
   }, []);
 
   const onCreateChannel = () => {
-    socket.emit('createChannel', channelName);
+    socket.emit('createChannel', {channelName: channelName});
     setChannelName('');
   };
 
   useEffect(() => {
     if (channelIds) {
       channelIds.forEach((channelId) => {
-        socket.emit('joinChannel', channelId);
+        socket.emit('joinRoom', {channelId: channelId});
       });
 
       channelIds.forEach((channelId) => {
         socket.on(`channelData:${channelId}`, (channelData: ChannelData) => {
           setChannelsData((prevChannelsData) => {
-            if (prevChannelsData) {
               const updatedChannels = [...prevChannelsData];
               const channelIndex = updatedChannels.findIndex(
                 (channel) => channel.channelId === channelId
@@ -61,8 +76,6 @@ export const  Websocket = () => {
                 updatedChannels.push(channelData);
               }
               return updatedChannels;
-            }
-            return [];
           });
         });
       });
@@ -88,7 +101,7 @@ export const  Websocket = () => {
         {channelsData &&
             channelsData.map((channel) => {
               return (
-                <ChannelComponent key={channel.channelId} channel={channel} socket={socket}/>
+                <ChannelComponent key={channel.channelId} channel={channel} socket={socket} user={userData}/>
               )
             })}
       </div>
