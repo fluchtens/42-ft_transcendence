@@ -23,7 +23,7 @@
       padding: 0.5rem 0.5rem;
       box-sizing: border-box;
       border: none;
-      border-radius: 0.5rem;
+      border-radius: $rounded-md;
       background: #f8d7da;
 
       p {
@@ -56,7 +56,7 @@
         padding-left: 1rem;
         box-sizing: border-box;
         border: none;
-        border-radius: 0.5rem;
+        border-radius: $rounded-md;
         outline: none;
         background: $extra-tertiary-color;
         font-size: map-get($text-sm, font-size);
@@ -71,7 +71,7 @@
         height: 2.5rem;
         box-sizing: border-box;
         border: none;
-        border-radius: 0.5rem;
+        border-radius: $rounded-md;
         background: $extra-secondary-color;
         font-size: map-get($text-base, font-size);
         line-height: map-get($text-base, line-height);
@@ -92,7 +92,7 @@
         height: 2.5rem;
         box-sizing: border-box;
         border: none;
-        border-radius: 0.5rem;
+        border-radius: $rounded-md;
         background: #36babb;
         font-size: map-get($text-base, font-size);
         line-height: map-get($text-base, line-height);
