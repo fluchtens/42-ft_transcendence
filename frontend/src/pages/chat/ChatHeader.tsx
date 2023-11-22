@@ -4,15 +4,16 @@ import styles from "./ChatHeader.module.scss";
 
 interface ChatHeaderProps {
   title: string;
+  toggleMembersMenu: () => void;
 }
 
-const ChatHeader = ({ title }: ChatHeaderProps) => (
+const ChatHeader = ({ title, toggleMembersMenu }: ChatHeaderProps) => (
   <div className={styles.header}>
     <button type="submit">
       <IoSettings className={styles.icon} />
     </button>
     <h1>{title}</h1>
-    <button type="submit">
+    <button onClick={toggleMembersMenu}>
       <HiUsers className={styles.icon} />
     </button>
   </div>

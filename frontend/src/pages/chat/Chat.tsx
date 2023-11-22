@@ -21,9 +21,14 @@ function Chat() {
   const [messages, setMessages] = useState<any | null>(null);
   const [newMessage, setNewMessage] = useState<string>("");
   const [members, setMembers] = useState<User[] | null>(null);
+  const [membersMenu, setMembersMenu] = useState<boolean>(true);
   const [contextMenu, setContextMenu] = useState<number | null>(null);
   const { user } = useAuth();
   const { id } = useParams();
+
+  const toggleMembersMenu = () => {
+    setMembersMenu(!membersMenu);
+  };
 
   const toggleContextMenu = (userId: number) => {
     setContextMenu(contextMenu === userId ? null : userId);
@@ -86,7 +91,10 @@ function Chat() {
         // </WebsocketPovider>
         <div className={styles.container}>
           <div className={styles.chat}>
-            <ChatHeader title={channel.name} />
+            <ChatHeader
+              title={channel.name}
+              toggleMembersMenu={toggleMembersMenu}
+            />
             <ul>
               {messages?.map(
                 (message: Message) =>
@@ -107,18 +115,22 @@ function Chat() {
               onSubmit={sendMessage}
             />
           </div>
-          <div className={styles.line}></div>
-          <ul className={styles.members}>
-            {members?.map((user) => (
-              <li key={user.id}>
-                <UserElement
-                  user={user}
-                  contextMenu={contextMenu === user.id}
-                  toggleContextMenu={() => toggleContextMenu(user.id)}
-                />
-              </li>
-            ))}
-          </ul>
+          {membersMenu && (
+            <>
+              <div className={styles.line}></div>
+              <ul className={styles.members}>
+                {members?.map((user) => (
+                  <li key={user.id}>
+                    <UserElement
+                      user={user}
+                      contextMenu={contextMenu === user.id}
+                      toggleContextMenu={() => toggleContextMenu(user.id)}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </div>
       )}
     </>
