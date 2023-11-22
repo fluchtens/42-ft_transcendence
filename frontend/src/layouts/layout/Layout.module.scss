@@ -10,9 +10,8 @@
     display: flex;
 
     main {
-      max-width: 64rem;
-      margin: auto;
       padding: 1rem;
+      flex-grow: 1;
     }
   }
 }
