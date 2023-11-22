@@ -7,7 +7,7 @@
   gap: 0.5rem;
 
   .form {
-    width: 22rem;
+    max-width: 22rem;
     padding: 2rem;
     flex-direction: column;
     display: flex;
@@ -19,7 +19,7 @@
     text-align: center;
 
     .error {
-      width: 100%;
+      width: 22rem;
       padding: 0.5rem 0.5rem;
       box-sizing: border-box;
       border: none;
@@ -36,7 +36,7 @@
     }
 
     .input {
-      width: 100%;
+      width: 22rem;
       flex-direction: column;
       display: flex;
       align-items: left;
@@ -51,7 +51,7 @@
       }
 
       input {
-        width: 100%;
+        width: 22rem;
         height: 2.5rem;
         padding-left: 1rem;
         box-sizing: border-box;
@@ -67,7 +67,7 @@
 
     .submitBtn {
       button {
-        width: 100%;
+        width: 22rem;
         height: 2.5rem;
         box-sizing: border-box;
         border: none;
@@ -88,7 +88,7 @@
 
     .fortyTwoBtn {
       button {
-        width: 100%;
+        width: 22rem;
         height: 2.5rem;
         box-sizing: border-box;
         border: none;
@@ -122,15 +122,6 @@
         text-decoration: none;
         color: #9ca3af;
       }
-    }
-  }
-}
-
-@media (max-width: 768px) {
-  .container {
-    .form {
-      width: auto;
-      padding: 1.5rem;
     }
   }
 }
