@@ -8,6 +8,7 @@ build: clean
 	docker-compose up --build
 
 up:
+	docker-compose down
 	docker-compose up
 
 down:

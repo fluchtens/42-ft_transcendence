@@ -25,7 +25,7 @@
       }
 
       input {
-        width: 20rem;
+        max-width: 20rem;
         height: 2rem;
         padding-left: 1rem;
         box-sizing: border-box;
@@ -110,6 +110,14 @@
       gap: 0.5rem;
       text-align: center;
 
+      .inputText {
+        align-items: center;
+
+        input {
+          width: 15rem;
+        }
+      }
+
       button {
         margin-top: 1rem;
         margin-right: 0;
@@ -118,6 +126,7 @@
 
     .toggleTwoFa {
       text-align: center;
+      align-items: center;
 
       button {
         margin-top: 1rem;

@@ -40,7 +40,7 @@ function Setup() {
     <div className={styles.container}>
       <MainTitle />
       <form className={styles.form} onSubmit={submitData}>
-        <h1>Set up your new account</h1>
+        <h1 className={styles.title}>Set up your new account</h1>
         <p>Before using our services, please choose a unique username :</p>
         {errorMessage && (
           <div className={styles.error}>

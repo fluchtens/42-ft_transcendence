@@ -61,7 +61,7 @@ function Login() {
     <div className={styles.container}>
       <MainTitle />
       <form className={styles.form} onSubmit={submitData}>
-        <h1>Sign in to your account</h1>
+        <h1 className={styles.title}>Sign in to your account</h1>
         {errorMessage && (
           <div className={styles.error}>
             <p>

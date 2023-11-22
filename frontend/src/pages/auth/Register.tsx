@@ -46,7 +46,7 @@ function Register() {
     <div className={styles.container}>
       <MainTitle />
       <form className={styles.form} onSubmit={submitData}>
-        <h1>Register a new account</h1>
+        <h1 className={styles.title}>Register a new account</h1>
         {errorMessage && (
           <div className={styles.error}>
             <p>

@@ -36,7 +36,6 @@
     }
 
     .input {
-      width: 22rem;
       flex-direction: column;
       display: flex;
       align-items: left;
@@ -121,6 +120,39 @@
         font-weight: 500;
         text-decoration: none;
         color: #9ca3af;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    .form {
+      padding: 1rem;
+
+      .title {
+        margin: 0;
+        font-size: map-get($text-lg, font-size);
+        line-height: map-get($text-lg, line-height);
+        font-weight: $font-semibold;
+      }
+
+      .input {
+        input {
+          width: 15rem;
+        }
+      }
+
+      .submitBtn {
+        button {
+          width: 15rem;
+        }
+      }
+
+      .fortyTwoBtn {
+        button {
+          width: 15rem;
+        }
       }
     }
   }
