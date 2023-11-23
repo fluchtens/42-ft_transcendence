@@ -6,12 +6,13 @@ import {
 	OnGatewayDisconnect,
 	MessageBody,
 } from '@nestjs/websockets' 
-import { AuthService } from "src/auth/auth.service"
 import { Socket, Server } from 'socket.io'
 import { GameRouter } from './gameRouter.service'
-import { UserService } from "src/user/user.service";
 import * as gm from './gameLogic'
 
+import { AuthService } from "src/auth/auth.service"
+import { PrismaService } from 'src/prisma/prisma.service';
+import { UserService } from "src/user/user.service";
 
 // TODO question
 // UserStatus should be set only by the service and not the controller
@@ -161,12 +162,12 @@ class GameService {
 		this.invites.set('test1', {host: new UserData(19)});
 		this.invites.set('test2', {host: new UserData(42)});
 
-		let alice = new UserData(1);
-		let bob = new UserData(2);
-		alice.rating = 1100;
-		bob.rating = 1000;
-		this.users.set(1, bob);
-		this.users.set(2, alice);
+// 		let alice = new UserData(1);
+// 		let bob = new UserData(2);
+// 		alice.rating = 1100;
+// 		bob.rating = 1000;
+// 		this.users.set(1, bob);
+// 		this.users.set(2, alice);
 	}
 	// END TESTING
 
@@ -339,7 +340,7 @@ class GameService {
 		return this.launchGame(pending.host.id, joiner.id, startTime);
 	}
 
-	joinQueue(userId) {
+	joinQueue(userId, userRating) {
 		let user = this.users.get(userId);
 		if (!user)
 			throw new Error("no such active user");
@@ -347,15 +348,13 @@ class GameService {
 			throw new Error("can't join queue while busy");
 
 		user.status = UserStatus.Waiting;
-		this.queue.add(user.id, user.rating);
+		this.queue.add(user.id, userRating);
 	}
 
 	leaveQueue(userId: number) {
 		let user = this.users.get(userId);
 		if (!user)
 			throw new Error("no such active user");
-// 		if (user.status != UserStatus.Normal)
-// 			throw new Error("can't join queue while busy");
 
 		user.status = UserStatus.Normal;
 		this.queue.del(user.id);
@@ -376,10 +375,16 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	constructor(
 		private readonly authService : AuthService,
 		private readonly userService : UserService,
+		private readonly prismaService : PrismaService,
 	) {
 		this.gameService.queueSetCallback( ({gameRoom, game}) => {
 			this.server.to(gameRoom).emit('statusChange', UserStatus.Playing);
 		});
+
+		function mockNewRatings(winnerRating: number, loserRating: number) {
+			return [winnerRating + 10, loserRating - 10];
+		} // TODO not mock
+
 		this.gameService.gameSetCallbacks( {
 			onRefresh: ({gameRoom, game}) => {
 				this.server.to(gameRoom).emit('gameUpdate', game.packet());
@@ -388,12 +393,51 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				this.server.to(gameRoom).emit('statusChange', UserStatus.Normal);
 				this.server.to(winner.userRoom).emit('winLose', true);
 				this.server.to(loser.userRoom).emit('winLose', false);
-			},
+				(async () => {
+					let winnerRatingBefore = await this._rating(winner.id);
+					let loserRatingBefore = await this._rating(loser.id);
+
+					let [winnerRatingAfter, loserRatingAfter] = mockNewRatings(winnerRatingBefore, loserRatingBefore);
+
+					// awaits needed?? (when not testing)
+					await this.prismaService.user.update({
+						where: { id: winner.id},
+						data: { rating: winnerRatingAfter }
+					});
+					await this.prismaService.user.update({
+						where: { id: loser.id},
+						data: { rating: loserRatingAfter }
+					});
+					// TODO data race if join queue again very fast?
+					// needs 'ready' bool prop in UserData?
+
+					await this.prismaService.gameRecord.create({
+						data: {
+							winnerId: winner.id,
+							winnerRatingBefore,
+							winnerRatingAfter,
+							loserId: loser.id,
+							loserRatingBefore,
+							loserRatingAfter,
+						}
+					});
+				//}) ();
+				})().then( async () => { 
+					console.log(await this.prismaService.gameRecord.findMany());
+					console.log(await this.prismaService.user.findMany({include: {wonMatches: true, lostMatches: true}}));
+				});
+				// END TESTING
+			}
 		});
 	}
 			
 	@WebSocketServer()
 	server: Server;
+
+	async _rating(userId: number) {
+		// TODO errors?
+		return (await this.userService.getUserById(userId)).rating;
+	}
 
 	handleConnection(sock: Socket) {
 		console.log('CONNECTION: ', sock.id);
@@ -531,10 +575,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	joinQueue(sock: Socket) {
 		let userData = this._wantStatus(sock, [UserStatus.Normal]);
 
-		console.log(`${userData.id} joined the queue`);
+		console.log(`${userData.id} will join the queue`);
 
-		this.gameService.joinQueue(userData.id);
-		this.server.to(userData.userRoom).emit('statusChange', UserStatus.Waiting);
+		(async () => {
+			let rating = await this._rating(userData.id);
+			this.gameService.joinQueue(userData.id, rating);
+			this.server.to(userData.userRoom).emit('statusChange', UserStatus.Waiting);
+		}) ();
 	}
 
 	@SubscribeMessage('syncGame')
