@@ -6,6 +6,7 @@ import {
 	OnGatewayDisconnect,
 	MessageBody,
 } from '@nestjs/websockets' 
+import { AuthService } from "src/auth/auth.service"
 import { Socket, Server } from 'socket.io'
 import { GameRouter } from './gameRouter.service'
 import * as gm from './gameLogic'
@@ -364,13 +365,14 @@ class GameService {
 	namespace: '/gamesocket',
 	cors: { 
 		origin: [process.env.VITE_FRONT_URL], // localhost is react client
+		credentials: true,
 	}
 })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	gameService = new GameService(); // TODO use nest module system
 
-	constructor() {
+	constructor(private readonly authService : AuthService) {
 		this.gameService.queueSetCallback( ({gameRoom, game}) => {
 			this.server.to(gameRoom).emit('statusChange', UserStatus.Playing);
 		});
@@ -391,6 +393,31 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	handleConnection(sock: Socket) {
 		console.log('CONNECTION: ', sock.id);
+		try {
+			const cookie = sock.handshake.headers.cookie;
+			if (!cookie) {
+				throw new Error('No cookies found');
+			}
+
+			const cookies = cookie.split(';').map((cookie) => cookie.trim());
+			const jwtCookie = cookies.find((cookie) => (
+				cookie.startsWith('access_token=')
+			));
+
+			const token = jwtCookie.substring('access_token='.length);
+			if (!token) {
+				throw new Error('access_token not found');
+			}
+			const decodedToken =  this.authService.verifyAccessToken(token);
+// 			client.handshake.auth.userId = decodedToken.id;
+			let userId = decodedToken.id;
+			console.log('connection from user', userId);
+			this.gameService.bindSocket(sock, String(userId)); // refactor so userId is an int
+			// await this.InitRooms(client);
+		}
+		catch (error) {
+			console.error('not connected', error.message);
+		}
 	}
 
 	handleDisconnect(sock: Socket) {
@@ -402,13 +429,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		}
 	}
 
-	@SubscribeMessage('authenticate')
-	authenticate(sock: Socket, data: {userId: string, /* authtokenOrSmth */}) {
+	@SubscribeMessage('authenticate') // TODO rename to getStatus or something
+	authenticate(sock: Socket) {
+		//
 		// validate authentication... TODO
-		if (data.userId === '') return null; // TESTING
-		let userData = this.gameService.bindSocket(sock, data.userId); 
-		console.log("logged in as:", data.userId, 'status:', userData.status);
-		return userData.status;
+// 		if (data.userId === '') return null; // TESTING
+// 		let userData = this.gameService.bindSocket(sock, data.userId); 
+// 		console.log("logged in as:", data.userId, 'status:', userData.status);
+		return this.gameService.getUserData(sock.id).status;
 	}
 
 	_gamesInfo() {
@@ -510,7 +538,30 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		this.server.to(room).emit('gameUpdate', game.packet(now));
 	}
 }
- 
+
+// try {
+//       const cookie = client.handshake.headers.cookie;
+//       if (!cookie) {
+//         throw new Error('No cookies found');
+//       }
+// 
+//       const cookies = cookie.split(';').map((cookie) => cookie.trim());
+//       const jwtCookie = cookies.find((cookie) =>
+//         cookie.startsWith('access_token='),
+//       );
+// 
+//       const token = jwtCookie.substring('access_token='.length);
+//       if (!token) {
+//         throw new Error('access_token not found');
+//       }
+//       const decodedToken =  this.authService.verifyAccessToken(token);
+//       client.handshake.auth.userId = decodedToken.id;
+//       // await this.InitRooms(client);
+//     }
+//     catch (error) {
+//       console.error('not connected', error.message);
+//     }
+
 ///
 
 // 	@SubscribeMessage('joinLobby')

@@ -11,7 +11,13 @@ import * as gm from './gameLogic';
 const SOCK_HOST = import.meta.env.VITE_BACK_URL;
 const gameSocket = io(
 	`${SOCK_HOST}/gamesocket`, 
-	{ autoConnect: false, });
+	{ 
+		autoConnect: false, 
+		withCredentials: true,
+		// maybe set those to check connection is alive with shorter timeouts
+		// retries
+		// ackTimeout
+	});
 const SocketContext = createContext<Socket>(gameSocket);
 
 export default function GameElement() {
@@ -37,8 +43,9 @@ function GameElementContent() {
 	// authenticate and get status + log 
 	// set hooks for changes of status
 	useEffect( () => { 
-		let userId = prompt('who are you?'); // TESTING
-		socket.emit('authenticate', {userId}, (gotStatus: UserStatus | null) => {
+// 		let userId = prompt('who are you?'); // TESTING
+// 		socket.emit('authenticate', {userId}, (gotStatus: UserStatus | null) => {
+		socket.emit('authenticate', (gotStatus: UserStatus | null) => {
 			console.log('got status:', gotStatus);
 			setStatus(gotStatus);
 			// TODO handle error, not logged in etc
