@@ -13,6 +13,9 @@ import { MessageElement } from "./MessageElement";
 import { MessageInput } from "./MessageInput";
 import { User } from "../../types/user.interface";
 import { UserElement } from "../../layouts/friends/UserElement";
+import { ContextMenuType } from "../../layouts/friends/UserContextMenu";
+import { AddFriendBar } from "../../layouts/friends/AddFriendBar";
+import { notifySuccess } from "../../utils/notifications";
 // import { Websocket } from "../../components/chat.websocket";
 // import { socket, WebsocketPovider } from "../../services/chat.socket";
 
@@ -21,6 +24,7 @@ function Chat() {
   const [messages, setMessages] = useState<any | null>(null);
   const [newMessage, setNewMessage] = useState<string>("");
   const [members, setMembers] = useState<User[] | null>(null);
+  const [addedMember, setAddedMember] = useState<string>("");
   const [membersMenu, setMembersMenu] = useState<boolean>(true);
   const [contextMenu, setContextMenu] = useState<number | null>(null);
   const { user } = useAuth();
@@ -53,6 +57,16 @@ function Chat() {
       prevMessages ? [...prevMessages, newMessageObject] : [newMessageObject]
     );
     setNewMessage("");
+  };
+
+  const changeAddedMember = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAddedMember(e.target.value);
+  };
+
+  const addMember = async (e: React.FormEvent) => {
+    e.preventDefault();
+    notifySuccess("In dev");
+    setAddedMember("");
   };
 
   useEffect(() => {
@@ -118,17 +132,25 @@ function Chat() {
           {membersMenu && (
             <>
               <div className={styles.line}></div>
-              <ul className={styles.members}>
-                {members?.map((user) => (
-                  <li key={user.id}>
-                    <UserElement
-                      user={user}
-                      contextMenu={contextMenu === user.id}
-                      toggleContextMenu={() => toggleContextMenu(user.id)}
-                    />
-                  </li>
-                ))}
-              </ul>
+              <div className={styles.members}>
+                <AddFriendBar
+                  value={addedMember}
+                  onChange={changeAddedMember}
+                  onSubmit={addMember}
+                />
+                <ul>
+                  {members?.map((user) => (
+                    <li key={user.id}>
+                      <UserElement
+                        user={user}
+                        contextMenu={contextMenu === user.id}
+                        contextMenuType={ContextMenuType.MEMBER}
+                        toggleContextMenu={() => toggleContextMenu(user.id)}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </>
           )}
         </div>

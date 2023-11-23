@@ -14,6 +14,7 @@ import styles from "./Friends.module.scss";
 import { io } from "socket.io-client";
 import { UserReqElement } from "./UserReqElement";
 import { useAuth } from "../../utils/useAuth";
+import { ContextMenuType } from "./UserContextMenu";
 
 const socket = io(`${import.meta.env.VITE_BACK_URL}/friendship`, {
   withCredentials: true,
@@ -112,6 +113,7 @@ function Friends() {
                 <UserElement
                   user={user}
                   contextMenu={contextMenu === user.id}
+                  contextMenuType={ContextMenuType.FRIEND}
                   toggleContextMenu={() => toggleContextMenu(user.id)}
                 />
               </li>

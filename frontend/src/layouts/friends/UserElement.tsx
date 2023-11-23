@@ -1,17 +1,19 @@
 import defaultAvatar from "/default_avatar.png";
 import styles from "./UserElement.module.scss";
-import { UserContextMenu } from "./UserContextMenu";
+import { ContextMenuType, UserContextMenu } from "./UserContextMenu";
 import { User } from "../../types/user.interface";
 
 interface UserElementProps {
   user: User;
   contextMenu: boolean;
+  contextMenuType: ContextMenuType;
   toggleContextMenu: () => void;
 }
 
 const UserElement = ({
   user,
   contextMenu,
+  contextMenuType,
   toggleContextMenu,
 }: UserElementProps) => {
   const isInGame = user.status === "In game";
@@ -59,7 +61,13 @@ const UserElement = ({
           )}
         </div>
       </button>
-      {contextMenu && <UserContextMenu user={user} cb={toggleContextMenu} />}
+      {contextMenu && (
+        <UserContextMenu
+          user={user}
+          type={contextMenuType}
+          cb={toggleContextMenu}
+        />
+      )}
     </div>
   );
 };
