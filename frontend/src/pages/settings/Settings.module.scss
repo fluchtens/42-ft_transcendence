@@ -1,7 +1,7 @@
 @import "../../styles/config.scss";
 
 .container {
-  height: calc(100vh - 10rem);
+  min-height: calc(100vh - 10rem);
   padding: 2rem;
   border-radius: $rounded-xl;
   background: $bg-secondary-color;
@@ -27,5 +27,10 @@
 @media (max-width: 768px) {
   .container {
     padding: 1rem;
+
+    .settings {
+      max-height: none;
+      overflow-y: visible;
+    }
   }
 }

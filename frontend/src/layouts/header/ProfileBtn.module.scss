@@ -1,6 +1,7 @@
 @import "../../styles/config.scss";
 
 .container {
+  z-index: 9999;
   position: relative;
 
   .userBtn {
@@ -12,6 +13,12 @@
     border-radius: $rounded;
     background: transparent;
     cursor: pointer;
+
+    &:hover {
+      p {
+        color: $extra-primary-color;
+      }
+    }
 
     p {
       margin: 0;
@@ -40,21 +47,16 @@
         left: 50%;
       }
     }
-
-    &:hover {
-      p {
-        color: $extra-primary-color;
-      }
-    }
   }
 
   .menu {
     position: absolute;
     padding: 0.75rem;
-    top: calc(100% + 2rem);
+    width: 100%;
+    top: calc(100% + 0.75rem);
     right: 0;
     border-radius: $rounded-2xl;
-    background-color: $bg-secondary-color;
+    background-color: $extra-tertiary-color;
     display: flex;
     flex-direction: column;
 
@@ -73,7 +75,7 @@
       transition: color 0.3s ease, background-color 0.3s ease;
 
       &:hover {
-        background: $extra-secondary-color;
+        background: $extra-primary-color;
         color: white;
       }
 
@@ -100,7 +102,7 @@
       cursor: pointer;
 
       &:hover {
-        background: $extra-secondary-color;
+        background: $extra-primary-color;
         color: white;
       }
     }
