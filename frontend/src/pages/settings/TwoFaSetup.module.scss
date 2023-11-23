@@ -1,6 +1,7 @@
 @import "../../styles/config.scss";
 
 .container {
+  max-width: 40rem;
   padding: 2rem;
   border-radius: $rounded-xl;
   background: $bg-secondary-color;
@@ -111,6 +112,9 @@
 
 @media (max-width: 768px) {
   .container {
+    margin: 0 1rem;
+    padding: 1rem;
+
     form {
       align-items: center;
 

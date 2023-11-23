@@ -1,16 +1,21 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { notifyError } from "../../utils/notifications";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { enableTwoFaApi } from "../../services/auth.api";
 import { Separator } from "../../components/Separator";
 import styles from "./TwoFaSetup.module.scss";
 import { useAuth } from "../../utils/useAuth";
+import { Modal } from "../../components/Modal";
 
-function TwoFaSetup() {
+interface TwoFaSetupProps {
+  qrcode: string;
+  close: () => void;
+}
+
+const TwoFaSetup = ({ qrcode, close }: TwoFaSetupProps) => {
   const { refreshUser } = useAuth();
   const [token, setToken] = useState<string>("");
-  const { qrcode } = useParams();
-  const qrCodeData = qrcode ? atob(qrcode) : null;
+  const [qrcodeData, setQrcodeData] = useState<string>("");
   const navigate = useNavigate();
 
   const changeToken = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -18,7 +23,7 @@ function TwoFaSetup() {
   };
 
   const cancel = () => {
-    navigate("/settings");
+    close();
   };
 
   const enableTwoFa = async (e: React.FormEvent) => {
@@ -34,10 +39,15 @@ function TwoFaSetup() {
     navigate(`/settings`);
   };
 
+  useEffect(() => {
+    if (!qrcode) close();
+    setQrcodeData(atob(qrcode));
+  }, []);
+
   return (
-    <>
+    <Modal>
       <div className={styles.container}>
-        {qrCodeData ? (
+        {qrcodeData ? (
           <form onSubmit={enableTwoFa}>
             <h1>Enable two-factor authentication (2FA)</h1>
             <Separator />
@@ -49,7 +59,7 @@ function TwoFaSetup() {
             </p>
             <h3>Scan the QR code</h3>
             <p>Use an authenticator app to scan.</p>
-            {qrCodeData && <img src={qrCodeData} alt="qrcode" />}
+            {qrcodeData && <img src={qrcodeData} alt="qrcode" />}
             <div className={styles.input}>
               <label>Verify the code from the app</label>
               <input
@@ -74,8 +84,8 @@ function TwoFaSetup() {
           <span>Invalid QR Code</span>
         )}
       </div>
-    </>
+    </Modal>
   );
-}
+};
 
 export default TwoFaSetup;

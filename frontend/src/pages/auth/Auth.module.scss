@@ -1,9 +1,11 @@
 @import "../../styles/config.scss";
 
 .container {
+  height: calc(100vh - 2rem);
   flex-direction: column;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
 
   .form {

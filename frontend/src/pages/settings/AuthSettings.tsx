@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { updatePasswordApi } from "../../services/user.api";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import styles from "./AuthSettings.module.scss";
@@ -9,6 +8,7 @@ import {
 } from "../../services/auth.api";
 import { Separator } from "../../components/Separator";
 import { useAuth } from "../../utils/useAuth";
+import TwoFaSetup from "./TwoFaSetup";
 
 interface InputTextProps {
   label: string;
@@ -34,7 +34,12 @@ function AuthSettings() {
   const [actualPwd, setActualPwd] = useState<string>("");
   const [newPwd, setNewPwd] = useState<string>("");
   const [confirmNewPwd, setConfirmNewPwd] = useState<string>("");
-  const navigate = useNavigate();
+  const [qrcode, setQrcode] = useState<string>("");
+  const [twoFaModal, setTwoFaModal] = useState<boolean>(false);
+
+  const closeTwoFaModal = () => {
+    setTwoFaModal(false);
+  };
 
   const changeActualPwd = (e: React.ChangeEvent<HTMLInputElement>) => {
     setActualPwd(e.target.value);
@@ -74,7 +79,8 @@ function AuthSettings() {
 
     if (data.qrcode) {
       const qrCodeBase64 = btoa(data.qrcode);
-      navigate(`/settings/twofa/${qrCodeBase64}`);
+      setQrcode(qrCodeBase64);
+      setTwoFaModal(true);
     }
   };
 
@@ -147,6 +153,9 @@ function AuthSettings() {
             )}
           </div>
         </div>
+      )}
+      {twoFaModal && qrcode && (
+        <TwoFaSetup qrcode={qrcode} close={closeTwoFaModal} />
       )}
     </>
   );

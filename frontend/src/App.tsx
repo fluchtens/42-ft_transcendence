@@ -7,7 +7,6 @@ import Setup from "./pages/auth/Setup";
 import Profile from "./pages/user/Profile";
 import Chat from "./pages/chat/Chat";
 import Settings from "./pages/settings/Settings";
-import TwoFaSetup from "./pages/settings/TwoFaSetup";
 import TwoFaAuth from "./pages/auth/TwoFaAuth";
 import { AuthProvider } from "./utils/useAuth";
 import GameElement from "./components/GameElement";
@@ -43,10 +42,7 @@ function App() {
           path: "/settings",
           element: <Settings />,
         },
-        {
-          path: "/settings/twofa/:qrcode",
-          element: <TwoFaSetup />,
-        },
+
         {
           path: "/game",
           element: <GameElement />,
