@@ -1,5 +1,4 @@
-import { useNavigate } from "react-router-dom";
-import { notifyError } from "../../utils/notifications";
+import { notifyError, notifySuccess } from "../../utils/notifications";
 import { useEffect, useState } from "react";
 import { enableTwoFaApi } from "../../services/auth.api";
 import { Separator } from "../../components/Separator";
@@ -16,7 +15,6 @@ const TwoFaSetup = ({ qrcode, close }: TwoFaSetupProps) => {
   const { refreshUser } = useAuth();
   const [token, setToken] = useState<string>("");
   const [qrcodeData, setQrcodeData] = useState<string>("");
-  const navigate = useNavigate();
 
   const changeToken = (e: React.ChangeEvent<HTMLInputElement>) => {
     setToken(e.target.value);
@@ -36,7 +34,8 @@ const TwoFaSetup = ({ qrcode, close }: TwoFaSetupProps) => {
     }
 
     await refreshUser();
-    navigate(`/settings`);
+    notifySuccess(message);
+    close();
   };
 
   useEffect(() => {
