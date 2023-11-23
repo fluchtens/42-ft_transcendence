@@ -39,7 +39,7 @@ function TwoFaAuth() {
     <div className={styles.container}>
       <MainTitle />
       <form className={styles.form} onSubmit={submitData}>
-        <h1 className={styles.title}>Two-factor authentication</h1>
+        <h1>Two-factor authentication</h1>
         <p>
           Open your two-factor authenticator app to view your authentication
           code.
@@ -61,8 +61,11 @@ function TwoFaAuth() {
             required
           />
         </div>
-        <div className={styles.submitBtn}>
-          <button type="submit">Continue</button>
+
+        <div className={styles.buttons}>
+          <button className={styles.submitBtn} type="submit">
+            Continue
+          </button>
         </div>
       </form>
     </div>

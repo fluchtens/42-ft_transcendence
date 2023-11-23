@@ -40,8 +40,8 @@ function Setup() {
     <div className={styles.container}>
       <MainTitle />
       <form className={styles.form} onSubmit={submitData}>
-        <h1 className={styles.title}>Set up your new account</h1>
-        <p>Before using our services, please choose a unique username :</p>
+        <h1>Set up your new account</h1>
+        <p>Choose a unique username :</p>
         {errorMessage && (
           <div className={styles.error}>
             <p>
@@ -58,8 +58,10 @@ function Setup() {
             required
           />
         </div>
-        <div className={styles.submitBtn}>
-          <button type="submit">Continue</button>
+        <div className={styles.buttons}>
+          <button className={styles.submitBtn} type="submit">
+            Continue
+          </button>
         </div>
       </form>
     </div>

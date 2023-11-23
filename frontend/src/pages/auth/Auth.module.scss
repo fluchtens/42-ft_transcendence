@@ -11,7 +11,7 @@
     padding: 2rem;
     flex-direction: column;
     display: flex;
-    align-items: left;
+    align-items: center;
     gap: 1rem;
     border-radius: $rounded-2xl;
     background: $bg-secondary-color;
@@ -52,7 +52,7 @@
       input {
         width: 22rem;
         height: 2.5rem;
-        padding-left: 1rem;
+        padding: 0 1rem;
         box-sizing: border-box;
         border: none;
         border-radius: $rounded-md;
@@ -60,64 +60,62 @@
         background: $extra-tertiary-color;
         font-size: map-get($text-sm, font-size);
         line-height: map-get($text-sm, line-height);
+        font-weight: $font-normal;
         color: $text-primary-color;
       }
     }
 
-    .submitBtn {
+    .buttons {
+      margin-top: 0.75rem;
+      flex-direction: column;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+
       button {
         width: 22rem;
         height: 2.5rem;
         box-sizing: border-box;
         border: none;
         border-radius: $rounded-md;
-        background: $extra-secondary-color;
+        transition: background 0.3s ease;
         font-size: map-get($text-base, font-size);
         line-height: map-get($text-base, line-height);
         font-weight: $font-medium;
-        font-weight: 500;
         color: white;
         cursor: pointer;
 
-        &:hover {
-          background: $extra-primary-color;
+        &.submitBtn {
+          background: $extra-secondary-color;
+
+          &:hover {
+            background: $extra-primary-color;
+          }
         }
-      }
-    }
 
-    .fortyTwoBtn {
-      button {
-        width: 22rem;
-        height: 2.5rem;
-        box-sizing: border-box;
-        border: none;
-        border-radius: $rounded-md;
-        background: #36babb;
-        font-size: map-get($text-base, font-size);
-        line-height: map-get($text-base, line-height);
-        font-weight: $font-medium;
-        color: white;
-        cursor: pointer;
+        &.fortyTwoBtn {
+          background: #36babb;
 
-        &:hover {
-          background: #48c7c7;
+          &:hover {
+            background: #48c7c7;
+          }
         }
       }
     }
 
     .help {
-      text-align: center;
-
       span {
-        font-size: 0.875rem;
-        font-weight: 300;
+        font-size: map-get($text-sm, font-size);
+        line-height: map-get($text-sm, line-height);
+        font-weight: $font-light;
         color: #9ca3af;
       }
 
       .link {
         margin-left: 0.3rem;
-        font-size: 0.875rem;
-        font-weight: 500;
+        font-size: map-get($text-sm, font-size);
+        line-height: map-get($text-sm, line-height);
+        font-weight: $font-medium;
         text-decoration: none;
         color: #9ca3af;
       }
@@ -129,29 +127,77 @@
   .container {
     .form {
       padding: 1rem;
+      gap: 0.5rem;
 
-      .title {
+      h1 {
         margin: 0;
         font-size: map-get($text-lg, font-size);
         line-height: map-get($text-lg, line-height);
         font-weight: $font-semibold;
       }
 
+      p {
+        margin: 0;
+        font-size: map-get($text-xs, font-size);
+        line-height: map-get($text-xs, line-height);
+        font-weight: $font-normal;
+      }
+
+      .error {
+        width: 15rem;
+
+        p {
+          font-size: map-get($text-xs, font-size);
+          line-height: map-get($text-xs, line-height);
+          font-weight: $font-normal;
+        }
+      }
+
       .input {
+        label {
+          display: block;
+          font-size: map-get($text-xs, font-size);
+          line-height: map-get($text-xs, line-height);
+          font-weight: $font-medium;
+          text-align: left;
+        }
+
         input {
           width: 15rem;
+          height: 2.25rem;
+          font-size: map-get($text-xs, font-size);
+          line-height: map-get($text-xs, line-height);
+          font-weight: $font-normal;
         }
       }
 
-      .submitBtn {
+      .buttons {
+        margin-top: 0.5rem;
+
         button {
           width: 15rem;
+          height: 2.25rem;
+          font-size: map-get($text-sm, font-size);
+          line-height: map-get($text-sm, line-height);
+          font-weight: $font-medium;
         }
       }
 
-      .fortyTwoBtn {
-        button {
-          width: 15rem;
+      .help {
+        span {
+          font-size: map-get($text-xs, font-size);
+          line-height: map-get($text-xs, line-height);
+          font-weight: $font-light;
+          color: #9ca3af;
+        }
+
+        .link {
+          margin-left: 0.3rem;
+          font-size: map-get($text-xs, font-size);
+          line-height: map-get($text-xs, line-height);
+          font-weight: $font-medium;
+          text-decoration: none;
+          color: #9ca3af;
         }
       }
     }

@@ -46,7 +46,7 @@ function Register() {
     <div className={styles.container}>
       <MainTitle />
       <form className={styles.form} onSubmit={submitData}>
-        <h1 className={styles.title}>Register a new account</h1>
+        <h1>Register a new account</h1>
         {errorMessage && (
           <div className={styles.error}>
             <p>
@@ -74,8 +74,10 @@ function Register() {
             required
           />
         </div>
-        <div className={styles.submitBtn}>
-          <button type="submit">Sign up</button>
+        <div className={styles.buttons}>
+          <button className={styles.submitBtn} type="submit">
+            Sign up
+          </button>
         </div>
         <p className={styles.help}>
           <span>Have an account?</span>

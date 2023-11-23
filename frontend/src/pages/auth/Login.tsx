@@ -61,7 +61,7 @@ function Login() {
     <div className={styles.container}>
       <MainTitle />
       <form className={styles.form} onSubmit={submitData}>
-        <h1 className={styles.title}>Sign in to your account</h1>
+        <h1>Sign in to your account</h1>
         {errorMessage && (
           <div className={styles.error}>
             <p>
@@ -89,16 +89,20 @@ function Login() {
             required
           />
         </div>
-        <div className={styles.submitBtn}>
-          <button type="submit">Sign in</button>
-        </div>
-        <div className={styles.fortyTwoBtn}>
-          <button type="button" onClick={fortyTwoAuth}>
+        <div className={styles.buttons}>
+          <button className={styles.submitBtn} type="submit">
+            Sign in
+          </button>
+          <button
+            className={styles.fortyTwoBtn}
+            type="button"
+            onClick={fortyTwoAuth}
+          >
             Sign in with 42
           </button>
         </div>
         <p className={styles.help}>
-          <span>Don’t have an account yet?</span>
+          <span>Don't have an account yet?</span>
           <Link to={"/register"} className={styles.link}>
             Sign up
           </Link>
