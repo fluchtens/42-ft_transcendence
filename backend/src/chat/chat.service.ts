@@ -96,25 +96,6 @@ export class ChatService{
     }
   }
 
-  async memberIsInChannel(channelId: string, userId: number) : Promise<boolean> {
-    try {
-      const existingMember = await this.prismaService.member.findUnique({
-        where: {
-          userId: userId,
-          channelId: channelId,
-        },
-      });
-      if (existingMember) {
-        console.log(`existing memver ${existingMember}`)
-        return true;
-      }
-      console.log(`rend ${existingMember}`)
-      return false;
-    }
-    catch (error){
-      return false;
-    }
-  }
 
   async findMemberInChannel(channelId: string, userId: number) : Promise<Member | null> {
     try {
@@ -124,11 +105,9 @@ export class ChatService{
           channelId: channelId,
         },
       });
-      console.log(`existing memver ${existingMember}`)
       if (existingMember) {
         return existingMember;
       }
-      console.log(`existing memverend ${existingMember}`)
       return null;
     }
     catch (error){
@@ -250,21 +229,18 @@ export class ChatService{
   }
 
   async addMember(userId: number, channelId: string, memberId: number): Promise<any>{
-    if (!(userId && channelId && memberId)) {
+    if (!userId || !channelId || !memberId) {
       console.log("channelId or UserId invalid");
       return;
     }
-    const memberData: boolean = await this.memberIsInChannel(channelId, memberId);
-    console.log(`user id ${userId}, channelId ${channelId}, memberId ${memberId}, memberdata ${memberData}`);
-  
-    if (memberData) {
-      console.log("Member already exists in the channel");
-      return null;
-    }
-  
-    const memberRole : string = await this.findMemberRoleInChannel(channelId, userId);
-    if (memberRole) {
-      try {
+    try {
+      const channelData = await this.getChannelMembers(channelId);
+      const existingMember = channelData.find((member) => Number(member.userId) === Number(memberId));
+      if (existingMember) {
+        console.error("Member already exists in the channel");
+        return null;
+      }
+      else {
         const newMember = await this.prismaService.member.create({
           data : {
             userId: Number(memberId),
@@ -273,16 +249,12 @@ export class ChatService{
         });
         return newMember;
       }
-      catch (error){
-        console.error('Error when try to add a new member to channel', error);
-        throw error;
-      }
     }
-    else {
-      console.log('member is not in channel, addMember failed');
+    catch (error){
+      console.error('Error when try to add a new member to channel', error);
+      throw error;
     }
   }
-
   async changeMemberRole(req: any, channelId: string, userId: number, newRole: string){
     const { user } = req;
     const memberRole : string = await this.findMemberRoleInChannel(channelId, Number(user.id));
@@ -460,10 +432,9 @@ export class ChatService{
     }
   }
 
-  async deleteChannel(req: any, channelId: string) : Promise<null | any> {
-    const { user } = req;
+  async deleteChannel(userId: number, channelId: string) : Promise<null | any> {
 
-    if (!user || !channelId){
+    if (!userId || !channelId){
       console.error('invalid input');
       return null;
     }
@@ -475,8 +446,7 @@ export class ChatService{
       });
       if (!channel)
         throw new Error("channel not found");
-      const userRole = await this.findMemberRoleInChannel(channelId, user.id);
-      if (!(userRole === "ADMIN") || channel.userId !== user.id) {
+      if (channel.userId !== userId) {
         throw new Error("You have no permission to delete the channel")
       }
       await this.prismaService.channel.delete({
@@ -490,6 +460,10 @@ export class ChatService{
       console.log('error when delete the channel', error);
       throw error;
     }
+  }
+
+  async changeChannelOwner() {
+
   }
 
   async checkIfUserCanJoinChannel(userId: number, channelId: string): Promise<boolean> {

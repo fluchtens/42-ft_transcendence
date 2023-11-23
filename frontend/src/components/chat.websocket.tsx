@@ -34,10 +34,14 @@ export const  Websocket = () => {
     socket.on('newChannel', (channelId: string) => {
       setChannelIds((prevChannelsIds) => [...prevChannelsIds, channelId]);
     });
+    socket.on('channelDeleted', (deletedChannelId: string) => {
+      setChannelIds((prevChannels) => prevChannels.filter((channelId) => channelId !== deletedChannelId));
+    });
     return () => {
       console.log('Unregistering Events...');
       socket.off('connect');
       socket.off('newChannel');
+      socket.off('channelDeleted');
     };
   }, []);
 
@@ -69,7 +73,6 @@ export const  Websocket = () => {
               const channelIndex = updatedChannels.findIndex(
                 (channel) => channel.channelId === channelId
               );
-  
               if (channelIndex !== -1) {
                 updatedChannels[channelIndex] = channelData;
               } else {
@@ -78,7 +81,22 @@ export const  Websocket = () => {
               return updatedChannels;
           });
         });
-      });
+      }); 
+      setChannelsData((prevChannelsData) => {
+        const updatedChannels = [...prevChannelsData];
+        const channelsToRemove = updatedChannels.filter(
+          (channel => !channelIds.includes(channel.channelId))
+        );
+        channelsToRemove.forEach((channelToRemove) => {
+          const removeIndex = updatedChannels.findIndex(
+            (channel) => channel.channelId === channelToRemove.channelId
+            );
+          if (removeIndex !== -1) {
+            updatedChannels.splice(removeIndex, 1);
+          }
+        });
+        return updatedChannels;
+      })
     }
     return () => {
       if (channelIds) {

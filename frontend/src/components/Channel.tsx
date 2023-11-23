@@ -38,7 +38,9 @@ const ChannelComponent: React.FC<ChannelComponentProps> = ({
       }
       setAddMemberInput('');
   };
-
+  const onDeleteChannel = () => {
+    socket.emit('deleteChannel', channel.channelId);
+  };
   useEffect(() => {
     setMessages(channel.messages);
     socket.on(`${channel.channelId}/messageDeleted`, (deletedMessageId: string) => {
@@ -60,6 +62,7 @@ const ChannelComponent: React.FC<ChannelComponentProps> = ({
   return (
     <div className="channel-container">
       <div className="channel-header">{channel.channelName}</div>
+      <button onClick={onDeleteChannel}>DeleteChannel</button>
       <div className="message-list">
         {messages.map((message, index) => (
           <div key={index} className="message">

@@ -224,7 +224,6 @@ export class ChatGateway implements OnModuleInit {
     const userId = client.handshake.auth.userId;
     if (userId) {
       try {
-        console.log('here');
         const message = await this.chatService.deleteMessage(userId, messageId);
         if (message) {
           this.server.to(channelId).emit(`${channelId}/messageDeleted`, messageId);
@@ -292,6 +291,33 @@ export class ChatGateway implements OnModuleInit {
       catch (error) {
         console.error('createchannel error', error.message);
         throw new BadRequestException;
+      }
+    }
+   else {
+    console.log("User ID not available.");
+   }
+  }
+
+  @SubscribeMessage('deleteChannel')
+  async handleDeleteChannel(@ConnectedSocket() client: Socket, @MessageBody() channelId: string ) {
+    const userId = Number(client.handshake.auth.userId);
+    if (userId) {
+      try {
+        const channel = await this.getChannelData(client, channelId);
+        if (channel) {
+          const deleted = await this.chatService.deleteChannel(userId, channelId);
+          for (const member of channel.members) {
+            const userId: number = member.userId;
+            this.server.to(String(userId)).emit('channelDeleted', channelId);
+          }
+          console.log(deleted);
+        }
+        else {
+          console.log("Error when get Channel data");
+        }
+      }
+      catch (error) {
+        console.error(error.message);
       }
     }
    else {
