@@ -1,15 +1,14 @@
-all: run
+all: build
 
 install:
 	cd backend && npm install && npx prisma generate
 	cd frontend && npm install
 
-up: 
-	docker-compose down
-	docker-compose up
-
-run: down
+build: clean
 	docker-compose up --build
+
+up:
+	docker-compose up
 
 down:
 	docker-compose down --rmi all --volumes
@@ -17,7 +16,7 @@ down:
 clean: down
 	rm -rf backend/prisma/migrations
 	rm -rf backend/uploads
-	docker system prune -a
+	docker system prune -a -f
 
 .PHONY: all
 

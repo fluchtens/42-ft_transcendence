@@ -3,54 +3,99 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import * as bcrypt from 'bcryptjs';
 import * as fs from 'fs';
 import * as path from 'path';
 import { UsernameDto } from './dtos/UsernameDto';
+import { UpdatePwdDto } from './dtos/UpdatePwdDto';
 
 @Injectable()
 export class UserService {
   constructor(private readonly prismaService: PrismaService) {}
 
   /* -------------------------------------------------------------------------- */
-  /*                                   Private                                  */
+  /*                                    Utils                                   */
   /* -------------------------------------------------------------------------- */
 
-  private async findUserById(id: number) {
-    return this.prismaService.user.findUnique({
-      where: { id },
-    });
+  async findUserById(id: number) {
+    try {
+      const user = await this.prismaService.user.findUnique({
+        where: { id },
+      });
+      return user;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
-  private async findUserByUsername(username: string) {
-    return this.prismaService.user.findUnique({
-      where: { username },
-    });
+  async findUserByUsername(username: string) {
+    try {
+      const user = await this.prismaService.user.findUnique({
+        where: { username },
+      });
+      return user;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
-  private async findUserAvatar(id: number) {
+  async findUserByFortyTwoId(fortyTwoId: number) {
+    try {
+      const user = await this.prismaService.user.findUnique({
+        where: { fortyTwoId },
+      });
+      return user;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  async findUserAvatar(id: number) {
     return this.prismaService.user.findUnique({
       where: { id },
       select: { avatar: true },
     });
   }
 
-  private async updateUserUsername(id: number, username: string) {
+  async updateUserUsername(id: number, username: string) {
     return this.prismaService.user.update({
       where: { id },
       data: { username },
     });
   }
 
-  private async updateUserAvatar(id: number, avatar: string) {
+  async updateUserAvatar(id: number, avatar: string) {
     return this.prismaService.user.update({
       where: { id },
       data: { avatar },
     });
   }
 
-  private exclude<User, Key extends keyof User>(
+  async updateUserPassword(id: number, password: string) {
+    return this.prismaService.user.update({
+      where: { id },
+      data: { password },
+    });
+  }
+
+  async updateUserTwoFa(id: number, twoFa: boolean) {
+    return this.prismaService.user.update({
+      where: { id },
+      data: { twoFa },
+    });
+  }
+
+  async updateUserTwoFaSecret(id: number, twoFaSecret: string) {
+    return this.prismaService.user.update({
+      where: { id },
+      data: { twoFaSecret },
+    });
+  }
+
+  exclude<User, Key extends keyof User>(
     user: User,
     keys: Key[],
   ): Omit<User, Key> {
@@ -69,7 +114,19 @@ export class UserService {
 
   async getAllUsers() {
     const users = await this.prismaService.user.findMany();
-    return users;
+    if (!users) {
+      throw new NotFoundException('No users found');
+    }
+
+    const usersData = users.map((user) => {
+      const userData = this.exclude(user, ['fortyTwoId', 'password']);
+      if (userData.avatar) {
+        userData.avatar = `${process.env.VITE_BACK_URL}/user/avatar/${userData.avatar}`;
+      }
+      return userData;
+    });
+
+    return usersData;
   }
 
   async getUserById(id: number) {
@@ -79,6 +136,9 @@ export class UserService {
     }
 
     const userData = this.exclude(user, ['fortyTwoId', 'password']);
+    if (userData.avatar) {
+      userData.avatar = `${process.env.VITE_BACK_URL}/user/avatar/${userData.avatar}`;
+    }
     return userData;
   }
 
@@ -89,6 +149,9 @@ export class UserService {
     }
 
     const userData = this.exclude(user, ['fortyTwoId', 'password']);
+    if (userData.avatar) {
+      userData.avatar = `${process.env.VITE_BACK_URL}/user/avatar/${userData.avatar}`;
+    }
     return userData;
   }
 
@@ -96,10 +159,10 @@ export class UserService {
   /*                                  Username                                  */
   /* -------------------------------------------------------------------------- */
 
-  async postUsername(req, body: UsernameDto) {
+  async changeUsername(req, body: UsernameDto) {
     const { username } = body;
 
-    const user = await this.getUserById(req.user.id);
+    const user = await this.findUserById(req.user.id);
     if (!user) {
       throw new NotFoundException('User not found');
     } else if (user.username === username) {
@@ -111,6 +174,30 @@ export class UserService {
     await this.updateUserUsername(req.user.id, username);
 
     return { message: 'Username updated successfully' };
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                  Password                                  */
+  /* -------------------------------------------------------------------------- */
+
+  async changePassword(req, body: UpdatePwdDto) {
+    const { id } = req.user;
+    const { password, newPassword } = body;
+
+    const user = await this.findUserById(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const matchPwd = await bcrypt.compare(password, user.password);
+    if (!matchPwd) {
+      throw new UnauthorizedException("Old password isn't valid");
+    }
+
+    const hashedPwd = await bcrypt.hash(newPassword, 10);
+    await this.updateUserPassword(id, hashedPwd);
+
+    return { message: 'Password updated successfully' };
   }
 
   /* -------------------------------------------------------------------------- */

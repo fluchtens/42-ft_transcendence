@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./Auth.module.scss";
-import { setupUser } from "../../services/auth.api";
-import { getUser } from "../../services/user.api";
+import { setupUserApi } from "../../services/auth.api";
 import { MainTitle } from "../../components/MainTitle";
+import { useAuth } from "../../utils/useAuth";
 
 function Setup() {
+  const { user, refreshUser } = useAuth();
   const [username, setUsername] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
@@ -17,24 +18,23 @@ function Setup() {
   const submitData = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const data = await setupUser(username);
+    const data = await setupUserApi(username);
     if (!data.success) {
       setErrorMessage(data.message);
       return;
     }
 
+    await refreshUser();
     navigate("/");
+    window.location.reload();
   };
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const data = await getUser();
-      if (data) {
-        navigate("/");
-      }
-    };
-    checkAuth();
-  }, []);
+    if (user) {
+      navigate("/");
+      return;
+    }
+  }, [user]);
 
   return (
     <div className={styles.container}>

@@ -1,37 +1,99 @@
 import { useContext, useEffect, useState } from "react"
-import { WebsocketContext } from "../services/chat.socket"
+import { WebsocketContext } from "../services/chat.socket";
+import ChannelComponent from "./Channel";
 
 
 export const  Websocket = () => {
 
-  const [value, setValue] = useState("")
-  const socket = useContext(WebsocketContext);
+  const [channelIds, setChannelIds] = useState<string[]>();
+  const [channelsData, setChannelsData] = useState<ChannelData[]>([]);
+  const socket : any = useContext(WebsocketContext);
   useEffect(() => {
     socket.on('connect', () => {
       console.log('Connected!');
     });
-    socket.on('onMessage', (data) => {
-      console.log('onMessage event received!');
-      console.log(data);
-    });
-
+    socket.on('channels', () => {
+      console.log("channels Connection");
+    })
     return () => {
       console.log('Unregistering Events...');
       socket.off('connect');
-      socket.off('onMessage');
+      socket.off('allChannels');
     };
   }, []);
 
-  const onSubmit = () => {
-    socket.emit('newMessage', value);
-    setValue('');
-  }
+  useEffect(() => {
+    socket.on('allChannels', (channelIds: string[]) => {
+      setChannelIds(channelIds);
+      console.log(channelIds);
+    });
+    socket.emit('getAllChannels');
+    // Nettoyer les écouteurs d'événements lorsque le composant est démonté
+    return () => {
+      socket.off('allChannels');
+    };
+  }, []);
+
+  useEffect(() => {
+    if (channelIds) {
+      channelIds.forEach((channelId) => {
+        socket.emit('joinChannel', channelId);
+      });
+
+      // Écouter l'événement pour chaque channelId
+      channelIds.forEach((channelId) => {
+        socket.on(`channelData:${channelId}`, (channelData: ChannelData) => {
+          console.log(`Received channelData for channelId ${channelId}`);
+          
+          // Mettez à jour l'état local avec les données du canal
+          setChannelsData((prevChannelsData) => {
+            if (prevChannelsData) {
+              const updatedChannels = [...prevChannelsData];
+              const channelIndex = updatedChannels.findIndex(
+                (channel) => channel.channelId === channelId
+              );
+  
+              if (channelIndex !== -1) {
+                updatedChannels[channelIndex] = channelData;
+              } else {
+                updatedChannels.push(channelData);
+              }
+  
+              console.log("Updated channelsData:", updatedChannels);
+              return updatedChannels;
+            }
+            return [];
+          });
+        });
+      });
+    }
+    console.log(channelsData);
+    // Nettoyer les écouteurs d'événements lorsque le composant est démonté
+    return () => {
+      console.log(channelsData);
+
+      if (channelIds) {
+        channelIds.forEach((channelId) => {
+          socket.off(`channelData:${channelId}`);
+        });
+      }
+    };
+  }, [channelIds]);
+
+  useEffect(() => {
+    console.log(channelsData);
+  }, [channelsData]);
+
   return (
     <div>
       <div>
-        <h1> Websocket </h1>
-        <input type="text" value={value} onChange={(e) => setValue(e.target.value)}/>
-        <button onClick={onSubmit}>Submit</button>
+        {channelsData &&
+            channelsData.map((channel) => {
+              console.log("Calling ChannelComponent for channel:", channel);
+              return (
+                <ChannelComponent key={channel.channelId} channel={channel} socket={socket}/>
+              )
+            })}
       </div>
     </div>
   )

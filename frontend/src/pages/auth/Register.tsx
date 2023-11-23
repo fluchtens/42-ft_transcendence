@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styles from "./Auth.module.scss";
-import { registerUser } from "../../services/auth.api";
-import { getUser } from "../../services/user.api";
+import { userRegistrationApi } from "../../services/auth.api";
 import { MainTitle } from "../../components/MainTitle";
+import { notifySuccess } from "../../utils/notifications";
+import { useAuth } from "../../utils/useAuth";
 
 function Register() {
+  const { user } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -23,24 +25,22 @@ function Register() {
     e.preventDefault();
 
     const user = { username, password };
-    const data = await registerUser(user);
+    const data = await userRegistrationApi(user);
     if (!data.success) {
       setErrorMessage(data.message);
       return;
     }
 
     navigate("/login");
+    notifySuccess(data.message);
   };
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const data = await getUser();
-      if (data) {
-        navigate("/");
-      }
-    };
-    checkAuth();
-  }, []);
+    if (user) {
+      navigate("/");
+      return;
+    }
+  }, [user]);
 
   return (
     <div className={styles.container}>

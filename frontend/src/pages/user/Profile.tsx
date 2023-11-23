@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getUserAvatar, getUserByUsername } from "../../services/user.api";
+import { getUserByUsernameApi } from "../../services/user.api";
 import { useNavigate, useParams } from "react-router-dom";
 import { User } from "../../types/user.interface";
 import { FaUser, FaUserPlus, FaUserPen } from "react-icons/fa6";
@@ -10,7 +10,6 @@ import styles from "./Profile.module.scss";
 
 export default function Profile() {
   const [user, setUser] = useState<User | null>(null);
-  const [avatar, setAvatar] = useState<string>("");
   const { username } = useParams();
   const navigate = useNavigate();
 
@@ -19,50 +18,61 @@ export default function Profile() {
       if (!username) {
         return;
       }
-      const data = await getUserByUsername(username);
+      const data = await getUserByUsernameApi(username);
       if (!data) {
         navigate("/");
         return;
       }
       setUser(data);
-      setAvatar(getUserAvatar(data.avatar));
     };
     getUser();
-  }, []);
+  }, [username]);
 
   return (
-    <div className={styles.container}>
-      <div className={styles.user}>
-        <div className={styles.header}>
-          <FaUser className={styles.icon} />
-          <h1>Profile</h1>
+    <>
+      {user && (
+        <div className={styles.container}>
+          <div className={styles.user}>
+            <div className={styles.header}>
+              <FaUser className={styles.icon} />
+              <h1>Profile</h1>
+            </div>
+            <div className={styles.details}>
+              {user.avatar ? (
+                <img src={user.avatar} />
+              ) : (
+                <img src={defaultAvatar} />
+              )}
+              <ul className={styles.dataList}>
+                <li className={styles.data}>
+                  <PiFootprintsFill className={styles.dataIcon} />
+                  <p className={styles.dataType}>ID</p>
+                  <p className={styles.dataValue}>{user.id}</p>
+                </li>
+                <li className={styles.data}>
+                  <FaUser className={styles.dataIcon} />
+                  <p className={styles.dataType}>Username</p>
+                  <p className={styles.dataValue}>{user.username}</p>
+                </li>
+                <li className={styles.data}>
+                  <FaUserPlus className={styles.dataIcon} />
+                  <p className={styles.dataType}>Registered</p>
+                  <p className={styles.dataValue}>
+                    {convertDate(user.createdAt)}
+                  </p>
+                </li>
+                <li className={styles.data}>
+                  <FaUserPen className={styles.dataIcon} />
+                  <p className={styles.dataType}>Updated</p>
+                  <p className={styles.dataValue}>
+                    {convertDate(user.updatedAt)}
+                  </p>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
-        <div className={styles.details}>
-          {avatar ? <img src={avatar} /> : <img src={defaultAvatar} />}
-          <ul className={styles.dataList}>
-            <li className={styles.data}>
-              <PiFootprintsFill className={styles.dataIcon} />
-              <p className={styles.dataType}>ID</p>
-              <p className={styles.dataValue}>{user?.id}</p>
-            </li>
-            <li className={styles.data}>
-              <FaUser className={styles.dataIcon} />
-              <p className={styles.dataType}>Username</p>
-              <p className={styles.dataValue}>{user?.username}</p>
-            </li>
-            <li className={styles.data}>
-              <FaUserPlus className={styles.dataIcon} />
-              <p className={styles.dataType}>Registered</p>
-              <p className={styles.dataValue}>{convertDate(user?.createdAt)}</p>
-            </li>
-            <li className={styles.data}>
-              <FaUserPen className={styles.dataIcon} />
-              <p className={styles.dataType}>Updated</p>
-              <p className={styles.dataValue}>{convertDate(user?.updatedAt)}</p>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 }

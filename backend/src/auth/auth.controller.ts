@@ -48,7 +48,7 @@ export class AuthController {
   /*                                     42                                     */
   /* -------------------------------------------------------------------------- */
 
-  @Get('42Auth')
+  @Get('42')
   @UseGuards(FortyTwoAuthGuard)
   fortyTwoAuth(
     @Req() req,

@@ -11,20 +11,20 @@ import { LoginDto } from './dtos/LoginDto';
 import { SetupDto } from './dtos/SetupDto';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
 import * as path from 'path';
 import fetch from 'node-fetch';
 import { authenticator } from 'otplib';
 import { toDataURL } from 'qrcode';
 import { TwoFaDto } from './dtos/TwoFaDto';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
+    private readonly userService: UserService,
   ) {}
 
   /* -------------------------------------------------------------------------- */
@@ -33,41 +33,9 @@ export class AuthService {
 
   private readonly cookieExpirationTime = 2 * 60 * 60 * 1000;
 
-  private async findUserById(id: number) {
-    return this.prismaService.user.findUnique({
-      where: { id },
-    });
-  }
-
-  private async findUserByUsername(username: string) {
-    return this.prismaService.user.findUnique({
-      where: { username },
-    });
-  }
-
-  private async findUserByFortyTwoId(fortyTwoId: number) {
-    return this.prismaService.user.findUnique({
-      where: { fortyTwoId },
-    });
-  }
-
-  private async updateUserTwoFa(id: number, twoFa: boolean) {
-    return this.prismaService.user.update({
-      where: { id },
-      data: { twoFa },
-    });
-  }
-
-  private async updateUserTwoFaSecret(id: number, twoFaSecret: string) {
-    return this.prismaService.user.update({
-      where: { id },
-      data: { twoFaSecret },
-    });
-  }
-
   private async generateJwtToken(payload: any, expiresIn: string) {
     const token = await this.jwtService.signAsync(payload, {
-      secret: this.configService.get('JWT_SECRET'),
+      secret: process.env.JWT_SECRET,
       expiresIn: expiresIn,
     });
 
@@ -108,7 +76,7 @@ export class AuthService {
   async register(body: RegisterDto) {
     const { username, password } = body;
 
-    const user = await this.findUserByUsername(username);
+    const user = await this.userService.findUserByUsername(username);
     if (user) {
       throw new ConflictException('This username is already taken');
     }
@@ -124,7 +92,7 @@ export class AuthService {
   async login(session, body: LoginDto, res) {
     const { username, password } = body;
 
-    const user = await this.findUserByUsername(username);
+    const user = await this.userService.findUserByUsername(username);
     if (!user || user.fortyTwoId) {
       throw new UnauthorizedException('Incorrect username or password');
     }
@@ -154,6 +122,14 @@ export class AuthService {
     return { message: 'User succesfully disconnected' };
   }
 
+  verifyAccessToken(token: string): any {
+    const decodedToken = this.jwtService.verify(token, {
+      secret: process.env.JWT_SECRET,
+    });
+
+    return decodedToken;
+  }
+
   /* -------------------------------------------------------------------------- */
   /*                                     42                                     */
   /* -------------------------------------------------------------------------- */
@@ -162,30 +138,26 @@ export class AuthService {
     const fortyTwoId: number = parseInt(req.user.id);
     const fortyTwoAvatar: string = req.user._json.image.link;
 
-    const user = await this.findUserByFortyTwoId(fortyTwoId);
+    const user = await this.userService.findUserByFortyTwoId(fortyTwoId);
     if (!user) {
       session.fortyTwoId = fortyTwoId;
       session.fortyTwoAvatar = fortyTwoAvatar;
 
-      return res.redirect(
-        this.configService.get('VITE_FRONT_URL') + '/register/setup',
-      );
+      return res.redirect(process.env.VITE_FRONT_URL + '/register/setup');
     }
 
     if (user.twoFa) {
       session.userId = user.id;
       session.twoFa = true;
 
-      return res.redirect(
-        this.configService.get('VITE_FRONT_URL') + '/login/twofa',
-      );
+      return res.redirect(process.env.VITE_FRONT_URL + '/login/twofa');
     }
 
     const payload = { id: user.id, username: user.username };
     const token = await this.generateJwtToken(payload, '2h');
     await this.setAccessTokenCookie(res, token, this.cookieExpirationTime);
 
-    return res.redirect(this.configService.get('VITE_FRONT_URL'));
+    return res.redirect(process.env.VITE_FRONT_URL);
   }
 
   async setup(session, body: SetupDto, res) {
@@ -196,7 +168,7 @@ export class AuthService {
       throw new UnauthorizedException('You are not logged in');
     }
 
-    let user = await this.findUserByUsername(username);
+    let user = await this.userService.findUserByUsername(username);
     if (user) {
       throw new ConflictException('This username is already taken');
     }
@@ -216,6 +188,8 @@ export class AuthService {
     const token = await this.generateJwtToken(payload, '2h');
     await this.setAccessTokenCookie(res, token, this.cookieExpirationTime);
 
+    res.clearCookie('connect.sid');
+
     return { message: 'User succesfully connected' };
   }
 
@@ -226,7 +200,7 @@ export class AuthService {
   async generateTwoFaQrCode(req) {
     const { id } = req.user;
 
-    const user = await this.findUserById(id);
+    const user = await this.userService.findUserById(id);
     if (!user) {
       throw new NotFoundException('User not found');
     } else if (user.twoFa) {
@@ -235,7 +209,7 @@ export class AuthService {
 
     const secret = authenticator.generateSecret();
     const otpAuthUrl = authenticator.keyuri(id, 'ft_transcendence', secret);
-    await this.updateUserTwoFaSecret(id, secret);
+    await this.userService.updateUserTwoFaSecret(id, secret);
     const qrcode = await toDataURL(otpAuthUrl);
 
     return { message: '2FA QRCode successfully generated', qrcode };
@@ -245,7 +219,7 @@ export class AuthService {
     const { id } = req.user;
     const { code } = body;
 
-    const user = await this.findUserById(id);
+    const user = await this.userService.findUserById(id);
     if (!user) {
       throw new NotFoundException('User not found');
     } else if (user.twoFa) {
@@ -261,7 +235,7 @@ export class AuthService {
     if (!isValidToken) {
       throw new UnauthorizedException('Invalid 2FA code');
     }
-    await this.updateUserTwoFa(id, true);
+    await this.userService.updateUserTwoFa(id, true);
 
     return { message: '2FA successfully enabled' };
   }
@@ -269,14 +243,14 @@ export class AuthService {
   async disableTwoFa(req) {
     const { id } = req.user;
 
-    const user = await this.findUserById(id);
+    const user = await this.userService.findUserById(id);
     if (!user) {
       throw new NotFoundException('User not found');
     } else if (!user.twoFa) {
       throw new BadRequestException('2FA already disabled');
     } else {
-      await this.updateUserTwoFa(id, false);
-      await this.updateUserTwoFaSecret(id, null);
+      await this.userService.updateUserTwoFa(id, false);
+      await this.userService.updateUserTwoFaSecret(id, null);
     }
 
     return { message: '2FA successfully disabled' };
@@ -290,7 +264,7 @@ export class AuthService {
       throw new UnauthorizedException('You are not logged in');
     }
 
-    const user = await this.findUserById(userId);
+    const user = await this.userService.findUserById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     } else if (!user.twoFa) {

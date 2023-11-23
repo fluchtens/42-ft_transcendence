@@ -9,26 +9,48 @@ datasource db {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  username     String   @unique @db.VarChar(255)
-  fortyTwoId   Int?     @unique
-  avatar       String?  @db.VarChar(255)
-  password     String?  @db.VarChar(255)
-  twoFa        Boolean  @default(false)
-  twoFaSecret  String?  @db.VarChar(255)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  blockedUsers Int[]    @default([0])
+  id              Int          @id @default(autoincrement())
+  username        String       @unique @db.VarChar(255)
+  fortyTwoId      Int?         @unique
+  avatar          String?      @db.VarChar(255)
+  password        String?      @db.VarChar(255)
+  twoFa           Boolean      @default(false)
+  twoFaSecret     String?      @db.VarChar(255)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  addedFriends    Friendship[] @relation("sender")
+  acceptedFriends Friendship[] @relation("receiver")
+  members         Member[]
+  channels        Channel[]
+  messages        Message[]
+}
 
-  members  Member[]
-  channels Channel[]
-  messages Message[]
+model Friendship {
+  id         Int              @id @default(autoincrement())
+  sender     User             @relation("sender", fields: [senderId], references: [id])
+  senderId   Int
+  receiver   User             @relation("receiver", fields: [receiverId], references: [id])
+  receiverId Int
+  status     FriendshipStatus
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  @@unique([senderId, receiverId])
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  DELETED
+  BLOCKED
 }
 
 model Channel {
   id         String      @id @default(uuid())
   name       String
   inviteCode String      @db.Text()
+  avatar     String?     @db.VarChar(255)
   password   String?     @db.VarChar(255)
   type       ChannelType @default(public)
 

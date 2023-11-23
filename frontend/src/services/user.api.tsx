@@ -7,7 +7,11 @@ interface ApiRes {
   message: string;
 }
 
-const getUser = async (): Promise<User | null> => {
+/* -------------------------------------------------------------------------- */
+/*                                   General                                  */
+/* -------------------------------------------------------------------------- */
+
+const getUserApi = async (): Promise<User | null> => {
   try {
     const response = await fetch(`${apiUrl}/`, {
       method: "GET",
@@ -26,7 +30,26 @@ const getUser = async (): Promise<User | null> => {
   }
 };
 
-async function getUserByUsername(username: string): Promise<User | null> {
+async function getUserByIdApi(id: number): Promise<User | null> {
+  try {
+    const response = await fetch(`${apiUrl}/id/${id}`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
+async function getUserByUsernameApi(username: string): Promise<User | null> {
   try {
     const response = await fetch(`${apiUrl}/username/${username}`, {
       method: "GET",
@@ -45,17 +68,39 @@ async function getUserByUsername(username: string): Promise<User | null> {
   }
 }
 
-async function postUsername(username: string): Promise<ApiRes> {
+const getAllUsersApi = async (): Promise<User[] | null> => {
+  try {
+    const response = await fetch(`${apiUrl}/all`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
+/* -------------------------------------------------------------------------- */
+/*                                  Username                                  */
+/* -------------------------------------------------------------------------- */
+
+async function updateUsernameApi(username: string): Promise<ApiRes> {
   try {
     const response = await fetch(`${apiUrl}/username`, {
-      method: "POST",
+      method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username }),
       credentials: "include",
     });
 
     const data = await response.json();
-    console.log(data);
     if (!response.ok) {
       return { success: false, message: data.message };
     }
@@ -70,6 +115,41 @@ async function postUsername(username: string): Promise<ApiRes> {
   }
 }
 
+/* -------------------------------------------------------------------------- */
+/*                                  Password                                  */
+/* -------------------------------------------------------------------------- */
+
+async function updatePasswordApi(
+  password: string,
+  newPassword: string
+): Promise<ApiRes> {
+  try {
+    const response = await fetch(`${apiUrl}/password`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password, newPassword }),
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      return { success: false, message: data.message };
+    }
+
+    return { success: true, message: data.message };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      message: "An error occurred while processing your request.",
+    };
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                   Avatar                                   */
+/* -------------------------------------------------------------------------- */
+
 function getUserAvatar(avatar: string): string {
   if (!avatar) {
     return "";
@@ -77,12 +157,12 @@ function getUserAvatar(avatar: string): string {
   return `${apiUrl}/avatar/${avatar}`;
 }
 
-async function postUserAvatar(file: any): Promise<ApiRes> {
+async function updateAvatarApi(file: any): Promise<ApiRes> {
   try {
     const formData = new FormData();
     formData.append("avatar", file);
 
-    const response = await fetch("http://localhost:3000/user/avatar", {
+    const response = await fetch(`${apiUrl}/avatar`, {
       method: "POST",
       body: formData,
       credentials: "include",
@@ -104,9 +184,12 @@ async function postUserAvatar(file: any): Promise<ApiRes> {
 }
 
 export {
-  getUser,
-  getUserByUsername,
-  postUsername,
+  getUserApi,
+  getUserByIdApi,
+  getUserByUsernameApi,
+  getAllUsersApi,
+  updateUsernameApi,
+  updatePasswordApi,
   getUserAvatar,
-  postUserAvatar,
+  updateAvatarApi,
 };

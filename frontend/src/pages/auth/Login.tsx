@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styles from "./Auth.module.scss";
-import { loginUser } from "../../services/auth.api";
-import { getUser } from "../../services/user.api";
+import { userLoginApi } from "../../services/auth.api";
 import { MainTitle } from "../../components/MainTitle";
+import { notifySuccess } from "../../utils/notifications";
+import { useAuth } from "../../utils/useAuth";
 
 function Login() {
+  const { user, refreshUser } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -23,7 +25,7 @@ function Login() {
     e.preventDefault();
 
     const user = { username, password };
-    const data = await loginUser(user);
+    const data = await userLoginApi(user);
     if (!data.success) {
       setErrorMessage(data.message);
       return;
@@ -33,26 +35,27 @@ function Login() {
       navigate("/login/twofa");
     } else {
       navigate("/");
+      notifySuccess(data.message);
+      window.location.reload();
     }
+
+    await refreshUser();
   };
 
   const fortyTwoAuth = async () => {
     try {
-      window.location.href = `${import.meta.env.VITE_BACK_URL}/auth/42Auth`;
+      window.location.href = `${import.meta.env.VITE_BACK_URL}/auth/42`;
     } catch (error) {
       console.error(error);
     }
   };
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const data = await getUser();
-      if (data) {
-        navigate("/");
-      }
-    };
-    checkAuth();
-  }, []);
+    if (user) {
+      navigate("/");
+      return;
+    }
+  }, [user]);
 
   return (
     <div className={styles.container}>

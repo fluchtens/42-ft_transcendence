@@ -1,0 +1,18 @@
+@import "../../styles/config.scss";
+
+.container {
+  min-height: 100vh;
+  flex-direction: column;
+  display: flex;
+
+  .main {
+    min-height: calc(100vh - 4rem);
+    display: flex;
+
+    main {
+      max-width: 64rem;
+      margin: auto;
+      padding: 1rem;
+    }
+  }
+}

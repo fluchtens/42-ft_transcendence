@@ -7,18 +7,19 @@ import * as session from 'express-session';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    origin: 'http://localhost',
+    origin: process.env.VITE_FRONT_URL,
     credentials: true,
   });
   app.useGlobalPipes(new ValidationPipe());
-  app.use(cookieParser());
   app.use(
+    cookieParser(),
     session({
-      secret: 'my-secret',
+      secret: process.env.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
     }),
   );
-  await app.listen(3000);
+
+  await app.listen(process.env.VITE_BACK_PORT);
 }
 bootstrap();

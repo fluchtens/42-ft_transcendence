@@ -1,15 +1,15 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Layout from "./layouts/Layout";
+import Layout from "./layouts/layout/Layout";
 import Error from "./components/Error";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Setup from "./pages/auth/Setup";
 import Profile from "./pages/user/Profile";
-import Game from "./pages/game/Game";
 import Chat from "./pages/chat/Chat";
-import Settings from "./pages/user/Settings";
-import TwoFaSetup from "./pages/user/TwoFaSetup";
+import Settings from "./pages/settings/Settings";
+import TwoFaSetup from "./pages/settings/TwoFaSetup";
 import TwoFaAuth from "./pages/auth/TwoFaAuth";
+import { AuthProvider } from "./utils/useAuth";
 import GameElement from "./components/GameElement";
 
 function App() {
@@ -60,7 +60,9 @@ function App() {
   ]);
   return (
     <>
-      <RouterProvider router={router} />
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
     </>
   );
 }

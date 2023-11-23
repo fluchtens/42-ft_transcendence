@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./Auth.module.scss";
-import { authUserTwoFa } from "../../services/auth.api";
-import { getUser } from "../../services/user.api";
+import { authUserTwoFaApi } from "../../services/auth.api";
 import { MainTitle } from "../../components/MainTitle";
+import { useAuth } from "../../utils/useAuth";
 
 function TwoFaAuth() {
+  const { user } = useAuth();
   const [token, setToken] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
@@ -17,24 +18,22 @@ function TwoFaAuth() {
   const submitData = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const data = await authUserTwoFa(token);
+    const data = await authUserTwoFaApi(token);
     if (!data.success) {
       setErrorMessage(data.message);
       return;
     }
 
     navigate("/");
+    window.location.reload();
   };
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const data = await getUser();
-      if (data) {
-        navigate("/");
-      }
-    };
-    checkAuth();
-  }, []);
+    if (user) {
+      navigate("/");
+      return;
+    }
+  }, [user]);
 
   return (
     <div className={styles.container}>
