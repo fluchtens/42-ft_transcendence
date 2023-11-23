@@ -8,7 +8,7 @@ import {
 } from '@nestjs/websockets' 
 import { Socket, Server } from 'socket.io'
 import { GameRouter } from './gameRouter.service'
-import * as gm from './tmp_game_logic'
+import * as gm from './gameLogic'
 
 
 // TODO question
@@ -49,7 +49,8 @@ class UserData {
 		this.sockets.add(sock);
 		[...this.rooms].forEach( (room) => {this.joinRoom(room)});
 		if (this._gameRoom) sock.join(this._gameRoom);
-		this.joinRoom(this.userRoom);
+// 		this.joinRoom(this.userRoom);
+		sock.join(this.userRoom);
 	}
 	rmSocket(sock: Socket) {
 		this.sockets.delete(sock);
@@ -63,7 +64,7 @@ class MMQueue { // Matchmaking queue
 	public options = {
 		widenRate: 5, // points per second
 		initialRange: 50, // +/-
-		refreshRate: 2, // per sec
+		refreshRate: (1 / 5), // per sec (ie 1 every 5 sec)
 	}
 	private _intervalHandle : any = null; // what type is returned by `setInterval`? TODO
 
@@ -127,7 +128,6 @@ class MMQueue { // Matchmaking queue
 	}
 }
 
-// should be 2 classes
 class GameService {
 	// unique game_invite name to info required to launch the game
 	lobbyRoom = '_LOBBY_';
@@ -145,6 +145,14 @@ class GameService {
 	socketUsers = new Map<string, string>(); // sockId to owning userId
 
 	queue = new MMQueue();
+
+	gameCallback = ( ( props: {gameRoom:string,game:gm.GameState} ) => {} );
+	gameFinishCallback = ( (props: {
+		gameRoom: string,
+	 	game:gm.GameState,
+	 	winner:UserData,
+	 	loser: UserData,
+	}) => {} );
 
 	// TESTING
 	constructor() {
@@ -167,6 +175,11 @@ class GameService {
 		}
 	}
 
+	gameSetCallbacks( {onRefresh, onFinish} ) {
+		this.gameCallback = onRefresh;
+		this.gameFinishCallback = onFinish;
+	}
+
 	bindSocket ( sock: Socket, userId: string ) {
 		this.socketUsers.set(sock.id, userId);
 		if ( !this.users.get(userId) ) {
@@ -174,7 +187,6 @@ class GameService {
 			this.users.set( userId, new UserData(userId) );
 		}
 
-// 		++socketUsers.get(sock.id)!.sockets.push(sock);
 		this.users.get(userId).addSocket(sock);
 		console.log('found user', this.users.get(userId));
 
@@ -204,14 +216,15 @@ class GameService {
 		return this.users.get(this.socketUsers.get(sockId));
 	}
 
-	getGameData( sockId: string): {p: gm.WhichPlayer, state: gm.GameState} | null {
-		let userId = this.socketUsers.get(sockId);
-		if (!userId) return null;
-
+	getGameData( userId: string): {player: gm.WhichPlayer, room: string, state: gm.GameState} | null {
 		let data = this.userGames.get(userId);
 		if (!data) return null;
 
-		return {p: data.p, state: this.games.get(data.gameId)};
+		return {
+			player: data.p, 
+			room: this.users.get(userId).gameRoom, 
+			state: this.games.get(data.gameId),
+		};
 	}
 
 	// creating / join games
@@ -229,6 +242,8 @@ class GameService {
 
 	lobbyCancelInvite(userId: string) {
 		if (this.userInvites.has(userId)) {
+			if (this.users.get(userId))
+				this.users.get(userId).status = UserStatus.Normal;
 			this.invites.delete(this.userInvites.get(userId)); // note: delete ok when undefined
 			this.userInvites.delete(userId);
 			return true;
@@ -254,7 +269,16 @@ class GameService {
 
 		let gameId = this.genId();
 		let game = new gm.GameState(startTime);
+		game.newBall(gm.WhichPlayer.P1, startTime);
+		// TESTING
+		game.ball.dx = - gm.PONG.ballXSpeed;
+		game.ball.dy = 0;
+		game.ball.x = Math.floor(gm.PONG.width / 2);
+		game.ball.y = Math.floor(gm.PONG.height / 2);
+		// END TESTING
+		// //
 		this.games.set(gameId, game);
+		console.log('ready to launch:', game);
 
 		let bindPlayer = (user, whichP) => {
 			user.status = UserStatus.Playing;
@@ -264,6 +288,36 @@ class GameService {
 		}
 		bindPlayer(player1, gm.WhichPlayer.P1);
 		bindPlayer(player2, gm.WhichPlayer.P2);
+
+		let onFinish = (winner: gm.WhichPlayer) => {
+			this.gameFinishCallback({
+				gameRoom: gameId,
+			 	game,
+				winner: (winner === gm.WhichPlayer.P1) ? player1: player2,
+				loser: (winner === gm.WhichPlayer.P1) ? player2: player1,
+		 	});
+			player1.status = UserStatus.Normal;
+			player1.gameRoom = null;
+			player2.status = UserStatus.Normal;
+			player2.gameRoom = null;
+			this.games.delete(gameId);
+			// TODO talk to db
+		}
+
+		let resetTimer = () => {
+			game.update();
+			let {finish, winner} = game.updateScores();
+			if (finish)
+				onFinish(winner);
+			else {
+				this.gameCallback({gameRoom: gameId, game});
+// 				let nextTimepoint = Math.max(20, game.minTimeToPoint());
+				let nextTimepoint = game.minTimeToPoint();
+				console.log('wait:', nextTimepoint);
+				setTimeout(resetTimer, nextTimepoint);
+			}
+		}
+		resetTimer();
 
 		return {gameRoom: gameId, game};
 	}
@@ -298,8 +352,8 @@ class GameService {
 		let user = this.users.get(userId);
 		if (!user)
 			throw new Error("no such active user");
-		if (user.status != UserStatus.Normal)
-			throw new Error("can't join queue while busy");
+// 		if (user.status != UserStatus.Normal)
+// 			throw new Error("can't join queue while busy");
 
 		user.status = UserStatus.Normal;
 		this.queue.del(user.id);
@@ -309,7 +363,7 @@ class GameService {
 @WebSocketGateway({
 	namespace: '/gamesocket',
 	cors: { 
-		origin: ['http://localhost:3000'], // localhost is react client
+		origin: [process.env.VITE_FRONT_URL], // localhost is react client
 	}
 })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -319,6 +373,16 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	constructor() {
 		this.gameService.queueSetCallback( ({gameRoom, game}) => {
 			this.server.to(gameRoom).emit('statusChange', UserStatus.Playing);
+		});
+		this.gameService.gameSetCallbacks( {
+			onRefresh: ({gameRoom, game}) => {
+				this.server.to(gameRoom).emit('gameUpdate', game.packet());
+			},
+			onFinish: ({gameRoom, game, winner, loser}) => {
+				this.server.to(gameRoom).emit('statusChange', UserStatus.Normal);
+				this.server.to(winner.userRoom).emit('winLose', true);
+				this.server.to(loser.userRoom).emit('winLose', false);
+			},
 		});
 	}
 			
@@ -387,7 +451,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 		this.gameService.lobbyCreateInvite(userData.id, gameName);
 
-		userData.status = UserStatus.Waiting;
+		console.log('stat change sent', userData.userRoom);
 		this.server.to(userData.userRoom).emit('statusChange', UserStatus.Waiting);
 
 		this._pushGameList();
@@ -404,7 +468,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 		this.gameService.leaveQueue(userData.id);
 		
-		userData.status = UserStatus.Normal;
 		this.server.to(userData.userRoom).emit('statusChange', UserStatus.Normal);
 	}
 
@@ -426,7 +489,29 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		this.gameService.joinQueue(userData.id);
 		this.server.to(userData.userRoom).emit('statusChange', UserStatus.Waiting);
 	}
+
+	@SubscribeMessage('syncGame')
+	syncGame(sock: Socket) {
+		let userData = this._wantStatus(sock, [UserStatus.Playing]);
+
+		let {player: whichPlayer, room, state: game} = this.gameService.getGameData(userData.id);
+		console.log('syncing', game);
+		return game.packet(Date.now());
+	}
+
+	@SubscribeMessage('playerMotion')
+	playerMotion(sock: Socket, mo: gm.MotionType) {
+		console.log('got motion', mo);
+		let userData = this._wantStatus(sock, [UserStatus.Playing]);
+		let {player: whichPlayer, room, state: game} = this.gameService.getGameData(userData.id);
+		let now = Date.now();
+		game.update(now);
+		game.player(whichPlayer).dy = gm.PONG.playerSpeed * Number(mo);
+		this.server.to(room).emit('gameUpdate', game.packet(now));
+	}
 }
+ 
+///
 
 // 	@SubscribeMessage('joinLobby')
 // 	joinLobby(sock: Socket) {
@@ -479,11 +564,4 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 // 	// creating / joining games
 // 	// hande 'createGame', 'joinGame', 'queue'
 // }
-
-
-
-
-
-
-
 
