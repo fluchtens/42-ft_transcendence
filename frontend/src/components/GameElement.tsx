@@ -37,7 +37,7 @@ export default function GameElement() {
 enum UserStatus { Normal, Waiting, Playing }
 function GameElementContent() {
 	const socket = useContext(SocketContext);
-	const [ status, setStatus ] = useState<UserStatus | null>(null);
+	const [ status, setStatus ] = useState<UserStatus | undefined>(undefined);
 	// todo status logged_in or something?
 
 	// authenticate and get status + log 
@@ -45,7 +45,7 @@ function GameElementContent() {
 	useEffect( () => { 
 // 		let userId = prompt('who are you?'); // TESTING
 // 		socket.emit('authenticate', {userId}, (gotStatus: UserStatus | null) => {
-		socket.emit('authenticate', (gotStatus: UserStatus | null) => {
+		socket.emit('getStatus', (gotStatus: UserStatus | undefined) => {
 			console.log('got status:', gotStatus);
 			setStatus(gotStatus);
 			// TODO handle error, not logged in etc
@@ -61,7 +61,7 @@ function GameElementContent() {
 
 	let content = <></>
 	switch (status) {
-		case null: 
+		case undefined: 
 			content = (<p> you are not logged in </p>); 
 		break;
 		case UserStatus.Playing: 
@@ -84,15 +84,17 @@ function GamesLobby({waiting = false}) {
 	const [ gamesInfo, setGamesInfo ] = useState<GamesList>([]);
 
 	useEffect( () => {
-		socket.emit('joinLobby', (gotGamesInfo: GamesList) => {
-		 	setGamesInfo(gotGamesInfo);
-			console.log('lobby log.', 'waiting?', waiting? 'yes':'no');
-// 			console.log('game info', gamesInfo);
-		});
+// 		socket.emit('joinLobby', (gotGamesInfo: GamesList) => {
+// 		 	setGamesInfo(gotGamesInfo);
+// 			console.log('lobby log.', 'waiting?', waiting? 'yes':'no');
+// // 			console.log('game info', gamesInfo);
+// 		});
 
 		socket.on('gameListUpdate', (gotGamesInfo: GamesList) => {
+			console.log('game info', gotGamesInfo);
 		 	setGamesInfo(gotGamesInfo);
 		})
+		socket.emit('joinLobby');
 
 		// cleanup
 		return () => {socket.off('gameListUpdate');} ;

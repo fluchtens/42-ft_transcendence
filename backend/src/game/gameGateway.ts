@@ -9,6 +9,7 @@ import {
 import { AuthService } from "src/auth/auth.service"
 import { Socket, Server } from 'socket.io'
 import { GameRouter } from './gameRouter.service'
+import { UserService } from "src/user/user.service";
 import * as gm from './gameLogic'
 
 
@@ -30,9 +31,9 @@ class UserData {
 		if (newRoom)	 this.joinRoom(newRoom);
 		this._gameRoom = newRoom;
 	}
-	get userRoom() { return 'user_' + this.id };
+	get userRoom() { return 'user_' + String(this.id) };
 
-	constructor(public id: string) {}
+	constructor(public id: number) {}
 
 	joinRoom(room: string) {
 		[...this.sockets].forEach( (sock) => { sock.join(room); } );
@@ -70,7 +71,7 @@ class MMQueue { // Matchmaking queue
 	private _intervalHandle : any = null; // what type is returned by `setInterval`? TODO
 
 	constructor (
-		public onMatch : ((userId1: string, userId2: string) => undefined) 
+		public onMatch : ((userId1: number, userId2: number) => undefined) 
 			= ( (id1, id2) => {} ) 
 	)
 	{}
@@ -133,17 +134,17 @@ class GameService {
 	// unique game_invite name to info required to launch the game
 	lobbyRoom = '_LOBBY_';
 	invites = new Map<string, { host: UserData /*, maybe game options etc*/}>();
-	userInvites = new Map<string, string>(); // userId -> inviteName, used for deleting
+	userInvites = new Map<number, string>(); // userId -> inviteName, used for deleting
 																					 // invites along their hosts
 
 	// sockId to active games
 	games = new Map<string, gm.GameState>();
-	userGames = new Map<string, { p: gm.WhichPlayer, gameId: string } >();
+	userGames = new Map<number, { p: gm.WhichPlayer, gameId: string } >();
 	// note: gameId is both key in `games` and socket.io room for game packets
 
 	// sockId to User
-	users = new Map<string, UserData>(); // userId to runtime states
-	socketUsers = new Map<string, string>(); // sockId to owning userId
+	users = new Map<number, UserData>(); // userId to runtime states
+	socketUsers = new Map<string, number>(); // sockId to owning userId
 
 	queue = new MMQueue();
 
@@ -157,15 +158,15 @@ class GameService {
 
 	// TESTING
 	constructor() {
-		this.invites.set('test1', {host: new UserData('dog')});
-		this.invites.set('test2', {host: new UserData('god')});
+		this.invites.set('test1', {host: new UserData(19)});
+		this.invites.set('test2', {host: new UserData(42)});
 
-		let alice = new UserData('alice');
-		let bob = new UserData('bob');
+		let alice = new UserData(1);
+		let bob = new UserData(2);
 		alice.rating = 1100;
 		bob.rating = 1000;
-		this.users.set('bob', bob);
-		this.users.set('alice', alice);
+		this.users.set(1, bob);
+		this.users.set(2, alice);
 	}
 	// END TESTING
 
@@ -181,7 +182,7 @@ class GameService {
 		this.gameFinishCallback = onFinish;
 	}
 
-	bindSocket ( sock: Socket, userId: string ) {
+	bindSocket ( sock: Socket, userId: number ) {
 		this.socketUsers.set(sock.id, userId);
 		if ( !this.users.get(userId) ) {
 			console.log('creating new user:', userId);
@@ -196,7 +197,7 @@ class GameService {
 
 	unbindSocket ( sock: Socket ) {
 		let userId = this.socketUsers?.get(sock.id);
-		let user = userId ? this.users.get(userId) : null;
+		let user = userId ? this.users.get(userId) : null; // can userId be 0? (TODO)
 
 		let deletions = { user: false, invite: false }
 		if (!user) return deletions;
@@ -217,7 +218,7 @@ class GameService {
 		return this.users.get(this.socketUsers.get(sockId));
 	}
 
-	getGameData( userId: string): {player: gm.WhichPlayer, room: string, state: gm.GameState} | null {
+	getGameData( userId: number): {player: gm.WhichPlayer, room: string, state: gm.GameState} | null {
 		let data = this.userGames.get(userId);
 		if (!data) return null;
 
@@ -229,7 +230,7 @@ class GameService {
 	}
 
 	// creating / join games
-	lobbyCreateInvite (userId: string, inviteName: string) {
+	lobbyCreateInvite (userId: number, inviteName: string) {
 		let user = this.users.get(userId);
 		if (!user)
 			throw new Error("no such active user");
@@ -241,7 +242,7 @@ class GameService {
 		this.userInvites.set(userId, inviteName);
 	}
 
-	lobbyCancelInvite(userId: string) {
+	lobbyCancelInvite(userId: number) {
 		if (this.userInvites.has(userId)) {
 			if (this.users.get(userId))
 				this.users.get(userId).status = UserStatus.Normal;
@@ -324,7 +325,7 @@ class GameService {
 	}
 
 	lobbyJoinGame (
-		userId: string,
+		userId: number,
 	 	inviteName: string,
 	 	startTime: number = Date.now())
 	{
@@ -349,7 +350,7 @@ class GameService {
 		this.queue.add(user.id, user.rating);
 	}
 
-	leaveQueue(userId) {
+	leaveQueue(userId: number) {
 		let user = this.users.get(userId);
 		if (!user)
 			throw new Error("no such active user");
@@ -372,7 +373,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	gameService = new GameService(); // TODO use nest module system
 
-	constructor(private readonly authService : AuthService) {
+	constructor(
+		private readonly authService : AuthService,
+		private readonly userService : UserService,
+	) {
 		this.gameService.queueSetCallback( ({gameRoom, game}) => {
 			this.server.to(gameRoom).emit('statusChange', UserStatus.Playing);
 		});
@@ -412,7 +416,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 // 			client.handshake.auth.userId = decodedToken.id;
 			let userId = decodedToken.id;
 			console.log('connection from user', userId);
-			this.gameService.bindSocket(sock, String(userId)); // refactor so userId is an int
+			this.gameService.bindSocket(sock, userId); // refactor so userId is an int
 			// await this.InitRooms(client);
 		}
 		catch (error) {
@@ -429,24 +433,36 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		}
 	}
 
-	@SubscribeMessage('authenticate') // TODO rename to getStatus or something
-	authenticate(sock: Socket) {
-		//
+	@SubscribeMessage('getStatus')
+	getStatus(sock: Socket) {
 		// validate authentication... TODO
 // 		if (data.userId === '') return null; // TESTING
 // 		let userData = this.gameService.bindSocket(sock, data.userId); 
 // 		console.log("logged in as:", data.userId, 'status:', userData.status);
-		return this.gameService.getUserData(sock.id).status;
+
+		return this.gameService.getUserData(sock.id)?.status;
 	}
 
-	_gamesInfo() {
-		return [...this.gameService.invites].map( ([key, {host}]) => ({ name: key, host: host.id}) );
+	async _gamesInfo() {
+		let gamesInfo = [];
+		for (let [key, {host}] of [...this.gameService.invites]) {
+			try {
+				let user = await this.userService.getUserById(host.id);
+				gamesInfo.push({name: key, host: user.username});
+			} catch {
+				gamesInfo.push( {name: key, host: '[unkown user]'});
+			}
+		}
+		return gamesInfo;
 	}
 	
 	_pushGameList() {
+		let promise = this._gamesInfo();
+		promise.then((gamesInfo) => {
 		this.server
 			.to(this.gameService.lobbyRoom)
-			.emit('gameListUpdate', this._gamesInfo());
+			.emit('gameListUpdate', gamesInfo);
+		});
 	}
 
 	_wantStatus(sock, accepted, errmsg = "Wrong Status") : UserData {
@@ -464,7 +480,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			let userData = this._wantStatus(sock, [UserStatus.Normal, UserStatus.Waiting])
 
 			userData.joinRoom(this.gameService.lobbyRoom);
-			return this._gamesInfo();
+			this._pushGameList();
+// 			return this._gamesInfo();
 			// TODO replace host.id with name (gotten from db? or set up in userData)
 		} catch {
 			return null;
@@ -506,6 +523,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		this.gameService.lobbyJoinGame(userData.id, gameId);
 		
 		this.server.to(userData.gameRoom).emit('statusChange', UserStatus.Playing);
+
+		this._pushGameList();
 	}
 
 	@SubscribeMessage('joinQueue')
@@ -533,8 +552,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		let userData = this._wantStatus(sock, [UserStatus.Playing]);
 		let {player: whichPlayer, room, state: game} = this.gameService.getGameData(userData.id);
 		let now = Date.now();
-		game.update(now);
-		game.player(whichPlayer).dy = gm.PONG.playerSpeed * Number(mo);
+		game.setMotion(whichPlayer, mo, now);
 		this.server.to(room).emit('gameUpdate', game.packet(now));
 	}
 }

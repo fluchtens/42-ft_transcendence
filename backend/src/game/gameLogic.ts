@@ -268,6 +268,11 @@ export class GameState {
 		return time + offset - from;
 	}
 
+	setMotion(who: WhichPlayer, mo: MotionType, when: number | null = null) {
+		if (when)
+			this.update(when);
+		this.player(who).dy = PONG.playerSpeed * Number(mo);
+	}
 
 	// TODO setMotion
 }
