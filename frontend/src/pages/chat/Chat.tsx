@@ -16,6 +16,7 @@ import { UserElement } from "../../layouts/friends/UserElement";
 import { ContextMenuType } from "../../layouts/friends/UserContextMenu";
 import { AddFriendBar } from "../../layouts/friends/AddFriendBar";
 import { notifySuccess } from "../../utils/notifications";
+import { useChatSocket } from "../../utils/useChatSocket";
 // import { Websocket } from "../../components/chat.websocket";
 // import { socket, WebsocketPovider } from "../../services/chat.socket";
 
@@ -29,6 +30,7 @@ function Chat() {
   const [contextMenu, setContextMenu] = useState<number | null>(null);
   const { user } = useAuth();
   const { id } = useParams();
+  const socket = useChatSocket();
 
   const toggleMembersMenu = () => {
     setMembersMenu(!membersMenu);
