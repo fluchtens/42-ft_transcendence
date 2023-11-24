@@ -2,11 +2,6 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../utils/useAuth";
 import { useParams } from "react-router-dom";
 import styles from "./Chat.module.scss";
-import {
-  channelsData,
-  messagesData,
-} from "../../layouts/channels/_chat.dummy.data";
-import { getAllUsersApi, getUserByIdApi } from "../../services/user.api";
 import { ChatHeader } from "./ChatHeader";
 import { MessageElement } from "./MessageElement";
 import { MessageInput } from "./MessageInput";
@@ -17,14 +12,13 @@ import { AddFriendBar } from "../../layouts/friends/AddFriendBar";
 import { notifySuccess } from "../../utils/notifications";
 import { useChatSocket } from "../../utils/useChatSocket";
 import { Channel, Message } from "../../types/chat.interface";
-// import { Websocket } from "../../components/chat.websocket";
-// import { socket, WebsocketPovider } from "../../services/chat.socket";
+import { getAllUsersApi } from "../../services/user.api";
 
 function Chat() {
   const [channel, setChannel] = useState<Channel>();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
-  const [members, setMembers] = useState<User[] | null>(null);
+  const [members, setMembers] = useState<User[]>([]);
   const [addedMember, setAddedMember] = useState<string>("");
   const [membersMenu, setMembersMenu] = useState<boolean>(true);
   const [contextMenu, setContextMenu] = useState<number | null>(null);
@@ -48,9 +42,6 @@ function Chat() {
     e.preventDefault();
     if (!user || !newMessage) return;
 
-    // setMessages((prevMessages: Message[]) =>
-    //   prevMessages ? [...prevMessages, newMessageObject] : [newMessageObject]
-    // );
     socket.emit("sendMessage", {
       channelId: id,
       message: newMessage,
@@ -70,19 +61,30 @@ function Chat() {
   };
 
   useEffect(() => {
+    const fetchData = async () => {
+      const membersData = await getAllUsersApi();
+      if (membersData) {
+        setMembers(membersData);
+      }
+    };
+    fetchData();
+
     socket.on(`channelData:${id}`, (channelData: Channel) => {
       setChannel(channelData);
       setMessages(channelData.messages);
       console.log(channelData.messages);
     });
+
     socket.on(`${id}/messageDeleted`, (deletedMessageId: string) => {
       setMessages((prevMessages) =>
         prevMessages.filter((message) => message.id !== deletedMessageId)
       );
     });
+
     socket.on(`${id}/message`, (message: Message) => {
       setMessages((prevMessages) => [...prevMessages, message]);
     });
+
     socket.emit("joinRoom", { channelId: id, getMessages: true });
 
     return () => {
@@ -91,51 +93,6 @@ function Chat() {
       socket.off(`${id}/message`);
     };
   }, [id]);
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     if (!user || !id) return;
-  //     if (!messages || !messages.length) return;
-  //     const messagesWithUsers = await Promise.all(
-  //       messages.map(async (message: Message) => {
-  //         const user = await getUserByIdApi(message.userId);
-  //         return { ...message, user };
-  //       })
-  //     );
-
-  //     setMessages(messagesWithUsers);
-  //   };
-
-  //   fetchData();
-  // }, [messages]);
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     if (!user || !id) return;
-
-  //     const channelData = channelsData.find((c) => c.id === parseInt(id, 10));
-  //     if (!channelData) return;
-  //     setChannel(channelData);
-
-  //     const membersData = await getAllUsersApi();
-  //     if (membersData) {
-  //       setMembers(membersData);
-  //     }
-
-  //     const messages: Message[] = messagesData;
-  //     if (!messages || !messages.length) return;
-
-  //     const messagesWithUsers = await Promise.all(
-  //       messages.map(async (message: Message) => {
-  //         const user = await getUserByIdApi(message.userId);
-  //         return { ...message, user };
-  //       })
-  //     );
-  //     setMessages(messagesWithUsers);
-  //   };
-
-  //   fetchData();
-  // }, [user]);
 
   return (
     <>
