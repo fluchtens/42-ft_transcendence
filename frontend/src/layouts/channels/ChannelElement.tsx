@@ -1,12 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import styles from "./ChannelElement.module.scss";
+import { Channel } from "../../types/chat.interface";
 
 interface ChannelElementProps {
-  name: string;
-  status: string;
+  channel: Channel;
 }
 
-const ChannelElement = ({ name, status }: ChannelElementProps) => {
+const ChannelElement = ({ channel }: ChannelElementProps) => {
   const navigate = useNavigate();
 
   const navigateToChannel = () => {
@@ -17,8 +17,8 @@ const ChannelElement = ({ name, status }: ChannelElementProps) => {
     <div className={styles.container}>
       <button className={styles.channelBtn} onClick={navigateToChannel}>
         <div>
-          <p className={styles.name}>{name}</p>
-          <p className={styles.status}>{status}</p>
+          <p className={styles.name}>{channel.name}</p>
+          <p className={styles.status}>Public</p>
         </div>
       </button>
     </div>

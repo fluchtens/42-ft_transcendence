@@ -6,17 +6,18 @@ import { notifySuccess } from "../../utils/notifications";
 interface CreateChannelProps {
   name: string;
   changeName: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  createChannel: () => void;
   closeModal: () => void;
 }
 
 const CreateChannel = ({
   name,
   changeName,
+  createChannel,
   closeModal,
 }: CreateChannelProps) => {
   const [type, setType] = useState<string>("public");
   const [password, setPassword] = useState<string>("");
-  console.log(password);
 
   const changeType = (type: string) => {
     setType(type);
@@ -28,6 +29,7 @@ const CreateChannel = ({
 
   const submitData = (e: React.FormEvent) => {
     e.preventDefault();
+    createChannel();
     closeModal();
     notifySuccess("Channel successfully created");
   };

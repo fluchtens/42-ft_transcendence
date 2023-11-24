@@ -6,9 +6,14 @@ import { CreateChannel } from "./CreateChannel";
 interface AddChannelBarProps {
   name: string;
   changeName: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  createChannel: () => void;
 }
 
-const AddChannelBar = ({ name, changeName }: AddChannelBarProps) => {
+const AddChannelBar = ({
+  name,
+  changeName,
+  createChannel,
+}: AddChannelBarProps) => {
   const [modal, setModal] = useState<boolean>(false);
 
   const openModal = (e: React.FormEvent) => {
@@ -32,6 +37,7 @@ const AddChannelBar = ({ name, changeName }: AddChannelBarProps) => {
         <CreateChannel
           name={name}
           changeName={changeName}
+          createChannel={createChannel}
           closeModal={closeModal}
         />
       )}

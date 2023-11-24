@@ -1,4 +1,3 @@
-
 export class SendMessageDto {
   channelId: string;
   message: string;
@@ -36,7 +35,12 @@ export class Messages {
   id: string;
   content: string;
   edited: boolean;
-  constructor(messageId: string, content: string, edited: boolean, userId: number) {
+  constructor(
+    messageId: string,
+    content: string,
+    edited: boolean,
+    userId: number,
+  ) {
     this.id = messageId;
     this.content = content;
     this.edited = edited;
@@ -45,11 +49,11 @@ export class Messages {
 }
 
 export class ChannelData {
-  channelId: string;
-  channelName: string;
+  id: string;
+  name: string;
   inviteCode?: string;
   public: boolean;
   protected: boolean;
-  messages: Messages [];
-  members: any [];
+  messages: Messages[];
+  members: any[];
 }
