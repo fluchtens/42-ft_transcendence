@@ -1,7 +1,8 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { Channel, Member, MemberRole, Message } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
-
+import { v4 as uuidv4 } from "uuid"
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class ChatService{
@@ -9,8 +10,10 @@ export class ChatService{
   
   
 
-  async getChannelById(channelId: string): Promise<Channel> {
+  async getChannelById(channelId: string, password?: string, connected?: boolean): Promise<Partial<Channel>> {
     try {
+      if (!channelId)
+        throw new BadRequestException('invalid channelId');
       const channel = await this.prismaService.channel.findUnique({
         where: {
           id: channelId
@@ -18,6 +21,25 @@ export class ChatService{
       });
       if (!channel) {
         throw new NotFoundException('Channel not found');
+      }
+      const sanitizedChannel: Partial<Channel> = {
+        id: channel.id,
+        name: channel.name,
+        public: channel.public,
+        password: "true",
+      };
+      if (channel.password && !connected) {
+        if (!password) {
+          return sanitizedChannel;
+        }
+        const matchPwd = await bcrypt.compare(password, channel.password)
+        console.log(password);
+        if (matchPwd){
+          return channel
+        }
+        else {
+          throw new BadRequestException("wrong password");
+        }
       }
       return channel;
     }
@@ -74,46 +96,77 @@ export class ChatService{
     }
   }
 
+
   async findMemberInChannel(channelId: string, userId: number) : Promise<Member | null> {
-    const existingMember = await this.prismaService.member.findFirst({
-      where: {
-        userId: userId,
-        channelId: channelId,
-      },
-    });
-    if (existingMember) {
-      return existingMember;
+    try {
+      const existingMember = await this.prismaService.member.findFirst({
+        where: {
+          userId: userId,
+          channelId: channelId,
+        },
+      });
+      if (existingMember) {
+        return existingMember;
+      }
+      return null;
     }
-    return null;
+    catch (error){
+      return null;
+    }
   }
   
-  async createChannel(userId: number, channelName: string){
+  async createChannel(userId: number, channelName: string, isPublic: boolean, password ?: string){
     if (!userId){
       console.error("user invalid");
       return null;
     }
     try {
-      const channel = await this.prismaService.channel.create({
-        data : {
-          name : channelName,
-          inviteCode: "InviteCode",
-          user: {
-            connect: {
-              id: userId
+      if (password) {
+        const hashedPwd = await bcrypt.hash(password, 10);
+        const channel = await this.prismaService.channel.create({
+          data : {
+            name : channelName,
+            inviteCode: uuidv4(),
+            password: hashedPwd,
+            public: isPublic,
+            user: {
+              connect: {
+                id: userId
+              },
             },
           },
-        },
-      });
-
-      const member = await this.prismaService.member.create({
-        data: {
-          role: 'ADMIN',
-          userId: userId,
-          channelId: channel.id,
-        },
-      });
-
-      return channel;
+        });
+        const member = await this.prismaService.member.create({
+          data: {
+            role: 'ADMIN',
+            userId: userId,
+            channelId: channel.id,
+          },
+        });
+        return channel;
+      }
+      else {
+        const channel = await this.prismaService.channel.create({
+          data : {
+            name : channelName,
+            inviteCode: uuidv4(),
+            public: isPublic,
+            user: {
+              connect: {
+                id: userId
+              },
+            },
+          },
+        });
+        const member = await this.prismaService.member.create({
+          data: {
+            role: 'ADMIN',
+            userId: userId,
+            channelId: channel.id,
+          },
+        });
+        return channel;
+      }
     }
     catch (error) {
       console.error("create channel ", error.message);
@@ -176,34 +229,32 @@ export class ChatService{
   }
 
   async addMember(userId: number, channelId: string, memberId: number): Promise<any>{
-    if (!(userId || channelId || memberId)) {
+    if (!userId || !channelId || !memberId) {
       console.log("channelId or UserId invalid");
       return;
     }
-    if (await this.findMemberInChannel(channelId, memberId)){
-      return "The user is already in the channel.";
-    }
-    const memberRole : string = await this.findMemberRoleInChannel(channelId, userId);
-    if (memberRole) {
-      try {
+    try {
+      const channelData = await this.getChannelMembers(channelId);
+      const existingMember = channelData.find((member) => Number(member.userId) === Number(memberId));
+      if (existingMember) {
+        console.error("Member already exists in the channel");
+        return null;
+      }
+      else {
         const newMember = await this.prismaService.member.create({
           data : {
-            userId: memberId,
+            userId: Number(memberId),
             channelId: channelId
           }
         });
         return newMember;
       }
-      catch (error){
-        console.error('Error when try to add a new member to channel', error);
-        throw error;
-      }
     }
-    else {
-      console.log('member is not in channel, addMember failed');
+    catch (error){
+      console.error('Error when try to add a new member to channel', error);
+      throw error;
     }
   }
-
   async changeMemberRole(req: any, channelId: string, userId: number, newRole: string){
     const { user } = req;
     const memberRole : string = await this.findMemberRoleInChannel(channelId, Number(user.id));
@@ -316,10 +367,9 @@ export class ChatService{
     }
   }
 
-  async changeMessage(req:any, messageId: string, newMessage: string) : Promise<null | any> {
-    const { user } = req;
+  async changeMessage(userId: number, messageId: string, newMessage: string) : Promise<null | any> {
 
-    if (!user || !messageId || !newMessage){
+    if (!userId || !messageId || !newMessage){
       console.error('invalid input');
       return null;
     }
@@ -331,7 +381,7 @@ export class ChatService{
       });
       if (!message)
         throw new Error("Message not found");
-      if (message.userId !== user.id)
+      if (message.userId !== userId)
         throw new Error("You cannot modify another user message");
       const updateMessage = await this.prismaService.message.update({
         where: {
@@ -351,10 +401,9 @@ export class ChatService{
     }
   }
 
-  async deleteMessage(req: any, messageId: string) : Promise<null | any> {
-    const { user } = req;
+  async deleteMessage(userId: number, messageId: string) : Promise<null | any> {
 
-    if (!user || !messageId){
+    if (!userId || !messageId){
       console.error('invalid input');
       return null;
     }
@@ -366,8 +415,8 @@ export class ChatService{
       });
       if (!message)
         throw new Error("Message not found");
-      const userRole = await this.findMemberRoleInChannel(message.channelId, user.id);
-      if (!(userRole === "MODERATOR" || userRole === "ADMIN") || message.userId !== user.id) {
+      const userRole = await this.findMemberRoleInChannel(message.channelId, userId);
+      if (!(userRole === "MODERATOR" || userRole === "ADMIN") && message.userId !== userId) {
         throw new Error("You have no permission to delete the message")
       }
       await this.prismaService.message.delete({
@@ -383,10 +432,9 @@ export class ChatService{
     }
   }
 
-  async deleteChannel(req: any, channelId: string) : Promise<null | any> {
-    const { user } = req;
+  async deleteChannel(userId: number, channelId: string) : Promise<null | any> {
 
-    if (!user || !channelId){
+    if (!userId || !channelId){
       console.error('invalid input');
       return null;
     }
@@ -398,8 +446,7 @@ export class ChatService{
       });
       if (!channel)
         throw new Error("channel not found");
-      const userRole = await this.findMemberRoleInChannel(channelId, user.id);
-      if (!(userRole === "ADMIN") || channel.userId !== user.id) {
+      if (channel.userId !== userId) {
         throw new Error("You have no permission to delete the channel")
       }
       await this.prismaService.channel.delete({
@@ -413,6 +460,10 @@ export class ChatService{
       console.log('error when delete the channel', error);
       throw error;
     }
+  }
+
+  async changeChannelOwner() {
+
   }
 
   async checkIfUserCanJoinChannel(userId: number, channelId: string): Promise<boolean> {
@@ -433,4 +484,93 @@ export class ChatService{
       return false;
     }
   }
+
+  async updateChannelWithPassword(userId: number, channelId: string, password: string) {
+    try {
+      const channelData = await this.getChannelById(channelId);
+      if (channelData.userId === userId) {
+        await this.prismaService.channel.update({
+          where: {
+            id: channelId
+          },
+          data : {
+            password: password
+          },
+        });
+      }
+    }
+    catch(error) {
+      console.error(error);
+      throw error
+    }
+
+  }
+
+  async verifyChannelPassword(channelId: string, password: string): Promise<boolean> {
+    const channel = await this.prismaService.channel.findUnique({ where: { id: channelId } });
+    return channel?.password === password;
+  }
+
+  async removePasswordFromChannel(userId: number, channelId: string, password: string): Promise<string> {
+    try {
+      const channelData = await this.getChannelById(channelId);
+      if (channelData.userId === userId) {
+        if (await this.verifyChannelPassword(channelId, password)) {
+          await this.prismaService.channel.update({
+            where: {
+              id: channelId
+            },
+            data : {
+              password: null
+            },
+          });
+          return ("Password successful removed"); 
+        }
+        return ("Password verification failed");
+      }
+      return ("You are not the channel Owner");
+    }
+    catch(error) {
+      console.error(error);
+      throw error
+    }
+  }
+
+  async updateChannelVisibility(userId: number, channelId: string, isPublic: boolean): Promise<string> {
+    try {
+      const channelData = await this.getChannelById(channelId);
+      if (channelData.userId === userId) {
+        await this.prismaService.channel.update({
+          where: {
+            id: channelId
+          },
+          data : {
+            public: isPublic
+          },
+        });
+        return ("Visibility changed");
+      }
+      return ("Only the channel owner can change the visibility");
+    }
+    catch(error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
+  async isChannelPublic(channelId: string) : Promise<boolean> {
+    try {
+      const channel = await this.prismaService.channel.findUnique({
+        where: {
+          id: channelId
+        },
+      });
+      return channel?.public || false;
+    }
+    catch(error) {
+      console.error(error);
+      throw error;
+    }
+  }
+  
 }

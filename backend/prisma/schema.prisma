@@ -52,7 +52,7 @@ model Channel {
   inviteCode String      @db.Text()
   avatar     String?     @db.VarChar(255)
   password   String?     @db.VarChar(255)
-  type       ChannelType @default(public)
+  public     Boolean     @default(false)
 
   userId   Int
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -108,12 +108,6 @@ enum MemberRole {
   ADMIN
   MODERATOR
   GUEST
-}
-
-enum ChannelType {
-  public
-  private
-  protected
 }
 
 // Do after

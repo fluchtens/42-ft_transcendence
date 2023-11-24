@@ -1,77 +1,104 @@
 import { useContext, useEffect, useState } from "react"
 import { WebsocketContext } from "../services/chat.socket";
 import ChannelComponent from "./Channel";
+import { User } from "../types/user.interface";
+import { getUserApi } from "../services/user.api";
 
 
 export const  Websocket = () => {
 
-  const [channelIds, setChannelIds] = useState<string[]>();
+  const [channelIds, setChannelIds] = useState<string[]>([]);
   const [channelsData, setChannelsData] = useState<ChannelData[]>([]);
+  const [channelName, setChannelName] = useState('');
+  const [userData, setUserData] = useState<User>({} as User);
+
   const socket : any = useContext(WebsocketContext);
+
+
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const user = await getUserApi();
+        if (user)
+         setUserData(user);
+      } catch (error) {
+        console.error("Error when getUserData:", error);
+      }
+    };
+    
+    fetchData();
+
     socket.on('connect', () => {
       console.log('Connected!');
     });
-    socket.on('channels', () => {
-      console.log("channels Connection");
-    })
+    socket.on('newChannel', (channelId: string) => {
+      setChannelIds((prevChannelsIds) => [...prevChannelsIds, channelId]);
+    });
+    socket.on('channelDeleted', (deletedChannelId: string) => {
+      setChannelIds((prevChannels) => prevChannels.filter((channelId) => channelId !== deletedChannelId));
+    });
     return () => {
       console.log('Unregistering Events...');
       socket.off('connect');
-      socket.off('allChannels');
+      socket.off('newChannel');
+      socket.off('channelDeleted');
     };
   }, []);
 
   useEffect(() => {
     socket.on('allChannels', (channelIds: string[]) => {
       setChannelIds(channelIds);
-      console.log(channelIds);
     });
     socket.emit('getAllChannels');
-    // Nettoyer les écouteurs d'événements lorsque le composant est démonté
     return () => {
       socket.off('allChannels');
     };
   }, []);
 
+  const onCreateChannel = () => {
+    socket.emit('createChannel', {channelName: channelName});
+    setChannelName('');
+  };
+
   useEffect(() => {
     if (channelIds) {
       channelIds.forEach((channelId) => {
-        socket.emit('joinChannel', channelId);
+        socket.emit('joinRoom', {channelId: channelId});
       });
 
-      // Écouter l'événement pour chaque channelId
       channelIds.forEach((channelId) => {
         socket.on(`channelData:${channelId}`, (channelData: ChannelData) => {
-          console.log(`Received channelData for channelId ${channelId}`);
-          
-          // Mettez à jour l'état local avec les données du canal
           setChannelsData((prevChannelsData) => {
-            if (prevChannelsData) {
               const updatedChannels = [...prevChannelsData];
               const channelIndex = updatedChannels.findIndex(
                 (channel) => channel.channelId === channelId
               );
-  
               if (channelIndex !== -1) {
                 updatedChannels[channelIndex] = channelData;
               } else {
                 updatedChannels.push(channelData);
               }
-  
-              console.log("Updated channelsData:", updatedChannels);
               return updatedChannels;
-            }
-            return [];
           });
         });
-      });
+      }); 
+      setChannelsData((prevChannelsData) => {
+        const updatedChannels = [...prevChannelsData];
+        const channelsToRemove = updatedChannels.filter(
+          (channel => !channelIds.includes(channel.channelId))
+        );
+        channelsToRemove.forEach((channelToRemove) => {
+          const removeIndex = updatedChannels.findIndex(
+            (channel) => channel.channelId === channelToRemove.channelId
+            );
+          if (removeIndex !== -1) {
+            updatedChannels.splice(removeIndex, 1);
+          }
+        });
+        return updatedChannels;
+      })
     }
-    console.log(channelsData);
-    // Nettoyer les écouteurs d'événements lorsque le composant est démonté
     return () => {
-      console.log(channelsData);
-
       if (channelIds) {
         channelIds.forEach((channelId) => {
           socket.off(`channelData:${channelId}`);
@@ -80,18 +107,19 @@ export const  Websocket = () => {
     };
   }, [channelIds]);
 
-  useEffect(() => {
-    console.log(channelsData);
-  }, [channelsData]);
-
   return (
     <div>
       <div>
+        <input type="text" placeholder="Name your channel" value={channelName} onChange={(e) => setChannelName(e.target.value)} />
+        <button onClick={onCreateChannel}>
+          CreateNewChannel
+        </button>
+      </div>
+      <div>
         {channelsData &&
             channelsData.map((channel) => {
-              console.log("Calling ChannelComponent for channel:", channel);
               return (
-                <ChannelComponent key={channel.channelId} channel={channel} socket={socket}/>
+                <ChannelComponent key={channel.channelId} channel={channel} socket={socket} user={userData}/>
               )
             })}
       </div>
