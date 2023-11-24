@@ -51,7 +51,7 @@ function Channels() {
 
   useEffect(() => {
     channelIds.forEach((channelId) => {
-      socket.emit("joinRoom", { channelId: channelId });
+      socket.emit("joinRoom", { channelId: channelId, getMessages: false });
       socket.on(`channelData:${channelId}`, (channelData: Channel) => {
         setChannelsData((prevChannelsData) => {
           const updatedChannels = [...prevChannelsData];

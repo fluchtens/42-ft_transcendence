@@ -13,39 +13,55 @@ const ChannelComponent: React.FC<ChannelComponentProps> = ({
   socket,
   user,
 }) => {
-  const [messageInput, setMessageInput] = useState('');
+  const [messageInput, setMessageInput] = useState("");
   const [messages, setMessages] = useState<Messages[]>([]);
   const [newMembers, setNewMembers] = useState<any[]>([]);
-  const [addMemberInput, setAddMemberInput] = useState('')
+  const [addMemberInput, setAddMemberInput] = useState("");
 
   const onSendMessage = () => {
     if (channel.channelId) {
-        socket.emit('sendMessage', { channelId: channel.channelId, message: messageInput });
-      setMessageInput('');
+      socket.emit("sendMessage", {
+        channelId: channel.channelId,
+        message: messageInput,
+      });
+      setMessageInput("");
     }
   };
 
   const handleDeleteMessage = (messageId: string) => {
-      if (messageId) {
-        socket.emit('deleteMessage', { messageId: messageId , channelId: channel.channelId});
-        setMessages((prevMessages) => prevMessages.filter((message) => message.id !== messageId));
-      }
+    if (messageId) {
+      socket.emit("deleteMessage", {
+        messageId: messageId,
+        channelId: channel.channelId,
+      });
+      setMessages((prevMessages) =>
+        prevMessages.filter((message) => message.id !== messageId)
+      );
+    }
   };
 
   const handleAddMember = () => {
-      if (addMemberInput) {
-        socket.emit('addMember', {channelId: channel.channelId, memberId: addMemberInput});
-      }
-      setAddMemberInput('');
+    if (addMemberInput) {
+      socket.emit("addMember", {
+        channelId: channel.channelId,
+        memberId: addMemberInput,
+      });
+    }
+    setAddMemberInput("");
   };
   const onDeleteChannel = () => {
-    socket.emit('deleteChannel', channel.channelId);
+    socket.emit("deleteChannel", channel.channelId);
   };
   useEffect(() => {
     setMessages(channel.messages);
-    socket.on(`${channel.channelId}/messageDeleted`, (deletedMessageId: string) => {
-      setMessages((prevMessages) => prevMessages.filter((message) => message.id !== deletedMessageId));
-    });
+    socket.on(
+      `${channel.channelId}/messageDeleted`,
+      (deletedMessageId: string) => {
+        setMessages((prevMessages) =>
+          prevMessages.filter((message) => message.id !== deletedMessageId)
+        );
+      }
+    );
     socket.on(`${channel.channelId}/message`, (message: Messages) => {
       setMessages((prevMessages) => [...prevMessages, message]);
     });
@@ -74,7 +90,6 @@ const ChannelComponent: React.FC<ChannelComponentProps> = ({
             )}
           </div>
         ))}
-
       </div>
       <div className="message-input">
         <input

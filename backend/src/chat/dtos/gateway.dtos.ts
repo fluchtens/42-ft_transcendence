@@ -1,3 +1,5 @@
+import { User } from '@prisma/client';
+
 export class SendMessageDto {
   channelId: string;
   message: string;
@@ -27,24 +29,25 @@ export class AddMemberDto {
 
 export class GetChannelDto {
   channelId: string;
+  getMessages: boolean;
   password?: string;
 }
 
 export class Messages {
-  userId: number;
   id: string;
   content: string;
-  edited: boolean;
+  userId: number;
+  user?: Partial<User>;
   constructor(
     messageId: string,
     content: string,
-    edited: boolean,
     userId: number,
+    user?: Partial<User>,
   ) {
     this.id = messageId;
     this.content = content;
-    this.edited = edited;
     this.userId = userId;
+    this.user = user;
   }
 }
 

@@ -10,7 +10,7 @@ const ChannelElement = ({ channel }: ChannelElementProps) => {
   const navigate = useNavigate();
 
   const navigateToChannel = () => {
-    navigate("/chat/1");
+    navigate(`chat/${channel.id}`);
   };
 
   return (

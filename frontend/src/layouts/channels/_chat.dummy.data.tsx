@@ -1,4 +1,4 @@
-import { Message } from "../../types/message.interface";
+import { Message } from "../../types/chat.interface";
 
 export const channelsData = [
   { id: 1, name: "Creators Area ", status: "Public" },

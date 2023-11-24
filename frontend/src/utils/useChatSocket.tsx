@@ -1,7 +1,7 @@
 import React, { createContext, useContext, ReactNode } from "react";
 import { Socket, io } from "socket.io-client";
 
-const socketInstance = io(`${import.meta.env.VITE_BACK_URL}/socket`, {
+const socketInstance = io(`${import.meta.env.VITE_BACK_URL}/chatSocket`, {
   withCredentials: true,
 });
 

@@ -44,7 +44,7 @@ import { channel } from 'diagnostics_channel';
 import * as bcrypt from 'bcryptjs';
 
 @WebSocketGateway({
-  namespace: 'socket',
+  namespace: 'chatSocket',
   cors: {
     origin: ['http://localhost'],
     credentials: true,
@@ -95,9 +95,12 @@ export class ChatGateway implements OnModuleInit {
     return true;
   }
 
+  async(Messages: any) {}
+
   async getChannelData(
     client: Socket,
     channelId: string,
+    getMessages: boolean,
     password?: string,
   ): Promise<ChannelData> {
     let channelData: ChannelData;
@@ -113,13 +116,13 @@ export class ChatGateway implements OnModuleInit {
       channelData.id = channelInfo.id;
       channelData.name = channelInfo.name;
       // channelData.public = channelInfo.public;
-      if (channelInfo.password === 'true') {
-        if (!password) {
+      if (channelInfo.password === 'true' || !getMessages) {
+        if (channelInfo.password === 'true') {
           channelData.protected = true;
-          channelData.messages = [];
-          channelData.members = [];
-          return channelData;
         }
+        channelData.messages = [];
+        channelData.members = [];
+        return channelData;
       } else {
         this.roomService.joinRoom(client, channelId);
         let connectedUsersSet = this.connectedUsers.get(channelId);
@@ -135,14 +138,18 @@ export class ChatGateway implements OnModuleInit {
       channelData.members = channelMembers;
       const messagesRaw =
         await this.chatService.getMessagesByChannel(channelId);
-      const messages: Messages[] = messagesRaw.map((rawMessage) => {
-        return new Messages(
-          rawMessage.id,
-          rawMessage.content,
-          rawMessage.edited,
-          rawMessage.userId,
-        );
-      });
+
+      const messages: Messages[] = await Promise.all(
+        messagesRaw.map(async (rawMessage) => {
+          const user = await this.userService.getUserById(rawMessage.userId);
+          return new Messages(
+            rawMessage.id,
+            rawMessage.content,
+            rawMessage.userId,
+            user,
+          );
+        }),
+      );
       channelData.messages = messages;
     } catch (error) {
       console.error('error getChannelData', error);
@@ -216,12 +223,13 @@ export class ChatGateway implements OnModuleInit {
     @MessageBody() getChannelDto: GetChannelDto,
   ) {
     const userId = client.handshake.auth.userId;
-    const { channelId, password } = getChannelDto;
+    const { channelId, password, getMessages } = getChannelDto;
     if (userId) {
       try {
         const ChannelData: ChannelData = await this.getChannelData(
           client,
           channelId,
+          getMessages,
           password,
         );
         client.emit(`channelData:${channelId}`, ChannelData);
@@ -254,7 +262,9 @@ export class ChatGateway implements OnModuleInit {
             message,
           );
           if (!messageSend) throw new Error('Message cannot be send');
-          this.server.to(channelId).emit(`${channelId}/message`, messageSend);
+          const messageData: Messages = messageSend;
+          messageData.user = await this.userService.getUserById(userId);
+          this.server.to(channelId).emit(`${channelId}/message`, messageData);
         }
       } catch (error) {
         console.error('sendMessage error', error.message);
@@ -306,6 +316,7 @@ export class ChatGateway implements OnModuleInit {
           const channelData = await this.getChannelData(
             client,
             message.channelId,
+            true,
           );
           this.server
             .to(message.channelId)
@@ -366,7 +377,7 @@ export class ChatGateway implements OnModuleInit {
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
-        const channel = await this.getChannelData(client, channelId);
+        const channel = await this.getChannelData(client, channelId, false);
         if (channel) {
           const deleted = await this.chatService.deleteChannel(
             userId,

@@ -1,3 +1,5 @@
+import { User } from "./user.interface";
+
 export interface Channel {
   id: string;
   name: string;
@@ -8,9 +10,9 @@ export interface Channel {
   members: any[];
 }
 
-interface Messages {
-  userId: number;
+export interface Message {
   id: string;
   content: string;
-  edited: boolean;
+  userId: number;
+  user?: User | null;
 }

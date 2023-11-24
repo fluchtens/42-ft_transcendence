@@ -7,7 +7,6 @@ import {
   messagesData,
 } from "../../layouts/channels/_chat.dummy.data";
 import { getAllUsersApi, getUserByIdApi } from "../../services/user.api";
-import { Message } from "../../types/message.interface";
 import { ChatHeader } from "./ChatHeader";
 import { MessageElement } from "./MessageElement";
 import { MessageInput } from "./MessageInput";
@@ -17,12 +16,13 @@ import { ContextMenuType } from "../../layouts/friends/UserContextMenu";
 import { AddFriendBar } from "../../layouts/friends/AddFriendBar";
 import { notifySuccess } from "../../utils/notifications";
 import { useChatSocket } from "../../utils/useChatSocket";
+import { Channel, Message } from "../../types/chat.interface";
 // import { Websocket } from "../../components/chat.websocket";
 // import { socket, WebsocketPovider } from "../../services/chat.socket";
 
 function Chat() {
-  const [channel, setChannel] = useState<any | null>(null);
-  const [messages, setMessages] = useState<any | null>(null);
+  const [channel, setChannel] = useState<Channel>();
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
   const [members, setMembers] = useState<User[] | null>(null);
   const [addedMember, setAddedMember] = useState<string>("");
@@ -48,16 +48,14 @@ function Chat() {
     e.preventDefault();
     if (!user || !newMessage) return;
 
-    const newMessageObject: Message = {
-      id: "24533452345",
-      content: newMessage,
-      userId: user.id,
-      user: user,
-    };
+    // setMessages((prevMessages: Message[]) =>
+    //   prevMessages ? [...prevMessages, newMessageObject] : [newMessageObject]
+    // );
+    socket.emit("sendMessage", {
+      channelId: id,
+      message: newMessage,
+    });
 
-    setMessages((prevMessages: Message[]) =>
-      prevMessages ? [...prevMessages, newMessageObject] : [newMessageObject]
-    );
     setNewMessage("");
   };
 
@@ -72,39 +70,76 @@ function Chat() {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!user || !id) return;
-
-      const channelData = channelsData.find((c) => c.id === parseInt(id, 10));
-      if (!channelData) return;
+    socket.on(`channelData:${id}`, (channelData: Channel) => {
       setChannel(channelData);
-
-      const membersData = await getAllUsersApi();
-      if (membersData) {
-        setMembers(membersData);
-      }
-
-      const messages: Message[] = messagesData;
-      if (!messages || !messages.length) return;
-
-      const messagesWithUsers = await Promise.all(
-        messages.map(async (message: Message) => {
-          const user = await getUserByIdApi(message.userId);
-          return { ...message, user };
-        })
+      setMessages(channelData.messages);
+      console.log(channelData.messages);
+    });
+    socket.on(`${id}/messageDeleted`, (deletedMessageId: string) => {
+      setMessages((prevMessages) =>
+        prevMessages.filter((message) => message.id !== deletedMessageId)
       );
-      setMessages(messagesWithUsers);
-    };
+    });
+    socket.on(`${id}/message`, (message: Message) => {
+      setMessages((prevMessages) => [...prevMessages, message]);
+    });
+    socket.emit("joinRoom", { channelId: id, getMessages: true });
 
-    fetchData();
-  }, [user]);
+    return () => {
+      socket.off(`channelData:${id}`);
+      socket.off(`${id}/messageDeleted`);
+      socket.off(`${id}/message`);
+    };
+  }, [id]);
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     if (!user || !id) return;
+  //     if (!messages || !messages.length) return;
+  //     const messagesWithUsers = await Promise.all(
+  //       messages.map(async (message: Message) => {
+  //         const user = await getUserByIdApi(message.userId);
+  //         return { ...message, user };
+  //       })
+  //     );
+
+  //     setMessages(messagesWithUsers);
+  //   };
+
+  //   fetchData();
+  // }, [messages]);
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     if (!user || !id) return;
+
+  //     const channelData = channelsData.find((c) => c.id === parseInt(id, 10));
+  //     if (!channelData) return;
+  //     setChannel(channelData);
+
+  //     const membersData = await getAllUsersApi();
+  //     if (membersData) {
+  //       setMembers(membersData);
+  //     }
+
+  //     const messages: Message[] = messagesData;
+  //     if (!messages || !messages.length) return;
+
+  //     const messagesWithUsers = await Promise.all(
+  //       messages.map(async (message: Message) => {
+  //         const user = await getUserByIdApi(message.userId);
+  //         return { ...message, user };
+  //       })
+  //     );
+  //     setMessages(messagesWithUsers);
+  //   };
+
+  //   fetchData();
+  // }, [user]);
 
   return (
     <>
       {user && channel && (
-        // <WebsocketPovider value={socket}>
-        //   <Websocket />
-        // </WebsocketPovider>
         <div className={styles.container}>
           <div className={styles.chat}>
             <ChatHeader

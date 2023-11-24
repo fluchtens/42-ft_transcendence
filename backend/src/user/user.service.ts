@@ -11,6 +11,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { UsernameDto } from './dtos/UsernameDto';
 import { UpdatePwdDto } from './dtos/UpdatePwdDto';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -129,13 +130,14 @@ export class UserService {
     return usersData;
   }
 
-  async getUserById(id: number) {
+  async getUserById(id: number): Promise<Partial<User>> {
     const user = await this.findUserById(id);
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
     const userData = this.exclude(user, ['fortyTwoId', 'password']);
+    console.log(userData);
     if (userData.avatar) {
       userData.avatar = `${process.env.VITE_BACK_URL}/user/avatar/${userData.avatar}`;
     }
