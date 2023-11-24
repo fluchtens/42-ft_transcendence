@@ -10,6 +10,7 @@ import Settings from "./pages/settings/Settings";
 import TwoFaAuth from "./pages/auth/TwoFaAuth";
 import { AuthProvider } from "./utils/useAuth";
 import GameElement from "./components/GameElement";
+import { ChatSocketProvider } from "./utils/useChatSocket";
 
 function App() {
   const router = createBrowserRouter([
@@ -57,7 +58,9 @@ function App() {
   return (
     <>
       <AuthProvider>
-        <RouterProvider router={router} />
+        <ChatSocketProvider>
+          <RouterProvider router={router} />
+        </ChatSocketProvider>
       </AuthProvider>
     </>
   );
