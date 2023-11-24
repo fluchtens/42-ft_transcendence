@@ -137,7 +137,6 @@ export class UserService {
     }
 
     const userData = this.exclude(user, ['fortyTwoId', 'password']);
-    console.log(userData);
     if (userData.avatar) {
       userData.avatar = `${process.env.VITE_BACK_URL}/user/avatar/${userData.avatar}`;
     }
