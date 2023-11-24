@@ -1,2 +1,2 @@
 # 42-ft_transcendence
-Creation of a pong web application.
+Modern multiplayer pong game web application made for 42.
