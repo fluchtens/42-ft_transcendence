@@ -1,94 +1,11 @@
 @import "../../styles/config.scss";
 
 .container {
+  min-height: calc(100vh - 10rem);
+  padding: 2rem;
+  flex-direction: column;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 2.5rem;
-
-  .user {
-    border-radius: 1.875rem;
-    background: $bg-secondary-color;
-
-    .header {
-      height: 2.75rem;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 0.5rem;
-      border-top-left-radius: 1.875rem;
-      border-top-right-radius: 1.875rem;
-      background: $extra-primary-color;
-      color: white;
-
-      .icon {
-        margin: 0;
-        height: 1.15rem;
-        width: 1.15rem;
-      }
-
-      h1 {
-        margin: 0;
-        font-size: 1.1rem;
-        font-weight: 600;
-        text-align: center;
-      }
-    }
-
-    .details {
-      padding: 2rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      border-bottom-left-radius: 1.875rem;
-      border-bottom-right-radius: 1.875rem;
-
-      img {
-        width: 12rem;
-        height: 12rem;
-        border: 3px solid $extra-primary-color;
-        border-radius: 50%;
-        object-fit: cover;
-      }
-
-      .dataList {
-        margin: 1.5rem 0 0 0;
-        padding: 0;
-        list-style-type: none;
-
-        .data:not(:last-child) {
-          margin-bottom: 0.5rem;
-        }
-
-        .data {
-          height: 2rem;
-          display: flex;
-          justify-content: left;
-          align-items: center;
-          gap: 0.5rem;
-          border-bottom: 1px solid $extra-primary-color;
-
-          .dataIcon {
-            padding: 0;
-            width: 1rem;
-            height: 1rem;
-          }
-
-          .dataType {
-            width: 7rem;
-            margin: 0;
-            font-size: 0.9rem;
-            font-weight: 500;
-          }
-
-          .dataValue {
-            margin: 0;
-            font-size: 0.9rem;
-            font-weight: 400;
-          }
-        }
-      }
-    }
-  }
+  gap: 2rem;
+  // background: $bg-secondary-color;
 }

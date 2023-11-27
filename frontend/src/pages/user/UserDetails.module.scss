@@ -1,0 +1,79 @@
+@import "../../styles/config.scss";
+
+.container {
+  border-radius: $rounded-lg;
+  background: $bg-secondary-color;
+
+  .header {
+    height: 2.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    border-top-left-radius: $rounded-lg;
+    border-top-right-radius: $rounded-lg;
+    background: $extra-primary-color;
+    color: white;
+
+    .icon {
+      height: 1.15rem;
+      width: 1.15rem;
+    }
+  }
+
+  .details {
+    padding: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    border-bottom-left-radius: $rounded-lg;
+    border-bottom-right-radius: $rounded-lg;
+
+    img {
+      width: 12rem;
+      height: 12rem;
+      border: 2px solid $extra-primary-color;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .dataList {
+      padding: 0;
+      list-style-type: none;
+
+      .data:not(:last-child) {
+        margin-bottom: 0.5rem;
+      }
+
+      .data {
+        height: 2rem;
+        display: flex;
+        justify-content: left;
+        align-items: center;
+        gap: 0.5rem;
+        border-bottom: 1px solid $extra-primary-color;
+
+        .dataIcon {
+          width: 1rem;
+          height: 1rem;
+        }
+
+        .dataType {
+          width: 7rem;
+          margin: 0;
+          font-size: map-get($text-sm, font-size);
+          line-height: map-get($text-sm, line-height);
+          font-weight: $font-medium;
+        }
+
+        .dataValue {
+          margin: 0;
+          font-size: map-get($text-sm, font-size);
+          line-height: map-get($text-sm, line-height);
+          font-weight: $font-normal;
+        }
+      }
+    }
+  }
+}
