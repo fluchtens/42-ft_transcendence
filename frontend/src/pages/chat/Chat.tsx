@@ -13,8 +13,10 @@ import { notifySuccess } from "../../utils/notifications";
 import { useChatSocket } from "../../hooks/useChatSocket";
 import { Channel, Message } from "../../types/chat.interface";
 import { getAllUsersApi } from "../../services/user.api";
+import { Loading } from "../../components/Loading";
 
 function Chat() {
+  const [loading, setLoading] = useState<boolean>(true);
   const [channel, setChannel] = useState<Channel>();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
@@ -72,7 +74,7 @@ function Chat() {
     socket.on(`channelData:${id}`, (channelData: Channel) => {
       setChannel(channelData);
       setMessages(channelData.messages);
-      console.log(channelData.messages);
+      setLoading(false);
     });
 
     socket.on(`${id}/messageDeleted`, (deletedMessageId: string) => {
@@ -96,7 +98,8 @@ function Chat() {
 
   return (
     <>
-      {user && channel && (
+      {loading && <Loading />}
+      {!loading && user && channel && (
         <div className={styles.container}>
           <div className={styles.chat}>
             <ChatHeader

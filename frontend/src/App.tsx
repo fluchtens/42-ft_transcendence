@@ -8,8 +8,8 @@ import Profile from "./pages/user/Profile";
 import Chat from "./pages/chat/Chat";
 import Settings from "./pages/settings/Settings";
 import TwoFaAuth from "./pages/auth/TwoFaAuth";
-import { AuthProvider } from "./hooks/useAuth";
 import GameElement from "./components/GameElement";
+import { AuthProvider } from "./hooks/useAuth";
 import { ChatSocketProvider } from "./hooks/useChatSocket";
 
 function App() {
@@ -43,7 +43,6 @@ function App() {
           path: "/settings",
           element: <Settings />,
         },
-
         {
           path: "/game",
           element: <GameElement />,
