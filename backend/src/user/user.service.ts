@@ -188,6 +188,8 @@ export class UserService {
     const user = await this.findUserById(id);
     if (!user) {
       throw new NotFoundException('User not found');
+    } else if (user.fortyTwoId) {
+      throw new UnauthorizedException('You are connected with 42');
     }
 
     const matchPwd = await bcrypt.compare(password, user.password);
