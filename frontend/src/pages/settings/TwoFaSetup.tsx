@@ -29,7 +29,7 @@ const TwoFaSetup = ({ qrcode, close }: TwoFaSetupProps) => {
 
     const { success, message } = await enableTwoFaApi(token);
     if (!success) {
-      notifyError(Array.isArray(message) ? message[0] : message);
+      notifyError(message);
       return;
     }
 

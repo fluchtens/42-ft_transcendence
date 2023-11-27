@@ -58,8 +58,7 @@ function AuthSettings() {
 
     if (newPwd === confirmNewPwd) {
       const { success, message } = await updatePasswordApi(actualPwd, newPwd);
-      const formatMessage = Array.isArray(message) ? message[0] : message;
-      success ? notifySuccess(message) : notifyError(formatMessage);
+      success ? notifySuccess(message) : notifyError(message);
     } else {
       notifyError("Password confirmation doesn't match the password");
     }
