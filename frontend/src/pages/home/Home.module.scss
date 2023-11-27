@@ -1,58 +1,50 @@
 @import "../../styles/config.scss";
 
 .container {
-  padding: 2.5rem;
-  border-radius: 1.875rem;
+  min-height: calc(100vh - 10rem);
+  padding: 2rem;
+  flex-direction: column;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  border-radius: $rounded-xl;
   background: $bg-secondary-color;
   text-align: center;
 
-  h1 {
-    margin: 0;
-    font-size: 2rem;
-    font-weight: 600;
-  }
+  .title {
+    flex-direction: column;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
 
-  h2 {
-    margin: 0.7rem 0 0 0;
-    font-size: 1.125rem;
-    font-weight: 400;
+    h1 {
+      font-size: map-get($text-3xl, font-size);
+      line-height: map-get($text-3xl, line-height);
+      font-weight: $font-semibold;
+    }
+
+    h2 {
+      font-size: map-get($text-xl, font-size);
+      line-height: map-get($text-xl, line-height);
+      font-weight: $font-normal;
+    }
   }
 
   .playButton {
-    margin-top: 1.5rem;
     padding: 0.8rem 2rem;
-    display: inline-block;
-    border-radius: 10px;
+    border-radius: $rounded-md;
     background: #08a045;
-    font-size: 1.5rem;
-    font-weight: 600;
+    transition: background 0.3s ease;
+    font-size: map-get($text-2xl, font-size);
+    line-height: map-get($text-2xl, line-height);
+    font-weight: $font-semibold;
     text-decoration: none;
     text-transform: uppercase;
     color: white;
 
     &:hover {
-      background-color: #6bbf59;
-    }
-  }
-}
-
-@media (max-width: 768px) {
-  .container {
-    padding: 1.125rem;
-    border-radius: 0.75rem;
-
-    h1 {
-      font-size: 1.125rem;
-    }
-
-    h2 {
-      font-size: 0.825rem;
-    }
-
-    .playButton {
-      margin-top: 1rem;
-      padding: 0.5rem 1.5rem;
-      font-size: 1rem;
+      background: #6bbf59;
     }
   }
 }
