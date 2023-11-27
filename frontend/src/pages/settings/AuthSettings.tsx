@@ -7,7 +7,7 @@ import {
   generateTwoFaQrCodeApi,
 } from "../../services/auth.api";
 import { Separator } from "../../components/Separator";
-import { useAuth } from "../../utils/useAuth";
+import { useAuth } from "../../hooks/useAuth";
 import TwoFaSetup from "./TwoFaSetup";
 
 interface InputTextProps {

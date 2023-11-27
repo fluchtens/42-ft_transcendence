@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styles from "./Auth.module.scss";
 import { authUserTwoFaApi } from "../../services/auth.api";
 import { MainTitle } from "../../components/MainTitle";
-import { useAuth } from "../../utils/useAuth";
+import { useAuth } from "../../hooks/useAuth";
 
 function TwoFaAuth() {
   const { user } = useAuth();

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { enableTwoFaApi } from "../../services/auth.api";
 import { Separator } from "../../components/Separator";
 import styles from "./TwoFaSetup.module.scss";
-import { useAuth } from "../../utils/useAuth";
+import { useAuth } from "../../hooks/useAuth";
 import { Modal } from "../../components/Modal";
 
 interface TwoFaSetupProps {

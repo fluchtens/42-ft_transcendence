@@ -7,7 +7,7 @@ import { AiFillHome } from "react-icons/ai";
 import { IoGameController } from "react-icons/io5";
 import { BsFillChatDotsFill } from "react-icons/bs";
 import styles from "./Header.module.scss";
-import { useAuth } from "../../utils/useAuth";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function Header() {
   const { user, refreshUser } = useAuth();

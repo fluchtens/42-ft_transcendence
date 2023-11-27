@@ -1,10 +1,10 @@
-import { useAuth } from "../../utils/useAuth";
+import { useAuth } from "../../hooks/useAuth";
 import { ChannelElement } from "./ChannelElement";
 import { AddChannelBar } from "./AddChannelBar";
 import styles from "./Channels.module.scss";
 import { useEffect, useState } from "react";
 import { Channel } from "../../types/chat.interface";
-import { useChatSocket } from "../../utils/useChatSocket";
+import { useChatSocket } from "../../hooks/useChatSocket";
 
 function Channels() {
   const [newChannel, setNewChannel] = useState<string>("");

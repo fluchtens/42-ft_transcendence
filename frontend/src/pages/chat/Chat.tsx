@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../../utils/useAuth";
+import { useAuth } from "../../hooks/useAuth";
 import { useParams } from "react-router-dom";
 import styles from "./Chat.module.scss";
 import { ChatHeader } from "./ChatHeader";
@@ -10,7 +10,7 @@ import { UserElement } from "../../layouts/friends/UserElement";
 import { ContextMenuType } from "../../layouts/friends/UserContextMenu";
 import { AddFriendBar } from "../../layouts/friends/AddFriendBar";
 import { notifySuccess } from "../../utils/notifications";
-import { useChatSocket } from "../../utils/useChatSocket";
+import { useChatSocket } from "../../hooks/useChatSocket";
 import { Channel, Message } from "../../types/chat.interface";
 import { getAllUsersApi } from "../../services/user.api";
 

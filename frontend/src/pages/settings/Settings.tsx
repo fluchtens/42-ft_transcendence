@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import styles from "./Settings.module.scss";
 import AuthSettings from "./AuthSettings";
 import ProfileSettings from "./ProfileSettings";
-import { useAuth } from "../../utils/useAuth";
+import { useAuth } from "../../hooks/useAuth";
 
 function Settings() {
   const { user } = useAuth();

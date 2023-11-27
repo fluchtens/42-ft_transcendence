@@ -4,7 +4,7 @@ import styles from "./Auth.module.scss";
 import { userRegistrationApi } from "../../services/auth.api";
 import { MainTitle } from "../../components/MainTitle";
 import { notifySuccess } from "../../utils/notifications";
-import { useAuth } from "../../utils/useAuth";
+import { useAuth } from "../../hooks/useAuth";
 
 function Register() {
   const { user } = useAuth();

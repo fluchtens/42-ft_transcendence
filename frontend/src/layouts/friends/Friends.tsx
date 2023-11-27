@@ -13,7 +13,7 @@ import { notifyError, notifySuccess } from "../../utils/notifications";
 import styles from "./Friends.module.scss";
 import { io } from "socket.io-client";
 import { UserReqElement } from "./UserReqElement";
-import { useAuth } from "../../utils/useAuth";
+import { useAuth } from "../../hooks/useAuth";
 import { ContextMenuType } from "./UserContextMenu";
 
 const socket = io(`${import.meta.env.VITE_BACK_URL}/friendship`, {

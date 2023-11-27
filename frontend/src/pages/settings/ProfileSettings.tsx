@@ -4,7 +4,7 @@ import { notifyError, notifySuccess } from "../../utils/notifications";
 import { Separator } from "../../components/Separator";
 import defaultAvatar from "/default_avatar.png";
 import styles from "./ProfileSettings.module.scss";
-import { useAuth } from "../../utils/useAuth";
+import { useAuth } from "../../hooks/useAuth";
 
 function ProfileSettings() {
   const { user, refreshUser } = useAuth();
