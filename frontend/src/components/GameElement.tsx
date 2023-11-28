@@ -60,7 +60,6 @@ function GameElementContent() {
 	// set hooks for changes of status
 	useEffect( () => { 
 		socket.emit('getStatus', (gotStatus: UserStatus | undefined) => {
-			console.log('got status:', gotStatus);
 			setStatus(gotStatus);
 		});
 
@@ -115,12 +114,9 @@ function GamesLobby({waiting = false}) {
 	useEffect( () => {
 // 		socket.emit('joinLobby', (gotGamesInfo: GamesList) => {
 // 		 	setGamesInfo(gotGamesInfo);
-// 			console.log('lobby log.', 'waiting?', waiting? 'yes':'no');
-// // 			console.log('game info', gamesInfo);
 // 		});
 
 		socket.on('gameListUpdate', (gotGamesInfo: GamesList) => {
-			console.log('game info', gotGamesInfo);
 		 	setGamesInfo(gotGamesInfo);
 		})
 		socket.emit('joinLobby');
@@ -183,7 +179,6 @@ function GamesTable(
 			joinEnable: boolean,
 		})
 {
-	console.log('table: games info', gamesInfo);
 	if (gamesInfo.length === 0) {
 		return (
 			<> <h2>Joinable Games</h2> <p> [ None ] </p> </>
@@ -275,7 +270,6 @@ function PongBoard({availWidth, availHeight}: {availWidth: number, availHeight: 
 			gameRef.current.pushPacket(packet);
 		})
 		socket.on('gameUpdate', (packet) => {
-			console.log('got update', packet.timestamp);
 			gameRef.current.pushPacket(packet);
 			gameRef.current.update(); // TESTING
 		})
@@ -349,7 +343,6 @@ function PongBoard({availWidth, availHeight}: {availWidth: number, availHeight: 
 // 			cx.fillText(String(curState.player1.score), 0, 30);
 // 			cx.textAlign = "right";
 // 			cx.fillText(String(curState.player2.score), gm.PONG.width - 1, 30);
-// 			console.log('scores:', curState.player1.score, curState.player2.score);
 // 			//
 // 			requestAnimationFrame(draw);
 // 		}
@@ -369,18 +362,14 @@ function PongBoard({availWidth, availHeight}: {availWidth: number, availHeight: 
 // 
 // 	function handleKeyDown(ev: any) { // TODO some sort of 'KeyboardEvent' instead of 'any'
 // 		if (ev.repeat) return;
-// 		console.log('keydown event', ev.key);
 // 		if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
 // 			pressed.current.add(ev.key);
-// 			console.log('dir', dir());
 // 			socket.emit('changeMotion', dir());
 // 		}
 // 	}
 // 	function handleKeyUp(ev: any) {
-// 		console.log('keyup event', typeof ev.key, ev.key);
 // 		if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
 // 			pressed.current.delete(ev.key); // refactor as one with _KeyUp?
-// 			console.log('dir', dir());
 // 			socket.emit('changeMotion', dir());
 // 		}
 // 	}
