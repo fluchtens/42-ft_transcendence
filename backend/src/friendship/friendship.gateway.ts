@@ -22,6 +22,7 @@ interface UserStatus {
 })
 export class FriendshipGateway {
   private userStatus: Map<number, UserStatus> = new Map();
+	public code = Math.random();
 
   constructor(private readonly authService: AuthService) {}
 
@@ -67,6 +68,7 @@ export class FriendshipGateway {
     userObject.status = playing ? 'In game' : 'Online';
 		this.server.emit('reloadList');
 		console.log('########### emiting', this.userStatus.get(userId));
+		console.log(`setStatus | map ${this.code}: ${this.userStatus}`)
   }
 
   handleConnection(client: Socket) {

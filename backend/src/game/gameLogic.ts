@@ -128,7 +128,6 @@ export class GameState {
 	}
 
 	update( time = Date.now()) {
-		console.log('pre-update');
 		let totalFrames = Math.floor( (time - this._lastUpdate) / PONG.msFrame );
 		// maybe throw if negative
 		this._lastUpdate += totalFrames * PONG.msFrame;
@@ -154,7 +153,6 @@ export class GameState {
 					(PONG.paddleHeight - 1 + PONG.ballSize - 1);
 				newDyRatio = 2.01 * (newDyRatio - 0.5); // [0, 1] -> [-1, 1]
 				this.ball.dy = Math.trunc(PONG.ballMaxYSpeed * newDyRatio);
-// 				console.log('ratio', newDyRatio, 'dy', this.ball.dy);
 			}
 		}
 
@@ -171,7 +169,6 @@ export class GameState {
 				else
 					distXToPaddle = (this.player2.x) - (this.ball.x + PONG.ballSize - 1);
 				let framesToCross = Math.ceil(distXToPaddle / this.ball.dx)
-// 				console.log(`dist: ${distXToPaddle}, frames: ${framesToCross}`);
 				framesToCross = Math.max(1, framesToCross);
 				if (framesToCross > totalFrames)
 					break;
@@ -201,13 +198,10 @@ export class GameState {
 				if (key in this) // check types make sense ('as any')
 					packet[key] = (this as any)[key];
 		}
-		console.log('made packet', packet);
 		return packet;
 	}
 
 	pushPacket(packet: {timestamp: number}) {
-		console.log('got packet:', packet);
-		console.log('pre:', this);
 		this._lastUpdate = packet.timestamp;
 		const allowedFields = ['player1', 'player2', 'ball'];
 		for (let key of allowedFields) {
@@ -216,7 +210,6 @@ export class GameState {
 			}
 		}
 		this.update();
-		console.log('post:', this);
 	}
 
 	newBall(to: WhichPlayer, when: number | null = null) {
@@ -317,7 +310,6 @@ export class GameState {
 // 			const relBallY = this.ball.y - (this.player(which).y - PONG.ballSize + 1);
 // 			const hitRange = PONG.paddleHeight + PONG.ballSize - 1;
 // 			if ( 0 <= relBallY && relBallY < hitRange) {
-// 				console.log('paddle Hit', this);
 // 				this.ball.dy = Math.floor(PONG.ballMaxYSpeed * ( 2*relBallY/(hitRange - 1) - 1));
 // 				this.ball.dx *= -1;
 // 				//
@@ -325,7 +317,6 @@ export class GameState {
 // 					[, this.ball.x] = mirrorCut(this.ball.x, PONG.player1X + PONG.paddleWidth, 1);
 // 				else
 // 					[, this.ball.x] = mirrorCut(this.ball.x, PONG.player2X - PONG.ballSize, -1);
-// 				console.log('post hit', this);
 // 			}
 // 			// TODO secondary collision (ie with the edge)
 // 		}

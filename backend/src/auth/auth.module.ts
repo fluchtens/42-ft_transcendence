@@ -10,5 +10,6 @@ import { FortyTwoStrategy } from './strategies/42.strategy';
   imports: [JwtModule.register({ global: true })],
   controllers: [AuthController],
   providers: [AuthService, UserService, JwtStrategy, FortyTwoStrategy],
+	exports: [AuthService]
 })
 export class AuthModule {}
