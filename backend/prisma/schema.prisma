@@ -18,11 +18,14 @@ model User {
   twoFaSecret     String?      @db.VarChar(255)
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
+  rating          Int           @default(1000)
   addedFriends    Friendship[] @relation("sender")
   acceptedFriends Friendship[] @relation("receiver")
   members         Member[]
   channels        Channel[]
   messages        Message[]
+  wonMatches      GameRecord[] @relation("won")
+  lostMatches     GameRecord[] @relation("lost")
 }
 
 model Friendship {
@@ -102,6 +105,22 @@ model Member {
 
   @@index([userId])
   @@index([channelId])
+}
+
+model GameRecord {
+  id        Int       @id @default(autoincrement())
+  finished  DateTime  @default(now())
+
+  winner              User  @relation(name: "won", fields: [winnerId], references: [id])
+  winnerId            Int
+  winnerRatingBefore  Int
+  winnerRatingAfter   Int
+
+  loser               User  @relation(name: "lost", fields: [loserId], references: [id])
+  loserId             Int
+  loserRatingBefore   Int
+  loserRatingAfter    Int
+
 }
 
 enum MemberRole {

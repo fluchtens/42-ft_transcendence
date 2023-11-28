@@ -8,8 +8,11 @@ import {
 } from '@nestjs/websockets' 
 import { Socket, Server } from 'socket.io'
 import { GameRouter } from './gameRouter.service'
-import * as gm from './tmp_game_logic'
+import * as gm from './gameLogic'
 
+import { AuthService } from "src/auth/auth.service"
+import { PrismaService } from 'src/prisma/prisma.service';
+import { UserService } from "src/user/user.service";
 
 // TODO question
 // UserStatus should be set only by the service and not the controller
@@ -29,9 +32,9 @@ class UserData {
 		if (newRoom)	 this.joinRoom(newRoom);
 		this._gameRoom = newRoom;
 	}
-	get userRoom() { return 'user_' + this.id };
+	get userRoom() { return 'user_' + String(this.id) };
 
-	constructor(public id: string) {}
+	constructor(public id: number) {}
 
 	joinRoom(room: string) {
 		[...this.sockets].forEach( (sock) => { sock.join(room); } );
@@ -49,7 +52,8 @@ class UserData {
 		this.sockets.add(sock);
 		[...this.rooms].forEach( (room) => {this.joinRoom(room)});
 		if (this._gameRoom) sock.join(this._gameRoom);
-		this.joinRoom(this.userRoom);
+// 		this.joinRoom(this.userRoom);
+		sock.join(this.userRoom);
 	}
 	rmSocket(sock: Socket) {
 		this.sockets.delete(sock);
@@ -63,12 +67,12 @@ class MMQueue { // Matchmaking queue
 	public options = {
 		widenRate: 5, // points per second
 		initialRange: 50, // +/-
-		refreshRate: 2, // per sec
+		refreshRate: (1 / 5), // per sec (ie 1 every 5 sec)
 	}
 	private _intervalHandle : any = null; // what type is returned by `setInterval`? TODO
 
 	constructor (
-		public onMatch : ((userId1: string, userId2: string) => undefined) 
+		public onMatch : ((userId1: number, userId2: number) => undefined) 
 			= ( (id1, id2) => {} ) 
 	)
 	{}
@@ -85,13 +89,17 @@ class MMQueue { // Matchmaking queue
 	}
 
 	launch () {
-			this._intervalHandle = setInterval( () => {
+		let repeat = () => {
 				console.log('queue: handling matches');
 				let matches = this.makeMatches();
 				matches.forEach( (ids) => {this.onMatch(ids[0], ids[1])} );
-				if (this.matchRequests.size < 2)
-					clearInterval(this._intervalHandle!);
-			}, 1000 / this.options.refreshRate);
+		}
+		repeat();
+		this._intervalHandle = setInterval( () => {
+			repeat();
+			if (this.matchRequests.size < 2)
+				clearInterval(this._intervalHandle!);
+		}, 1000 / this.options.refreshRate);
 	}
 
 	stop() {
@@ -127,36 +135,44 @@ class MMQueue { // Matchmaking queue
 	}
 }
 
-// should be 2 classes
 class GameService {
 	// unique game_invite name to info required to launch the game
 	lobbyRoom = '_LOBBY_';
 	invites = new Map<string, { host: UserData /*, maybe game options etc*/}>();
-	userInvites = new Map<string, string>(); // userId -> inviteName, used for deleting
+	userInvites = new Map<number, string>(); // userId -> inviteName, used for deleting
 																					 // invites along their hosts
 
 	// sockId to active games
 	games = new Map<string, gm.GameState>();
-	userGames = new Map<string, { p: gm.WhichPlayer, gameId: string } >();
+	userGames = new Map<number, { p: gm.WhichPlayer, gameId: string } >();
 	// note: gameId is both key in `games` and socket.io room for game packets
 
 	// sockId to User
-	users = new Map<string, UserData>(); // userId to runtime states
-	socketUsers = new Map<string, string>(); // sockId to owning userId
+	users = new Map<number, UserData>(); // userId to runtime states
+	socketUsers = new Map<string, number>(); // sockId to owning userId
+	pendingDelete = new Set<number>(); // User (by id) who are still in game and have no sock
 
 	queue = new MMQueue();
 
+	gameCallback = ( ( props: {gameRoom:string,game:gm.GameState} ) => {} );
+	gameFinishCallback = ( (props: {
+		gameRoom: string,
+	 	game:gm.GameState,
+	 	winner:UserData,
+	 	loser: UserData,
+	}) => {} );
+
 	// TESTING
 	constructor() {
-		this.invites.set('test1', {host: new UserData('dog')});
-		this.invites.set('test2', {host: new UserData('god')});
+		this.invites.set('test1', {host: new UserData(19)});
+		this.invites.set('test2', {host: new UserData(42)});
 
-		let alice = new UserData('alice');
-		let bob = new UserData('bob');
-		alice.rating = 1100;
-		bob.rating = 1000;
-		this.users.set('bob', bob);
-		this.users.set('alice', alice);
+// 		let alice = new UserData(1);
+// 		let bob = new UserData(2);
+// 		alice.rating = 1100;
+// 		bob.rating = 1000;
+// 		this.users.set(1, bob);
+// 		this.users.set(2, alice);
 	}
 	// END TESTING
 
@@ -167,15 +183,20 @@ class GameService {
 		}
 	}
 
-	bindSocket ( sock: Socket, userId: string ) {
+	gameSetCallbacks( {onRefresh, onFinish} ) {
+		this.gameCallback = onRefresh;
+		this.gameFinishCallback = onFinish;
+	}
+
+	bindSocket ( sock: Socket, userId: number ) {
 		this.socketUsers.set(sock.id, userId);
 		if ( !this.users.get(userId) ) {
 			console.log('creating new user:', userId);
 			this.users.set( userId, new UserData(userId) );
 		}
 
-// 		++socketUsers.get(sock.id)!.sockets.push(sock);
 		this.users.get(userId).addSocket(sock);
+		this.pendingDelete.delete(userId);
 		console.log('found user', this.users.get(userId));
 
 		return this.users.get(userId);
@@ -183,7 +204,7 @@ class GameService {
 
 	unbindSocket ( sock: Socket ) {
 		let userId = this.socketUsers?.get(sock.id);
-		let user = userId ? this.users.get(userId) : null;
+		let user = userId ? this.users.get(userId) : null; // can userId be 0? (TODO)
 
 		let deletions = { user: false, invite: false }
 		if (!user) return deletions;
@@ -192,10 +213,14 @@ class GameService {
 		user.rmSocket(sock);
 
 		if (user.sockets.size === 0) { // delete users that don't have any sockets
-			deletions.user = true;
-			this.users.delete(userId);
-			deletions.invite = this.lobbyCancelInvite(userId);
-			this.queue.del(userId);
+			if (user.status === UserStatus.Playing){
+				this.pendingDelete.add(user.id);
+			} else {
+				deletions.user = true;
+				this.users.delete(userId);
+				deletions.invite = this.lobbyCancelInvite(userId);
+				this.queue.del(userId);
+			}
 		}
 		return deletions;
 	}
@@ -204,31 +229,35 @@ class GameService {
 		return this.users.get(this.socketUsers.get(sockId));
 	}
 
-	getGameData( sockId: string): {p: gm.WhichPlayer, state: gm.GameState} | null {
-		let userId = this.socketUsers.get(sockId);
-		if (!userId) return null;
-
+	getGameData( userId: number): {player: gm.WhichPlayer, room: string, state: gm.GameState} | null {
 		let data = this.userGames.get(userId);
 		if (!data) return null;
 
-		return {p: data.p, state: this.games.get(data.gameId)};
+		return {
+			player: data.p, 
+			room: this.users.get(userId).gameRoom, 
+			state: this.games.get(data.gameId),
+		};
 	}
 
 	// creating / join games
-	lobbyCreateInvite (userId: string, inviteName: string) {
+	lobbyCreateInvite (userId: number, inviteName: string) {
 		let user = this.users.get(userId);
 		if (!user)
 			throw new Error("no such active user");
-		user.status = UserStatus.Waiting;
-		
 		if (this.invites.has(inviteName))
 			throw new Error("invite name already taken");
+
+		user.status = UserStatus.Waiting;
+		
 		this.invites.set(inviteName, {host: user});
 		this.userInvites.set(userId, inviteName);
 	}
 
-	lobbyCancelInvite(userId: string) {
+	lobbyCancelInvite(userId: number) {
 		if (this.userInvites.has(userId)) {
+			if (this.users.get(userId))
+				this.users.get(userId).status = UserStatus.Normal;
 			this.invites.delete(this.userInvites.get(userId)); // note: delete ok when undefined
 			this.userInvites.delete(userId);
 			return true;
@@ -254,7 +283,16 @@ class GameService {
 
 		let gameId = this.genId();
 		let game = new gm.GameState(startTime);
+		game.newBall(gm.WhichPlayer.P1, startTime);
+		// TESTING
+		game.ball.dx = - gm.PONG.ballXSpeed;
+		game.ball.dy = 0;
+		game.ball.x = Math.floor(gm.PONG.width / 2);
+		game.ball.y = Math.floor(gm.PONG.height / 2);
+		// END TESTING
+		// //
 		this.games.set(gameId, game);
+		console.log('ready to launch:', game);
 
 		let bindPlayer = (user, whichP) => {
 			user.status = UserStatus.Playing;
@@ -265,11 +303,54 @@ class GameService {
 		bindPlayer(player1, gm.WhichPlayer.P1);
 		bindPlayer(player2, gm.WhichPlayer.P2);
 
+		let deleteGame = () => {
+			for (let player of [player1, player2]) {
+				player.status = UserStatus.Normal;
+				player.gameRoom = null;
+				this.userGames.delete(player.id);
+				if (this.pendingDelete.has(player.id)) {
+					this.users.delete(player.id);
+					this.pendingDelete.delete(player.id);
+				}
+			}
+			this.games.delete(gameId);
+		}
+
+		let onFinish = (winner: gm.WhichPlayer) => {
+			this.gameFinishCallback({
+				gameRoom: gameId,
+			 	game,
+				winner: (winner === gm.WhichPlayer.P1) ? player1: player2,
+				loser: (winner === gm.WhichPlayer.P1) ? player2: player1,
+		 	});
+			deleteGame();
+		}
+
+		let resetTimer = () => {
+			if (this.pendingDelete.has(player1.id) && this.pendingDelete.has(player2.id)) {
+				console.log('game aborted bc both players disconnected');
+				deleteGame();
+				return ;
+			}
+			game.update();
+			let {finish, winner} = game.updateScores();
+			if (finish) {
+				onFinish(winner);
+			} else {
+				this.gameCallback({gameRoom: gameId, game});
+// 				let nextTimepoint = Math.max(20, game.minTimeToPoint());
+				let nextTimepoint = game.minTimeToPoint();
+				console.log('wait:', nextTimepoint);
+				setTimeout(resetTimer, nextTimepoint);
+			}
+		}
+		resetTimer();
+
 		return {gameRoom: gameId, game};
 	}
 
 	lobbyJoinGame (
-		userId: string,
+		userId: number,
 	 	inviteName: string,
 	 	startTime: number = Date.now())
 	{
@@ -283,7 +364,7 @@ class GameService {
 		return this.launchGame(pending.host.id, joiner.id, startTime);
 	}
 
-	joinQueue(userId) {
+	joinQueue(userId, userRating) {
 		let user = this.users.get(userId);
 		if (!user)
 			throw new Error("no such active user");
@@ -291,15 +372,13 @@ class GameService {
 			throw new Error("can't join queue while busy");
 
 		user.status = UserStatus.Waiting;
-		this.queue.add(user.id, user.rating);
+		this.queue.add(user.id, userRating);
 	}
 
-	leaveQueue(userId) {
+	leaveQueue(userId: number) {
 		let user = this.users.get(userId);
 		if (!user)
 			throw new Error("no such active user");
-		if (user.status != UserStatus.Normal)
-			throw new Error("can't join queue while busy");
 
 		user.status = UserStatus.Normal;
 		this.queue.del(user.id);
@@ -309,71 +388,168 @@ class GameService {
 @WebSocketGateway({
 	namespace: '/gamesocket',
 	cors: { 
-		origin: ['http://localhost:3000'], // localhost is react client
+		origin: [process.env.VITE_FRONT_URL], // localhost is react client
+		credentials: true,
 	}
 })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	gameService = new GameService(); // TODO use nest module system
 
-	constructor() {
+	constructor(
+		private readonly authService : AuthService,
+		private readonly userService : UserService,
+		private readonly prismaService : PrismaService,
+	) {
 		this.gameService.queueSetCallback( ({gameRoom, game}) => {
 			this.server.to(gameRoom).emit('statusChange', UserStatus.Playing);
+		});
+
+		function mockNewRatings(winnerRating: number, loserRating: number) {
+			return [winnerRating + 10, loserRating - 10];
+		} // TODO not mock
+
+		this.gameService.gameSetCallbacks( {
+			onRefresh: ({gameRoom, game}) => {
+				this.server.to(gameRoom).emit('gameUpdate', game.packet());
+			},
+			onFinish: ({gameRoom, game, winner, loser}) => {
+				(async () => {
+					let winnerRatingBefore = await this._rating(winner.id);
+					let loserRatingBefore = await this._rating(loser.id);
+
+					let [winnerRatingAfter, loserRatingAfter] = mockNewRatings(winnerRatingBefore, loserRatingBefore);
+
+					// awaits needed?? (when not testing)
+					await this.prismaService.user.update({
+						where: { id: winner.id},
+						data: { rating: winnerRatingAfter }
+					});
+					await this.prismaService.user.update({
+						where: { id: loser.id},
+						data: { rating: loserRatingAfter }
+					});
+					for (let user of [winner, loser]) {
+						this.server.to(user.userRoom).emit('statusChange', UserStatus.Normal);
+						this.server.to(user.userRoom).emit('winLose', (user === winner) );
+					}
+// 					this.server.to(gameRoom).emit('statusChange', UserStatus.Normal);
+// 					this.server.to(winner.userRoom).emit('winLose', true);
+// 					this.server.to(loser.userRoom).emit('winLose', false);
+
+					await this.prismaService.gameRecord.create({
+						data: {
+							winnerId: winner.id,
+							winnerRatingBefore,
+							winnerRatingAfter,
+							loserId: loser.id,
+							loserRatingBefore,
+							loserRatingAfter,
+						}
+					});
+				//}) ();
+				})().then( async () => { // TESTING
+					console.log(await this.prismaService.gameRecord.findMany());
+					console.log(await this.prismaService.user.findMany({include: {wonMatches: true, lostMatches: true}}));
+				});
+				// END TESTING
+			}
 		});
 	}
 			
 	@WebSocketServer()
 	server: Server;
 
+	async _rating(userId: number) {
+		// TODO errors?
+		return (await this.userService.getUserById(userId)).rating;
+	}
+
 	handleConnection(sock: Socket) {
 		console.log('CONNECTION: ', sock.id);
+		try {
+			const cookie = sock.handshake.headers.cookie;
+			if (!cookie) {
+				throw new Error('No cookies found');
+			}
+
+			const cookies = cookie.split(';').map((cookie) => cookie.trim());
+			const jwtCookie = cookies.find((cookie) => (
+				cookie.startsWith('access_token=')
+			));
+
+			const token = jwtCookie.substring('access_token='.length);
+			if (!token) {
+				throw new Error('access_token not found');
+			}
+			const decodedToken =  this.authService.verifyAccessToken(token);
+// 			client.handshake.auth.userId = decodedToken.id;
+			let userId = decodedToken.id;
+			console.log('connection from user', userId);
+			this.gameService.bindSocket(sock, userId); // refactor so userId is an int
+			// await this.InitRooms(client);
+		}
+		catch (error) {
+			console.error('not connected', error.message);
+		}
 	}
 
 	handleDisconnect(sock: Socket) {
 		console.log('DICONNECT', sock.id);
-		// TODO if a user is deleted, gameList
 		let deletions = this.gameService.unbindSocket(sock);
 		if (deletions.invite) {
 			this._pushGameList();
 		}
 	}
 
-	@SubscribeMessage('authenticate')
-	authenticate(sock: Socket, data: {userId: string, /* authtokenOrSmth */}) {
-		// validate authentication... TODO
-		if (data.userId === '') return null; // TESTING
-		let userData = this.gameService.bindSocket(sock, data.userId); 
-		console.log("logged in as:", data.userId, 'status:', userData.status);
-		return userData.status;
+	@SubscribeMessage('getStatus')
+	getStatus(sock: Socket) {
+		return this.gameService.getUserData(sock.id)?.status;
 	}
 
-	_gamesInfo() {
-		return [...this.gameService.invites].map( ([key, {host}]) => ({ name: key, host: host.id}) );
+	async _gamesInfo() {
+		let gamesInfo = [];
+		for (let [key, {host}] of [...this.gameService.invites]) {
+			try {
+				let user = await this.userService.getUserById(host.id);
+				gamesInfo.push({name: key, host: user.username});
+			} catch {
+				gamesInfo.push( {name: key, host: '[unkown user]'});
+			}
+		}
+		return gamesInfo;
 	}
 	
 	_pushGameList() {
+		let promise = this._gamesInfo();
+		promise.then((gamesInfo) => {
 		this.server
 			.to(this.gameService.lobbyRoom)
-			.emit('gameListUpdate', this._gamesInfo());
+			.emit('gameListUpdate', gamesInfo);
+		});
 	}
 
-	_wantStatus(sock, accepted, errmsg = "Wrong Status") : UserData {
+	_confirmStatus(sock, accepted, errmsg = "Forbidden action") : UserData {
 		let userData = this.gameService.getUserData(sock.id);
-		if ( !userData ) 
-			throw new Error("not authenticated");
-		if ( !(new Set(accepted).has(userData.status)) )
-			throw new Error(errmsg);
+		if ( !userData ) {
+			sock.emit('gameSocketError', "you have no active session.");
+			return null;
+		}
+		if ( !(new Set(accepted).has(userData.status)) ) {
+			sock.emit('gameSocketError', errmsg);
+			return null;
+		}
 		return userData;
 	}
 
 	@SubscribeMessage('joinLobby')
 	joinLobby(sock: Socket) {
 		try {
-			let userData = this._wantStatus(sock, [UserStatus.Normal, UserStatus.Waiting])
+			let userData = this._confirmStatus(sock, [UserStatus.Normal, UserStatus.Waiting])
+			if (!userData) return null;
 
 			userData.joinRoom(this.gameService.lobbyRoom);
-			return this._gamesInfo();
-			// TODO replace host.id with name (gotten from db? or set up in userData)
+			this._pushGameList();
 		} catch {
 			return null;
 		}
@@ -381,13 +557,20 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('createInvite')
 	createInvite(sock: Socket, gameName: string) {
-		let userData = this._wantStatus(sock, [UserStatus.Normal] );
-		if (this.gameService.invites.has(gameName) )
-				throw new Error ("name already taken"); // TODO handle in client somehow
+		let userData = this._confirmStatus(sock, [UserStatus.Normal] );
+		if (!userData) return null;
+		
+// 		if (this.gameService.invites.has(gameName) )
+// 				throw new Error ("name already taken"); // TODO handle in client somehow
 
-		this.gameService.lobbyCreateInvite(userData.id, gameName);
+		try {
+			this.gameService.lobbyCreateInvite(userData.id, gameName);
+		} catch {
+			console.log("caught error");
+			sock.emit('gameSocketError', "name already taken");
+			return;
+		}
 
-		userData.status = UserStatus.Waiting;
 		this.server.to(userData.userRoom).emit('statusChange', UserStatus.Waiting);
 
 		this._pushGameList();
@@ -397,36 +580,91 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('cancel')
 	cancel(sock: Socket) {
-		let userData = this._wantStatus(sock, [UserStatus.Waiting]);
+		let userData = this._confirmStatus(sock, [UserStatus.Waiting]);
+		if (!userData) return null;
 
 		if (this.gameService.lobbyCancelInvite(userData.id))
 			this._pushGameList();
 
 		this.gameService.leaveQueue(userData.id);
 		
-		userData.status = UserStatus.Normal;
 		this.server.to(userData.userRoom).emit('statusChange', UserStatus.Normal);
 	}
 
 	@SubscribeMessage('joinGame')
 	joinGame(sock: Socket, gameId: string) {
-		let userData = this._wantStatus(sock, [UserStatus.Normal]);
+		let userData = this._confirmStatus(sock, [UserStatus.Normal]);
+		if (!userData) return null;
 
 		this.gameService.lobbyJoinGame(userData.id, gameId);
 		
 		this.server.to(userData.gameRoom).emit('statusChange', UserStatus.Playing);
+
+		this._pushGameList();
 	}
 
 	@SubscribeMessage('joinQueue')
 	joinQueue(sock: Socket) {
-		let userData = this._wantStatus(sock, [UserStatus.Normal]);
+		let userData = this._confirmStatus(sock, [UserStatus.Normal]);
+		if (!userData) return null;
 
-		console.log(`${userData.id} joined the queue`);
+		console.log(`${userData.id} will join the queue`);
 
-		this.gameService.joinQueue(userData.id);
-		this.server.to(userData.userRoom).emit('statusChange', UserStatus.Waiting);
+		(async () => {
+			let rating = await this._rating(userData.id);
+			this.gameService.joinQueue(userData.id, rating);
+			console.log('did join');
+			this.server.to(userData.userRoom).emit('statusChange', UserStatus.Waiting);
+		}) ();
+	}
+
+	@SubscribeMessage('syncGame')
+	syncGame(sock: Socket) {
+		let userData = this._confirmStatus(sock, [UserStatus.Playing]);
+		if (!userData) return null;
+
+		let {player: whichPlayer, room, state: game} = this.gameService.getGameData(userData.id);
+		console.log('syncing', game);
+		return game.packet(Date.now());
+	}
+
+	@SubscribeMessage('playerMotion')
+	playerMotion(sock: Socket, mo: gm.MotionType) {
+		console.log('got motion', mo);
+		let userData = this._confirmStatus(sock, [UserStatus.Playing]);
+		if (!userData) return null;
+
+		let {player: whichPlayer, room, state: game} = this.gameService.getGameData(userData.id);
+		let now = Date.now();
+		game.setMotion(whichPlayer, mo, now);
+		this.server.to(room).emit('gameUpdate', game.packet(now));
 	}
 }
+
+// try {
+//       const cookie = client.handshake.headers.cookie;
+//       if (!cookie) {
+//         throw new Error('No cookies found');
+//       }
+// 
+//       const cookies = cookie.split(';').map((cookie) => cookie.trim());
+//       const jwtCookie = cookies.find((cookie) =>
+//         cookie.startsWith('access_token='),
+//       );
+// 
+//       const token = jwtCookie.substring('access_token='.length);
+//       if (!token) {
+//         throw new Error('access_token not found');
+//       }
+//       const decodedToken =  this.authService.verifyAccessToken(token);
+//       client.handshake.auth.userId = decodedToken.id;
+//       // await this.InitRooms(client);
+//     }
+//     catch (error) {
+//       console.error('not connected', error.message);
+//     }
+
+///
 
 // 	@SubscribeMessage('joinLobby')
 // 	joinLobby(sock: Socket) {
@@ -479,11 +717,4 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 // 	// creating / joining games
 // 	// hande 'createGame', 'joinGame', 'queue'
 // }
-
-
-
-
-
-
-
 
