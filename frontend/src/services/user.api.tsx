@@ -1,3 +1,4 @@
+import { Stats } from "../types/game.interface";
 import { User } from "../types/user.interface";
 
 const apiUrl: string = `${import.meta.env.VITE_BACK_URL}/user`;
@@ -183,6 +184,29 @@ async function updateAvatarApi(file: any): Promise<ApiRes> {
   }
 }
 
+/* -------------------------------------------------------------------------- */
+/*                                    Game                                    */
+/* -------------------------------------------------------------------------- */
+
+async function getUserStatsApi(id: number): Promise<Stats | null> {
+  try {
+    const response = await fetch(`${apiUrl}/game/stats/${id}`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
 export {
   getUserApi,
   getUserByIdApi,
@@ -192,4 +216,5 @@ export {
   updatePasswordApi,
   getUserAvatar,
   updateAvatarApi,
+  getUserStatsApi,
 };

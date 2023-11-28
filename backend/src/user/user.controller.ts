@@ -91,7 +91,7 @@ export class UserController {
   /*                                    Game                                    */
   /* -------------------------------------------------------------------------- */
 
-  @Get('game/:id')
+  @Get('game/stats/:id')
   @UseGuards(JwtAuthGuard)
   async getUserStats(@Param('id') id: string) {
     return this.userService.getUserStats(parseInt(id));
