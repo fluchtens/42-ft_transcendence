@@ -3,10 +3,8 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { use } from 'passport';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
-import { UserService } from 'src/user/user.service';
 
 interface UserStatus {
   status: 'Online' | 'In game';
@@ -22,6 +20,7 @@ interface UserStatus {
 })
 export class FriendshipGateway {
   private userStatus: Map<number, UserStatus> = new Map();
+  public code = Math.random();
 
   constructor(private readonly authService: AuthService) {}
 
