@@ -61,6 +61,25 @@ export class UserService {
     });
   }
 
+  async findUserStats(id: number) {
+    try {
+      const user = await this.prismaService.user.findUnique({
+        where: { id },
+        include: {
+          wonMatches: true,
+          lostMatches: true,
+        },
+      });
+
+      return {
+        wonMatches: user.wonMatches.length,
+        lostMatches: user.lostMatches.length,
+      };
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
   async updateUserUsername(id: number, username: string) {
     return this.prismaService.user.update({
       where: { id },
@@ -235,5 +254,23 @@ export class UserService {
     await this.updateUserAvatar(req.user.id, file.filename);
 
     return { message: 'Avatar updated successfully' };
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                    Game                                    */
+  /* -------------------------------------------------------------------------- */
+
+  async getUserStats(id: number) {
+    const user = await this.findUserById(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const stats = await this.findUserStats(id);
+    if (!user) {
+      throw new NotFoundException('No stats found');
+    }
+
+    return stats;
   }
 }
