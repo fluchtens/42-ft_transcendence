@@ -83,8 +83,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					});
 				//}) ();
 				})().then( async () => { // TESTING
-					console.log(await this.prismaService.gameRecord.findMany());
-					console.log(await this.prismaService.user.findMany({include: {wonMatches: true, lostMatches: true}}));
+					//console.log(await this.prismaService.gameRecord.findMany());
+					//console.log(await this.prismaService.user.findMany({include: {wonMatches: true, lostMatches: true}}));
 				});
 				// END TESTING
 			}
@@ -100,7 +100,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	handleConnection(sock: Socket) {
-		console.log('CONNECTION: ', sock.id);
+		//console.log('CONNECTION: ', sock.id);
 		try {
 			const cookie = sock.handshake.headers.cookie;
 			if (!cookie) {
@@ -119,7 +119,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			const decodedToken =  this.authService.verifyAccessToken(token);
 // 			client.handshake.auth.userId = decodedToken.id;
 			let userId = decodedToken.id;
-			console.log('connection from user', userId);
+			//console.log('connection from user', userId);
 			this.gameService.bindSocket(sock, userId); // refactor so userId is an int
 			// await this.InitRooms(client);
 		}
@@ -129,7 +129,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	handleDisconnect(sock: Socket) {
-		console.log('DICONNECT', sock.id);
+		//console.log('DICONNECT', sock.id);
 		let deletions = this.gameService.unbindSocket(sock);
 		if (deletions.invite) {
 			this._pushGameList();
@@ -200,7 +200,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		try {
 			this.gameService.lobbyCreateInvite(userData.id, gameName);
 		} catch {
-			console.log("caught error");
+			//console.log("caught error");
 			sock.emit('gameSocketError', "name already taken");
 			return;
 		}
@@ -209,7 +209,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 		this._pushGameList();
 
-		console.log(`${userData.id} created game ${gameName}`);
+		//console.log(`${userData.id} created game ${gameName}`);
 	}
 
 	@SubscribeMessage('cancel')
@@ -242,12 +242,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		let userData = this._confirmStatus(sock, [UserStatus.Normal]);
 		if (!userData) return null;
 
-		console.log(`${userData.id} will join the queue`);
+		//console.log(`${userData.id} will join the queue`);
 
 		(async () => {
 			let rating = await this._rating(userData.id);
 			this.gameService.joinQueue(userData.id, rating);
-			console.log('did join');
+			//console.log('did join');
 			this.server.to(userData.userRoom).emit('statusChange', UserStatus.Waiting);
 		}) ();
 	}
@@ -258,13 +258,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		if (!userData) return null;
 
 		let {player: whichPlayer, room, state: game} = this.gameService.getGameData(userData.id);
-		console.log('syncing', game);
+		//console.log('syncing', game);
 		return game.packet(Date.now());
 	}
 
 	@SubscribeMessage('playerMotion')
 	playerMotion(sock: Socket, mo: gm.MotionType) {
-		console.log('got motion', mo);
+		//console.log('got motion', mo);
 		let userData = this._confirmStatus(sock, [UserStatus.Playing]);
 		if (!userData) return null;
 
