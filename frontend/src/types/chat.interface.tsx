@@ -7,7 +7,7 @@ export interface Channel {
   public: boolean;
   protected: boolean;
   messages: Messages[];
-  members: any[];
+  members: MemberUsers[];
 }
 
 export interface Message {
@@ -15,4 +15,25 @@ export interface Message {
   content: string;
   userId: number;
   user?: User | null;
+}
+
+export interface Member {
+  id: string;
+  role: MemberRole;
+  userId: number;
+  channelId: string;
+  silencedTime: Date;
+  CreatedAt: Date;
+  updatedAt: Date;
+}
+
+export interface MemberUsers {
+  member: Member;
+  user: User;
+}
+
+enum MemberRole {
+  ADMIN,
+  MODERATOR,
+  GUEST,
 }

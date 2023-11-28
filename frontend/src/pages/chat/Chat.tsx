@@ -11,7 +11,7 @@ import { ContextMenuType } from "../../layouts/friends/UserContextMenu";
 import { AddFriendBar } from "../../layouts/friends/AddFriendBar";
 import { notifySuccess } from "../../utils/notifications";
 import { useChatSocket } from "../../hooks/useChatSocket";
-import { Channel, Message } from "../../types/chat.interface";
+import { Channel, Member, MemberUsers, Message } from "../../types/chat.interface";
 import { getAllUsersApi } from "../../services/user.api";
 import { Loading } from "../../components/Loading";
 
@@ -20,7 +20,7 @@ function Chat() {
   const [channel, setChannel] = useState<Channel>();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
-  const [members, setMembers] = useState<User[]>([]);
+  const [members, setMembers] = useState<MemberUsers[]>([]);
   const [addedMember, setAddedMember] = useState<string>("");
   const [membersMenu, setMembersMenu] = useState<boolean>(true);
   const [contextMenu, setContextMenu] = useState<number | null>(null);
@@ -58,22 +58,26 @@ function Chat() {
 
   const addMember = async (e: React.FormEvent) => {
     e.preventDefault();
-    notifySuccess("In dev");
+    socket.emit("addMember", {
+      channelId: id,
+      memberId: addedMember,
+    });
     setAddedMember("");
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      const membersData = await getAllUsersApi();
-      if (membersData) {
-        setMembers(membersData);
-      }
-    };
-    fetchData();
+    // const fetchData = async () => {
+    //   const membersData = await getAllUsersApi();
+    //   if (membersData) {
+    //     setMembers(membersData);
+    //   }
+    // };
+    // fetchData();
 
     socket.on(`channelData:${id}`, (channelData: Channel) => {
       setChannel(channelData);
       setMessages(channelData.messages);
+      setMembers(channelData.members);
       setLoading(false);
     });
 
@@ -86,6 +90,10 @@ function Chat() {
     socket.on(`${id}/message`, (message: Message) => {
       setMessages((prevMessages) => [...prevMessages, message]);
     });
+    
+    socket.on(`${id}/member`, (member: MemberUsers) => {
+      setMembers((prevMembers) => [...prevMembers, member]);
+    });
 
     socket.emit("joinRoom", { channelId: id, getMessages: true });
 
@@ -93,6 +101,7 @@ function Chat() {
       socket.off(`channelData:${id}`);
       socket.off(`${id}/messageDeleted`);
       socket.off(`${id}/message`);
+      socket.off(`${id}/member`);
     };
   }, [id]);
 
@@ -136,13 +145,13 @@ function Chat() {
                   onSubmit={addMember}
                 />
                 <ul>
-                  {members?.map((user) => (
-                    <li key={user.id}>
+                  {members?.map((member) => (
+                    <li key={member.user.id}>
                       <UserElement
-                        user={user}
-                        contextMenu={contextMenu === user.id}
+                        user={member.user}
+                        contextMenu={contextMenu === member.user.id}
                         contextMenuType={ContextMenuType.MEMBER}
-                        toggleContextMenu={() => toggleContextMenu(user.id)}
+                        toggleContextMenu={() => toggleContextMenu(member.user.id)}
                       />
                     </li>
                   ))}
