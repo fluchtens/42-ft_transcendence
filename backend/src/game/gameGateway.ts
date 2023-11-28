@@ -89,13 +89,17 @@ class MMQueue { // Matchmaking queue
 	}
 
 	launch () {
-			this._intervalHandle = setInterval( () => {
+		let repeat = () => {
 				console.log('queue: handling matches');
 				let matches = this.makeMatches();
 				matches.forEach( (ids) => {this.onMatch(ids[0], ids[1])} );
-				if (this.matchRequests.size < 2)
-					clearInterval(this._intervalHandle!);
-			}, 1000 / this.options.refreshRate);
+		}
+		repeat();
+		this._intervalHandle = setInterval( () => {
+			repeat();
+			if (this.matchRequests.size < 2)
+				clearInterval(this._intervalHandle!);
+		}, 1000 / this.options.refreshRate);
 	}
 
 	stop() {
@@ -146,6 +150,7 @@ class GameService {
 	// sockId to User
 	users = new Map<number, UserData>(); // userId to runtime states
 	socketUsers = new Map<string, number>(); // sockId to owning userId
+	pendingDelete = new Set<number>(); // User (by id) who are still in game and have no sock
 
 	queue = new MMQueue();
 
@@ -191,6 +196,7 @@ class GameService {
 		}
 
 		this.users.get(userId).addSocket(sock);
+		this.pendingDelete.delete(userId);
 		console.log('found user', this.users.get(userId));
 
 		return this.users.get(userId);
@@ -207,10 +213,14 @@ class GameService {
 		user.rmSocket(sock);
 
 		if (user.sockets.size === 0) { // delete users that don't have any sockets
-			deletions.user = true;
-			this.users.delete(userId);
-			deletions.invite = this.lobbyCancelInvite(userId);
-			this.queue.del(userId);
+			if (user.status === UserStatus.Playing){
+				this.pendingDelete.add(user.id);
+			} else {
+				deletions.user = true;
+				this.users.delete(userId);
+				deletions.invite = this.lobbyCancelInvite(userId);
+				this.queue.del(userId);
+			}
 		}
 		return deletions;
 	}
@@ -235,10 +245,11 @@ class GameService {
 		let user = this.users.get(userId);
 		if (!user)
 			throw new Error("no such active user");
-		user.status = UserStatus.Waiting;
-		
 		if (this.invites.has(inviteName))
 			throw new Error("invite name already taken");
+
+		user.status = UserStatus.Waiting;
+		
 		this.invites.set(inviteName, {host: user});
 		this.userInvites.set(userId, inviteName);
 	}
@@ -292,6 +303,19 @@ class GameService {
 		bindPlayer(player1, gm.WhichPlayer.P1);
 		bindPlayer(player2, gm.WhichPlayer.P2);
 
+		let deleteGame = () => {
+			for (let player of [player1, player2]) {
+				player.status = UserStatus.Normal;
+				player.gameRoom = null;
+				this.userGames.delete(player.id);
+				if (this.pendingDelete.has(player.id)) {
+					this.users.delete(player.id);
+					this.pendingDelete.delete(player.id);
+				}
+			}
+			this.games.delete(gameId);
+		}
+
 		let onFinish = (winner: gm.WhichPlayer) => {
 			this.gameFinishCallback({
 				gameRoom: gameId,
@@ -299,20 +323,20 @@ class GameService {
 				winner: (winner === gm.WhichPlayer.P1) ? player1: player2,
 				loser: (winner === gm.WhichPlayer.P1) ? player2: player1,
 		 	});
-			player1.status = UserStatus.Normal;
-			player1.gameRoom = null;
-			player2.status = UserStatus.Normal;
-			player2.gameRoom = null;
-			this.games.delete(gameId);
-			// TODO talk to db
+			deleteGame();
 		}
 
 		let resetTimer = () => {
+			if (this.pendingDelete.has(player1.id) && this.pendingDelete.has(player2.id)) {
+				console.log('game aborted bc both players disconnected');
+				deleteGame();
+				return ;
+			}
 			game.update();
 			let {finish, winner} = game.updateScores();
-			if (finish)
+			if (finish) {
 				onFinish(winner);
-			else {
+			} else {
 				this.gameCallback({gameRoom: gameId, game});
 // 				let nextTimepoint = Math.max(20, game.minTimeToPoint());
 				let nextTimepoint = game.minTimeToPoint();
@@ -390,9 +414,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				this.server.to(gameRoom).emit('gameUpdate', game.packet());
 			},
 			onFinish: ({gameRoom, game, winner, loser}) => {
-				this.server.to(gameRoom).emit('statusChange', UserStatus.Normal);
-				this.server.to(winner.userRoom).emit('winLose', true);
-				this.server.to(loser.userRoom).emit('winLose', false);
 				(async () => {
 					let winnerRatingBefore = await this._rating(winner.id);
 					let loserRatingBefore = await this._rating(loser.id);
@@ -408,8 +429,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 						where: { id: loser.id},
 						data: { rating: loserRatingAfter }
 					});
-					// TODO data race if join queue again very fast?
-					// needs 'ready' bool prop in UserData?
+					for (let user of [winner, loser]) {
+						this.server.to(user.userRoom).emit('statusChange', UserStatus.Normal);
+						this.server.to(user.userRoom).emit('winLose', (user === winner) );
+					}
+// 					this.server.to(gameRoom).emit('statusChange', UserStatus.Normal);
+// 					this.server.to(winner.userRoom).emit('winLose', true);
+// 					this.server.to(loser.userRoom).emit('winLose', false);
 
 					await this.prismaService.gameRecord.create({
 						data: {
@@ -422,7 +448,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 						}
 					});
 				//}) ();
-				})().then( async () => { 
+				})().then( async () => { // TESTING
 					console.log(await this.prismaService.gameRecord.findMany());
 					console.log(await this.prismaService.user.findMany({include: {wonMatches: true, lostMatches: true}}));
 				});
@@ -470,7 +496,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	handleDisconnect(sock: Socket) {
 		console.log('DICONNECT', sock.id);
-		// TODO if a user is deleted, gameList
 		let deletions = this.gameService.unbindSocket(sock);
 		if (deletions.invite) {
 			this._pushGameList();
@@ -479,11 +504,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('getStatus')
 	getStatus(sock: Socket) {
-		// validate authentication... TODO
-// 		if (data.userId === '') return null; // TESTING
-// 		let userData = this.gameService.bindSocket(sock, data.userId); 
-// 		console.log("logged in as:", data.userId, 'status:', userData.status);
-
 		return this.gameService.getUserData(sock.id)?.status;
 	}
 
@@ -509,24 +529,27 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		});
 	}
 
-	_wantStatus(sock, accepted, errmsg = "Wrong Status") : UserData {
+	_confirmStatus(sock, accepted, errmsg = "Forbidden action") : UserData {
 		let userData = this.gameService.getUserData(sock.id);
-		if ( !userData ) 
-			throw new Error("not authenticated");
-		if ( !(new Set(accepted).has(userData.status)) )
-			throw new Error(errmsg);
+		if ( !userData ) {
+			sock.emit('gameSocketError', "you have no active session.");
+			return null;
+		}
+		if ( !(new Set(accepted).has(userData.status)) ) {
+			sock.emit('gameSocketError', errmsg);
+			return null;
+		}
 		return userData;
 	}
 
 	@SubscribeMessage('joinLobby')
 	joinLobby(sock: Socket) {
 		try {
-			let userData = this._wantStatus(sock, [UserStatus.Normal, UserStatus.Waiting])
+			let userData = this._confirmStatus(sock, [UserStatus.Normal, UserStatus.Waiting])
+			if (!userData) return null;
 
 			userData.joinRoom(this.gameService.lobbyRoom);
 			this._pushGameList();
-// 			return this._gamesInfo();
-			// TODO replace host.id with name (gotten from db? or set up in userData)
 		} catch {
 			return null;
 		}
@@ -534,13 +557,20 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('createInvite')
 	createInvite(sock: Socket, gameName: string) {
-		let userData = this._wantStatus(sock, [UserStatus.Normal] );
-		if (this.gameService.invites.has(gameName) )
-				throw new Error ("name already taken"); // TODO handle in client somehow
+		let userData = this._confirmStatus(sock, [UserStatus.Normal] );
+		if (!userData) return null;
+		
+// 		if (this.gameService.invites.has(gameName) )
+// 				throw new Error ("name already taken"); // TODO handle in client somehow
 
-		this.gameService.lobbyCreateInvite(userData.id, gameName);
+		try {
+			this.gameService.lobbyCreateInvite(userData.id, gameName);
+		} catch {
+			console.log("caught error");
+			sock.emit('gameSocketError', "name already taken");
+			return;
+		}
 
-		console.log('stat change sent', userData.userRoom);
 		this.server.to(userData.userRoom).emit('statusChange', UserStatus.Waiting);
 
 		this._pushGameList();
@@ -550,7 +580,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('cancel')
 	cancel(sock: Socket) {
-		let userData = this._wantStatus(sock, [UserStatus.Waiting]);
+		let userData = this._confirmStatus(sock, [UserStatus.Waiting]);
+		if (!userData) return null;
 
 		if (this.gameService.lobbyCancelInvite(userData.id))
 			this._pushGameList();
@@ -562,7 +593,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('joinGame')
 	joinGame(sock: Socket, gameId: string) {
-		let userData = this._wantStatus(sock, [UserStatus.Normal]);
+		let userData = this._confirmStatus(sock, [UserStatus.Normal]);
+		if (!userData) return null;
 
 		this.gameService.lobbyJoinGame(userData.id, gameId);
 		
@@ -573,20 +605,23 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('joinQueue')
 	joinQueue(sock: Socket) {
-		let userData = this._wantStatus(sock, [UserStatus.Normal]);
+		let userData = this._confirmStatus(sock, [UserStatus.Normal]);
+		if (!userData) return null;
 
 		console.log(`${userData.id} will join the queue`);
 
 		(async () => {
 			let rating = await this._rating(userData.id);
 			this.gameService.joinQueue(userData.id, rating);
+			console.log('did join');
 			this.server.to(userData.userRoom).emit('statusChange', UserStatus.Waiting);
 		}) ();
 	}
 
 	@SubscribeMessage('syncGame')
 	syncGame(sock: Socket) {
-		let userData = this._wantStatus(sock, [UserStatus.Playing]);
+		let userData = this._confirmStatus(sock, [UserStatus.Playing]);
+		if (!userData) return null;
 
 		let {player: whichPlayer, room, state: game} = this.gameService.getGameData(userData.id);
 		console.log('syncing', game);
@@ -596,7 +631,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	@SubscribeMessage('playerMotion')
 	playerMotion(sock: Socket, mo: gm.MotionType) {
 		console.log('got motion', mo);
-		let userData = this._wantStatus(sock, [UserStatus.Playing]);
+		let userData = this._confirmStatus(sock, [UserStatus.Playing]);
+		if (!userData) return null;
+
 		let {player: whichPlayer, room, state: game} = this.gameService.getGameData(userData.id);
 		let now = Date.now();
 		game.setMotion(whichPlayer, mo, now);

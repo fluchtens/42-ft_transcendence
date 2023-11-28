@@ -128,18 +128,17 @@ export class GameState {
 	}
 
 	update( time = Date.now()) {
+		console.log('pre-update');
 		let totalFrames = Math.floor( (time - this._lastUpdate) / PONG.msFrame );
 		// maybe throw if negative
 		this._lastUpdate += totalFrames * PONG.msFrame;
 
 		let handlePaddleCollision = () => {
-			if (!this.ball) return false;
+			if (!this.ball) return;
 
 			let which = (this.ball.dx < 0) ? WhichPlayer.P1 : WhichPlayer.P2;
 			if ((this.player(which).y - PONG.ballSize < this.ball.y)
 					&& (this.ball.y < (this.player(which).y + PONG.paddleHeight)) ) 
-				// TODO seems like the bottom is 1 too short? why
-				// maybe it's not? test better
 			{
 				this.ball.dx *= -1; 
 
@@ -156,18 +155,16 @@ export class GameState {
 				newDyRatio = 2.01 * (newDyRatio - 0.5); // [0, 1] -> [-1, 1]
 				this.ball.dy = Math.trunc(PONG.ballMaxYSpeed * newDyRatio);
 // 				console.log('ratio', newDyRatio, 'dy', this.ball.dy);
-
-				return true;
 			}
-
-			return false;
 		}
 
 		if (this.ball) {
 			let ballPassed = false; 
-			ballPassed = ballPassed || this.ball.x < this.player1.x + PONG.paddleWidth;
-			ballPassed = ballPassed || this.ball.x > this.player2.x - PONG.ballSize;
 			while (!ballPassed) {
+				ballPassed = ballPassed || this.ball.x <= this.player1.x - PONG.ballSize;
+				ballPassed = ballPassed || this.ball.x >= this.player2.x + PONG.paddleWidth;
+				if (ballPassed) break;
+
 				let distXToPaddle = 0;
 				if (this.ball.dx < 0) // going left
 					distXToPaddle = (this.player1.x + PONG.paddleWidth - 1) - this.ball.x;
@@ -175,20 +172,20 @@ export class GameState {
 					distXToPaddle = (this.player2.x) - (this.ball.x + PONG.ballSize - 1);
 				let framesToCross = Math.ceil(distXToPaddle / this.ball.dx)
 // 				console.log(`dist: ${distXToPaddle}, frames: ${framesToCross}`);
+				framesToCross = Math.max(1, framesToCross);
 				if (framesToCross > totalFrames)
 					break;
 
 				this._updateHelper(framesToCross);
 				totalFrames -= framesToCross;
+				handlePaddleCollision();
 
-				ballPassed = !handlePaddleCollision();
 			}
 		}
 		this._updateHelper(totalFrames);
 
 		return this;
 	}
-
 
 	player(which: WhichPlayer): Player {
 		return (which === WhichPlayer.P1) ? this.player1 : this.player2;
@@ -236,6 +233,8 @@ export class GameState {
 	}
 
 	updateScores(when: number | null = null) {
+		// TODO bad name for this function...
+		// more like "if scores should change do so and create new ball"
 		if (!this.ball) return {finish: false};
 		if (when)
 			this.update(when);
@@ -273,8 +272,6 @@ export class GameState {
 			this.update(when);
 		this.player(who).dy = PONG.playerSpeed * Number(mo);
 	}
-
-	// TODO setMotion
 }
 
 // 	update(time = Date.now()) { 

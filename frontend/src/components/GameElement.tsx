@@ -20,15 +20,30 @@ const gameSocket = io(
 	});
 const SocketContext = createContext<Socket>(gameSocket);
 
+// TODO io.on('connection', () => {refresh();}) or something
+// for reconnections
 export default function GameElement() {
 	let sockRef = useRef<Socket>(gameSocket);
+	let [errmsg, setErrmsg] = useState<string | null>(null);
+
 	useEffect( () => {
 		sockRef.current.connect();
-		// if (! socket.connected ) throw ...;
+		sockRef.current.on('gameSocketError', (errmsg: string) => {
+			setErrmsg(`Error: ${errmsg}`);
+		});
+
 		return () => { sockRef.current.disconnect(); };
 	}, []);
+
 	return ( 
 		<SocketContext.Provider value={sockRef.current}>
+			{errmsg
+				? <p style={{color:'red'}}>
+						{errmsg}
+						<button onClick={() => {setErrmsg(null);}}>x</button>
+					</p>
+				: <></>
+			}
 			<GameElementContent />
 		</SocketContext.Provider>
 	);
@@ -36,43 +51,57 @@ export default function GameElement() {
 
 enum UserStatus { Normal, Waiting, Playing }
 function GameElementContent() {
+	enum WinLose { NA = 0, Win, Lose };
 	const socket = useContext(SocketContext);
 	const [ status, setStatus ] = useState<UserStatus | undefined>(undefined);
-	// todo status logged_in or something?
+	const [ winLose, setWinLose ] = useState(WinLose.NA);
 
 	// authenticate and get status + log 
 	// set hooks for changes of status
 	useEffect( () => { 
-// 		let userId = prompt('who are you?'); // TESTING
-// 		socket.emit('authenticate', {userId}, (gotStatus: UserStatus | null) => {
 		socket.emit('getStatus', (gotStatus: UserStatus | undefined) => {
 			console.log('got status:', gotStatus);
 			setStatus(gotStatus);
-			// TODO handle error, not logged in etc
-			// + What if already authenticated?
-			// + Make it work if log out / re log in
 		});
 
-		console.log('register statchange');
-		socket.on('statusChange', (gotStatus: UserStatus) => { console.log('stat change', gotStatus); setStatus(gotStatus); } );
+		socket.on('statusChange', (gotStatus: UserStatus) => { setStatus(gotStatus); } );
+		socket.on('winLose', (gotWin: boolean) => { 
+			setWinLose(gotWin? WinLose.Win: WinLose.Lose); 
+		});
 		//cleanup
-		return () => { socket.off('statusChange'); console.log('statchange off'); };
+		return () => { 
+			socket.off('statusChange'); 
+			socket.off('winLose');
+		};
 	}, []);
 
+	function WinScreen({win = true}) {
+		return (
+			<p>
+				<b> You { win ? "Win :)" : "Lose :(" } !!! </b>
+				<button onClick={() => {setWinLose(WinLose.NA);}}> OK </button>
+			</p>
+		);
+	}
+
 	let content = <></>
-	switch (status) {
-		case undefined: 
-			content = (<p> you are not logged in </p>); 
-		break;
-		case UserStatus.Playing: 
-			content = <PongBoard availWidth={503} />; // TODO get width dynamically
-		break;
-		case UserStatus.Waiting:
-			content = <GamesLobby waiting={true} />;
-		break;
-		case UserStatus.Normal:
-			content = <GamesLobby waiting={false} />;
-		break;
+	if (winLose != WinLose.NA) {
+		content = <WinScreen win={winLose === WinLose.Win}/>
+	} else {
+		switch (status) {
+			case undefined: 
+				content = (<p> you are not logged in </p>); 
+			break;
+			case UserStatus.Playing: 
+				content = <PongBoard availWidth={703} availHeight={501}/>; // TODO get width dynamically
+			break;
+			case UserStatus.Waiting:
+				content = <GamesLobby waiting={true} />;
+			break;
+			case UserStatus.Normal:
+				content = <GamesLobby waiting={false} />;
+			break;
+		}
 	}
 
 	return content;
@@ -200,12 +229,15 @@ function GamesTable(
 	);
 }
 
-function PongBoard({availWidth}: {availWidth: number}) {
+function PongBoard({availWidth, availHeight}: {availWidth: number, availHeight: number}) {
 	const gameRef = useRef(new gm.GameState());
 	const socket = useContext(SocketContext);
 	const boardRef = useRef<HTMLCanvasElement | null>(null)
 
-	const scale = Math.floor(availWidth / gm.PONG.width);
+	let scale = Math.min(
+		Math.floor(availWidth / gm.PONG.width),
+		Math.floor(availHeight / gm.PONG.height));
+	scale = Math.max(1, scale); // if not enough space, dumb crop
 	const [canvasWidth, canvasHeight] = [gm.PONG.width * scale, gm.PONG.height * scale];
 
 	function drawGame(cx: CanvasRenderingContext2D) {
@@ -229,7 +261,7 @@ function PongBoard({availWidth}: {availWidth: number}) {
 			}
 
 			// display scores
-			cx.font = "30px Monospace";
+			cx.font = `${Math.floor(canvasHeight / 15)}px Monospace`;
 			cx.textAlign = "left";
 			cx.fillText(String(game.player1.score), 0, 30);
 			cx.textAlign = "right";
