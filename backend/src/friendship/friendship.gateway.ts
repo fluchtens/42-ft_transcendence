@@ -3,6 +3,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { use } from 'passport';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
 import { UserService } from 'src/user/user.service';
@@ -56,6 +57,16 @@ export class FriendshipGateway {
 
   public getUserStatus() {
     return this.userStatus;
+  }
+
+  public setUserStatus(userId: number, playing: boolean) {
+    let userObject = this.userStatus.get(userId);
+    if (!userObject) {
+      throw new Error('Unexpected Error');
+    }
+    userObject.status = playing ? 'In game' : 'Online';
+		this.server.emit('reloadList');
+		console.log('########### emiting', this.userStatus.get(userId));
   }
 
   handleConnection(client: Socket) {
