@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { Modal } from "../../components/Modal";
 import styles from "./CreateChannel.module.scss";
 import { notifySuccess } from "../../utils/notifications";
@@ -6,6 +6,10 @@ import { notifySuccess } from "../../utils/notifications";
 interface CreateChannelProps {
   name: string;
   changeName: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  isPublic: boolean;
+  setIsPublic: Dispatch<SetStateAction<boolean>>;
+  password: string;
+  setPassword: Dispatch<SetStateAction<string>>;
   createChannel: () => void;
   closeModal: () => void;
 }
@@ -13,12 +17,14 @@ interface CreateChannelProps {
 const CreateChannel = ({
   name,
   changeName,
+  isPublic,
+  setIsPublic,
+  password,
+  setPassword,
   createChannel,
   closeModal,
 }: CreateChannelProps) => {
-  const [isPublic, setIsPublic] = useState<boolean>(true);
   const [isProtected, setIsProtected] = useState<boolean>(false);
-  const [password, setPassword] = useState<string>("");
 
   const changeStatus = () => {
     setIsPublic(!isPublic);

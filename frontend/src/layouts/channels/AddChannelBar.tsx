@@ -1,17 +1,25 @@
 import { FaPlus } from "react-icons/fa6";
 import styles from "./AddChannelBar.module.scss";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { CreateChannel } from "./CreateChannel";
 
 interface AddChannelBarProps {
   name: string;
   changeName: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  isPublic: boolean;
+  setIsPublic: Dispatch<SetStateAction<boolean>>;
+  password: string;
+  setPassword: Dispatch<SetStateAction<string>>;
   createChannel: () => void;
 }
 
 const AddChannelBar = ({
   name,
   changeName,
+  isPublic,
+  setIsPublic,
+  password,
+  setPassword,
   createChannel,
 }: AddChannelBarProps) => {
   const [modal, setModal] = useState<boolean>(false);
@@ -37,6 +45,10 @@ const AddChannelBar = ({
         <CreateChannel
           name={name}
           changeName={changeName}
+          isPublic={isPublic}
+          setIsPublic={setIsPublic}
+          password={password}
+          setPassword={setPassword}
           createChannel={createChannel}
           closeModal={closeModal}
         />

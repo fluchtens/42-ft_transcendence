@@ -10,6 +10,8 @@ function Channels() {
   const [newChannel, setNewChannel] = useState<string>("");
   const [channelIds, setChannelIds] = useState<string[]>([]);
   const [channelsData, setChannelsData] = useState<Channel[]>([]);
+  const [isPublic, setIsPublic] = useState<boolean>(true);
+  const [password, setPassword] = useState<string>("");
   const { user } = useAuth();
   const socket = useChatSocket();
 
@@ -18,8 +20,14 @@ function Channels() {
   };
 
   const onCreateChannel = () => {
-    socket.emit("createChannel", { channelName: newChannel });
+    socket.emit("createChannel", {
+      channelName: newChannel,
+      isPublic: isPublic,
+      password: password,
+    });
     setNewChannel("");
+    setIsPublic(true);
+    setPassword("");
   };
 
   useEffect(() => {
@@ -98,6 +106,10 @@ function Channels() {
           <AddChannelBar
             name={newChannel}
             changeName={changeNewChannel}
+            isPublic={isPublic}
+            setIsPublic={setIsPublic}
+            password={password}
+            setPassword={setPassword}
             createChannel={onCreateChannel}
           />
           <ul>
