@@ -65,8 +65,8 @@ export class FriendshipGateway {
       throw new Error('Unexpected Error');
     }
     userObject.status = playing ? 'In game' : 'Online';
-		this.server.emit('reloadList');
-		console.log('########### emiting', this.userStatus.get(userId));
+    this.userStatus.set(userId, userObject);
+    this.server.emit('reloadList');
   }
 
   handleConnection(client: Socket) {
