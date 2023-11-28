@@ -16,11 +16,16 @@ const CreateChannel = ({
   createChannel,
   closeModal,
 }: CreateChannelProps) => {
-  const [type, setType] = useState<string>("public");
+  const [isPublic, setIsPublic] = useState<boolean>(true);
+  const [isProtected, setIsProtected] = useState<boolean>(false);
   const [password, setPassword] = useState<string>("");
 
-  const changeType = (type: string) => {
-    setType(type);
+  const changeStatus = () => {
+    setIsPublic(!isPublic);
+  };
+
+  const changeIsProtected = () => {
+    setIsProtected(!isProtected);
   };
 
   const changePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,38 +45,29 @@ const CreateChannel = ({
         <h1>Create Channel</h1>
         <div className={styles.types}>
           <label>Channel Type</label>
-          <div className={styles.type} onClick={() => changeType("public")}>
-            <div>
-              <label>Public</label>
-              <input
-                type="checkbox"
-                checked={type === "public"}
-                onChange={() => changeType("public")}
-              />
-            </div>
-            <p>Anyone can join the channel.</p>
-          </div>
-          <div className={styles.type} onClick={() => changeType("private")}>
-            <div>
-              <label>Private</label>
-              <input
-                type="checkbox"
-                checked={type === "private"}
-                onChange={() => changeType("private")}
-              />
-            </div>
-            <p>Only selected members will be able to join the channel.</p>
-          </div>
-          <div className={styles.type} onClick={() => changeType("protected")}>
+          <div className={styles.type} onClick={changeIsProtected}>
             <div>
               <label>Protected by a password</label>
               <input
                 type="checkbox"
-                checked={type === "protected"}
-                onChange={() => changeType("protected")}
+                checked={isProtected === true}
+                onChange={changeIsProtected}
               />
             </div>
             <p>Only members with the channel password will be able to join.</p>
+          </div>
+          <div className={styles.type} onClick={changeStatus}>
+            <div>
+              <label>Private Channel</label>
+              <input
+                type="checkbox"
+                checked={isPublic === false}
+                onChange={changeStatus}
+              />
+            </div>
+            <p>
+              Only selected members and roles will be able to view this channel.
+            </p>
           </div>
         </div>
         <div className={styles.inputs}>
@@ -85,9 +81,9 @@ const CreateChannel = ({
               required
             />
           </div>
-          {type === "protected" && (
+          {isProtected === true && (
             <div className={styles.input}>
-              <label>Password</label>
+              <label>Channel Password</label>
               <input
                 type="password"
                 value={password}
