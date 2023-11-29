@@ -9,7 +9,7 @@ export interface Game {
   id: number;
   finished: string;
   winner: User;
-  winnerId: string;
+  winnerId: number;
   winnerRatingBefore: number;
   winnerRatingAfter: number;
   loser: User;

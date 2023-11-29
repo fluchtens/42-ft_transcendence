@@ -1,56 +1,103 @@
 @import "../../styles/config.scss";
 
 .container {
-  .details {
+  text-align: center;
+
+  .profile {
     margin-top: 1.5rem;
     display: flex;
-    justify-content: left;
+    justify-content: center;
     align-items: center;
     gap: 3rem;
+    text-align: left;
 
     img {
-      width: 12rem;
-      height: 12rem;
-      border: 2px solid $extra-primary-color;
+      width: 14rem;
+      height: 14rem;
       border-radius: 50%;
       object-fit: cover;
     }
 
-    ul {
-      margin: 0;
-      padding: 0;
-      list-style-type: none;
+    .details {
+      flex-direction: column;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
 
-      .data:not(:last-child) {
-        margin-bottom: 0.5rem;
+      .lists {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 3rem;
+
+        ul {
+          width: 100%;
+          margin: 0;
+          padding: 0;
+          list-style-type: none;
+
+          .data:not(:last-child) {
+            margin-bottom: 0.5rem;
+          }
+
+          .data {
+            padding: 0 0.5rem;
+            height: 2.5rem;
+            display: flex;
+            justify-content: left;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid rgb(255, 255, 255, 0.05);
+
+            .icon {
+              width: 1rem;
+              height: 1rem;
+            }
+
+            p {
+              margin: 0;
+              font-size: map-get($text-sm, font-size);
+              line-height: map-get($text-sm, line-height);
+              font-weight: $font-medium;
+              white-space: nowrap;
+
+              &.type {
+                width: 7rem;
+                font-weight: $font-medium;
+              }
+
+              &.value {
+                margin-left: auto;
+                font-weight: $font-normal;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .container {
+    .profile {
+      margin-top: 1rem;
+      flex-direction: column;
+      gap: 1rem;
+
+      img {
+        width: 12rem;
+        height: 12rem;
       }
 
-      .data {
-        height: 2rem;
-        display: flex;
-        justify-content: left;
-        align-items: center;
-        gap: 0.5rem;
-        border-bottom: 1px solid $extra-primary-color;
-
-        .icon {
-          width: 1rem;
-          height: 1rem;
-        }
-
-        .type {
-          width: 7rem;
-          margin: 0;
-          font-size: map-get($text-sm, font-size);
-          line-height: map-get($text-sm, line-height);
-          font-weight: $font-medium;
-        }
-
-        .value {
-          margin: 0;
-          font-size: map-get($text-sm, font-size);
-          line-height: map-get($text-sm, line-height);
-          font-weight: $font-normal;
+      .details {
+        .lists {
+          flex-direction: column;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 0.5rem;
         }
       }
     }

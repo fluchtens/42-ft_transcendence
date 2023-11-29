@@ -8,12 +8,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import { User } from "../../types/user.interface";
 import styles from "./Profile.module.scss";
 import { UserDetails } from "./UserDetails";
-import { UserStats } from "./UserStats";
 import { Game, Stats } from "../../types/game.interface";
 import { UserHistory } from "./UserHistory";
 
 export default function Profile() {
-  const [user, setUser] = useState<User | null>(null);
+  const [targetUser, setTargetUser] = useState<User | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
   const [history, setHistory] = useState<Game[] | null>(null);
   const { username } = useParams();
@@ -28,7 +27,7 @@ export default function Profile() {
         navigate("/");
         return;
       }
-      setUser(userData);
+      setTargetUser(userData);
 
       const userStats = await getUserStatsApi(userData.id);
       setStats(userStats);
@@ -42,14 +41,11 @@ export default function Profile() {
 
   return (
     <>
-      {user && stats && history && (
+      {targetUser && stats && history && (
         <div className={styles.container}>
           <ul className={styles.profile}>
             <li>
-              <UserDetails user={user} />{" "}
-            </li>
-            <li>
-              <UserStats stats={stats} />
+              <UserDetails user={targetUser} stats={stats} />{" "}
             </li>
             <li>
               <UserHistory history={history} />

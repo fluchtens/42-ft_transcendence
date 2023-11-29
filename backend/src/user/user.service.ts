@@ -290,7 +290,6 @@ export class UserService {
 
     const history = await this.findUserHistory(id);
     history.sort((a, b) => (a.finished > b.finished ? -1 : 1));
-    console.log(history);
 
     return stats;
   }
