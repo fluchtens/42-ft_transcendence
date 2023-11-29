@@ -6,12 +6,17 @@ import { ChatHeader } from "./ChatHeader";
 import { MessageElement } from "./MessageElement";
 import { MessageInput } from "./MessageInput";
 import { User } from "../../types/user.interface";
-import { UserElement } from "../../layouts/friends/UserElement";
-import { ContextMenuType } from "../../layouts/friends/UserContextMenu";
-import { AddFriendBar } from "../../layouts/friends/AddFriendBar";
+import { UserElement } from "../friends/UserElement";
+import { ContextMenuType } from "../friends/UserContextMenu";
+import { AddFriendBar } from "../friends/AddFriendBar";
 import { notifySuccess } from "../../utils/notifications";
 import { useChatSocket } from "../../hooks/useChatSocket";
-import { Channel, Member, MemberUsers, Message } from "../../types/chat.interface";
+import {
+  Channel,
+  Member,
+  MemberUsers,
+  Message,
+} from "../../types/chat.interface";
 import { getAllUsersApi } from "../../services/user.api";
 import { Loading } from "../../components/Loading";
 
@@ -90,7 +95,7 @@ function Chat() {
     socket.on(`${id}/message`, (message: Message) => {
       setMessages((prevMessages) => [...prevMessages, message]);
     });
-    
+
     socket.on(`${id}/member`, (member: MemberUsers) => {
       setMembers((prevMembers) => [...prevMembers, member]);
     });
@@ -151,7 +156,9 @@ function Chat() {
                         user={member.user}
                         contextMenu={contextMenu === member.user.id}
                         contextMenuType={ContextMenuType.MEMBER}
-                        toggleContextMenu={() => toggleContextMenu(member.user.id)}
+                        toggleContextMenu={() =>
+                          toggleContextMenu(member.user.id)
+                        }
                       />
                     </li>
                   ))}

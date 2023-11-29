@@ -1,12 +1,12 @@
 @import "../../styles/config.scss";
 
 .container {
-  width: 14rem;
-  max-height: calc(100vh - 6rem);
-  padding: 1rem 0.75rem;
+  height: calc(100vh - 10rem);
+  padding: 2rem;
   flex-direction: column;
   display: flex;
-  gap: 0.5rem;
+  border-radius: $rounded-xl;
+  gap: 1rem;
   background: $bg-secondary-color;
 
   ul {
@@ -26,23 +26,15 @@
   }
 }
 
-@media (max-width: 1280px) {
+@media (max-width: 768px) {
   .container {
-    display: none;
-    margin: 0;
     padding: 1rem;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: calc(100vw - 2rem);
-    height: calc(100vh - 2rem);
-    max-height: 100vh;
-    z-index: 9999;
-    overflow-y: auto;
+    height: auto;
+    min-height: calc(100vh - 8rem);
 
     ul {
-      margin: 0;
-      padding: 0;
+      max-height: none;
+      overflow-y: visible;
     }
   }
 }
