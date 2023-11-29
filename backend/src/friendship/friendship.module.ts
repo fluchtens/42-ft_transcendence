@@ -8,5 +8,6 @@ import { AuthService } from 'src/auth/auth.service';
 @Module({
   controllers: [FriendshipController],
   providers: [FriendshipService, FriendshipGateway, AuthService, UserService],
+	exports: [FriendshipGateway, FriendshipService]
 })
 export class FriendshipModule {}
