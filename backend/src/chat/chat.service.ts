@@ -51,6 +51,25 @@ export class ChatService {
     }
   }
 
+  async getMemberById(memberId: string){
+    try{
+      const member = await this.prismaService.member.findUnique({
+        where : {
+          id: memberId,
+        }
+      });
+      if (member){
+        return member;
+      }
+      else {
+        throw new Error("no member found");
+      }
+    }
+    catch(error){
+      console.log(error);
+    }
+  }
+
   async getChannelMembers(channelId: string) {
     try {
       const channelMembers = await this.prismaService.member.findMany({

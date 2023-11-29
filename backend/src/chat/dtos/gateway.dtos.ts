@@ -1,4 +1,4 @@
-import { User } from '@prisma/client';
+import { Member, User } from '@prisma/client';
 
 export class SendMessageDto {
   channelId: string;
@@ -47,6 +47,15 @@ export class Messages {
     this.id = messageId;
     this.content = content;
     this.userId = userId;
+    this.user = user;
+  }
+}
+
+export class MemberDto {
+  member: Member;
+  user: Partial<User>;
+  constructor(member: Member, user: Partial<User>){
+    this.member = member;
     this.user = user;
   }
 }

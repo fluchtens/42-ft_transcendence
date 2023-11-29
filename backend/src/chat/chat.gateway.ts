@@ -39,9 +39,11 @@ import {
   GetChannelDto,
   DeleteMessageDto,
   ChangeMessageDto,
+  MemberDto,
 } from './dtos/gateway.dtos';
 import { channel } from 'diagnostics_channel';
 import * as bcrypt from 'bcryptjs';
+import { Member, User } from '@prisma/client';
 
 @WebSocketGateway({
   namespace: 'chatSocket',
@@ -59,6 +61,7 @@ export class ChatGateway implements OnModuleInit {
   ) {}
 
   private connectedUsers: Map<string, Set<string>> = new Map();
+  private usersData: Map<number, Partial<User>> = new Map();
 
   @WebSocketServer()
   server: Server;
@@ -95,7 +98,16 @@ export class ChatGateway implements OnModuleInit {
     return true;
   }
 
-  async(Messages: any) {}
+  async getOrAddUserData(number: number): Promise<Partial<User>> {
+    const existingUser = this.usersData.get(number);
+    if (existingUser) {
+      return existingUser;
+    } else {
+      const newUser: Partial<User> = await this.userService.findUserById(number);
+      this.usersData.set(number, newUser);
+      return newUser;
+    }
+  }
 
   async getChannelData(
     client: Socket,
@@ -115,7 +127,7 @@ export class ChatGateway implements OnModuleInit {
       channelData.inviteCode = channelInfo.inviteCode;
       channelData.id = channelInfo.id;
       channelData.name = channelInfo.name;
-      // channelData.public = channelInfo.public;
+      channelData.public = channelInfo.public;
       if (channelInfo.password === 'true' || !getMessages) {
         if (channelInfo.password === 'true') {
           channelData.protected = true;
@@ -141,7 +153,7 @@ export class ChatGateway implements OnModuleInit {
 
       const messages: Messages[] = await Promise.all(
         messagesRaw.map(async (rawMessage) => {
-          const user = await this.userService.getUserById(rawMessage.userId);
+          const user = await this.getOrAddUserData(rawMessage.userId);
           return new Messages(
             rawMessage.id,
             rawMessage.content,
@@ -150,7 +162,17 @@ export class ChatGateway implements OnModuleInit {
           );
         }),
       );
+      const memberDto: MemberDto[] = await Promise.all(
+        channelMembers.map(async (rawMember) => {
+          const user = await this.getOrAddUserData(rawMember.userId);
+          return new MemberDto(
+            rawMember,
+            user,
+          );
+        }),
+      );
       channelData.messages = messages;
+      channelData.members = memberDto;
     } catch (error) {
       console.error('error getChannelData', error);
       throw error;
@@ -263,7 +285,7 @@ export class ChatGateway implements OnModuleInit {
           );
           if (!messageSend) throw new Error('Message cannot be send');
           const messageData: Messages = messageSend;
-          messageData.user = await this.userService.getUserById(userId);
+          messageData.user = await this.getOrAddUserData(userId);
           this.server.to(channelId).emit(`${channelId}/message`, messageData);
         }
       } catch (error) {
@@ -343,7 +365,7 @@ export class ChatGateway implements OnModuleInit {
     if (userId) {
       if (!channelName) {
         try {
-          const user = await this.userService.getUserById(userId);
+          const user = await this.getOrAddUserData(userId);
           channelName = user.username + '_channel';
         } catch (error) {
           console.error('createchannel error', error.message);
@@ -415,14 +437,16 @@ export class ChatGateway implements OnModuleInit {
         );
         if (result) {
           const message = userId + ' have added ' + memberId;
-          const members = await this.chatService.getChannelMembers(channelId);
           const messageData = await this.chatService.addMessage(
             userId,
             channelId,
             message,
           );
-          this.server.to(channelId).emit(`${channelId}/message`, messageData);
-          this.server.to(channelId).emit(`${channelId}/members`, members);
+          const messageDataDto: Messages = messageData;
+          messageDataDto.user = await this.getOrAddUserData(userId);
+          this.server.to(channelId).emit(`${channelId}/message`, messageDataDto);
+          const userMember = await this.getOrAddUserData(Number(memberId));
+          this.server.to(channelId).emit(`${channelId}/member`, {member: result, user: userMember});
           this.server.to(String(memberId)).emit('newChannel', channelId);
         }
       } else {
@@ -457,7 +481,7 @@ export class ChatGateway implements OnModuleInit {
   //   // async typing(@MessageBody('isTyping') isTyping: boolean,
   //   //   @ConnectedSocket() client: Socket,
   //   //   ){
-  //   //     const name = await this.userService.getUserById(Number(client.handshake.auth.userId));
+  //   //   //  const name = await this.userService.findUserById(Number(client.handshake.auth.userId));
   //   //     this.server.emit('typing', { name, isTyping });
   //   // }
 
