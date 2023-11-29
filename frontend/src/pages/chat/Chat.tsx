@@ -11,7 +11,12 @@ import { ContextMenuType } from "../../layouts/friends/UserContextMenu";
 import { AddFriendBar } from "../../layouts/friends/AddFriendBar";
 import { notifySuccess } from "../../utils/notifications";
 import { useChatSocket } from "../../hooks/useChatSocket";
-import { Channel, Member, MemberUsers, Message } from "../../types/chat.interface";
+import {
+  Channel,
+  Member,
+  MemberUsers,
+  Message,
+} from "../../types/chat.interface";
 import { getAllUsersApi } from "../../services/user.api";
 import { Loading } from "../../components/Loading";
 
@@ -60,21 +65,14 @@ function Chat() {
     e.preventDefault();
     socket.emit("addMember", {
       channelId: id,
-      memberId: addedMember,
+      memberUsername: addedMember,
     });
     setAddedMember("");
   };
 
   useEffect(() => {
-    // const fetchData = async () => {
-    //   const membersData = await getAllUsersApi();
-    //   if (membersData) {
-    //     setMembers(membersData);
-    //   }
-    // };
-    // fetchData();
-
     socket.on(`channelData:${id}`, (channelData: Channel) => {
+      console.log(channelData);
       setChannel(channelData);
       setMessages(channelData.messages);
       setMembers(channelData.members);
@@ -90,7 +88,7 @@ function Chat() {
     socket.on(`${id}/message`, (message: Message) => {
       setMessages((prevMessages) => [...prevMessages, message]);
     });
-    
+
     socket.on(`${id}/member`, (member: MemberUsers) => {
       setMembers((prevMembers) => [...prevMembers, member]);
     });
@@ -151,7 +149,9 @@ function Chat() {
                         user={member.user}
                         contextMenu={contextMenu === member.user.id}
                         contextMenuType={ContextMenuType.MEMBER}
-                        toggleContextMenu={() => toggleContextMenu(member.user.id)}
+                        toggleContextMenu={() =>
+                          toggleContextMenu(member.user.id)
+                        }
                       />
                     </li>
                   ))}

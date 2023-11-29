@@ -24,7 +24,7 @@ export class ChangeMessageDto {
 
 export class AddMemberDto {
   channelId: string;
-  memberId: number;
+  memberUsername: string;
 }
 
 export class GetChannelDto {
@@ -63,6 +63,8 @@ export class MemberDto {
 export class ChannelData {
   id: string;
   name: string;
+  isMember: boolean;
+  isConnected: boolean;
   inviteCode?: string;
   public: boolean;
   protected: boolean;

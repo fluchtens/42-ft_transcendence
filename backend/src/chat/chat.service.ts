@@ -496,27 +496,6 @@ export class ChatService {
 
   async changeChannelOwner() {}
 
-  async checkIfUserCanJoinChannel(
-    userId: number,
-    channelId: string,
-  ): Promise<boolean> {
-    try {
-      const member = await this.prismaService.member.findFirst({
-        where: {
-          userId: userId,
-          channelId: channelId,
-        },
-      });
-      if (member) {
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error(error.message);
-      return false;
-    }
-  }
-
   async updateChannelWithPassword(
     userId: number,
     channelId: string,
@@ -540,16 +519,6 @@ export class ChatService {
     }
   }
 
-  async verifyChannelPassword(
-    channelId: string,
-    password: string,
-  ): Promise<boolean> {
-    const channel = await this.prismaService.channel.findUnique({
-      where: { id: channelId },
-    });
-    return channel?.password === password;
-  }
-
   async removePasswordFromChannel(
     userId: number,
     channelId: string,
@@ -558,7 +527,7 @@ export class ChatService {
     try {
       const channelData = await this.getChannelById(channelId);
       if (channelData.userId === userId) {
-        if (await this.verifyChannelPassword(channelId, password)) {
+        if (await bcrypt.compare(password, channelData.password)) {
           await this.prismaService.channel.update({
             where: {
               id: channelId,
@@ -613,6 +582,51 @@ export class ChatService {
       return channel?.public || false;
     } catch (error) {
       console.error(error);
+      throw error;
+    }
+  }
+
+  async getAllPublicChannels() {
+    try {
+      const channels = this.prismaService.channel.findMany({
+        where: {
+          public: true,
+        },
+      });
+      if (channels){
+        return channels
+      }
+    }
+    catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  async joinPublicChannel(userId: number, channelId: string, password?: string) {
+    try {
+      if (!userId) {
+        throw new BadRequestException('userId not found');
+      }
+      const channelMembers = await this.getChannelMembers(channelId);
+      const existingMember = channelMembers.find(
+        (member) => Number(member.userId) === Number(userId),
+      );
+      if (existingMember) {
+        throw new Error('Member already exists in the channel');
+      }
+      const channel = await this.getChannelById(channelId, password);
+      if (channel.password === 'true') {
+        throw new Error('need password to join channel');
+      }
+      const newMember = await this.prismaService.member.create({
+        data: {
+          userId: userId,
+          channelId: channelId,
+        },
+      });
+      return newMember;
+  }
+    catch(error) {
       throw error;
     }
   }

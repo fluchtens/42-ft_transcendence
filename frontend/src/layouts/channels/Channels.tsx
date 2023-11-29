@@ -61,6 +61,7 @@ function Channels() {
     channelIds.forEach((channelId) => {
       socket.emit("joinRoom", { channelId: channelId, getMessages: false });
       socket.on(`channelData:${channelId}`, (channelData: Channel) => {
+        console.log("channelData", channelData);
         setChannelsData((prevChannelsData) => {
           const updatedChannels = [...prevChannelsData];
           const channelIndex = updatedChannels.findIndex(

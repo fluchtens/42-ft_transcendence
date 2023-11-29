@@ -3,6 +3,8 @@ import { User } from "./user.interface";
 export interface Channel {
   id: string;
   name: string;
+  isMember: boolean;
+  isConnected: boolean;
   inviteCode?: string;
   public: boolean;
   protected: boolean;
