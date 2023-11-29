@@ -103,7 +103,7 @@ export class ChatGateway implements OnModuleInit {
     if (existingUser) {
       return existingUser;
     } else {
-      const newUser: Partial<User> = await this.userService.findUserById(number);
+      const newUser: Partial<User> = await this.userService.getUserById(number);
       this.usersData.set(number, newUser);
       return newUser;
     }
@@ -165,10 +165,7 @@ export class ChatGateway implements OnModuleInit {
       const memberDto: MemberDto[] = await Promise.all(
         channelMembers.map(async (rawMember) => {
           const user = await this.getOrAddUserData(rawMember.userId);
-          return new MemberDto(
-            rawMember,
-            user,
-          );
+          return new MemberDto(rawMember, user);
         }),
       );
       channelData.messages = messages;
@@ -444,9 +441,13 @@ export class ChatGateway implements OnModuleInit {
           );
           const messageDataDto: Messages = messageData;
           messageDataDto.user = await this.getOrAddUserData(userId);
-          this.server.to(channelId).emit(`${channelId}/message`, messageDataDto);
+          this.server
+            .to(channelId)
+            .emit(`${channelId}/message`, messageDataDto);
           const userMember = await this.getOrAddUserData(Number(memberId));
-          this.server.to(channelId).emit(`${channelId}/member`, {member: result, user: userMember});
+          this.server
+            .to(channelId)
+            .emit(`${channelId}/member`, { member: result, user: userMember });
           this.server.to(String(memberId)).emit('newChannel', channelId);
         }
       } else {
