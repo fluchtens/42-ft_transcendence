@@ -1,35 +1,13 @@
 @import "../../styles/config.scss";
 
 .container {
-  border-radius: $rounded-lg;
-  background: $bg-secondary-color;
-
-  .header {
-    height: 2.5rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 0.5rem;
-    border-top-left-radius: $rounded-lg;
-    border-top-right-radius: $rounded-lg;
-    background: $extra-primary-color;
-    color: white;
-
-    .icon {
-      height: 1.15rem;
-      width: 1.15rem;
-    }
-  }
-
   .details {
-    padding: 0 2rem;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-bottom-left-radius: $rounded-lg;
-    border-bottom-right-radius: $rounded-lg;
 
     ul {
+      width: 100%;
       margin: 0;
       padding: 0;
       list-style-type: none;

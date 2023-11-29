@@ -1,6 +1,6 @@
+import { Separator } from "../../components/Separator";
 import { Stats } from "../../types/game.interface";
 import styles from "./UserStats.module.scss";
-import { IoGameController } from "react-icons/io5";
 
 interface UserStatsProps {
   stats: Stats;
@@ -13,10 +13,8 @@ const UserStats = ({ stats }: UserStatsProps) => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <IoGameController className={styles.icon} />
-        <h2>Stats</h2>
-      </div>
+      <h1>Stats</h1>
+      <Separator />
       <div className={styles.details}>
         <div className={styles.percentages}>
           <p className={styles.wonPercentage}>{wonPercentage.toFixed(2)}%</p>

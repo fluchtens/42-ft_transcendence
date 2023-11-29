@@ -44,9 +44,17 @@ export default function Profile() {
     <>
       {user && stats && history && (
         <div className={styles.container}>
-          <UserDetails user={user} />
-          <UserStats stats={stats} />
-          <UserHistory history={history} />
+          <ul className={styles.profile}>
+            <li>
+              <UserDetails user={user} />{" "}
+            </li>
+            <li>
+              <UserStats stats={stats} />
+            </li>
+            <li>
+              <UserHistory history={history} />
+            </li>
+          </ul>
         </div>
       )}
     </>

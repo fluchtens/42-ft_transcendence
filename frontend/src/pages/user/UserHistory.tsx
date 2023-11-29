@@ -1,7 +1,7 @@
-import { FaUser } from "react-icons/fa6";
 import { GiPingPongBat } from "react-icons/gi";
 import styles from "./UserHistory.module.scss";
 import { Game } from "../../types/game.interface";
+import { Separator } from "../../components/Separator";
 
 interface UserHistoryProps {
   history: Game[];
@@ -10,10 +10,8 @@ interface UserHistoryProps {
 const UserHistory = ({ history }: UserHistoryProps) => {
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <FaUser className={styles.icon} />
-        <h2>Match history</h2>
-      </div>
+      <h1>Match history</h1>
+      <Separator />
       <div className={styles.details}>
         <ul>
           {history?.map((match) => (
