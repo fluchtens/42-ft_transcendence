@@ -16,7 +16,6 @@ export class UserData {
 		return this._status;
 	}
 	public set status(val: UserStatus) {
-		console.log(' ### pre-status', gFriendshipGateway === undefined);
 		if (val === UserStatus.Playing && gFriendshipGateway ) {
 			gFriendshipGateway.setUserStatus(this.id, true);
 		} else if ( this.status === UserStatus.Playing && gFriendshipGateway) {
@@ -92,7 +91,6 @@ class MMQueue { // Matchmaking queue
 
 	launch () {
 		let repeat = () => {
-				console.log('queue: handling matches');
 				let matches = this.makeMatches();
 				matches.forEach( (ids) => {this.onMatch(ids[0], ids[1])} );
 		}
@@ -119,7 +117,6 @@ class MMQueue { // Matchmaking queue
 			let [initRg, wRate] = [this.options.initialRange, this.options.widenRate];
 			let minRating1 = req2.rating - (initRg + wRate * ( Date.now() - req2.timestamp ) / 1000);
 			let maxRating2 = req1.rating + (initRg + wRate * ( Date.now() - req1.timestamp ) / 1000);
-			console.log('matching:', req1, req2, minRating1, maxRating2);
 			return ( minRating1 < req1.rating && req2.rating < maxRating2 );
 		}
 
@@ -175,8 +172,6 @@ export class GameService {
 
 // 		gFriendshipGateway = this.friendshipGateway;
 // 		//
-// 		console.log('gateway', this.friendshipGateway);
-// 		console.log('##################set gateway', gFriendshipGateway);
 // 		let alice = new UserData(1);
 // 		let bob = new UserData(2);
 // 		alice.rating = 1100;
@@ -200,19 +195,15 @@ export class GameService {
 
 	bindSocket ( sock: Socket, userId: number ) {
 		if (!gFriendshipGateway) {
-			console.log('foo');
 			gFriendshipGateway = this.friendshipGateway;
-			console.log('##################set gateway', gFriendshipGateway === undefined);
 		}
 		this.socketUsers.set(sock.id, userId);
 		if ( !this.users.get(userId) ) {
-			console.log('creating new user:', userId);
 			this.users.set( userId, new UserData(userId) );
 		}
 
 		this.users.get(userId).addSocket(sock);
 		this.pendingDelete.delete(userId);
-		console.log('found user', this.users.get(userId));
 
 		return this.users.get(userId);
 	}
@@ -292,7 +283,6 @@ export class GameService {
 	launchGame(userId1, userId2, startTime = Date.now()) {
 		let player1 = this.users.get(userId1);
 		let player2 = this.users.get(userId2);
-		console.log('players', player1?.id, player2?.id);
 		if (!player1 || !player2)
 			throw new Error("no such active user");
 
@@ -307,7 +297,6 @@ export class GameService {
 		// END TESTING
 		// //
 		this.games.set(gameId, game);
-		console.log('ready to launch:', game);
 
 		let bindPlayer = (user, whichP) => {
 			user.status = UserStatus.Playing;
@@ -355,7 +344,6 @@ export class GameService {
 				this.gameCallback({gameRoom: gameId, game});
 // 				let nextTimepoint = Math.max(20, game.minTimeToPoint());
 				let nextTimepoint = game.minTimeToPoint();
-				console.log('wait:', nextTimepoint);
 				setTimeout(resetTimer, nextTimepoint);
 			}
 		}

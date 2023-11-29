@@ -86,4 +86,14 @@ export class UserController {
   async postAvatar(@Req() req, @UploadedFile() file: Express.Multer.File) {
     return this.userService.postAvatar(req, file);
   }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                    Game                                    */
+  /* -------------------------------------------------------------------------- */
+
+  @Get('game/stats/:id')
+  @UseGuards(JwtAuthGuard)
+  async getUserStats(@Param('id') id: string) {
+    return this.userService.getUserStats(parseInt(id));
+  }
 }

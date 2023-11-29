@@ -1,37 +1,42 @@
 import { useEffect, useState } from "react";
-import { getUserByUsernameApi } from "../../services/user.api";
+import { getUserByUsernameApi, getUserStatsApi } from "../../services/user.api";
 import { useNavigate, useParams } from "react-router-dom";
 import { User } from "../../types/user.interface";
 import styles from "./Profile.module.scss";
 import { UserDetails } from "./UserDetails";
 import { UserStats } from "./UserStats";
+import { Stats } from "../../types/game.interface";
 
 export default function Profile() {
   const [user, setUser] = useState<User | null>(null);
+  const [stats, setStats] = useState<Stats | null>(null);
   const { username } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const getUser = async () => {
-      if (!username) {
-        return;
-      }
-      const data = await getUserByUsernameApi(username);
-      if (!data) {
+    const fetchData = async () => {
+      if (!username) return;
+
+      const userData = await getUserByUsernameApi(username);
+      if (!userData) {
         navigate("/");
         return;
       }
-      setUser(data);
+      setUser(userData);
+
+      const userStats = await getUserStatsApi(userData.id);
+      setStats(userStats);
     };
-    getUser();
+
+    fetchData();
   }, [username]);
 
   return (
     <>
-      {user && (
+      {user && stats && (
         <div className={styles.container}>
           <UserDetails user={user} />
-          <UserStats user={user} />
+          <UserStats stats={stats} />
         </div>
       )}
     </>
