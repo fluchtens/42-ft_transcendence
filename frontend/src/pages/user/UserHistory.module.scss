@@ -1,0 +1,118 @@
+@import "../../styles/config.scss";
+
+.container {
+  border-radius: $rounded-lg;
+  background: $bg-secondary-color;
+
+  .header {
+    height: 2.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    border-top-left-radius: $rounded-lg;
+    border-top-right-radius: $rounded-lg;
+    background: $extra-primary-color;
+    color: white;
+
+    .icon {
+      height: 1.15rem;
+      width: 1.15rem;
+    }
+  }
+
+  .details {
+    padding: 0 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom-left-radius: $rounded-lg;
+    border-bottom-right-radius: $rounded-lg;
+
+    ul {
+      margin: 0;
+      padding: 0;
+      list-style-type: none;
+
+      .match {
+        height: 8rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1.25rem;
+        border-bottom: 1px solid $extra-primary-color;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .matchIcon {
+          width: 2rem;
+          height: 2rem;
+        }
+
+        .userStats {
+          flex-direction: column;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+
+          &.left {
+            .player {
+              margin-left: auto;
+            }
+            .rating {
+              margin-left: auto;
+            }
+          }
+
+          &.right {
+            .player {
+              margin-right: auto;
+            }
+            .rating {
+              margin-right: auto;
+            }
+          }
+
+          .player {
+            font-size: map-get($text-lg, font-size);
+            line-height: map-get($text-lg, line-height);
+            font-weight: $font-semibold;
+          }
+
+          .rating {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.25rem;
+
+            .ratingNow {
+              margin: 0;
+              font-size: map-get($text-base, font-size);
+              line-height: map-get($text-base, line-height);
+              font-weight: $font-normal;
+              text-align: right;
+            }
+
+            p {
+              margin: 0;
+              font-size: map-get($text-base, font-size);
+              line-height: map-get($text-base, line-height);
+              font-weight: $font-medium;
+              text-align: right;
+            }
+
+            .ratingIncrease {
+              color: #81b64c;
+            }
+
+            .ratingDecrease {
+              color: #e02827;
+            }
+          }
+        }
+      }
+    }
+  }
+}
