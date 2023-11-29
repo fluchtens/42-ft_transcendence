@@ -6,14 +6,16 @@ interface NavLinkProps {
   path: string;
   text: string;
   icon: ReactNode;
+  cb: () => void;
 }
 
-const NavLink = ({ path, text, icon }: NavLinkProps) => {
+const NavLink = ({ path, text, icon, cb }: NavLinkProps) => {
   const { pathname } = useLocation();
   const isAcualPath = pathname === path;
 
   return (
     <Link
+      onClick={cb}
       to={path}
       className={isAcualPath ? styles.actualPathLink : styles.link}
     >
