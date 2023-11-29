@@ -39,8 +39,24 @@
       background: #81b64c;
     }
 
+    .wonPartFull {
+      border-top-left-radius: $rounded-lg;
+      border-top-right-radius: $rounded-lg;
+      border-bottom-left-radius: $rounded-lg;
+      border-bottom-right-radius: $rounded-lg;
+      background: #81b64c;
+    }
+
     .lostPart {
       border-top-right-radius: $rounded-lg;
+      border-bottom-right-radius: $rounded-lg;
+      background: #e02827;
+    }
+
+    .lostPartFull {
+      border-top-left-radius: $rounded-lg;
+      border-top-right-radius: $rounded-lg;
+      border-bottom-left-radius: $rounded-lg;
       border-bottom-right-radius: $rounded-lg;
       background: #e02827;
     }

@@ -18,11 +18,15 @@ const StatsBar = ({ stats }: StatsBarProps) => {
       </div>
       <div className={styles.statsBar}>
         <div
-          className={styles.wonPart}
+          className={`${
+            wonPercentage === 100 ? styles.wonPartFull : styles.wonPart
+          }`}
           style={{ width: `${wonPercentage}%` }}
         ></div>
         <div
-          className={styles.lostPart}
+          className={`${
+            lostPercentage === 100 ? styles.lostPartFull : styles.lostPart
+          }`}
           style={{ width: `${lostPercentage}%` }}
         ></div>
       </div>
