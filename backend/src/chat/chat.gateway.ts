@@ -129,11 +129,13 @@ export class ChatGateway implements OnModuleInit {
       channelData.id = channelInfo.id;
       channelData.name = channelInfo.name;
       channelData.public = channelInfo.public;
-      const userInChannel = await this.chatService.findMemberInChannel(channelData.id, Number(client.handshake.auth.userId));
+      const userInChannel = await this.chatService.findMemberInChannel(
+        channelData.id,
+        Number(client.handshake.auth.userId),
+      );
       if (userInChannel) {
         channelData.isMember = true;
-      }
-      else {
+      } else {
         channelData.isMember = false;
       }
       if (channelInfo.password === 'true' || !getMessages) {
@@ -394,8 +396,7 @@ export class ChatGateway implements OnModuleInit {
         this.roomService.joinRoom(client, channelData.id);
         if (isPublic) {
           this.server.emit('newChannel', channelData.id);
-        }
-        else {
+        } else {
           client.emit('newChannel', channelData.id);
         }
       } catch (error) {
@@ -480,17 +481,26 @@ export class ChatGateway implements OnModuleInit {
   }
 
   @SubscribeMessage('joinPublicChannel')
-  async handleJoinPublicChannel(@ConnectedSocket() client: Socket, @MessageBody() channelDto: GetChannelDto) {
+  async handleJoinPublicChannel(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() channelDto: GetChannelDto,
+  ) {
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
-        const channel = await this.chatService.getChannelById(channelDto.channelId);
+        const channel = await this.chatService.getChannelById(
+          channelDto.channelId,
+        );
         console.log('joinPublicChannel', channel);
         if (channel) {
           console.log(channelDto.channelId);
-          const joinChannel = await this.chatService.joinPublicChannel(userId, channelDto.channelId, channelDto.password);
+          const joinChannel = await this.chatService.joinPublicChannel(
+            userId,
+            channelDto.channelId,
+            channelDto.password,
+          );
           if (joinChannel) {
-            console.log("SendEvent");
+            console.log('SendEvent');
             const user = await this.getOrAddUserData(userId);
             const message = user.username + ' have joined the channel';
             const messageData = await this.chatService.addMessage(
@@ -505,20 +515,27 @@ export class ChatGateway implements OnModuleInit {
               .emit(`${channelDto.channelId}/message`, messageDataDto);
             this.server
               .to(channelDto.channelId)
-              .emit(`${channelDto.channelId}/member`, { member: joinChannel, user: user });
-            const channelInfo = await this.getChannelData(client, channel.id, false, channelDto.password);
-            this.server.to(String(userId)).emit(`channelData:${channel.id}`, channelInfo);
+              .emit(`${channelDto.channelId}/member`, {
+                member: joinChannel,
+                user: user,
+              });
+            const channelInfo = await this.getChannelData(
+              client,
+              channel.id,
+              false,
+              channelDto.password,
+            );
+            this.server
+              .to(String(userId))
+              .emit(`channelData:${channel.id}`, channelInfo);
             return true;
+          } else {
+            throw new Error('error when join the channel');
           }
-          else {
-            throw new Error("error when join the channel");
-          }
-        }
-        else {
+        } else {
           throw new Error('Channel not found');
         }
-      }
-      catch (error) {
+      } catch (error) {
         console.log(error.message);
         return false;
       }

@@ -54,7 +54,7 @@ export class Messages {
 export class MemberDto {
   member: Member;
   user: Partial<User>;
-  constructor(member: Member, user: Partial<User>){
+  constructor(member: Member, user: Partial<User>) {
     this.member = member;
     this.user = user;
   }

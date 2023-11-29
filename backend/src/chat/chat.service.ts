@@ -51,21 +51,19 @@ export class ChatService {
     }
   }
 
-  async getMemberById(memberId: string){
-    try{
+  async getMemberById(memberId: string) {
+    try {
       const member = await this.prismaService.member.findUnique({
-        where : {
+        where: {
           id: memberId,
-        }
+        },
       });
-      if (member){
+      if (member) {
         return member;
+      } else {
+        throw new Error('no member found');
       }
-      else {
-        throw new Error("no member found");
-      }
-    }
-    catch(error){
+    } catch (error) {
       console.log(error);
     }
   }
@@ -593,16 +591,19 @@ export class ChatService {
           public: true,
         },
       });
-      if (channels){
-        return channels
+      if (channels) {
+        return channels;
       }
-    }
-    catch (error) {
+    } catch (error) {
       console.log(error.message);
     }
   }
 
-  async joinPublicChannel(userId: number, channelId: string, password?: string) {
+  async joinPublicChannel(
+    userId: number,
+    channelId: string,
+    password?: string,
+  ) {
     try {
       if (!userId) {
         throw new BadRequestException('userId not found');
@@ -625,8 +626,7 @@ export class ChatService {
         },
       });
       return newMember;
-  }
-    catch(error) {
+    } catch (error) {
       throw error;
     }
   }
