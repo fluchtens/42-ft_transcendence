@@ -90,6 +90,7 @@ export class FriendshipGateway {
 
       this.addSocketToUser(userId, socketId);
       this.server.emit('reloadList');
+      console.log('firend connexion' + client.id);
     } catch (error) {
       client.disconnect(true);
       console.error(`client ${client.id} disconnected`, error.message);
@@ -102,6 +103,7 @@ export class FriendshipGateway {
 
     this.removeSocketFromUser(userId, socketId);
     this.server.emit('reloadList');
+    console.log('firend disconnect');
   }
 
   @SubscribeMessage('reloadList')

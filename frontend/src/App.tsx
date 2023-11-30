@@ -13,6 +13,7 @@ import FriendStyles from "./pages/friends/Friends.module.scss";
 import Settings from "./pages/settings/Settings";
 import { AuthProvider } from "./hooks/useAuth";
 import { ChatSocketProvider } from "./hooks/useChatSocket";
+import { FriendshipSocketProvider } from "./hooks/useFriendshipSocket";
 
 function App() {
   const router = createBrowserRouter([
@@ -64,7 +65,9 @@ function App() {
     <>
       <AuthProvider>
         <ChatSocketProvider>
-          <RouterProvider router={router} />
+          <FriendshipSocketProvider>
+            <RouterProvider router={router} />
+          </FriendshipSocketProvider>
         </ChatSocketProvider>
       </AuthProvider>
     </>
