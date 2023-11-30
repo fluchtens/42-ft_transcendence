@@ -9,11 +9,13 @@ import { BsFillChatDotsFill } from "react-icons/bs";
 import styles from "./Header.module.scss";
 import { useAuth } from "../../hooks/useAuth";
 import { FaUserGroup } from "react-icons/fa6";
+import { useFriendshipSocket } from "../../hooks/useFriendshipSocket";
 
 export default function Header() {
   const { user, refreshUser } = useAuth();
   const [navMenu, setNavMenu] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(Boolean(user));
+  const firendshipSocket = useFriendshipSocket();
 
   const closeNavMenu = () => {
     setNavMenu(false);
@@ -26,6 +28,7 @@ export default function Header() {
   const handleLogout = async () => {
     await refreshUser();
     setIsLoggedIn(false);
+    firendshipSocket.disconnect();
     window.location.reload();
   };
 
