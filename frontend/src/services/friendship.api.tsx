@@ -69,6 +69,28 @@ async function blockUserApi(userId: number): Promise<AuthRes> {
     return { success: false, message: ERR_MSG };
   }
 }
+
+async function unlockUserApi(userId: number): Promise<AuthRes> {
+  try {
+    const response = await fetch(`${API_URL}/unlock`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId }),
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      return { success: false, message: data.message };
+    }
+
+    return { success: true, message: data.message };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: ERR_MSG };
+  }
+}
+
 /* -------------------------------------------------------------------------- */
 /*                                  Requests                                  */
 /* -------------------------------------------------------------------------- */
@@ -159,6 +181,7 @@ export {
   getFriendsApi,
   removeFriendApi,
   blockUserApi,
+  unlockUserApi,
   getFriendRequestsApi,
   sendFriendRequestApi,
   acceptFriendRequestApi,

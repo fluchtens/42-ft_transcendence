@@ -3,6 +3,7 @@ import styles from "./Settings.module.scss";
 import AuthSettings from "./AuthSettings";
 import ProfileSettings from "./ProfileSettings";
 import { useAuth } from "../../hooks/useAuth";
+import UnlockUser from "./UnlockUser";
 
 function Settings() {
   const { user } = useAuth();
@@ -21,6 +22,9 @@ function Settings() {
             </li>
             <li>
               <AuthSettings />
+            </li>
+            <li>
+              <UnlockUser />
             </li>
           </ul>
         </div>

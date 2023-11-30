@@ -226,6 +226,43 @@ export class FriendshipService {
     return { message: 'User successfully blocked' };
   }
 
+  async unlockUser(reqUserId: number, targetUserId: number) {
+    if (reqUserId === targetUserId) {
+      throw new BadRequestException("You can't unlock yourself");
+    }
+
+    const targetUser = await this.userService.findUserById(targetUserId);
+    if (!targetUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    const friendship = await this.findFriendship(reqUserId, targetUserId);
+    if (!friendship) {
+      await this.prismaService.friendship.create({
+        data: {
+          sender: { connect: { id: reqUserId } },
+          receiver: { connect: { id: targetUserId } },
+          status: FriendshipStatus.DELETED,
+        },
+      });
+    } else {
+      if (friendship.status !== FriendshipStatus.BLOCKED) {
+        throw new BadRequestException('This user is not blocked');
+      }
+
+      await this.prismaService.friendship.update({
+        where: { id: friendship.id },
+        data: {
+          sender: { connect: { id: reqUserId } },
+          receiver: { connect: { id: targetUserId } },
+          status: FriendshipStatus.DELETED,
+        },
+      });
+    }
+
+    return { message: 'User successfully unlocked' };
+  }
+
   /* -------------------------------------------------------------------------- */
   /*                                  Requests                                  */
   /* -------------------------------------------------------------------------- */

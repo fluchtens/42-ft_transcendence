@@ -56,6 +56,18 @@ export class FriendshipController {
     return res;
   }
 
+  @Patch('unlock')
+  @UseGuards(JwtAuthGuard)
+  async unlockUser(@Req() req, @Body() body: UserIdDto) {
+    const { id } = req.user;
+    const { userId } = body;
+
+    const res = await this.friendshipService.unlockUser(id, userId);
+    this.friendshipGateway.handleReloadList();
+
+    return res;
+  }
+
   /* -------------------------------------------------------------------------- */
   /*                                  Requests                                  */
   /* -------------------------------------------------------------------------- */
