@@ -272,7 +272,7 @@ function PongBoard({availWidth, availHeight}: {availWidth: number, availHeight: 
 			let {x, y} = game.ball;
 			cx.fillRect(x * scale, y * scale, w, w);
 		} else {
-			let contdown = game.timeToBall() / 1000;
+			let countdown = game.timeToBall() / 1000;
 			if (countdown > 0)
 				drawCountdown(game.timeToBall() / 1000);
 		}
