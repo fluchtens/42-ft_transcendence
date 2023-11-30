@@ -1,48 +1,80 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import { useState } from "react";
 import { Modal } from "../../components/Modal";
 import styles from "./CreateChannel.module.scss";
 import { notifySuccess } from "../../utils/notifications";
+import { useChatSocket } from "../../hooks/useChatSocket";
 
 interface CreateChannelProps {
-  name: string;
-  changeName: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  isPublic: boolean;
-  setIsPublic: Dispatch<SetStateAction<boolean>>;
-  password: string;
-  setPassword: Dispatch<SetStateAction<string>>;
-  createChannel: () => void;
+  newChannel: {
+    name: string;
+    isPublic: boolean;
+    password: string;
+  };
+  setNewChannel: React.Dispatch<
+    React.SetStateAction<{
+      name: string;
+      isPublic: boolean;
+      password: string;
+    }>
+  >;
   closeModal: () => void;
 }
 
 const CreateChannel = ({
-  name,
-  changeName,
-  isPublic,
-  setIsPublic,
-  password,
-  setPassword,
-  createChannel,
+  newChannel,
+  setNewChannel,
   closeModal,
 }: CreateChannelProps) => {
   const [isProtected, setIsProtected] = useState<boolean>(false);
-
-  const changeStatus = () => {
-    setIsPublic(!isPublic);
-  };
+  const socket = useChatSocket();
 
   const changeIsProtected = () => {
     setIsProtected(!isProtected);
   };
 
+  const changeName = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewChannel((prevEditChannel) => ({
+      ...prevEditChannel,
+      name: e.target.value,
+    }));
+  };
+
+  const changeStatus = () => {
+    setNewChannel((prevEditChannel) => ({
+      ...prevEditChannel,
+      isPublic: !prevEditChannel.isPublic,
+    }));
+  };
+
   const changePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value);
+    setNewChannel((prevEditChannel) => ({
+      ...prevEditChannel,
+      password: e.target.value,
+    }));
+  };
+
+  const resetProperties = () => {
+    setNewChannel({
+      name: "",
+      isPublic: true,
+      password: "",
+    });
+  };
+
+  const createChannel = () => {
+    socket.emit("createChannel", {
+      channelName: newChannel.name,
+      isPublic: newChannel.isPublic,
+      password: newChannel.password,
+    });
+    notifySuccess("Channel successfully created");
   };
 
   const submitData = (e: React.FormEvent) => {
     e.preventDefault();
     createChannel();
     closeModal();
-    notifySuccess("Channel successfully created");
+    resetProperties();
   };
 
   return (
@@ -67,7 +99,7 @@ const CreateChannel = ({
               <label>Private Channel</label>
               <input
                 type="checkbox"
-                checked={isPublic === false}
+                checked={newChannel.isPublic === false}
                 onChange={changeStatus}
               />
             </div>
@@ -81,7 +113,7 @@ const CreateChannel = ({
             <label>Channel Name</label>
             <input
               type="text"
-              value={name}
+              value={newChannel.name}
               onChange={changeName}
               placeholder="Enter a channel name"
               required
@@ -92,7 +124,7 @@ const CreateChannel = ({
               <label>Channel Password</label>
               <input
                 type="password"
-                value={password}
+                value={newChannel.password}
                 onChange={changePassword}
                 placeholder="Enter a channel password"
                 required
