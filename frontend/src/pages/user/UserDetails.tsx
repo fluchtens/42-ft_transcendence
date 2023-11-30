@@ -61,7 +61,7 @@ const UserDetails = ({ user, stats }: UserDetailsProps) => {
               <li className={styles.data}>
                 <IoPodiumSharp className={styles.icon} />
                 <p className={styles.type}>W/L ratio</p>
-                <p className={styles.value}>{winLossRatio}</p>
+                <p className={styles.value}>{winLossRatio.toFixed(2)}</p>
               </li>
             </ul>
           </div>

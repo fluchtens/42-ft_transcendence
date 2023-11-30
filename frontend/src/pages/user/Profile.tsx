@@ -10,8 +10,10 @@ import styles from "./Profile.module.scss";
 import { UserDetails } from "./UserDetails";
 import { Game, Stats } from "../../types/game.interface";
 import { UserHistory } from "./UserHistory";
+import { Loading } from "../../components/Loading";
 
 export default function Profile() {
+  const [loading, setLoading] = useState<boolean>(true);
   const [targetUser, setTargetUser] = useState<User | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
   const [history, setHistory] = useState<Game[] | null>(null);
@@ -23,17 +25,20 @@ export default function Profile() {
       if (!username) return;
 
       const userData = await getUserByUsernameApi(username);
-      if (!userData) {
+      if (!userData || !userData.id) {
+        // Rediriger vers la page d'accueil en cas de problème
         navigate("/");
         return;
       }
       setTargetUser(userData);
 
       const userStats = await getUserStatsApi(userData.id);
-      setStats(userStats);
+      if (userStats) setStats(userStats);
 
       const userHistory = await getUserHistoryApi(userData.id);
-      setHistory(userHistory);
+      if (userHistory) setHistory(userHistory);
+
+      setLoading(false);
     };
 
     fetchData();
@@ -41,7 +46,8 @@ export default function Profile() {
 
   return (
     <>
-      {targetUser && stats && history && (
+      {loading && <Loading />}
+      {!loading && targetUser && stats && history && (
         <div className={styles.container}>
           <ul className={styles.profile}>
             <li>
