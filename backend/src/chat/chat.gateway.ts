@@ -221,12 +221,10 @@ export class ChatGateway implements OnModuleInit {
         }
       }
     });
-    console.log(`client ${client.id} disconnected`);
   }
 
   onModuleInit() {
     this.server.on('connection', (socket) => {
-      console.log(socket.id);
       this.InitRooms(socket);
     });
   }
