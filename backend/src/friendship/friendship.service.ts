@@ -36,23 +36,21 @@ export class FriendshipService {
           ],
         },
       });
-
       return friendship;
     } catch (error) {
       throw new BadRequestException(error.message);
     }
   }
 
-  private async findPendingRequest(senderId: number, receiverId: number) {
+  private async findBlockedRelation(senderId: number, receiverId: number) {
     try {
       const friendship = await this.prismaService.friendship.findFirst({
         where: {
           senderId: senderId,
           receiverId: receiverId,
-          status: FriendshipStatus.PENDING,
+          status: FriendshipStatus.BLOCKED,
         },
       });
-
       return friendship;
     } catch (error) {
       throw new BadRequestException(error.message);
@@ -90,8 +88,22 @@ export class FriendshipService {
           },
         },
       });
-
       return friends;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  private async findPendingRequest(senderId: number, receiverId: number) {
+    try {
+      const friendship = await this.prismaService.friendship.findFirst({
+        where: {
+          senderId: senderId,
+          receiverId: receiverId,
+          status: FriendshipStatus.PENDING,
+        },
+      });
+      return friendship;
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -105,24 +117,85 @@ export class FriendshipService {
           status: FriendshipStatus.PENDING,
         },
       });
-
       return requests;
     } catch (error) {
       throw new BadRequestException(error.message);
     }
   }
 
-  private exclude<User, Key extends keyof User>(
-    user: User,
-    keys: Key[],
-  ): Omit<User, Key> {
-    return Object.fromEntries(
-      Object.entries(user).filter(([key]) => !keys.includes(key as Key)),
-    ) as Omit<User, Key>;
+  /* -------------------------------------------------------------------------- */
+  /*                                   General                                  */
+  /* -------------------------------------------------------------------------- */
+
+  async blockUser(reqUserId: number, targetUserId: number) {
+    if (reqUserId === targetUserId) {
+      throw new BadRequestException("You can't block yourself");
+    }
+
+    const targetUser = await this.userService.findUserById(targetUserId);
+    if (!targetUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    const friendship = await this.findFriendship(reqUserId, targetUserId);
+    if (!friendship) {
+      await this.prismaService.friendship.create({
+        data: {
+          sender: { connect: { id: reqUserId } },
+          receiver: { connect: { id: targetUserId } },
+          status: FriendshipStatus.BLOCKED,
+        },
+      });
+    } else {
+      if (friendship.status === FriendshipStatus.BLOCKED) {
+        throw new BadRequestException('This user is already blocked');
+      }
+
+      await this.prismaService.friendship.update({
+        where: { id: friendship.id },
+        data: {
+          sender: { connect: { id: reqUserId } },
+          receiver: { connect: { id: targetUserId } },
+          status: FriendshipStatus.BLOCKED,
+        },
+      });
+    }
+
+    return { message: 'User successfully blocked' };
+  }
+
+  async unlockUser(reqUserId: number, targetUserId: number) {
+    if (reqUserId === targetUserId) {
+      throw new BadRequestException("You can't unlock yourself");
+    }
+
+    const targetUser = await this.userService.findUserById(targetUserId);
+    if (!targetUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    const friendship = await this.findFriendship(reqUserId, targetUserId);
+    if (!friendship || friendship.status !== FriendshipStatus.BLOCKED) {
+      throw new BadRequestException('This user is not blocked');
+    }
+
+    const blockedRelation = await this.findBlockedRelation(
+      reqUserId,
+      targetUserId,
+    );
+    if (!blockedRelation) {
+      throw new BadRequestException('This user has blocked you');
+    }
+
+    await this.prismaService.friendship.delete({
+      where: { id: friendship.id },
+    });
+
+    return { message: 'User successfully unlocked' };
   }
 
   /* -------------------------------------------------------------------------- */
-  /*                                   General                                  */
+  /*                                   Friends                                  */
   /* -------------------------------------------------------------------------- */
 
   async getFriends(userId: number) {
@@ -177,90 +250,11 @@ export class FriendshipService {
       throw new BadRequestException('You are not friends with this user');
     }
 
-    await this.prismaService.friendship.update({
+    await this.prismaService.friendship.delete({
       where: { id: friendship.id },
-      data: {
-        sender: { connect: { id: reqUserId } },
-        receiver: { connect: { id: targetUserId } },
-        status: FriendshipStatus.DELETED,
-      },
     });
 
     return { message: 'Friend removed successfully' };
-  }
-
-  async blockUser(reqUserId: number, targetUserId: number) {
-    if (reqUserId === targetUserId) {
-      throw new BadRequestException("You can't block yourself");
-    }
-
-    const targetUser = await this.userService.findUserById(targetUserId);
-    if (!targetUser) {
-      throw new NotFoundException('User not found');
-    }
-
-    const friendship = await this.findFriendship(reqUserId, targetUserId);
-    if (!friendship) {
-      await this.prismaService.friendship.create({
-        data: {
-          sender: { connect: { id: reqUserId } },
-          receiver: { connect: { id: targetUserId } },
-          status: FriendshipStatus.BLOCKED,
-        },
-      });
-    } else {
-      if (friendship.status === FriendshipStatus.BLOCKED) {
-        throw new BadRequestException('This user is already blocked');
-      }
-
-      await this.prismaService.friendship.update({
-        where: { id: friendship.id },
-        data: {
-          sender: { connect: { id: reqUserId } },
-          receiver: { connect: { id: targetUserId } },
-          status: FriendshipStatus.BLOCKED,
-        },
-      });
-    }
-
-    return { message: 'User successfully blocked' };
-  }
-
-  async unlockUser(reqUserId: number, targetUserId: number) {
-    if (reqUserId === targetUserId) {
-      throw new BadRequestException("You can't unlock yourself");
-    }
-
-    const targetUser = await this.userService.findUserById(targetUserId);
-    if (!targetUser) {
-      throw new NotFoundException('User not found');
-    }
-
-    const friendship = await this.findFriendship(reqUserId, targetUserId);
-    if (!friendship) {
-      await this.prismaService.friendship.create({
-        data: {
-          sender: { connect: { id: reqUserId } },
-          receiver: { connect: { id: targetUserId } },
-          status: FriendshipStatus.DELETED,
-        },
-      });
-    } else {
-      if (friendship.status !== FriendshipStatus.BLOCKED) {
-        throw new BadRequestException('This user is not blocked');
-      }
-
-      await this.prismaService.friendship.update({
-        where: { id: friendship.id },
-        data: {
-          sender: { connect: { id: reqUserId } },
-          receiver: { connect: { id: targetUserId } },
-          status: FriendshipStatus.DELETED,
-        },
-      });
-    }
-
-    return { message: 'User successfully unlocked' };
   }
 
   /* -------------------------------------------------------------------------- */
@@ -357,9 +351,8 @@ export class FriendshipService {
       );
     }
 
-    await this.prismaService.friendship.update({
+    await this.prismaService.friendship.delete({
       where: { id: friendship.id },
-      data: { status: FriendshipStatus.DECLINED },
     });
 
     return {

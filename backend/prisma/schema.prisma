@@ -18,7 +18,7 @@ model User {
   twoFaSecret     String?      @db.VarChar(255)
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
-  rating          Int           @default(1000)
+  rating          Int          @default(1000)
   addedFriends    Friendship[] @relation("sender")
   acceptedFriends Friendship[] @relation("receiver")
   members         Member[]
@@ -29,7 +29,7 @@ model User {
 }
 
 model Friendship {
-  id         Int              @id @default(autoincrement())
+  id         String           @id @default(uuid())
   sender     User             @relation("sender", fields: [senderId], references: [id])
   senderId   Int
   receiver   User             @relation("receiver", fields: [receiverId], references: [id])
@@ -44,18 +44,16 @@ model Friendship {
 enum FriendshipStatus {
   PENDING
   ACCEPTED
-  DECLINED
-  DELETED
   BLOCKED
 }
 
 model Channel {
-  id         String      @id @default(uuid())
+  id         String  @id @default(uuid())
   name       String
-  inviteCode String      @db.Text()
-  avatar     String?     @db.VarChar(255)
-  password   String?     @db.VarChar(255)
-  public     Boolean     @default(false)
+  inviteCode String  @db.Text()
+  avatar     String? @db.VarChar(255)
+  password   String? @db.VarChar(255)
+  public     Boolean @default(false)
 
   userId   Int
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -108,19 +106,18 @@ model Member {
 }
 
 model GameRecord {
-  id        Int       @id @default(autoincrement())
-  finished  DateTime  @default(now())
+  id       Int      @id @default(autoincrement())
+  finished DateTime @default(now())
 
-  winner              User  @relation(name: "won", fields: [winnerId], references: [id])
-  winnerId            Int
-  winnerRatingBefore  Int
-  winnerRatingAfter   Int
+  winner             User @relation(name: "won", fields: [winnerId], references: [id])
+  winnerId           Int
+  winnerRatingBefore Int
+  winnerRatingAfter  Int
 
-  loser               User  @relation(name: "lost", fields: [loserId], references: [id])
-  loserId             Int
-  loserRatingBefore   Int
-  loserRatingAfter    Int
-
+  loser             User @relation(name: "lost", fields: [loserId], references: [id])
+  loserId           Int
+  loserRatingBefore Int
+  loserRatingAfter  Int
 }
 
 enum MemberRole {
