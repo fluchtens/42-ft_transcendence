@@ -269,10 +269,6 @@ export class ChatGateway implements OnModuleInit {
         return true;
       } catch (error) {
         console.error('Error joining room:', error.message);
-        // client.emit(
-        //   'channelJoinError',
-        //   'An error occurred while joining the channel.',
-        // );
         return false;
       }
     } else {
@@ -492,7 +488,6 @@ export class ChatGateway implements OnModuleInit {
         const channel = await this.chatService.getChannelById(
           channelDto.channelId,
           );
-          console.log('joinPublicChannel', channel);
           if (channel) {
             console.log(channelDto.channelId);
             const member = await this.chatService.findMemberInChannel(channelDto.channelId, userId);
@@ -505,7 +500,6 @@ export class ChatGateway implements OnModuleInit {
               channelDto.password,
             );
             if (joinChannel) {
-              console.log('SendEvent');
               const user = await this.getOrAddUserData(userId);
               const message = user.username + ' have joined the channel';
               const messageData = await this.chatService.addMessage(

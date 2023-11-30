@@ -38,7 +38,6 @@ export class ChatService {
           return sanitizedChannel;
         }
         const matchPwd = await bcrypt.compare(password, channel.password);
-        console.log(password);
         if (matchPwd) {
           return channel;
         } else {
