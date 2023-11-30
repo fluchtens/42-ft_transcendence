@@ -63,7 +63,9 @@ function GameElementContent() {
 			setStatus(gotStatus);
 		});
 
-		socket.on('statusChange', (gotStatus: UserStatus) => { setStatus(gotStatus); } );
+		socket.on('statusChange', (gotStatus: UserStatus) => { 
+			setStatus(gotStatus); 
+		});
 		socket.on('winLose', (gotWin: boolean) => { 
 			setWinLose(gotWin? WinLose.Win: WinLose.Lose); 
 		});

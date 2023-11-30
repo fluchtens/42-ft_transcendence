@@ -246,9 +246,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 		(async () => {
 			let rating = await this._rating(userData.id);
+			this.server.to(userData.userRoom).emit('statusChange', UserStatus.Waiting);
 			this.gameService.joinQueue(userData.id, rating);
 			//console.log('did join');
-			this.server.to(userData.userRoom).emit('statusChange', UserStatus.Waiting);
 		}) ();
 	}
 
