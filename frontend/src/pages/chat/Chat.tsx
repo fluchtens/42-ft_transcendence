@@ -93,6 +93,12 @@ function Chat() {
       setMembers((prevMembers) => [...prevMembers, member]);
     });
 
+    socket.on(`${id}/memberDeleted`, (deletedMemberId: string) => {
+      setMembers((prevMembers) =>
+        prevMembers.filter((member) => member.member.id !== deletedMemberId)
+      );
+    });
+
     socket.emit("joinRoom", { channelId: id, getMessages: true });
 
     return () => {
@@ -110,7 +116,7 @@ function Chat() {
         <div className={styles.container}>
           <div className={styles.chat}>
             <ChatHeader
-              title={channel.name}
+              channel={channel}
               toggleMembersMenu={toggleMembersMenu}
             />
             <ul>

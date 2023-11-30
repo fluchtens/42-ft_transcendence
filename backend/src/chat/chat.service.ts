@@ -509,14 +509,15 @@ export class ChatService {
     password: string,
   ) {
     try {
-      const channelData = await this.getChannelById(channelId);
-      if (channelData.userId === userId) {
-        await this.prismaService.channel.update({
+      const userRole = await this.findMemberRoleInChannel(channelId, userId);
+      const cryptedPassword: string = await bcrypt.hash(password, 10);
+      if (userRole === "OWNER") {
+        const result = await this.prismaService.channel.update({
           where: {
             id: channelId,
           },
           data: {
-            password: password,
+            password: cryptedPassword ,
           },
         });
       }
@@ -575,7 +576,7 @@ export class ChatService {
         });
         return 'Visibility changed';
       }
-      return 'Only the channel owner can change the visibility';
+      throw new Error('Only the channel owner can change the visibility');
     } catch (error) {
       console.error(error);
       throw error;

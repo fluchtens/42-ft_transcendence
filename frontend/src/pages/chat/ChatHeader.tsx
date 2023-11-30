@@ -1,19 +1,21 @@
 import { IoSettings } from "react-icons/io5";
 import { HiUsers } from "react-icons/hi2";
 import styles from "./ChatHeader.module.scss";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { EditChannel } from "./EditChannel";
+import { Channel } from "../../types/chat.interface";
 
 interface ChatHeaderProps {
-  title: string;
+  channel: Channel;
   toggleMembersMenu: () => void;
 }
 
-const ChatHeader = ({ title, toggleMembersMenu }: ChatHeaderProps) => {
+const ChatHeader = ({ channel, toggleMembersMenu }: ChatHeaderProps) => {
   const [modal, setModal] = useState<boolean>(false);
   const [editChannel, setEditChannel] = useState({
     name: "",
     isPublic: true,
+    protected: false,
     password: "",
   });
 
@@ -25,13 +27,22 @@ const ChatHeader = ({ title, toggleMembersMenu }: ChatHeaderProps) => {
     setModal(false);
   };
 
+  useEffect(() => {
+    setEditChannel({
+      name: channel.name,
+      isPublic: channel.public,
+      protected: channel.protected,
+      password: "",
+    });
+  }, [channel]);
+
   return (
     <>
       <div className={styles.header}>
         <button onClick={openEditMenuModal}>
           <IoSettings className={styles.icon} />
         </button>
-        <h1>{title}</h1>
+        <h1>{channel.name}</h1>
         <button onClick={toggleMembersMenu}>
           <HiUsers className={styles.icon} />
         </button>
@@ -41,6 +52,7 @@ const ChatHeader = ({ title, toggleMembersMenu }: ChatHeaderProps) => {
           editChannel={editChannel}
           setEditChannel={setEditChannel}
           closeModal={closeModal}
+          channel={channel}
         />
       )}
     </>

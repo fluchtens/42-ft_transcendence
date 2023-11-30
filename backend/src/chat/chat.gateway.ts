@@ -43,6 +43,7 @@ import {
   ChangeRoleDto,
   ChangeChannelPasswordDto,
   KickUserDto,
+  ChangeChannelVisibilityDto,
 } from './dtos/gateway.dtos';
 import { channel } from 'diagnostics_channel';
 import * as bcrypt from 'bcryptjs';
@@ -142,6 +143,9 @@ export class ChatGateway implements OnModuleInit {
         channelData.isMember = true;
       } else {
         channelData.isMember = false;
+      }
+      if (channelInfo.password){
+        channelData.protected = true;
       }
       if (channelInfo.password === 'true' || !getMessages) {
         if (channelInfo.password === 'true') {
@@ -248,7 +252,7 @@ export class ChatGateway implements OnModuleInit {
         console.error('error getting all channels:', error.message);
       }
     } else {
-      console.error('User ID not available.');
+      console.error('User ID not available.254');
     }
   }
 
@@ -275,7 +279,7 @@ export class ChatGateway implements OnModuleInit {
         return false;
       }
     } else {
-      console.error('User ID not available.');
+      console.error('User ID not available.281');
       return false;
     }
   }
@@ -404,7 +408,7 @@ export class ChatGateway implements OnModuleInit {
         throw new BadRequestException();
       }
     } else {
-      console.log('User ID not available.');
+      console.log('User ID not available.410');
     }
   }
 
@@ -413,28 +417,38 @@ export class ChatGateway implements OnModuleInit {
     @ConnectedSocket() client: Socket,
     @MessageBody() channelId: string,
   ) {
+    console.log(channelId)
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
-        const channel = await this.getChannelData(client, channelId, false);
+        const channel : ChannelData = await this.getChannelData(client, channelId, true);
         if (channel) {
+          for (const member of channel.members) {
+            const memberId: number = member.member.userId;
+            const clients = this.roomService.getRoomClients(channelId);
+            clients.forEach((client) => {
+              this.roomService.leaveRoom(client, channelId);
+            });
+            this.server.to(String(memberId)).emit('channelDeleted', channelId);
+          }
           const deleted = await this.chatService.deleteChannel(
             userId,
             channelId,
           );
-          for (const member of channel.members) {
-            const userId: number = member.userId;
-            this.server.to(String(userId)).emit('channelDeleted', channelId);
-          }
+          this.connectedUsers.delete(channelId);
           console.log(deleted);
+          return "";
         } else {
           console.log('Error when get Channel data');
+          throw new Error('Error when get Channel data');
         }
       } catch (error) {
         console.error(error.message);
+        return error.message;
       }
     } else {
-      console.log('User ID not available.');
+      console.log('User ID not available.449');
+      return 'User ID not available.450';
     }
   }
 
@@ -488,7 +502,7 @@ export class ChatGateway implements OnModuleInit {
         return error.message;
       }
     } else {
-      console.log('User ID not available.');
+      console.log('User ID not available.504');
       return "User ID not available.";
     }
   }
@@ -556,12 +570,12 @@ export class ChatGateway implements OnModuleInit {
         return false;
       }
     } else {
-      console.log('User ID not available.');
+      console.log('User ID not available.572');
       return false;
     }
   }
 
-  @SubscribeMessage('ProtectChannel')
+  @SubscribeMessage('protectChannel')
   async handleChannelProtection(
     @ConnectedSocket() client: Socket,
     @MessageBody() changeChannelPasswordDto: ChangeChannelPasswordDto,
@@ -570,15 +584,17 @@ export class ChatGateway implements OnModuleInit {
     if (userId) {
       try {
         const { channelId, password } = changeChannelPasswordDto;
+        console.log(channelId, password );
         const protect = await this.chatService.updateChannelWithPassword(userId, channelId, password);
-        return false;
+        return "";
       }
       catch (error) {
         console.log(error.message);
         return error.message;
       }
     } else {
-      console.log('User ID not available.');
+      console.log('User ID not available.594');
+      return 'User ID not available';
     }
   }
 
@@ -606,7 +622,7 @@ export class ChatGateway implements OnModuleInit {
         return error.message;
       }
     } else {
-      console.log('User ID not available.');
+      console.log('User ID not available.622');
       return 'User ID not available.';
     }
   }
@@ -630,7 +646,50 @@ export class ChatGateway implements OnModuleInit {
         return error.message;
       }
     } else {
-      console.log('User ID not available.');
+      console.log('User ID not available.646');
+      return 'User ID not available.';
+    }
+  }
+
+  @SubscribeMessage('changeChannelVisibility')
+  async handlechangeChannelVisibility(@ConnectedSocket() client: Socket,
+  @MessageBody() changeChannelVisibilityDto : ChangeChannelVisibilityDto) {
+    const userId = Number(client.handshake.auth.userId);
+    if (userId) {
+      try {
+        const { channelId, isPublic} = changeChannelVisibilityDto;
+        if (channelId) {
+          const changeChannel = await this.chatService.updateChannelVisibility(userId, channelId, isPublic);
+          if (changeChannel) {
+            const user = await this.getOrAddUserData(userId);
+            const message = user.username + " Have changed the channel visibility";
+            const messageData = await this.chatService.addMessage(
+              userId,
+              channelId,
+              message,
+            );
+            const messageDataDto: Messages = messageData;
+            messageDataDto.user = user;
+            this.server
+              .to(channelId)
+              .emit(`${channelId}/message`, messageDataDto);
+              const clients = this.roomService.getRoomClients(channelId);
+              const channel = await this.getChannelData(client, channelId, true);
+              clients.forEach((client) => {
+                this.server.to(client.id).emit(`channelData:${channelId}`, channel)
+              });
+            return null;
+          }
+          console.log(changeChannel);
+          return null;
+        }
+      }
+      catch (error) {
+        console.log(error.message);
+        return error.message;
+      }
+    } else {
+      console.log('User ID not available.646');
       return 'User ID not available.';
     }
   }

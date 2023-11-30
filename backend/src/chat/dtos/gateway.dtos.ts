@@ -49,6 +49,11 @@ export class KickUserDto {
   userIdKick: number;
 }
 
+export class ChangeChannelVisibilityDto {
+  channelId: string;
+  isPublic: boolean;
+}
+
 export class Messages {
   id: string;
   content: string;
