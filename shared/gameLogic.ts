@@ -93,7 +93,7 @@ export class GameState {
 	private _ball: Ball;
 	private _ballEntryTime;
 	get ball(): Ball | null {
-		return (_ballEntryTime >= _lastUpdate)? _ball : null;
+		return (this._ballEntryTime >= this._lastUpdate)? null : this._ball;
 	}
 
 	constructor(private _lastUpdate: number = Date.now()) {
@@ -142,8 +142,10 @@ export class GameState {
 		this._lastUpdate += totalFrames * PONG.msFrame;
 		let framesToBall = Math.ceil( (this._ballEntryTime - this._lastUpdate) / PONG.msFrame);
 
-		if (0 < framesToBall && framesToBall <= totalFrames)
-			_updateHelper(framesToBall); 
+		if (0 < framesToBall && framesToBall <= totalFrames) {
+			this._updateHelper(framesToBall); 
+			totalFrames -= framesToBall;
+		}
 
 		let handlePaddleCollision = () => {
 			if (!this.ball) return;
@@ -201,7 +203,11 @@ export class GameState {
 		return (which === WhichPlayer.P1) ? this.player1 : this.player2;
 	}
 
-	packet(timestamp: number | null = null, fields = ['player1', 'player2', 'ball']): {timestamp: number} {
+	packet(
+		timestamp: number | null = null,
+		 	fields = ['player1', 'player2', '_ball', '_ballEntryTime']
+	) : {timestamp: number} 
+	{
 		if (timestamp)
 			this.update(timestamp);
 		timestamp = timestamp || this._lastUpdate;
@@ -216,7 +222,7 @@ export class GameState {
 
 	pushPacket(packet: {timestamp: number}) {
 		this._lastUpdate = packet.timestamp;
-		const allowedFields = ['player1', 'player2', 'ball'];
+		const allowedFields = ['player1', 'player2', '_ball', '_ballEntryTime'];
 		for (let key of allowedFields) {
 			if (key in packet) {
 				(this as any)[key] = (packet as any)[key];
@@ -278,6 +284,10 @@ export class GameState {
 		if (when)
 			this.update(when);
 		this.player(who).dy = PONG.playerSpeed * Number(mo);
+	}
+	
+	timeToBall(from = Date.now()) {
+		return this._ballEntryTime - from;
 	}
 }
 
