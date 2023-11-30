@@ -105,6 +105,12 @@ model Member {
   @@index([channelId])
 }
 
+enum MemberRole {
+  OWNER
+  ADMIN
+  GUEST
+}
+
 model GameRecord {
   id       Int      @id @default(autoincrement())
   finished DateTime @default(now())
@@ -119,16 +125,3 @@ model GameRecord {
   loserRatingBefore Int
   loserRatingAfter  Int
 }
-
-enum MemberRole {
-  OWNER
-  ADMIN
-  GUEST
-}
-
-// Do after
-// enum MemberStatus {
-//   Default
-//   Muted
-
-// }
