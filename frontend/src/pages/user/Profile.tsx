@@ -26,7 +26,6 @@ export default function Profile() {
 
       const userData = await getUserByUsernameApi(username);
       if (!userData || !userData.id) {
-        // Rediriger vers la page d'accueil en cas de problème
         navigate("/");
         return;
       }

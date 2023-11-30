@@ -20,7 +20,7 @@ export class FriendshipService {
   /*                                   Private                                  */
   /* -------------------------------------------------------------------------- */
 
-  private async findFriendship(senderId: number, receiverId: number) {
+  async findFriendship(senderId: number, receiverId: number) {
     try {
       const friendship = await this.prismaService.friendship.findFirst({
         where: {
