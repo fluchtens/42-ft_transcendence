@@ -18,6 +18,7 @@ function Channels() {
     });
 
     socket.on("channelDeleted", (deletedChannelId: string) => {
+      console.log("channelDeleted");
       setChannelIds((prevChannels) =>
         prevChannels.filter((channelId) => channelId !== deletedChannelId)
       );
@@ -27,7 +28,7 @@ function Channels() {
       socket.off("newChannel");
       socket.off("channelDeleted");
     };
-  }, []);
+  }, [socket]);
 
   useEffect(() => {
     socket.on("allChannels", (channelIds: string[]) => {
@@ -37,7 +38,7 @@ function Channels() {
     return () => {
       socket.off("allChannels");
     };
-  }, []);
+  }, [socket]);
 
   useEffect(() => {
     channelIds.forEach((channelId) => {

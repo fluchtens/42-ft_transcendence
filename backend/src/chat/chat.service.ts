@@ -162,7 +162,7 @@ export class ChatService {
         });
         const member = await this.prismaService.member.create({
           data: {
-            role: 'ADMIN',
+            role: 'OWNER',
             userId: userId,
             channelId: channel.id,
           },
@@ -183,7 +183,7 @@ export class ChatService {
         });
         const member = await this.prismaService.member.create({
           data: {
-            role: 'ADMIN',
+            role: 'OWNER',
             userId: userId,
             channelId: channel.id,
           },
@@ -277,32 +277,55 @@ export class ChatService {
     }
   }
   async changeMemberRole(
-    req: any,
-    channelId: string,
     userId: number,
+    channelId: string,
+    memberChangeId: number,
     newRole: string,
   ) {
-    const { user } = req;
     const memberRole: string = await this.findMemberRoleInChannel(
       channelId,
-      Number(user.id),
+      Number(userId),
     );
     try {
-      const existingMember = await this.findMemberInChannel(channelId, userId);
+      const existingMember = await this.findMemberInChannel(channelId, memberChangeId);
       if (!existingMember) {
         throw new Error('User not found in channel');
       }
       if (existingMember.role === newRole) {
         throw new Error('This member already have this Role');
       }
-      if (user.role === 'GUEST') {
+      if (memberRole === 'GUEST' || memberRole === 'ADMIN') {
         throw new Error('You have no permission!');
       }
       const memberId = existingMember.id;
       switch (newRole) {
-        case 'ADMIN': {
-          if (memberRole !== 'ADMIN')
+        case 'OWNER': {
+          if (memberRole !== 'OWNER')
             throw new Error('You have no permission!');
+
+          const updateChannel = await this.prismaService.channel.update({
+            where: {
+              id : channelId,
+            },
+            data: {
+              user: {
+                connect: {
+                  id: memberChangeId,
+                },
+              },
+            }
+          })
+          const updatedMember = await this.prismaService.member.update({
+            where: {
+              id: memberId,
+            },
+            data: {
+              role: MemberRole.OWNER,
+            },
+          });
+          return updatedMember;
+        }
+        case 'ADMIN': {
           const updatedMember = await this.prismaService.member.update({
             where: {
               id: memberId,
@@ -313,20 +336,9 @@ export class ChatService {
           });
           return updatedMember;
         }
-        case 'MODERATOR': {
-          const updatedMember = await this.prismaService.member.update({
-            where: {
-              id: memberId,
-            },
-            data: {
-              role: MemberRole.MODERATOR,
-            },
-          });
-          return updatedMember;
-        }
 
         case 'GUEST': {
-          if (existingMember.role === 'MODERATOR' && user.role === 'MODERATOR')
+          if (existingMember.role === 'ADMIN' && memberRole === 'ADMIN')
             throw new Error('You have no permission');
           const updatedMember = await this.prismaService.member.update({
             where: {
@@ -447,7 +459,7 @@ export class ChatService {
         userId,
       );
       if (
-        !(userRole === 'MODERATOR' || userRole === 'ADMIN') &&
+        !(userRole === 'OWNER' || userRole === 'ADMIN') &&
         message.userId !== userId
       ) {
         throw new Error('You have no permission to delete the message');
@@ -491,24 +503,26 @@ export class ChatService {
     }
   }
 
-  async changeChannelOwner() {}
-
   async updateChannelWithPassword(
     userId: number,
     channelId: string,
     password: string,
   ) {
     try {
-      const channelData = await this.getChannelById(channelId);
-      if (channelData.userId === userId) {
-        await this.prismaService.channel.update({
+      const userRole = await this.findMemberRoleInChannel(channelId, userId);
+      const cryptedPassword: string = await bcrypt.hash(password, 10);
+      if (userRole === "OWNER") {
+        const result = await this.prismaService.channel.update({
           where: {
             id: channelId,
           },
           data: {
-            password: password,
+            password: cryptedPassword ,
           },
         });
+      }
+      else {
+        throw new Error("You are not the chat owner");
       }
     } catch (error) {
       console.error(error);
@@ -562,7 +576,7 @@ export class ChatService {
         });
         return 'Visibility changed';
       }
-      return 'Only the channel owner can change the visibility';
+      throw new Error('Only the channel owner can change the visibility');
     } catch (error) {
       console.error(error);
       throw error;
@@ -626,6 +640,42 @@ export class ChatService {
       });
       return newMember;
     } catch (error) {
+      throw error;
+    }
+  }
+
+  async deleteMember(userId: number, channelId: string) {
+    try {
+      const member = await this.findMemberInChannel(channelId, userId);
+      if (member) {
+        await this.prismaService.member.delete({
+          where: {
+            id: member.id,
+          },
+        });
+      }
+      else {
+        throw new Error("The member dons't exist");
+      }
+    }
+    catch(error) {
+      throw error;
+    }
+  }
+
+  async kickUser(userId: number, channelId: string, userIdKick: number) {
+    try {
+      const userRole = await this.findMemberRoleInChannel(channelId, userId);
+      const userRoleKick = await this.findMemberRoleInChannel(channelId, userIdKick);
+      if (userRole === 'ADMIN' || userRole === 'OWNER') {
+        if (userRoleKick === 'OWNER') {
+          throw new Error('You cannot kick the chat owner')
+        }
+        await this.deleteMember(userIdKick, channelId);
+        return "member deleted";
+      }
+    }
+    catch(error) {
       throw error;
     }
   }

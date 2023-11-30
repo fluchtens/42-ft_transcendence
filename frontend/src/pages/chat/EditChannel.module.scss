@@ -119,7 +119,7 @@
       }
     }
 
-    &[type="button"] {
+    &.cancel {
       background: transparent;
 
       &:hover {
@@ -127,7 +127,7 @@
       }
     }
 
-    &[type="submit"] {
+    &.edit {
       background: $sucess-primary-color;
 
       &:hover {
