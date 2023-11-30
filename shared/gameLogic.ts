@@ -21,19 +21,19 @@ function clamp<Type>(min: Type, x: Type, max: Type) {
 // Pong Logic
 export enum MotionType  { Up = -1, Still = 0, Down = 1 }; // -1, 1 convenient as mult factor for direction
 export const PONG = { // Parameters for PONG game
-	width: 200,
-	height: 150,
-	fps: 30,
+	width: 300,
+	height: 200,
+	fps: 60,
 	get msFrame() { return 1000 / this.fps; },
 	margin: 20,
 	//
-	playerSpeed: 6, // pixels per frame
-	ballXSpeed: 3,
-	ballMaxYSpeed: 6, // determines angle when edge of paddle is hit
+	playerSpeed: 4, // pixels per frame
+	ballXSpeed: 2,
+	ballMaxYSpeed: 4, // determines angle when edge of paddle is hit
 	//
-	ballSize: 2,
+	ballSize: 4,
 	get paddleWidth() { return this.ballSize },
-	paddleHeight: 14,
+	paddleHeight: 20,
 	//
 	get player1X() { return this.margin; },
 	get player2X() {
@@ -241,7 +241,7 @@ export class GameState {
 		this._ball.x = Math.floor((PONG.width - PONG.ballSize) / 2);
 		this._ball.y = Math.floor(Math.random() * (PONG.height - PONG.ballSize));
 		this._ball.dx = Number(to) * PONG.ballXSpeed;
-		this._ball.dy = PONG.ballMaxYSpeed;
+		this._ball.dy = Math.ceil(PONG.ballMaxYSpeed / 2);
 		if (Math.random() < 0.5) this._ball.dy *= -1;
 	}
 
