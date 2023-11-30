@@ -1,16 +1,15 @@
 import { useState } from "react";
 import { Modal } from "../../components/Modal";
-import styles from "./CreateChannel.module.scss";
+import styles from "./EditChannel.module.scss";
 import { notifySuccess } from "../../utils/notifications";
-import { useChatSocket } from "../../hooks/useChatSocket";
 
-interface CreateChannelProps {
-  newChannel: {
+interface EditChannelProps {
+  editChannel: {
     name: string;
     isPublic: boolean;
     password: string;
   };
-  setNewChannel: React.Dispatch<
+  setEditChannel: React.Dispatch<
     React.SetStateAction<{
       name: string;
       isPublic: boolean;
@@ -20,67 +19,57 @@ interface CreateChannelProps {
   closeModal: () => void;
 }
 
-const CreateChannel = ({
-  newChannel,
-  setNewChannel,
+const EditChannel = ({
+  editChannel,
+  setEditChannel,
   closeModal,
-}: CreateChannelProps) => {
+}: EditChannelProps) => {
   const [isProtected, setIsProtected] = useState<boolean>(false);
-  const socket = useChatSocket();
 
   const changeIsProtected = () => {
     setIsProtected(!isProtected);
   };
 
   const changeName = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewChannel((prevEditChannel) => ({
+    setEditChannel((prevEditChannel) => ({
       ...prevEditChannel,
       name: e.target.value,
     }));
   };
 
   const changeStatus = () => {
-    setNewChannel((prevEditChannel) => ({
+    setEditChannel((prevEditChannel) => ({
       ...prevEditChannel,
       isPublic: !prevEditChannel.isPublic,
     }));
   };
 
   const changePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewChannel((prevEditChannel) => ({
+    setEditChannel((prevEditChannel) => ({
       ...prevEditChannel,
       password: e.target.value,
     }));
   };
 
   const resetProperties = () => {
-    setNewChannel({
+    setEditChannel({
       name: "",
       isPublic: true,
       password: "",
     });
   };
 
-  const createChannel = () => {
-    socket.emit("createChannel", {
-      channelName: newChannel.name,
-      isPublic: newChannel.isPublic,
-      password: newChannel.password,
-    });
-    notifySuccess("Channel successfully created");
-  };
-
   const submitData = (e: React.FormEvent) => {
     e.preventDefault();
-    createChannel();
     closeModal();
     resetProperties();
+    notifySuccess("Channel successfully created");
   };
 
   return (
     <Modal>
       <form className={styles.form} onSubmit={submitData}>
-        <h1>Create Channel</h1>
+        <h1>Edit Channel</h1>
         <div className={styles.types}>
           <label>Channel Type</label>
           <div className={styles.type} onClick={changeIsProtected}>
@@ -99,7 +88,7 @@ const CreateChannel = ({
               <label>Private Channel</label>
               <input
                 type="checkbox"
-                checked={newChannel.isPublic === false}
+                checked={editChannel.isPublic === false}
                 onChange={changeStatus}
               />
             </div>
@@ -113,7 +102,7 @@ const CreateChannel = ({
             <label>Channel Name</label>
             <input
               type="text"
-              value={newChannel.name}
+              value={editChannel.name}
               onChange={changeName}
               placeholder="Enter a channel name"
               required
@@ -124,7 +113,7 @@ const CreateChannel = ({
               <label>Channel Password</label>
               <input
                 type="password"
-                value={newChannel.password}
+                value={editChannel.password}
                 onChange={changePassword}
                 placeholder="Enter a channel password"
                 required
@@ -133,14 +122,18 @@ const CreateChannel = ({
           )}
         </div>
         <div className={styles.buttons}>
-          <button type="button" onClick={closeModal}>
-            Cancel
-          </button>
-          <button type="submit">Create Channel</button>
+          <button className={styles.delete}>Delete Channel</button>
+
+          <div className={styles.rightBtns}>
+            <button type="button" onClick={closeModal}>
+              Cancel
+            </button>
+            <button type="submit">Edit Channel</button>
+          </div>
         </div>
       </form>
     </Modal>
   );
 };
 
-export { CreateChannel };
+export { EditChannel };

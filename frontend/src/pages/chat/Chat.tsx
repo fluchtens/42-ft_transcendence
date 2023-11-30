@@ -9,11 +9,7 @@ import { UserElement } from "../friends/UserElement";
 import { ContextMenuType } from "../friends/UserContextMenu";
 import { AddFriendBar } from "../friends/AddFriendBar";
 import { useChatSocket } from "../../hooks/useChatSocket";
-import {
-  Channel,
-  MemberUsers,
-  Message,
-} from "../../types/chat.interface";
+import { Channel, MemberUsers, Message } from "../../types/chat.interface";
 import { Loading } from "../../components/Loading";
 import { notifyError } from "../../utils/notifications";
 
@@ -60,14 +56,18 @@ function Chat() {
 
   const addMember = async (e: React.FormEvent) => {
     e.preventDefault();
-    socket.emit("addMember", {
-      channelId: id,
-      memberUsername: addedMember,
-    }, (result: string) => {
-      if (result) {
-        notifyError(result);
+    socket.emit(
+      "addMember",
+      {
+        channelId: id,
+        memberUsername: addedMember,
+      },
+      (result: string) => {
+        if (result) {
+          notifyError(result);
+        }
       }
-    });
+    );
     setAddedMember("");
   };
 
