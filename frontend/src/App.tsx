@@ -11,6 +11,7 @@ import Chat from "./pages/chat/Chat";
 import Friends from "./pages/friends/Friends";
 import FriendStyles from "./pages/friends/Friends.module.scss";
 import Settings from "./pages/settings/Settings";
+import Leaderboard from "./pages/leaderboard/Leaderboard";
 import { AuthProvider } from "./hooks/useAuth";
 import { ChatSocketProvider } from "./hooks/useChatSocket";
 import { FriendshipSocketProvider } from "./hooks/useFriendshipSocket";
@@ -57,6 +58,10 @@ function App() {
         {
           path: "/settings",
           element: <Settings />,
+        },
+        {
+          path: "/leaderboard",
+          element: <Leaderboard />,
         },
       ],
     },
