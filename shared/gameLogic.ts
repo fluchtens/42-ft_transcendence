@@ -39,7 +39,11 @@ export const PONG = { // Parameters for PONG game
 	get player2X() {
 		return this.width - this.margin - this.paddleWidth;
 	},
+	//
 	winScore: 11,
+	//
+	startDelay: 3000,
+	newBallDelay: 500,
 }
 
 // export const PONG = { // Parameters for PONG game
@@ -86,12 +90,17 @@ export enum WhichPlayer { P1 = -1, P2 = 1 } // -1, 1 convenient as mult factor f
 export class GameState {
 	public player1: Player;
 	public player2: Player;
-	public ball: Ball | null = null;
+	private _ball: Ball;
+	private _ballEntryTime;
+	get ball(): Ball | null {
+		return (_ballEntryTime >= _lastUpdate)? _ball : null;
+	}
 
-	constructor(private _lastUpdate: number = Date.now()/*, public ball: Ball = new Ball(0,0)*/) {
+	constructor(private _lastUpdate: number = Date.now()) {
 		let paddleY = Math.trunc((PONG.height - PONG.paddleHeight) / 2);
 	 	this.player1 = new Player(PONG.player1X, paddleY);
 	 	this.player2 = new Player(PONG.player2X, paddleY);
+		this.newBall(WhichPlayer.P1, this._lastUpdate, PONG.startDelay);
 	}
 
 	_updateHelper(frames: number) {
@@ -131,6 +140,10 @@ export class GameState {
 		let totalFrames = Math.floor( (time - this._lastUpdate) / PONG.msFrame );
 		// maybe throw if negative
 		this._lastUpdate += totalFrames * PONG.msFrame;
+		let framesToBall = Math.ceil( (this._ballEntryTime - this._lastUpdate) / PONG.msFrame);
+
+		if (0 < framesToBall && framesToBall <= totalFrames)
+			_updateHelper(framesToBall); 
 
 		let handlePaddleCollision = () => {
 			if (!this.ball) return;
@@ -212,17 +225,18 @@ export class GameState {
 		this.update();
 	}
 
-	newBall(to: WhichPlayer, when: number | null = null) {
+	newBall(to: WhichPlayer, when: number | null = null, delay = PONG.newBallDelay) {
 		if (when)
 			this.update(when);
 
-		this.ball = new Ball(0, 0);
-		this.ball.x = Math.floor((PONG.width - PONG.ballSize) / 2);
-		this.ball.y = Math.floor(Math.random() * (PONG.height - PONG.ballSize));
-		this.ball.dx = Number(to) * PONG.ballXSpeed;
-		this.ball.dy = PONG.ballMaxYSpeed;
-		if (Math.random() < 0.5) this.ball.dy *= -1;
-		return this.ball;
+		this._ballEntryTime = this._lastUpdate + delay;
+
+		this._ball = new Ball(0, 0);
+		this._ball.x = Math.floor((PONG.width - PONG.ballSize) / 2);
+		this._ball.y = Math.floor(Math.random() * (PONG.height - PONG.ballSize));
+		this._ball.dx = Number(to) * PONG.ballXSpeed;
+		this._ball.dy = PONG.ballMaxYSpeed;
+		if (Math.random() < 0.5) this._ball.dy *= -1;
 	}
 
 	updateScores(when: number | null = null) {
