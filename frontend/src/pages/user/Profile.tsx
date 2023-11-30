@@ -1,15 +1,22 @@
 import { useEffect, useState } from "react";
-import { getUserByUsernameApi, getUserStatsApi } from "../../services/user.api";
+import {
+  getUserByUsernameApi,
+  getUserHistoryApi,
+  getUserStatsApi,
+} from "../../services/user.api";
 import { useNavigate, useParams } from "react-router-dom";
 import { User } from "../../types/user.interface";
 import styles from "./Profile.module.scss";
 import { UserDetails } from "./UserDetails";
-import { UserStats } from "./UserStats";
-import { Stats } from "../../types/game.interface";
+import { Game, Stats } from "../../types/game.interface";
+import { UserHistory } from "./UserHistory";
+import { Loading } from "../../components/Loading";
 
 export default function Profile() {
-  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [targetUser, setTargetUser] = useState<User | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
+  const [history, setHistory] = useState<Game[] | null>(null);
   const { username } = useParams();
   const navigate = useNavigate();
 
@@ -18,14 +25,19 @@ export default function Profile() {
       if (!username) return;
 
       const userData = await getUserByUsernameApi(username);
-      if (!userData) {
+      if (!userData || !userData.id) {
         navigate("/");
         return;
       }
-      setUser(userData);
+      setTargetUser(userData);
 
       const userStats = await getUserStatsApi(userData.id);
-      setStats(userStats);
+      if (userStats) setStats(userStats);
+
+      const userHistory = await getUserHistoryApi(userData.id);
+      if (userHistory) setHistory(userHistory);
+
+      setLoading(false);
     };
 
     fetchData();
@@ -33,10 +45,17 @@ export default function Profile() {
 
   return (
     <>
-      {user && stats && (
+      {loading && <Loading />}
+      {!loading && targetUser && stats && history && (
         <div className={styles.container}>
-          <UserDetails user={user} />
-          <UserStats stats={stats} />
+          <ul className={styles.profile}>
+            <li>
+              <UserDetails user={targetUser} stats={stats} />{" "}
+            </li>
+            <li>
+              <UserHistory history={history} />
+            </li>
+          </ul>
         </div>
       )}
     </>

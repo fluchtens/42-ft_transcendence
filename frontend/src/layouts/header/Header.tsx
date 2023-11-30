@@ -8,11 +8,16 @@ import { IoGameController } from "react-icons/io5";
 import { BsFillChatDotsFill } from "react-icons/bs";
 import styles from "./Header.module.scss";
 import { useAuth } from "../../hooks/useAuth";
+import { FaUserGroup } from "react-icons/fa6";
 
 export default function Header() {
   const { user, refreshUser } = useAuth();
   const [navMenu, setNavMenu] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(Boolean(user));
+
+  const closeNavMenu = () => {
+    setNavMenu(false);
+  };
 
   const toggleNavMenu = () => {
     setNavMenu(!navMenu);
@@ -35,13 +40,36 @@ export default function Header() {
           <MainNavLink toggleNavMenu={toggleNavMenu} />
           <ul className={`${navMenu ? styles.navListMenu : styles.navList}`}>
             <li>
-              <NavLink path="/" text="HOME" icon={<AiFillHome />} />
+              <NavLink
+                path="/"
+                text="HOME"
+                icon={<AiFillHome />}
+                cb={closeNavMenu}
+              />
             </li>
             <li>
-              <NavLink path="/game" text="GAME" icon={<IoGameController />} />
+              <NavLink
+                path="/game"
+                text="GAME"
+                icon={<IoGameController />}
+                cb={closeNavMenu}
+              />
             </li>
             <li>
-              <NavLink path="/chat" text="CHAT" icon={<BsFillChatDotsFill />} />
+              <NavLink
+                path="/chat"
+                text="CHAT"
+                icon={<BsFillChatDotsFill />}
+                cb={closeNavMenu}
+              />
+            </li>
+            <li>
+              <NavLink
+                path="/friends"
+                text="FRIENDS"
+                icon={<FaUserGroup />}
+                cb={closeNavMenu}
+              />
             </li>
           </ul>
         </div>

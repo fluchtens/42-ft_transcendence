@@ -96,4 +96,10 @@ export class UserController {
   async getUserStats(@Param('id') id: string) {
     return this.userService.getUserStats(parseInt(id));
   }
+
+  @Get('game/history/:id')
+  @UseGuards(JwtAuthGuard)
+  async getUserHistory(@Param('id') id: string) {
+    return this.userService.getUserHistory(parseInt(id));
+  }
 }

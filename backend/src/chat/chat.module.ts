@@ -8,11 +8,14 @@ import { AuthModule } from "src/auth/auth.module";
 import { AuthService } from "src/auth/auth.service";
 import { UserService } from "src/user/user.service";
 import { RoomsService } from "./room.service";
+import { FriendshipService } from "src/friendship/friendship.service";
+import { FriendshipModule } from "src/friendship/friendship.module";
 // import { SocketClient } from "./chat.client";
 
 
 @Module({
+  imports: [FriendshipModule, AuthModule, UserModule],
   controllers: [ChatController],
-  providers: [ChatService, ChatGateway, AuthService, UserService, RoomsService],
+  providers: [ChatService, ChatGateway, RoomsService],
 })
 export class ChatModule {}

@@ -124,8 +124,8 @@ model GameRecord {
 }
 
 enum MemberRole {
+  OWNER
   ADMIN
-  MODERATOR
   GUEST
 }
 

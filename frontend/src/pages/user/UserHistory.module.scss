@@ -1,0 +1,119 @@
+@import "../../styles/config.scss";
+
+.container {
+  text-align: center;
+
+  .details {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    ul {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      list-style-type: none;
+
+      .match {
+        padding: 1rem 0;
+        flex-direction: column;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.25rem;
+        border-bottom: 1px solid rgb(255, 255, 255, 0.05);
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .date {
+          margin: 0;
+          font-size: map-get($text-sm, font-size);
+          line-height: map-get($text-sm, line-height);
+          font-weight: $font-medium;
+          color: $text-secondary-color;
+        }
+
+        .infos {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 1.25rem;
+
+          .matchIcon {
+            width: 2rem;
+            height: 2rem;
+          }
+
+          .userStats {
+            flex-direction: column;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            &.left {
+              .player {
+                margin-left: auto;
+              }
+              .rating {
+                margin-left: auto;
+              }
+            }
+
+            &.right {
+              .player {
+                margin-right: auto;
+              }
+              .rating {
+                margin-right: auto;
+              }
+            }
+
+            .player {
+              margin: 0;
+              font-size: map-get($text-lg, font-size);
+              line-height: map-get($text-lg, line-height);
+              font-weight: $font-semibold;
+
+              &.test {
+                color: $extra-primary-color;
+              }
+            }
+
+            .rating {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              gap: 0.25rem;
+
+              .ratingNow {
+                margin: 0;
+                font-size: map-get($text-base, font-size);
+                line-height: map-get($text-base, line-height);
+                font-weight: $font-normal;
+                text-align: right;
+              }
+
+              p {
+                margin: 0;
+                font-size: map-get($text-base, font-size);
+                line-height: map-get($text-base, line-height);
+                font-weight: $font-medium;
+                text-align: right;
+              }
+
+              .ratingIncrease {
+                color: #81b64c;
+              }
+
+              .ratingDecrease {
+                color: #e02827;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -7,28 +7,10 @@ import { Channel } from "../../types/chat.interface";
 import { useChatSocket } from "../../hooks/useChatSocket";
 
 function Channels() {
-  const [newChannel, setNewChannel] = useState<string>("");
   const [channelIds, setChannelIds] = useState<string[]>([]);
   const [channelsData, setChannelsData] = useState<Channel[]>([]);
-  const [isPublic, setIsPublic] = useState<boolean>(true);
-  const [password, setPassword] = useState<string>("");
-  const { user } = useAuth();
   const socket = useChatSocket();
-
-  const changeNewChannel = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewChannel(e.target.value);
-  };
-
-  const onCreateChannel = () => {
-    socket.emit("createChannel", {
-      channelName: newChannel,
-      isPublic: isPublic,
-      password: password,
-    });
-    setNewChannel("");
-    setIsPublic(true);
-    setPassword("");
-  };
+  const { user } = useAuth();
 
   useEffect(() => {
     socket.on("newChannel", (channelId: string) => {
@@ -36,6 +18,7 @@ function Channels() {
     });
 
     socket.on("channelDeleted", (deletedChannelId: string) => {
+      console.log("channelDeleted");
       setChannelIds((prevChannels) =>
         prevChannels.filter((channelId) => channelId !== deletedChannelId)
       );
@@ -45,7 +28,7 @@ function Channels() {
       socket.off("newChannel");
       socket.off("channelDeleted");
     };
-  }, []);
+  }, [socket]);
 
   useEffect(() => {
     socket.on("allChannels", (channelIds: string[]) => {
@@ -55,13 +38,12 @@ function Channels() {
     return () => {
       socket.off("allChannels");
     };
-  }, []);
+  }, [socket]);
 
   useEffect(() => {
     channelIds.forEach((channelId) => {
       socket.emit("joinRoom", { channelId: channelId, getMessages: false });
       socket.on(`channelData:${channelId}`, (channelData: Channel) => {
-        console.log("channelData", channelData);
         setChannelsData((prevChannelsData) => {
           const updatedChannels = [...prevChannelsData];
           const channelIndex = updatedChannels.findIndex(
@@ -104,15 +86,7 @@ function Channels() {
     <>
       {user && (
         <div className={styles.container}>
-          <AddChannelBar
-            name={newChannel}
-            changeName={changeNewChannel}
-            isPublic={isPublic}
-            setIsPublic={setIsPublic}
-            password={password}
-            setPassword={setPassword}
-            createChannel={onCreateChannel}
-          />
+          <AddChannelBar />
           <ul>
             {channelsData.map((channel) => {
               return (

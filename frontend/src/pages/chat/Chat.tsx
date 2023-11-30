@@ -5,20 +5,13 @@ import styles from "./Chat.module.scss";
 import { ChatHeader } from "./ChatHeader";
 import { MessageElement } from "./MessageElement";
 import { MessageInput } from "./MessageInput";
-import { User } from "../../types/user.interface";
-import { UserElement } from "../../layouts/friends/UserElement";
-import { ContextMenuType } from "../../layouts/friends/UserContextMenu";
-import { AddFriendBar } from "../../layouts/friends/AddFriendBar";
-import { notifySuccess } from "../../utils/notifications";
+import { UserElement } from "../friends/UserElement";
+import { ContextMenuType } from "../friends/UserContextMenu";
+import { AddFriendBar } from "../friends/AddFriendBar";
 import { useChatSocket } from "../../hooks/useChatSocket";
-import {
-  Channel,
-  Member,
-  MemberUsers,
-  Message,
-} from "../../types/chat.interface";
-import { getAllUsersApi } from "../../services/user.api";
+import { Channel, MemberUsers, Message } from "../../types/chat.interface";
 import { Loading } from "../../components/Loading";
+import { notifyError } from "../../utils/notifications";
 
 function Chat() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -63,16 +56,23 @@ function Chat() {
 
   const addMember = async (e: React.FormEvent) => {
     e.preventDefault();
-    socket.emit("addMember", {
-      channelId: id,
-      memberUsername: addedMember,
-    });
+    socket.emit(
+      "addMember",
+      {
+        channelId: id,
+        memberUsername: addedMember,
+      },
+      (result: string) => {
+        if (result) {
+          notifyError(result);
+        }
+      }
+    );
     setAddedMember("");
   };
 
   useEffect(() => {
     socket.on(`channelData:${id}`, (channelData: Channel) => {
-      console.log(channelData);
       setChannel(channelData);
       setMessages(channelData.messages);
       setMembers(channelData.members);
@@ -93,6 +93,12 @@ function Chat() {
       setMembers((prevMembers) => [...prevMembers, member]);
     });
 
+    socket.on(`${id}/memberDeleted`, (deletedMemberId: string) => {
+      setMembers((prevMembers) =>
+        prevMembers.filter((member) => member.member.id !== deletedMemberId)
+      );
+    });
+
     socket.emit("joinRoom", { channelId: id, getMessages: true });
 
     return () => {
@@ -110,7 +116,7 @@ function Chat() {
         <div className={styles.container}>
           <div className={styles.chat}>
             <ChatHeader
-              title={channel.name}
+              channel={channel}
               toggleMembersMenu={toggleMembersMenu}
             />
             <ul>

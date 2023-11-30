@@ -80,6 +80,23 @@ export class UserService {
     }
   }
 
+  async findUserHistory(id: number) {
+    try {
+      const user = await this.prismaService.user.findUnique({
+        where: { id },
+        include: {
+          wonMatches: true,
+          lostMatches: true,
+        },
+      });
+
+      const history = [...user.wonMatches, ...user.lostMatches];
+      return history;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
   async updateUserUsername(id: number, username: string) {
     return this.prismaService.user.update({
       where: { id },
@@ -271,6 +288,38 @@ export class UserService {
       throw new NotFoundException('No stats found');
     }
 
+    const history = await this.findUserHistory(id);
+    history.sort((a, b) => (a.finished > b.finished ? -1 : 1));
+
     return stats;
+  }
+
+  async getUserHistory(id: number) {
+    const user = await this.findUserById(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const history = await this.findUserHistory(id);
+    if (!history) {
+      throw new NotFoundException('No history found');
+    }
+
+    const sortedHistory = history.sort((a, b) =>
+      a.finished > b.finished ? -1 : 1,
+    );
+
+    const userPromises = sortedHistory.map(async (match: any) => {
+      const [winner, loser] = await Promise.all([
+        this.getUserById(match.winnerId),
+        this.getUserById(match.loserId),
+      ]);
+      match.winner = winner;
+      match.loser = loser;
+      return match;
+    });
+
+    const historyWithUsers = await Promise.all(userPromises);
+    return historyWithUsers;
   }
 }

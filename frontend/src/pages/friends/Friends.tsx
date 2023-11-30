@@ -10,7 +10,6 @@ import {
 import { AddFriendBar } from "./AddFriendBar";
 import { UserElement } from "./UserElement";
 import { notifyError, notifySuccess } from "../../utils/notifications";
-import styles from "./Friends.module.scss";
 import { io } from "socket.io-client";
 import { UserReqElement } from "./UserReqElement";
 import { useAuth } from "../../hooks/useAuth";
@@ -20,7 +19,11 @@ const socket = io(`${import.meta.env.VITE_BACK_URL}/friendship`, {
   withCredentials: true,
 });
 
-function Friends() {
+interface FriendsProps {
+  styles: CSSModuleClasses;
+}
+
+function Friends({ styles }: FriendsProps) {
   const { user } = useAuth();
   const [friends, setFriends] = useState<User[] | null>(null);
   const [usersReq, setUsersReq] = useState<User[] | null>(null);

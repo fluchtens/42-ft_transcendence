@@ -17,8 +17,7 @@ const ChannelElement = ({ channel }: ChannelElementProps) => {
   };
 
   const joinChannel = () => {
-    console.log(channel.isMember);
-    if (!channel.isMember) {
+    if ((!channel.isConnected && channel.protected) || !channel.isMember) {
       setModal(true);
     } else {
       navigate("/chat/" + channel.id);
@@ -55,7 +54,7 @@ const ChannelElement = ({ channel }: ChannelElementProps) => {
           </button>
         </div>
       )}
-      {modal && !channel.isMember && !channel.isConnected && (
+      {modal && (
         <JoinChannelModal channel={channel} closeModal={closeModal} />
       )}
     </>

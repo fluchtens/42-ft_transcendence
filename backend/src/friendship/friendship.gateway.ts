@@ -60,9 +60,7 @@ export class FriendshipGateway {
 
   public setUserStatus(userId: number, playing: boolean) {
     let userObject = this.userStatus.get(userId);
-    if (!userObject) {
-      throw new Error('Unexpected Error');
-    }
+    if (!userObject) return;
     userObject.status = playing ? 'In game' : 'Online';
     this.server.emit('reloadList');
   }
