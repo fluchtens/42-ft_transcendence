@@ -1,4 +1,4 @@
-import { Stats } from "../types/game.interface";
+import { Game, Stats } from "../types/game.interface";
 import { User } from "../types/user.interface";
 
 const apiUrl: string = `${import.meta.env.VITE_BACK_URL}/user`;
@@ -207,6 +207,25 @@ async function getUserStatsApi(id: number): Promise<Stats | null> {
   }
 }
 
+async function getUserHistoryApi(id: number): Promise<Game[] | null> {
+  try {
+    const response = await fetch(`${apiUrl}/game/history/${id}`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
 export {
   getUserApi,
   getUserByIdApi,
@@ -217,4 +236,5 @@ export {
   getUserAvatar,
   updateAvatarApi,
   getUserStatsApi,
+  getUserHistoryApi,
 };
