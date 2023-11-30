@@ -24,9 +24,36 @@ function Channels() {
       );
     });
 
+    socket.on("resetChannel", (channelId: string) => {
+      socket.emit('getChannelStatus', channelId, (channel: Channel) => {
+          setChannelsData((prevChannelsData) => {
+            console.log(channel);
+            const updatedChannels = [...prevChannelsData];
+            const channelIndex = updatedChannels.findIndex(
+              (channel) => channel.id === channelId
+            );
+            if (channelIndex !== -1) {
+              if (channel.isMember || channel.public) {
+                updatedChannels[channelIndex] = channel;
+              }
+              else {
+                const filteredChannels = updatedChannels.filter(
+                  (channel) => channel.id !== channelId
+                );
+                return filteredChannels;
+              }
+            } else {
+              updatedChannels.push(channel);
+            }
+            return updatedChannels;
+          });
+      })
+    });
+
     return () => {
       socket.off("newChannel");
       socket.off("channelDeleted");
+      socket.off("resetChannel");
     };
   }, [socket]);
 

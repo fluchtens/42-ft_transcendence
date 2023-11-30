@@ -45,7 +45,6 @@ import {
   KickUserDto,
   ChangeChannelVisibilityDto,
 } from './dtos/gateway.dtos';
-import { channel } from 'diagnostics_channel';
 import * as bcrypt from 'bcryptjs';
 import { FriendshipStatus, Member, User } from '@prisma/client';
 import { FriendshipService } from 'src/friendship/friendship.service';
@@ -254,6 +253,25 @@ export class ChatGateway implements OnModuleInit {
     }
   }
 
+  @SubscribeMessage('getChannelStatus')
+  async getChannelStatus(@ConnectedSocket() client: Socket,
+  @MessageBody() channelId: string) {
+    const userId: number = client.handshake.auth.userId;
+    if (userId) {
+      const channelIsPublic  = await this.chatService.isChannelPublic(channelId);
+      if (channelIsPublic) {
+        const channel = await this.chatService.getChannelById(channelId);
+        return channel;
+      }
+      const channel = await this.getChannelData(client, channelId, false);
+      return channel;
+    }
+    else {
+      console.log("userId Invalid getChannelStatus");
+      return ;
+    }
+  }
+
   @SubscribeMessage('joinRoom')
   async handleJoinRoom(
     @ConnectedSocket() client: Socket,
@@ -272,6 +290,8 @@ export class ChatGateway implements OnModuleInit {
         client.emit(`channelData:${channelId}`, ChannelData);
         if (ChannelData)
          return true;
+        // if (!ChannelData.isMember && !ChannelData.public)
+        //  return true;
       } catch (error) {
         console.error('Error joining room:', error.message);
         return false;
@@ -673,11 +693,15 @@ export class ChatGateway implements OnModuleInit {
               .emit(`${channelId}/message`, messageDataDto);
             const clients = this.roomService.getRoomClients(channelId);
             const channel = await this.getChannelData(client, channelId, true);
-            this.server.except(channelId).emit('channelDeleted', channel.id)
+            // this.server.except(channelId).emit('channelDeleted', channel.id);
             this.server.to(channelId).emit(`channelData:${channelId}`, channel);
-            if (isPublic && channel.public) {
-              this.server.except(channelId).emit("newChannel", channel.id);
-            }
+            this.server.emit('resetChannel', channel.id);
+            // if (isPublic && channel.public) {
+              // this.server.except(channelId).emit("newChannel", channel.id);
+            // }
+            channel.members = [];
+            channel.messages = [];
+            // this.server.except(channelId).emit(`channelData:${channelId}`, channel);
             return null;
           }
           console.log(changeChannel);
