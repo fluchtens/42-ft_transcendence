@@ -564,8 +564,8 @@ export class ChatService {
     isPublic: boolean,
   ): Promise<string> {
     try {
-      const channelData = await this.getChannelById(channelId);
-      if (channelData.userId === userId) {
+      const userRole = await this.findMemberRoleInChannel(channelId, userId);
+      if (userRole === "OWNER") {
         await this.prismaService.channel.update({
           where: {
             id: channelId,

@@ -148,14 +148,12 @@ export class ChatGateway implements OnModuleInit {
         channelData.protected = true;
       }
       if (channelInfo.password === 'true' || !getMessages) {
-        if (channelInfo.password === 'true') {
-          channelData.protected = true;
-        }
         channelData.messages = [];
         channelData.members = [];
         return channelData;
-      } else {
-        this.roomService.joinRoom(client, channelId);
+      }
+      this.roomService.joinRoom(client, channelId);
+      if (!connection) {
         let connectedUsersSet = this.connectedUsers.get(channelId);
         if (!connectedUsersSet) {
           connectedUsersSet = new Set<string>();
@@ -189,7 +187,7 @@ export class ChatGateway implements OnModuleInit {
       );
       channelData.messages = messages;
       channelData.members = memberDto;
-      channelData.isConnected = true;
+      // channelData.isConnected = true;
     } catch (error) {
       console.error('error getChannelData', error);
       throw error;
@@ -273,7 +271,7 @@ export class ChatGateway implements OnModuleInit {
         );
         client.emit(`channelData:${channelId}`, ChannelData);
         if (ChannelData)
-        return true;
+         return true;
       } catch (error) {
         console.error('Error joining room:', error.message);
         return false;
@@ -551,7 +549,7 @@ export class ChatGateway implements OnModuleInit {
               const channelInfo = await this.getChannelData(
                 client,
                 channel.id,
-                false,
+                true,
                 channelDto.password,
               );
               this.server
@@ -673,11 +671,13 @@ export class ChatGateway implements OnModuleInit {
             this.server
               .to(channelId)
               .emit(`${channelId}/message`, messageDataDto);
-              const clients = this.roomService.getRoomClients(channelId);
-              const channel = await this.getChannelData(client, channelId, true);
-              clients.forEach((client) => {
-                this.server.to(client.id).emit(`channelData:${channelId}`, channel)
-              });
+            const clients = this.roomService.getRoomClients(channelId);
+            const channel = await this.getChannelData(client, channelId, true);
+            this.server.except(channelId).emit('channelDeleted', channel.id)
+            this.server.to(channelId).emit(`channelData:${channelId}`, channel);
+            if (isPublic && channel.public) {
+              this.server.except(channelId).emit("newChannel", channel.id);
+            }
             return null;
           }
           console.log(changeChannel);

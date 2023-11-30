@@ -54,7 +54,19 @@ function Channels() {
           } else {
             updatedChannels.push(channelData);
           }
-          return updatedChannels;
+          const removeUsselesschannel = updatedChannels;
+          const channelsToRemove = removeUsselesschannel.filter(
+            (channel) => !channelIds.includes(channel.id)
+          );
+          channelsToRemove.forEach((channelToRemove) => {
+            const removeIndex = removeUsselesschannel.findIndex(
+              (channel) => channel.id === channelToRemove.id
+            );
+            if (removeIndex !== -1) {
+              removeUsselesschannel.splice(removeIndex, 1);
+            }
+          });
+          return removeUsselesschannel;
         });
       });
     });

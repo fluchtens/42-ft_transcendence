@@ -37,7 +37,7 @@ const JoinChannelModal = ({ channel, closeModal }: JoinChannelModalProps) => {
         }
       );
     }
-    else if (channel.isMember && channel.protected){
+    else {
       socket.emit("joinRoom", {channelId:channel.id, getMessages: true, password:password}, (result : boolean) => {
         if (result) {
           notifySuccess("You have joined the channel");
