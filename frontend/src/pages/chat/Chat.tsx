@@ -72,7 +72,6 @@ function Chat() {
 
   useEffect(() => {
     socket.on(`channelData:${id}`, (channelData: Channel) => {
-      console.log(channelData);
       setChannel(channelData);
       setMessages(channelData.messages);
       setMembers(channelData.members);

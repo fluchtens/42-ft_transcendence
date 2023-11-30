@@ -138,7 +138,6 @@ export class FriendshipService {
 
     friends.sort((a, b) => a.username.localeCompare(b.username));
 
-		console.log(`getFriends | map ${this.friendshipGateway.code}: ${this.friendshipGateway.getUserStatus()}`);
     const friendsData = friends.map((user: any) => {
       if (user.avatar) {
         user.avatar = `${process.env.VITE_BACK_URL}/user/avatar/${user.avatar}`;

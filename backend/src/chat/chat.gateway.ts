@@ -87,12 +87,12 @@ export class ChatGateway implements OnModuleInit {
     }
   }
 
-  verifyUserConnection(socket: Socket, channelId: string): boolean {
+  verifyUserConnection(socketId: string, channelId: string): boolean {
     if (!channelId) {
       return false;
     }
     const connectedUsersSet = this.connectedUsers.get(channelId);
-    if (!connectedUsersSet || !connectedUsersSet.has(socket.id)) {
+    if (!connectedUsersSet || !connectedUsersSet.has(socketId)) {
       return false;
     }
     return true;
@@ -117,7 +117,7 @@ export class ChatGateway implements OnModuleInit {
   ): Promise<ChannelData> {
     let channelData: ChannelData;
     try {
-      const connection: boolean = this.verifyUserConnection(client, channelId);
+      const connection: boolean = this.verifyUserConnection(client.id, channelId);
       const channelInfo = await this.chatService.getChannelById(
         channelId,
         password,
@@ -265,6 +265,7 @@ export class ChatGateway implements OnModuleInit {
           password,
         );
         client.emit(`channelData:${channelId}`, ChannelData);
+        if (ChannelData)
         return true;
       } catch (error) {
         console.error('Error joining room:', error.message);
@@ -490,49 +491,54 @@ export class ChatGateway implements OnModuleInit {
       try {
         const channel = await this.chatService.getChannelById(
           channelDto.channelId,
-        );
-        console.log('joinPublicChannel', channel);
-        if (channel) {
-          console.log(channelDto.channelId);
-          const joinChannel = await this.chatService.joinPublicChannel(
-            userId,
-            channelDto.channelId,
-            channelDto.password,
           );
-          if (joinChannel) {
-            console.log('SendEvent');
-            const user = await this.getOrAddUserData(userId);
-            const message = user.username + ' have joined the channel';
-            const messageData = await this.chatService.addMessage(
+          console.log('joinPublicChannel', channel);
+          if (channel) {
+            console.log(channelDto.channelId);
+            const member = await this.chatService.findMemberInChannel(channelDto.channelId, userId);
+            if (member) {
+              throw new Error("member is in channel")
+            }
+            const joinChannel = await this.chatService.joinPublicChannel(
               userId,
               channelDto.channelId,
-              message,
-            );
-            const messageDataDto: Messages = messageData;
-            messageDataDto.user = user;
-            this.server
-              .to(channelDto.channelId)
-              .emit(`${channelDto.channelId}/message`, messageDataDto);
-            this.server
-              .to(channelDto.channelId)
-              .emit(`${channelDto.channelId}/member`, {
-                member: joinChannel,
-                user: user,
-              });
-            const channelInfo = await this.getChannelData(
-              client,
-              channel.id,
-              false,
               channelDto.password,
             );
-            this.server
-              .to(String(userId))
-              .emit(`channelData:${channel.id}`, channelInfo);
-            return true;
-          } else {
-            throw new Error('error when join the channel');
+            if (joinChannel) {
+              console.log('SendEvent');
+              const user = await this.getOrAddUserData(userId);
+              const message = user.username + ' have joined the channel';
+              const messageData = await this.chatService.addMessage(
+                userId,
+                channelDto.channelId,
+                message,
+              );
+              const messageDataDto: Messages = messageData;
+              messageDataDto.user = user;
+              this.server
+                .to(channelDto.channelId)
+                .emit(`${channelDto.channelId}/message`, messageDataDto);
+              this.server
+                .to(channelDto.channelId)
+                .emit(`${channelDto.channelId}/member`, {
+                  member: joinChannel,
+                  user: user,
+                });
+              const channelInfo = await this.getChannelData(
+                client,
+                channel.id,
+                false,
+                channelDto.password,
+              );
+              this.server
+                .to(String(userId))
+                .emit(`channelData:${channel.id}`, channelInfo);
+              return true;
+            } else {
+              throw new Error('error when join the channel');
+            }
           }
-        } else {
+          else {
           throw new Error('Channel not found');
         }
       } catch (error) {

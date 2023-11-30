@@ -22,7 +22,7 @@ const JoinChannelModal = ({ channel, closeModal }: JoinChannelModalProps) => {
 
   const submitData = (e: React.FormEvent) => {
     e.preventDefault();
-    if (channel.public) {
+    if (channel.public && !channel.isMember) {
       socket.emit(
         "joinPublicChannel",
         { channelId: channel.id, password: password },
@@ -37,8 +37,8 @@ const JoinChannelModal = ({ channel, closeModal }: JoinChannelModalProps) => {
         }
       );
     }
-    else {
-      socket.emit("joinRoom", {channelId:channel.id, getMessages: false, password:password}, (result : boolean) => {
+    else if (channel.isMember && channel.protected){
+      socket.emit("joinRoom", {channelId:channel.id, getMessages: true, password:password}, (result : boolean) => {
         if (result) {
           notifySuccess("You have joined the channel");
           navigate("/chat/" + channel.id);
