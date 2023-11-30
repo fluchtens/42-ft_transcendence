@@ -40,6 +40,9 @@ import {
   DeleteMessageDto,
   ChangeMessageDto,
   MemberDto,
+  ChangeRoleDto,
+  ChangeChannelPasswordDto,
+  KickUserDto,
 } from './dtos/gateway.dtos';
 import { channel } from 'diagnostics_channel';
 import * as bcrypt from 'bcryptjs';
@@ -561,38 +564,75 @@ export class ChatGateway implements OnModuleInit {
   @SubscribeMessage('ProtectChannel')
   async handleChannelProtection(
     @ConnectedSocket() client: Socket,
-    @MessageBody() channelId: string,
+    @MessageBody() changeChannelPasswordDto: ChangeChannelPasswordDto,
   ) {
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
+      try {
+        const { channelId, password } = changeChannelPasswordDto;
+        const protect = await this.chatService.updateChannelWithPassword(userId, channelId, password);
+        return false;
+      }
+      catch (error) {
+        console.log(error.message);
+        return error.message;
+      }
     } else {
       console.log('User ID not available.');
     }
   }
-  //   // @SubscribeMessage('getChannels')
-  //   // async getChannels(@ConnectedSocket() client: Socket) {
-  //   //   const userId = Number(client.handshake.auth.userId);
-  //   //   const channels = await this.chatService.getUserChannels(userId);
-  //   //   channels.forEach((channel) => {
-  //   //     console.log(channel.id);
-  //   //   });
-  //   // }
 
-  //   // @SubscribeMessage('typing')
-  //   // async typing(@MessageBody('isTyping') isTyping: boolean,
-  //   //   @ConnectedSocket() client: Socket,
-  //   //   ){
-  //   //   //  const name = await this.userService.findUserById(Number(client.handshake.auth.userId));
-  //   //     this.server.emit('typing', { name, isTyping });
-  //   // }
+  @SubscribeMessage('changeRole')
+  async handleChangeRole(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() changeRoleDto: ChangeRoleDto) {
+    const userId = Number(client.handshake.auth.userId);
+    if (userId) {
+      try {
+        const { channelId, memberId, newRole } = changeRoleDto;
+        if (channelId && memberId && newRole) {
+          const changeRole = await this.chatService.changeMemberRole(userId, channelId, memberId, newRole);
 
-  //   // @SubscribeMessage('updateMessage')
-  //   // async update() {
+          const userMember = await this.getOrAddUserData(Number(memberId));
+            this.server
+              .to(channelId)
+              .emit(`${channelId}/member`, { member: changeRole, user: userMember });
+          console.log(changeRole);
+          return null;
+        }
+      }
+      catch (error) {
+        console.log(error.message);
+        return error.message;
+      }
+    } else {
+      console.log('User ID not available.');
+      return 'User ID not available.';
+    }
+  }
 
-  //   // }
+  @SubscribeMessage('kickUser')
+  async handleKickUser(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() kickUserDto: KickUserDto) {
+    const userId = Number(client.handshake.auth.userId);
+    if (userId) {
+      try {
+        const { channelId, userIdKick} = kickUserDto;
+        if (channelId && userIdKick) {
+          const changeRole = await this.chatService.kickUser(userId, channelId, userIdKick);
+          console.log(changeRole);
+          return null;
+        }
+      }
+      catch (error) {
+        console.log(error.message);
+        return error.message;
+      }
+    } else {
+      console.log('User ID not available.');
+      return 'User ID not available.';
+    }
+  }
 
-  //   // @SubscribeMessage('removeMessage')
-  //   // async remove() {
-
-  //   // }
 }

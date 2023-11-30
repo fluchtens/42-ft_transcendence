@@ -1,4 +1,4 @@
-import { Member, User } from '@prisma/client';
+import { Member, MemberRole, User } from '@prisma/client';
 
 export class SendMessageDto {
   channelId: string;
@@ -31,6 +31,22 @@ export class GetChannelDto {
   channelId: string;
   getMessages: boolean;
   password?: string;
+}
+
+export class ChangeRoleDto {
+  channelId: string;
+  memberId: number;
+  newRole: MemberRole;
+}
+
+export class ChangeChannelPasswordDto {
+  channelId: string;
+  password: string;
+}
+
+export class KickUserDto {
+  channelId: string;
+  userIdKick: number;
 }
 
 export class Messages {
