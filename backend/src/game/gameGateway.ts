@@ -39,9 +39,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			this.server.to(gameRoom).emit('statusChange', UserStatus.Playing);
 		});
 
-		function mockNewRatings(winnerRating: number, loserRating: number) {
-			return [winnerRating + 10, loserRating - 10];
-		} // TODO not mock
+		function newRatings(winnerRating: number, loserRating: number) {
+			let change = Math.ceil(Math.max(1, 25 + (winnerRating - loserRating) / 10));
+			return [winnerRating + change, loserRating - change];
+		} 
 
 		this.gameService.gameSetCallbacks( {
 			onRefresh: ({gameRoom, game}) => {
@@ -52,7 +53,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 					let winnerRatingBefore = await this._rating(winner.id);
 					let loserRatingBefore = await this._rating(loser.id);
 
-					let [winnerRatingAfter, loserRatingAfter] = mockNewRatings(winnerRatingBefore, loserRatingBefore);
+					let [winnerRatingAfter, loserRatingAfter] = newRatings(winnerRatingBefore, loserRatingBefore);
 
 					// awaits needed?? (when not testing)
 					await this.prismaService.user.update({
@@ -119,7 +120,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			const decodedToken =  this.authService.verifyAccessToken(token);
 // 			client.handshake.auth.userId = decodedToken.id;
 			let userId = decodedToken.id;
-			//console.log('connection from user', userId);
+			console.log('CONNECTION from user', userId, 'at sock', sock.id);
 			this.gameService.bindSocket(sock, userId); // refactor so userId is an int
 			// await this.InitRooms(client);
 		}
@@ -129,7 +130,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	handleDisconnect(sock: Socket) {
-		//console.log('DICONNECT', sock.id);
+		console.log('DICONNECT', sock.id);
 		let deletions = this.gameService.unbindSocket(sock);
 		if (deletions.invite) {
 			this._pushGameList();
@@ -246,9 +247,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 		(async () => {
 			let rating = await this._rating(userData.id);
+			this.server.to(userData.userRoom).emit('statusChange', UserStatus.Waiting);
 			this.gameService.joinQueue(userData.id, rating);
 			//console.log('did join');
-			this.server.to(userData.userRoom).emit('statusChange', UserStatus.Waiting);
 		}) ();
 	}
 
