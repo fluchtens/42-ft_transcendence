@@ -43,7 +43,8 @@ import {
 } from './dtos/gateway.dtos';
 import { channel } from 'diagnostics_channel';
 import * as bcrypt from 'bcryptjs';
-import { Member, User } from '@prisma/client';
+import { FriendshipStatus, Member, User } from '@prisma/client';
+import { FriendshipService } from 'src/friendship/friendship.service';
 
 @WebSocketGateway({
   namespace: 'chatSocket',
@@ -58,6 +59,7 @@ export class ChatGateway implements OnModuleInit {
     private readonly chatService: ChatService,
     private readonly userService: UserService,
     private readonly roomService: RoomsService,
+    private readonly friendshipService: FriendshipService,
   ) {}
 
   private connectedUsers: Map<string, Set<string>> = new Map();
@@ -440,38 +442,51 @@ export class ChatGateway implements OnModuleInit {
   ) {
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
-      const { channelId, memberUsername } = addMemberDto;
-      const member = await this.userService.findUserByUsername(memberUsername);
-      if (channelId && member) {
-        const result = await this.chatService.addMember(
-          userId,
-          channelId,
-          member.id,
-        );
-        if (result) {
-          const user = await this.getOrAddUserData(userId);
-          const message = user.username + ' have added ' + member.username;
-          const messageData = await this.chatService.addMessage(
+      try {
+        const { channelId, memberUsername } = addMemberDto;
+        const member = await this.userService.findUserByUsername(memberUsername);
+        const friendship = await this.friendshipService.findFriendship(userId, member.id);
+        if (!friendship || friendship.status !== FriendshipStatus.ACCEPTED) {
+          throw new Error('You are not friends with this user');
+        }
+        if (channelId && member) {
+          const result = await this.chatService.addMember(
             userId,
             channelId,
-            message,
+            member.id,
           );
-          const messageDataDto: Messages = messageData;
-          messageDataDto.user = user;
-          this.server
-            .to(channelId)
-            .emit(`${channelId}/message`, messageDataDto);
-          const userMember = await this.getOrAddUserData(Number(member.id));
-          this.server
-            .to(channelId)
-            .emit(`${channelId}/member`, { member: result, user: userMember });
-          this.server.to(String(member.id)).emit('newChannel', channelId);
+          if (result) {
+            const user = await this.getOrAddUserData(userId);
+            const message = user.username + ' have added ' + member.username;
+            const messageData = await this.chatService.addMessage(
+              userId,
+              channelId,
+              message,
+            );
+            const messageDataDto: Messages = messageData;
+            messageDataDto.user = user;
+            this.server
+              .to(channelId)
+              .emit(`${channelId}/message`, messageDataDto);
+            const userMember = await this.getOrAddUserData(Number(member.id));
+            this.server
+              .to(channelId)
+              .emit(`${channelId}/member`, { member: result, user: userMember });
+            this.server.to(String(member.id)).emit('newChannel', channelId);
+            return null;
+          }
+        } else {
+          console.error('channelId or member not found, addMemberFail');
+          return "channelId or member not found, addMemberFail";
         }
-      } else {
-        console.error('channelId or member not found, addMemberFail');
+      }
+      catch (error) {
+        console.log(error.message);
+        return error.message;
       }
     } else {
       console.log('User ID not available.');
+      return "User ID not available.";
     }
   }
 

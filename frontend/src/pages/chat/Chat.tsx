@@ -5,20 +5,17 @@ import styles from "./Chat.module.scss";
 import { ChatHeader } from "./ChatHeader";
 import { MessageElement } from "./MessageElement";
 import { MessageInput } from "./MessageInput";
-import { User } from "../../types/user.interface";
 import { UserElement } from "../friends/UserElement";
 import { ContextMenuType } from "../friends/UserContextMenu";
 import { AddFriendBar } from "../friends/AddFriendBar";
-import { notifySuccess } from "../../utils/notifications";
 import { useChatSocket } from "../../hooks/useChatSocket";
 import {
   Channel,
-  Member,
   MemberUsers,
   Message,
 } from "../../types/chat.interface";
-import { getAllUsersApi } from "../../services/user.api";
 import { Loading } from "../../components/Loading";
+import { notifyError } from "../../utils/notifications";
 
 function Chat() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -66,6 +63,10 @@ function Chat() {
     socket.emit("addMember", {
       channelId: id,
       memberUsername: addedMember,
+    }, (result: string) => {
+      if (result) {
+        notifyError(result);
+      }
     });
     setAddedMember("");
   };
