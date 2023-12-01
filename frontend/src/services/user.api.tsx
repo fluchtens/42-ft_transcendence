@@ -188,6 +188,25 @@ async function updateAvatarApi(file: any): Promise<ApiRes> {
 /*                                    Game                                    */
 /* -------------------------------------------------------------------------- */
 
+const getLeaderboardApi = async (): Promise<User[] | null> => {
+  try {
+    const response = await fetch(`${apiUrl}/game/leaderboard`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
 async function getUserStatsApi(id: number): Promise<Stats | null> {
   try {
     const response = await fetch(`${apiUrl}/game/stats/${id}`, {
@@ -235,6 +254,7 @@ export {
   updatePasswordApi,
   getUserAvatar,
   updateAvatarApi,
+  getLeaderboardApi,
   getUserStatsApi,
   getUserHistoryApi,
 };

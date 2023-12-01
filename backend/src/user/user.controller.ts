@@ -91,6 +91,12 @@ export class UserController {
   /*                                    Game                                    */
   /* -------------------------------------------------------------------------- */
 
+  @Get('game/leaderboard')
+  @UseGuards(JwtAuthGuard)
+  async getLeaderboard() {
+    return this.userService.getLeaderboard();
+  }
+
   @Get('game/stats/:id')
   @UseGuards(JwtAuthGuard)
   async getUserStats(@Param('id') id: string) {

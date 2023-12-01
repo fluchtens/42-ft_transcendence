@@ -10,6 +10,7 @@ import styles from "./Header.module.scss";
 import { useAuth } from "../../hooks/useAuth";
 import { FaUserGroup } from "react-icons/fa6";
 import { useFriendshipSocket } from "../../hooks/useFriendshipSocket";
+import { MdLeaderboard } from "react-icons/md";
 
 export default function Header() {
   const { user, refreshUser } = useAuth();
@@ -71,6 +72,14 @@ export default function Header() {
                 path="/friends"
                 text="FRIENDS"
                 icon={<FaUserGroup />}
+                cb={closeNavMenu}
+              />
+            </li>
+            <li>
+              <NavLink
+                path="/leaderboard"
+                text="LEADERBOARD"
+                icon={<MdLeaderboard />}
                 cb={closeNavMenu}
               />
             </li>

@@ -12,7 +12,6 @@
     max-height: calc(100vh - 10rem);
     flex-direction: column;
     display: flex;
-    gap: 2rem;
     list-style-type: none;
     overflow-y: auto;
     scrollbar-width: none; // Firefox
@@ -20,6 +19,20 @@
 
     &::-webkit-scrollbar {
       display: none; // WebKit-based browsers like Opera, Chrome, and Safari
+    }
+
+    li {
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgb(255, 255, 255, 0.05);
+
+      p {
+        font-size: map-get($text-base, font-size);
+        line-height: map-get($text-base, line-height);
+        font-weight: $font-medium;
+      }
     }
   }
 }

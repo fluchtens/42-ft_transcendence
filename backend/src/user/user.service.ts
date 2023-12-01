@@ -277,6 +277,15 @@ export class UserService {
   /*                                    Game                                    */
   /* -------------------------------------------------------------------------- */
 
+  async getLeaderboard() {
+    const users = await this.getAllUsers();
+    if (!users) throw new NotFoundException('No users found');
+
+    const sortedUsers = users.sort((a, b) => b.rating - a.rating);
+    const topUsers = sortedUsers.slice(0, 100);
+    return topUsers;
+  }
+
   async getUserStats(id: number) {
     const user = await this.findUserById(id);
     if (!user) {
