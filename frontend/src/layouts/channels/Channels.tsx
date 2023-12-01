@@ -25,6 +25,7 @@ function Channels() {
 
     socket.on("resetChannel", (channelId: string) => {
       socket.emit('getChannelStatus', channelId, (channel: Channel) => {
+        // console.log('channelData', user?.username, channel);
           setChannelsData((prevChannelsData) => {
             const updatedChannels = [...prevChannelsData];
             if (!channel.isMember && !channel.public) {
@@ -71,34 +72,6 @@ function Channels() {
 
   useEffect(() => {
     channelIds.forEach((channelId) => {
-      // socket.emit("joinRoom", { channelId: channelId, getMessages: false });
-      // socket.on(`channelData:${channelId}`, (channelData: Channel) => {
-      //   setChannelsData((prevChannelsData) => {
-      //     const updatedChannels = [...prevChannelsData];
-      //     const channelIndex = updatedChannels.findIndex(
-      //       (channel) => channel.id === channelId
-      //     );
-      //     if (channelIndex !== -1) {
-      //       updatedChannels[channelIndex] = channelData;
-      //     } else {
-      //       updatedChannels.push(channelData);
-      //     }
-      //     const removeUsselesschannel = updatedChannels;
-      //     const channelsToRemove = removeUsselesschannel.filter(
-      //       (channel) => !channelIds.includes(channel.id)
-      //     );
-      //     channelsToRemove.forEach((channelToRemove) => {
-      //       const removeIndex = removeUsselesschannel.findIndex(
-      //         (channel) => channel.id === channelToRemove.id
-      //       );
-      //       if (removeIndex !== -1) {
-      //         removeUsselesschannel.splice(removeIndex, 1);
-      //       }
-      //     });
-      //     return removeUsselesschannel;
-      //   });
-      // });
-
       socket.emit('getChannelInitialData', channelId, (channel: Channel) => {
         setChannelsData((prevChannelsData) => {
           const updatedChannels = [...prevChannelsData];
@@ -126,7 +99,6 @@ function Channels() {
         });
     })
     });
-
     setChannelsData((prevChannelsData) => {
       const updatedChannels = [...prevChannelsData];
       const channelsToRemove = updatedChannels.filter(

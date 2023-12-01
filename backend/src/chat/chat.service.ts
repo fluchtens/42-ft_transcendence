@@ -533,23 +533,19 @@ export class ChatService {
   async removePasswordFromChannel(
     userId: number,
     channelId: string,
-    password: string,
   ): Promise<string> {
     try {
-      const channelData = await this.getChannelById(channelId);
-      if (channelData.userId === userId) {
-        if (await bcrypt.compare(password, channelData.password)) {
-          await this.prismaService.channel.update({
-            where: {
-              id: channelId,
-            },
-            data: {
-              password: null,
-            },
-          });
-          return 'Password successful removed';
-        }
-        return 'Password verification failed';
+      const memberRole = await this.findMemberRoleInChannel(channelId, userId);
+      if (memberRole === "OWNER") {
+        await this.prismaService.channel.update({
+          where: {
+            id: channelId,
+          },
+          data: {
+            password: null,
+          },
+        });
+        return 'Password successful removed';
       }
       return 'You are not the channel Owner';
     } catch (error) {

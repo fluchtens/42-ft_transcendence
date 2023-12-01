@@ -104,18 +104,40 @@ const EditChannel = ({
       socket.emit("protectChannel", {
         channelId: channel.id, password: editChannel.password
       }, (result: string) => {
-        if (result) {
-          // notifySuccess("Password Changed");
+        if (result === "You are not the chat owner") {
+          notifyError(result);
         }
-        else {
-          // notifyError(result);
+        else if (!result){
+          notifySuccess("Password Changed");
         }
       });
     }
-    socket.emit('changeChannelVisibility', {channelId: channel.id, isPublic:editChannel.isPublic});
+    if (channel.protected && !editChannel.protected) {
+      socket.emit('deteleChannelProtection', {
+        channelId: channel.id
+      }, (result: string) => {
+        if (result === "You are not the chat owner") {
+          notifyError(result);
+        }
+        else if (!result){
+          notifySuccess("Password Changed");
+        }
+        else {
+          notifyError("result");
+        }
+      });
+      console.log("testing");
+    }
+    socket.emit('changeChannelVisibility', {channelId: channel.id, isPublic:editChannel.isPublic}, (result: string) => {
+      if (!result){
+        notifySuccess("Channel successfully updated");
+      }
+      else {
+        notifyError("Failed to")
+      }
+    });
     closeModal();
     resetProperties();
-    notifySuccess("Channel successfully updated");
   };
 
   return (
