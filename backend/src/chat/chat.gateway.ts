@@ -333,7 +333,9 @@ export class ChatGateway implements OnModuleInit {
           getMessages,
           password,
         );
-        client.emit(`channelData:${channelId}`, ChannelData);
+        // if (ChannelData.messages)
+        //   console.log("emit test", ChannelData.name);
+        this.server.to(client.id).emit(`channelData:${channelId}`, ChannelData);
         if (ChannelData)
          return true;
         // if (!ChannelData.isMember && !ChannelData.public)

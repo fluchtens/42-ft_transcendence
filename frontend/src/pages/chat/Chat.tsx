@@ -73,9 +73,13 @@ function Chat() {
 
   useEffect(() => {
     socket.on(`channelData:${id}`, (channelData: Channel) => {
-      setChannel(channelData);
-      setMessages(channelData.messages);
-      setMembers(channelData.members);
+      if (channelData.messages && channelData.members) {
+        setMessages(channelData.messages);
+        setMembers(channelData.members);
+        setChannel(channelData);
+      }
+      // setMessages(channelData.messages);
+      // setMembers(channelData.members);
       setLoading(false);
     });
 
@@ -98,7 +102,6 @@ function Chat() {
         prevMembers.filter((member) => member.member.id !== deletedMemberId)
       );
     });
-
     socket.emit("joinRoom", { channelId: id, getMessages: true });
 
     return () => {
@@ -110,8 +113,21 @@ function Chat() {
   }, [id, socket]);
 
   useEffect(() => {
+    socket.on(`channelData:${id}`, (channelData: Channel) => {
+      if (channelData.messages && channelData.members) {
+        setMessages(channelData.messages);
+        setMembers(channelData.members);
+        setChannel(channelData);
+      }
+      // setMessages(channelData.messages);
+      // setMembers(channelData.members);
+      setLoading(false);
+    });
     socket.emit("joinRoom", { channelId: id, getMessages: true });
-  }, [socket]);
+    return () => {
+      socket.off(`channelData:${id}`);
+    }
+  }, [socket, id]);
 
   return (
     <>
