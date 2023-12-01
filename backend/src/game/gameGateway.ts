@@ -17,6 +17,7 @@ import { UserService } from "src/user/user.service";
 
 // TODO question
 // UserStatus should be set only by the service and not the controller
+// I think that's done
 
 @WebSocketGateway({
 	namespace: '/gamesocket',
@@ -26,8 +27,6 @@ import { UserService } from "src/user/user.service";
 	}
 })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
-
-// 	gameService = new GameService(); // TODO use nest module system
 
 	constructor(
 		private readonly authService : AuthService,
@@ -50,6 +49,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			},
 			onFinish: ({gameRoom, game, winner, loser}) => {
 				(async () => {
+					// TODO handle db errors? users don't exist etc
 					let winnerRatingBefore = await this._rating(winner.id);
 					let loserRatingBefore = await this._rating(loser.id);
 
@@ -164,7 +164,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		});
 	}
 
-	_confirmStatus(sock, accepted, errmsg = "Forbidden action") : UserData {
+	_confirmStatus(sock, accepted, errmsg = "Forbidden action (try to refresh)") : UserData {
 		let userData = this.gameService.getUserData(sock.id);
 		if ( !userData ) {
 			sock.emit('gameSocketError', "you have no active session.");
@@ -247,6 +247,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 		(async () => {
 			let rating = await this._rating(userData.id);
+			// TODO handle error db miss
 			this.server.to(userData.userRoom).emit('statusChange', UserStatus.Waiting);
 			this.gameService.joinQueue(userData.id, rating);
 			//console.log('did join');

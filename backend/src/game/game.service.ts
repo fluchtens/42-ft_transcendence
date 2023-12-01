@@ -24,8 +24,6 @@ export class UserData {
 		this._status = val;
 	}
 
-	public rating = 0; // TODO get from db or something
-
 	private _gameRoom : string | null = null;
 	get gameRoom() { return this._gameRoom; }
 	set gameRoom(newRoom: string | null ) {
@@ -170,6 +168,7 @@ export class GameService {
 		this.invites.set('test1', {host: new UserData(19)});
 		this.invites.set('test2', {host: new UserData(42)});
 
+		this.externalCreateGame(1, 2); // alice and bob always play :P
 // 		gFriendshipGateway = this.friendshipGateway;
 // 		//
 // 		let alice = new UserData(1);
@@ -366,7 +365,8 @@ export class GameService {
 					this.pendingDelete.add(userId);
 				}
 			}
-		}, 10000);
+// 		}, 10000);
+		}, 100000); // TESTING
 	}
 
 	lobbyJoinGame (

@@ -6,25 +6,9 @@ import { PrismaModule } from 'src/prisma/prisma.module';
 import { GameService } from './game.service'
 import { FriendshipModule } from 'src/friendship/friendship.module';
 
-// @Module({
-//   providers: [
-// 		GameGateway,
-// 		GameRouter,
-// 		AuthService,
-// 		UserService,
-// 		PrismaService,
-// 		GameService,
-// 		FriendshipGateway,
-// 	],
-// //   providers: [GameGateway],
-// })
-// export class GameGatewayModule {}
-
 @Module({
   providers: [ GameGateway, GameService ],
-	imports: [AuthModule, UserModule, PrismaModule, FriendshipModule]
-//   providers: [GameGateway],
+	imports: [AuthModule, UserModule, PrismaModule, FriendshipModule],
+	exports: [GameService]
 })
 export class GameGatewayModule {}
-
-//

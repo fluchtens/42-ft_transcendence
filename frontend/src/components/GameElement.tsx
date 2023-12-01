@@ -310,9 +310,9 @@ function PongBoard({availWidth, availHeight}: {availWidth: number, availHeight: 
 	}
 
 	function handleKeyDown(ev: any) { // TODO some sort of 'KeyboardEvent' instead of 'any'
-		if (ev.repeat) return;
 		if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
 			ev.preventDefault();
+			if (ev.repeat) return;
 			pressed.current.add(ev.key);
 			socket.emit('playerMotion', dir());
 		}
