@@ -288,12 +288,12 @@ export class GameService {
 
 		let gameId = this.genId();
 		let game = new gm.GameState(startTime);
-		game.newBall(gm.WhichPlayer.P1, startTime);
+// 		game.newBall(gm.WhichPlayer.P1, startTime);
 		// TESTING
-		game.ball.dx = - gm.PONG.ballXSpeed;
-		game.ball.dy = 0;
-		game.ball.x = Math.floor(gm.PONG.width / 2);
-		game.ball.y = Math.floor(gm.PONG.height / 2);
+// 		game.ball.dx = - gm.PONG.ballXSpeed;
+// 		game.ball.dy = 0;
+// 		game.ball.x = Math.floor(gm.PONG.width / 2);
+// 		game.ball.y = Math.floor(gm.PONG.height / 2);
 		// END TESTING
 		// //
 		this.games.set(gameId, game);

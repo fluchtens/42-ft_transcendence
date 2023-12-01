@@ -10,14 +10,10 @@ import {
 import { AddFriendBar } from "./AddFriendBar";
 import { UserElement } from "./UserElement";
 import { notifyError, notifySuccess } from "../../utils/notifications";
-import { io } from "socket.io-client";
 import { UserReqElement } from "./UserReqElement";
 import { useAuth } from "../../hooks/useAuth";
 import { ContextMenuType } from "./UserContextMenu";
-
-const socket = io(`${import.meta.env.VITE_BACK_URL}/friendship`, {
-  withCredentials: true,
-});
+import { useFriendshipSocket } from "../../hooks/useFriendshipSocket";
 
 interface FriendsProps {
   styles: CSSModuleClasses;
@@ -29,6 +25,7 @@ function Friends({ styles }: FriendsProps) {
   const [usersReq, setUsersReq] = useState<User[] | null>(null);
   const [addUser, setAddUser] = useState<string>("");
   const [contextMenu, setContextMenu] = useState<number | null>(null);
+  const socket = useFriendshipSocket();
 
   const changeAddUser = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAddUser(e.target.value);

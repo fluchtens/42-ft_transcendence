@@ -9,6 +9,52 @@ const ERR_MSG = "An error occurred while processing your request.";
 /*                                   General                                  */
 /* -------------------------------------------------------------------------- */
 
+async function blockUserApi(userId: number): Promise<AuthRes> {
+  try {
+    const response = await fetch(`${API_URL}/block`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId }),
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      return { success: false, message: data.message };
+    }
+
+    return { success: true, message: data.message };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: ERR_MSG };
+  }
+}
+
+async function unlockUserApi(userId: number): Promise<AuthRes> {
+  try {
+    const response = await fetch(`${API_URL}/unlock`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId }),
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      return { success: false, message: data.message };
+    }
+
+    return { success: true, message: data.message };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: ERR_MSG };
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                   Friends                                  */
+/* -------------------------------------------------------------------------- */
+
 async function getFriendsApi(userId: number): Promise<User[] | null> {
   try {
     const response = await fetch(`${API_URL}/${userId}`, {
@@ -31,7 +77,7 @@ async function getFriendsApi(userId: number): Promise<User[] | null> {
 async function removeFriendApi(userId: number): Promise<AuthRes> {
   try {
     const response = await fetch(`${API_URL}/remove`, {
-      method: "PATCH",
+      method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId }),
       credentials: "include",
@@ -49,26 +95,6 @@ async function removeFriendApi(userId: number): Promise<AuthRes> {
   }
 }
 
-async function blockUserApi(userId: number): Promise<AuthRes> {
-  try {
-    const response = await fetch(`${API_URL}/block`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId }),
-      credentials: "include",
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      return { success: false, message: data.message };
-    }
-
-    return { success: true, message: data.message };
-  } catch (error) {
-    console.error(error);
-    return { success: false, message: ERR_MSG };
-  }
-}
 /* -------------------------------------------------------------------------- */
 /*                                  Requests                                  */
 /* -------------------------------------------------------------------------- */
@@ -137,7 +163,7 @@ async function acceptFriendRequestApi(userId: number): Promise<AuthRes> {
 async function declineFriendRequestApi(userId: number): Promise<AuthRes> {
   try {
     const response = await fetch(`${API_URL}/request/decline`, {
-      method: "PATCH",
+      method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId }),
       credentials: "include",
@@ -156,9 +182,10 @@ async function declineFriendRequestApi(userId: number): Promise<AuthRes> {
 }
 
 export {
+  blockUserApi,
+  unlockUserApi,
   getFriendsApi,
   removeFriendApi,
-  blockUserApi,
   getFriendRequestsApi,
   sendFriendRequestApi,
   acceptFriendRequestApi,

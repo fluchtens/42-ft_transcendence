@@ -63,7 +63,9 @@ function GameElementContent() {
 			setStatus(gotStatus);
 		});
 
-		socket.on('statusChange', (gotStatus: UserStatus) => { setStatus(gotStatus); } );
+		socket.on('statusChange', (gotStatus: UserStatus) => { 
+			setStatus(gotStatus); 
+		});
 		socket.on('winLose', (gotWin: boolean) => { 
 			setWinLose(gotWin? WinLose.Win: WinLose.Lose); 
 		});
@@ -236,33 +238,53 @@ function PongBoard({availWidth, availHeight}: {availWidth: number, availHeight: 
 	const [canvasWidth, canvasHeight] = [gm.PONG.width * scale, gm.PONG.height * scale];
 
 	function drawGame(cx: CanvasRenderingContext2D) {
-			let game = gameRef.current
+		function drawCountdown(seconds: number) {
+			const center = { 
+				x : Math.floor((canvasWidth + 1) / 2),
+				y : Math.floor((canvasHeight + 1) / 2)
+			};
+			const textSize = Math.floor(canvasHeight / 15);
+			cx.textAlign = 'center';
+			cx.fillText(String(Math.ceil(seconds)), center.x, center.y + textSize/2, textSize);
 
-			cx.fillStyle = 'black';
-			cx.fillRect(0, 0, gm.PONG.width * scale, gm.PONG.height * scale);
-			cx.fillStyle = '#00ff80'; // bluish green
-			game.update();
+			const arcWidth = 10;
+			const frac = (seconds % 1);
+			cx.beginPath();
+			cx.arc(center.x, center.y, textSize, 0, frac * 2 * Math.PI, false);
+			cx.arc(center.x, center.y, textSize + arcWidth, frac * 2 * Math.PI, 2 * Math.PI, true);
+			cx.fill();
+		}
+		let game = gameRef.current
 
-			// display paddles
-			let [w, h] = [gm.PONG.paddleWidth * scale, gm.PONG.paddleHeight * scale];
-			for (let {x, y} of [game.player1, game.player2]) {
-				cx.fillRect(x * scale, y * scale, w, h);
-			}
+		cx.fillStyle = 'black';
+		cx.fillRect(0, 0, gm.PONG.width * scale, gm.PONG.height * scale);
+		cx.fillStyle = '#00ff80'; // bluish green
+		game.update();
 
-			// display ball
-			if (game.ball) {
-				let {x, y} = game.ball;
-				cx.fillRect(x * scale, y * scale, w, w);
-			}
+		// display paddles
+		let [w, h] = [gm.PONG.paddleWidth * scale, gm.PONG.paddleHeight * scale];
+		for (let {x, y} of [game.player1, game.player2]) {
+			cx.fillRect(x * scale, y * scale, w, h);
+		}
 
-			// display scores
-			cx.font = `${Math.floor(canvasHeight / 15)}px Monospace`;
-			cx.textAlign = "left";
-			cx.fillText(String(game.player1.score), 0, 30);
-			cx.textAlign = "right";
-			cx.fillText(String(game.player2.score), gm.PONG.width * scale - 1, 30);
-			//
-			requestAnimationFrame( () => {drawGame(cx);} );
+		// display ball
+		if (game.ball) {
+			let {x, y} = game.ball;
+			cx.fillRect(x * scale, y * scale, w, w);
+		} else {
+			let countdown = game.timeToBall() / 1000;
+			if (countdown > 0)
+				drawCountdown(game.timeToBall() / 1000);
+		}
+
+		// display scores
+		cx.font = `${Math.floor(canvasHeight / 15)}px Monospace`;
+		cx.textAlign = "left";
+		cx.fillText(String(game.player1.score), 0, 30);
+		cx.textAlign = "right";
+		cx.fillText(String(game.player2.score), gm.PONG.width * scale - 1, 30);
+		//
+		requestAnimationFrame( () => {drawGame(cx);} );
 	}
 
 	useEffect( function() {

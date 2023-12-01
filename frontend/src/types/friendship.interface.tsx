@@ -1,5 +1,5 @@
 export interface Friendship {
-  id: number;
+  id: string;
   senderId: number;
   receiverId: string;
   status: string;

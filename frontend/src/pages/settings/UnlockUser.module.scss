@@ -1,0 +1,72 @@
+@import "../../styles/config.scss";
+
+.container {
+  text-align: left;
+
+  .dataToSubmit {
+    flex-direction: column;
+    display: flex;
+    align-items: left;
+    gap: 0.5rem;
+
+    p {
+      color: $text-secondary-color;
+    }
+
+    .unlockUserBar {
+      height: 2rem;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      input {
+        max-width: 20rem;
+        height: 100%;
+        padding: 0 0.5rem;
+        box-sizing: border-box;
+        border: none;
+        border-radius: $rounded;
+        outline: none;
+        background: $extra-tertiary-color;
+        font-size: map-get($text-sm, font-size);
+        line-height: map-get($text-sm, line-height);
+        color: $text-primary-color;
+      }
+
+      button {
+        width: 2rem;
+        height: 2rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: none;
+        border-radius: $rounded;
+        background: $extra-tertiary-color;
+        color: $text-primary-color;
+        transition: color 0.3s ease;
+        cursor: pointer;
+
+        &:hover {
+          color: white;
+        }
+
+        .icon {
+          width: 1rem;
+          height: 1rem;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    text-align: center;
+
+    .dataToSubmit {
+      align-items: center;
+    }
+  }
+}

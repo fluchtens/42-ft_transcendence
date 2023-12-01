@@ -21,25 +21,29 @@ function clamp<Type>(min: Type, x: Type, max: Type) {
 // Pong Logic
 export enum MotionType  { Up = -1, Still = 0, Down = 1 }; // -1, 1 convenient as mult factor for direction
 export const PONG = { // Parameters for PONG game
-	width: 200,
-	height: 150,
-	fps: 30,
+	width: 300,
+	height: 200,
+	fps: 60,
 	get msFrame() { return 1000 / this.fps; },
 	margin: 20,
 	//
-	playerSpeed: 6, // pixels per frame
-	ballXSpeed: 3,
-	ballMaxYSpeed: 6, // determines angle when edge of paddle is hit
+	playerSpeed: 4, // pixels per frame
+	ballXSpeed: 2,
+	ballMaxYSpeed: 4, // determines angle when edge of paddle is hit
 	//
-	ballSize: 2,
+	ballSize: 4,
 	get paddleWidth() { return this.ballSize },
-	paddleHeight: 14,
+	paddleHeight: 20,
 	//
 	get player1X() { return this.margin; },
 	get player2X() {
 		return this.width - this.margin - this.paddleWidth;
 	},
+	//
 	winScore: 11,
+	//
+	startDelay: 3000,
+	newBallDelay: 500,
 }
 
 // export const PONG = { // Parameters for PONG game
@@ -86,12 +90,17 @@ export enum WhichPlayer { P1 = -1, P2 = 1 } // -1, 1 convenient as mult factor f
 export class GameState {
 	public player1: Player;
 	public player2: Player;
-	public ball: Ball | null = null;
+	private _ball: Ball;
+	private _ballEntryTime;
+	get ball(): Ball | null {
+		return (this._ballEntryTime >= this._lastUpdate)? null : this._ball;
+	}
 
-	constructor(private _lastUpdate: number = Date.now()/*, public ball: Ball = new Ball(0,0)*/) {
+	constructor(private _lastUpdate: number = Date.now()) {
 		let paddleY = Math.trunc((PONG.height - PONG.paddleHeight) / 2);
 	 	this.player1 = new Player(PONG.player1X, paddleY);
 	 	this.player2 = new Player(PONG.player2X, paddleY);
+		this.newBall(WhichPlayer.P1, this._lastUpdate, PONG.startDelay);
 	}
 
 	_updateHelper(frames: number) {
@@ -131,6 +140,12 @@ export class GameState {
 		let totalFrames = Math.floor( (time - this._lastUpdate) / PONG.msFrame );
 		// maybe throw if negative
 		this._lastUpdate += totalFrames * PONG.msFrame;
+		let framesToBall = Math.ceil( (this._ballEntryTime - this._lastUpdate) / PONG.msFrame);
+
+		if (0 < framesToBall && framesToBall <= totalFrames) {
+			this._updateHelper(framesToBall); 
+			totalFrames -= framesToBall;
+		}
 
 		let handlePaddleCollision = () => {
 			if (!this.ball) return;
@@ -188,7 +203,11 @@ export class GameState {
 		return (which === WhichPlayer.P1) ? this.player1 : this.player2;
 	}
 
-	packet(timestamp: number | null = null, fields = ['player1', 'player2', 'ball']): {timestamp: number} {
+	packet(
+		timestamp: number | null = null,
+		 	fields = ['player1', 'player2', '_ball', '_ballEntryTime']
+	) : {timestamp: number} 
+	{
 		if (timestamp)
 			this.update(timestamp);
 		timestamp = timestamp || this._lastUpdate;
@@ -203,7 +222,7 @@ export class GameState {
 
 	pushPacket(packet: {timestamp: number}) {
 		this._lastUpdate = packet.timestamp;
-		const allowedFields = ['player1', 'player2', 'ball'];
+		const allowedFields = ['player1', 'player2', '_ball', '_ballEntryTime'];
 		for (let key of allowedFields) {
 			if (key in packet) {
 				(this as any)[key] = (packet as any)[key];
@@ -212,17 +231,18 @@ export class GameState {
 		this.update();
 	}
 
-	newBall(to: WhichPlayer, when: number | null = null) {
+	newBall(to: WhichPlayer, when: number | null = null, delay = PONG.newBallDelay) {
 		if (when)
 			this.update(when);
 
-		this.ball = new Ball(0, 0);
-		this.ball.x = Math.floor((PONG.width - PONG.ballSize) / 2);
-		this.ball.y = Math.floor(Math.random() * (PONG.height - PONG.ballSize));
-		this.ball.dx = Number(to) * PONG.ballXSpeed;
-		this.ball.dy = PONG.ballMaxYSpeed;
-		if (Math.random() < 0.5) this.ball.dy *= -1;
-		return this.ball;
+		this._ballEntryTime = this._lastUpdate + delay;
+
+		this._ball = new Ball(0, 0);
+		this._ball.x = Math.floor((PONG.width - PONG.ballSize) / 2);
+		this._ball.y = Math.floor(Math.random() * (PONG.height - PONG.ballSize));
+		this._ball.dx = Number(to) * PONG.ballXSpeed;
+		this._ball.dy = Math.ceil(PONG.ballMaxYSpeed / 2);
+		if (Math.random() < 0.5) this._ball.dy *= -1;
 	}
 
 	updateScores(when: number | null = null) {
@@ -264,6 +284,10 @@ export class GameState {
 		if (when)
 			this.update(when);
 		this.player(who).dy = PONG.playerSpeed * Number(mo);
+	}
+	
+	timeToBall(from = Date.now()) {
+		return this._ballEntryTime - from;
 	}
 }
 

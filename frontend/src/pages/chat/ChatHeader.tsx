@@ -4,6 +4,8 @@ import styles from "./ChatHeader.module.scss";
 import { useEffect, useState } from "react";
 import { EditChannel } from "./EditChannel";
 import { Channel } from "../../types/chat.interface";
+import { FaDoorOpen } from "react-icons/fa6";
+import { notifySuccess } from "../../utils/notifications";
 
 interface ChatHeaderProps {
   channel: Channel;
@@ -27,6 +29,10 @@ const ChatHeader = ({ channel, toggleMembersMenu }: ChatHeaderProps) => {
     setModal(false);
   };
 
+  const leaveChannel = () => {
+    notifySuccess("You left the channel successfully");
+  };
+
   useEffect(() => {
     setEditChannel({
       name: channel.name,
@@ -39,9 +45,14 @@ const ChatHeader = ({ channel, toggleMembersMenu }: ChatHeaderProps) => {
   return (
     <>
       <div className={styles.header}>
-        <button onClick={openEditMenuModal}>
-          <IoSettings className={styles.icon} />
-        </button>
+        <div className={styles.leftBtns}>
+          <button onClick={openEditMenuModal}>
+            <IoSettings className={styles.icon} />
+          </button>
+          <button onClick={leaveChannel}>
+            <FaDoorOpen className={styles.icon} />
+          </button>
+        </div>
         <h1>{channel.name}</h1>
         <button onClick={toggleMembersMenu}>
           <HiUsers className={styles.icon} />
