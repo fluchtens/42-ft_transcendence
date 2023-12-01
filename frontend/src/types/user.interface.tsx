@@ -8,6 +8,8 @@ export interface User {
   twoFa: boolean;
   status: string;
   rating: number;
+  wonMatches: number;
+  lostMatches: number;
   createdAt: string;
   updatedAt: string;
   friendship: Friendship;

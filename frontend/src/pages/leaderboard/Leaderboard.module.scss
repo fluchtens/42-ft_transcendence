@@ -5,33 +5,56 @@
   padding: 2rem;
   border-radius: $rounded-xl;
   background: $bg-secondary-color;
+  text-align: center;
 
-  ul {
-    margin: 0;
-    padding: 0;
+  .tableContainer {
     max-height: calc(100vh - 10rem);
-    flex-direction: column;
-    display: flex;
-    list-style-type: none;
     overflow-y: auto;
     scrollbar-width: none; // Firefox
     -ms-overflow-style: none; // IE (Internet Explorer) and Edge
 
     &::-webkit-scrollbar {
-      display: none; // WebKit-based browsers like Opera, Chrome, and Safari
+      display: none; // WebKit-based /browsers like Opera, Chrome, and Safari
     }
 
-    li {
-      padding: 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid rgb(255, 255, 255, 0.05);
+    table {
+      width: 100%;
 
-      p {
+      th {
         font-size: map-get($text-base, font-size);
         line-height: map-get($text-base, line-height);
-        font-weight: $font-medium;
+        font-weight: $font-semibold;
+        text-align: center;
+
+        &:nth-child(2) {
+          text-align: left;
+        }
+      }
+
+      td {
+        padding: 1rem 0;
+        font-size: map-get($text-base, font-size);
+        line-height: map-get($text-base, line-height);
+        font-weight: $font-normal;
+        border-bottom: 1px solid rgb(255, 255, 255, 0.05);
+
+        &:nth-child(2) {
+          text-align: left;
+        }
+
+        &.avatarAndName {
+          display: flex;
+          justify-content: left;
+          align-items: center;
+          gap: 0.7rem;
+        }
+
+        img {
+          width: 2.25rem;
+          height: 2.25rem;
+          border-radius: 50%;
+          object-fit: cover;
+        }
       }
     }
   }
@@ -41,9 +64,31 @@
   .container {
     padding: 1rem;
 
-    ul {
+    .tableContainer {
       max-height: none;
       overflow-y: visible;
+
+      table {
+        th {
+          &:first-child {
+            padding-right: 0.25rem;
+          }
+
+          &.responsiveStat {
+            display: none;
+          }
+        }
+
+        td {
+          &:first-child {
+            padding-right: 0.25rem;
+          }
+
+          &.responsiveStat {
+            display: none;
+          }
+        }
+      }
     }
   }
 }
