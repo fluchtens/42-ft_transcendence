@@ -67,9 +67,34 @@ export class ChatGateway implements OnModuleInit {
 
   private connectedUsers: Map<string, Set<string>> = new Map();
   private usersData: Map<number, Partial<User>> = new Map();
+  private userConnections: Map<number, Set<Socket>> = new Map();
 
   @WebSocketServer()
   server: Server;
+
+  private addSocketToUser(userId: number, socketData: Socket): void {
+    let socket = this.userConnections.get(userId);
+    if (!socket) {
+      socket = new Set<Socket>(),
+      this.userConnections.set(userId, socket);
+    }
+
+    socket.add(socketData);
+    this.userConnections.set(userId, socket);
+  }
+
+  private removeSocketFromUser(userId: number, socketData: Socket) {
+    const userSocket = this.userConnections.get(userId);
+    if (userSocket) {
+      userSocket.delete(socketData);
+
+      if (userSocket.size === 0) {
+        this.userConnections.delete(userId);
+      } else {
+        this.userConnections.set(userId, userSocket);
+      }
+    }
+  }
 
   async InitRooms(client: Socket) {
     const userId: string = String(client.handshake.auth.userId);
@@ -224,6 +249,10 @@ export class ChatGateway implements OnModuleInit {
       }
       const decodedToken = this.authService.verifyAccessToken(token);
       client.handshake.auth.userId = decodedToken.id;
+      // this.addSocketToUser(client.handshake.auth.userId, client.id);
+      const userId = client.handshake.auth.userId;
+
+      this.addSocketToUser(userId, client);
     } catch (error) {
       console.error('not connected', error.message);
     }
@@ -231,6 +260,10 @@ export class ChatGateway implements OnModuleInit {
 
   handleDisconnect(client: Socket) {
     this.roomService.disconnectClient(client);
+    const userId = client.handshake.auth.userId;
+
+    this.removeSocketFromUser(userId, client);
+    
     this.connectedUsers.forEach((usersSet, channelId) => {
       if (usersSet.has(client.id)) {
         usersSet.delete(client.id);
@@ -742,4 +775,55 @@ export class ChatGateway implements OnModuleInit {
     }
   }
 
+  @SubscribeMessage('leaveChannel')
+  async handleLeaveChannel(@ConnectedSocket() client: Socket, @MessageBody() channelId: string): Promise<string> {
+    const userId: number = client.handshake.auth.userId;
+    const user = await this.getOrAddUserData(userId);
+    if (userId) {
+      try {
+        const channel = await this.getChannelData(client, channelId, false);
+        const userRole = await this.chatService.findMemberRoleInChannel(channelId, userId);
+        if (userRole === "OWNER")
+          throw new Error("The owner cannot leave the channel");
+        const message: string = user.username + " have leave the channel";
+        const messageSend = await this.chatService.addMessage(
+          userId,
+          channelId,
+          message,
+        );
+        if (!messageSend) throw new Error('Error when sending the leave channel message');
+        const messageData: Messages = messageSend;
+        messageData.user = user;
+        this.server.to(channelId).emit(`${channelId}/message`, messageData);
+        if (channel.isConnected) {
+          console.log(this.userConnections.get(userId), typeof(this.userConnections.get(userId)));
+          const connectedUsersSet = this.connectedUsers.get(channelId);
+          if (!connectedUsersSet)
+            throw new Error ("Cannot find the channel connection to leave")
+          const sockets = this.userConnections.get(userId);
+          sockets.forEach((socket) => {
+            this.roomService.leaveRoom(socket, channelId);
+            connectedUsersSet.delete(socket.id);
+
+          });
+          this.roomService.leaveRoom(client, channelId);
+          const result: string = await this.chatService.deleteMember(userId, channelId);
+          if (result) {
+            if (!channel.public) {
+              this.server.to(String(userId)).emit("channelDeleted");
+            }
+            else {
+              const channelData = await this.getChannelData(client, channelId, false);
+              this.server.to(String(userId)).emit(`channelData:${channelId}`, channelData);
+            }
+            return "";
+          }
+        }
+      }
+      catch(error) {
+        console.log(error.message);
+        return (error.message);
+      }
+    }
+  }
 }

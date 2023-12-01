@@ -644,7 +644,7 @@ export class ChatService {
     }
   }
 
-  async deleteMember(userId: number, channelId: string) {
+  async deleteMember(userId: number, channelId: string): Promise<string> {
     try {
       const member = await this.findMemberInChannel(channelId, userId);
       if (member) {
@@ -653,6 +653,7 @@ export class ChatService {
             id: member.id,
           },
         });
+        return "member deleted";
       }
       else {
         throw new Error("The member dons't exist");
