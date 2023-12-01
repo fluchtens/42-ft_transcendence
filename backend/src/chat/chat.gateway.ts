@@ -463,6 +463,10 @@ export class ChatGateway implements OnModuleInit {
       try {
         const channel : ChannelData = await this.getChannelData(client, channelId, true);
         if (channel) {
+          const deleted = await this.chatService.deleteChannel(
+            userId,
+            channelId,
+          );
           for (const member of channel.members) {
             const memberId: number = member.member.userId;
             const clients = this.roomService.getRoomClients(channelId);
@@ -471,10 +475,6 @@ export class ChatGateway implements OnModuleInit {
             });
             this.server.to(String(memberId)).emit('channelDeleted', channelId);
           }
-          const deleted = await this.chatService.deleteChannel(
-            userId,
-            channelId,
-          );
           this.connectedUsers.delete(channelId);
           console.log(deleted);
           return "";
