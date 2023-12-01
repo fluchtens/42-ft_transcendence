@@ -48,13 +48,15 @@ function ProfileSettings() {
       success ? notifySuccess(message) : notifyError(message);
     }
 
+    setFile(null);
     await refreshUser();
     chatSocket.emit("refreshUser");
   };
 
   useEffect(() => {
-    if (!user) return;
-    setUsername(user.username);
+    if (user) {
+      setUsername(user.username);
+    }
   }, [user]);
 
   return (
@@ -77,7 +79,9 @@ function ProfileSettings() {
             </div>
             <div className={styles.inputFile}>
               <label>Profile picture</label>
-              {user.avatar ? (
+              {file ? (
+                <img src={URL.createObjectURL(file)} />
+              ) : user.avatar ? (
                 <img src={user.avatar} />
               ) : (
                 <img src={defaultAvatar} />
