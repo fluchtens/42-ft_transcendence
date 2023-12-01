@@ -10,34 +10,37 @@ import styles from "./Profile.module.scss";
 import { UserDetails } from "./UserDetails";
 import { Game, Stats } from "../../types/game.interface";
 import { UserHistory } from "./UserHistory";
+import { useAuth } from "../../hooks/useAuth";
 
-export default function Profile() {
+function Profile() {
   const [targetUser, setTargetUser] = useState<User | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
   const [history, setHistory] = useState<Game[] | null>(null);
+  const { user } = useAuth();
   const { username } = useParams();
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!username) return;
+      if (username) {
+        const userData = await getUserByUsernameApi(username);
+        if (!userData) return;
+        setTargetUser(userData);
 
-      const userData = await getUserByUsernameApi(username);
-      if (!userData) return;
-      setTargetUser(userData);
+        const userStats = await getUserStatsApi(userData.id);
+        if (userStats) setStats(userStats);
 
-      const userStats = await getUserStatsApi(userData.id);
-      if (userStats) setStats(userStats);
-
-      const userHistory = await getUserHistoryApi(userData.id);
-      if (userHistory) setHistory(userHistory);
+        const userHistory = await getUserHistoryApi(userData.id);
+        if (userHistory) setHistory(userHistory);
+      }
     };
 
+    if (user === null) return;
     fetchData();
-  }, [username]);
+  }, [user, username]);
 
   return (
     <>
-      {targetUser && stats && history && (
+      {user && targetUser && stats && history && (
         <div className={styles.container}>
           <ul className={styles.profile}>
             <li>
@@ -52,3 +55,5 @@ export default function Profile() {
     </>
   );
 }
+
+export default Profile;

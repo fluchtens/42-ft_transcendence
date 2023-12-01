@@ -14,6 +14,8 @@ function Leaderboard() {
       if (!usersData) return;
       setUsers(usersData);
     };
+
+    if (user === null) return;
     fetchData();
   }, [user]);
 

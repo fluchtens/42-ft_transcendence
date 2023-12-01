@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./Auth.module.scss";
 import { authUserTwoFaApi } from "../../services/auth.api";
@@ -28,47 +28,44 @@ function TwoFaAuth() {
     window.location.reload();
   };
 
-  useEffect(() => {
-    if (user) {
-      navigate("/");
-      return;
-    }
-  }, [user]);
-
   return (
-    <div className={styles.container}>
-      <MainTitle />
-      <form className={styles.form} onSubmit={submitData}>
-        <h1>Two-factor authentication</h1>
-        <p>
-          Open your two-factor authenticator app to view your authentication
-          code.
-        </p>
-        {errorMessage && (
-          <div className={styles.error}>
+    <>
+      {user === null && (
+        <div className={styles.container}>
+          <MainTitle />
+          <form className={styles.form} onSubmit={submitData}>
+            <h1>Two-factor authentication</h1>
             <p>
-              {Array.isArray(errorMessage) ? errorMessage[0] : errorMessage}
+              Open your two-factor authenticator app to view your authentication
+              code.
             </p>
-          </div>
-        )}
-        <div className={styles.input}>
-          <label>Authentication code :</label>
-          <input
-            type="text"
-            value={token}
-            onChange={changeToken}
-            placeholder="XXXXXX"
-            required
-          />
-        </div>
+            {errorMessage && (
+              <div className={styles.error}>
+                <p>
+                  {Array.isArray(errorMessage) ? errorMessage[0] : errorMessage}
+                </p>
+              </div>
+            )}
+            <div className={styles.input}>
+              <label>Authentication code :</label>
+              <input
+                type="text"
+                value={token}
+                onChange={changeToken}
+                placeholder="XXXXXX"
+                required
+              />
+            </div>
 
-        <div className={styles.buttons}>
-          <button className={styles.submitBtn} type="submit">
-            Continue
-          </button>
+            <div className={styles.buttons}>
+              <button className={styles.submitBtn} type="submit">
+                Continue
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
-    </div>
+      )}
+    </>
   );
 }
 

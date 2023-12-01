@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styles from "./Auth.module.scss";
 import { userLoginApi } from "../../services/auth.api";
@@ -50,65 +50,62 @@ function Login() {
     }
   };
 
-  useEffect(() => {
-    if (user) {
-      navigate("/");
-      return;
-    }
-  }, [user]);
-
   return (
-    <div className={styles.container}>
-      <MainTitle />
-      <form className={styles.form} onSubmit={submitData}>
-        <h1>Sign in to your account</h1>
-        {errorMessage && (
-          <div className={styles.error}>
-            <p>
-              {Array.isArray(errorMessage) ? errorMessage[0] : errorMessage}
+    <>
+      {user === null && (
+        <div className={styles.container}>
+          <MainTitle />
+          <form className={styles.form} onSubmit={submitData}>
+            <h1>Sign in to your account</h1>
+            {errorMessage && (
+              <div className={styles.error}>
+                <p>
+                  {Array.isArray(errorMessage) ? errorMessage[0] : errorMessage}
+                </p>
+              </div>
+            )}
+            <div className={styles.input}>
+              <label>Username :</label>
+              <input
+                type="text"
+                value={username}
+                onChange={changeUsername}
+                placeholder="Enter a username"
+                required
+              />
+            </div>
+            <div className={styles.input}>
+              <label>Password :</label>
+              <input
+                type="password"
+                value={password}
+                onChange={changePassword}
+                placeholder="Enter a password"
+                required
+              />
+            </div>
+            <div className={styles.buttons}>
+              <button className={styles.submitBtn} type="submit">
+                Sign in
+              </button>
+              <button
+                className={styles.fortyTwoBtn}
+                type="button"
+                onClick={fortyTwoAuth}
+              >
+                Sign in with 42
+              </button>
+            </div>
+            <p className={styles.help}>
+              <span>Don't have an account yet?</span>
+              <Link to={"/register"} className={styles.link}>
+                Sign up
+              </Link>
             </p>
-          </div>
-        )}
-        <div className={styles.input}>
-          <label>Username :</label>
-          <input
-            type="text"
-            value={username}
-            onChange={changeUsername}
-            placeholder="Enter a username"
-            required
-          />
+          </form>
         </div>
-        <div className={styles.input}>
-          <label>Password :</label>
-          <input
-            type="password"
-            value={password}
-            onChange={changePassword}
-            placeholder="Enter a password"
-            required
-          />
-        </div>
-        <div className={styles.buttons}>
-          <button className={styles.submitBtn} type="submit">
-            Sign in
-          </button>
-          <button
-            className={styles.fortyTwoBtn}
-            type="button"
-            onClick={fortyTwoAuth}
-          >
-            Sign in with 42
-          </button>
-        </div>
-        <p className={styles.help}>
-          <span>Don't have an account yet?</span>
-          <Link to={"/register"} className={styles.link}>
-            Sign up
-          </Link>
-        </p>
-      </form>
-    </div>
+      )}
+    </>
   );
 }
 

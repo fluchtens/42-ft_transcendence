@@ -80,7 +80,7 @@ function Friends({ styles }: FriendsProps) {
   };
 
   useEffect(() => {
-    if (!user) return;
+    if (user === null) return;
     getData();
     socket.on("reloadList", getData);
 

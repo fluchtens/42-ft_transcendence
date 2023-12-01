@@ -9,12 +9,12 @@ import { getUserApi } from "../services/user.api";
 import { User } from "../types/user.interface";
 
 interface AuthContextProps {
-  user: User | null;
+  user: User | null | undefined;
   refreshUser: () => void;
 }
 
 const AuthContext = createContext<AuthContextProps>({
-  user: null,
+  user: undefined,
   refreshUser: () => {},
 });
 
@@ -23,13 +23,15 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null | undefined>(undefined);
 
   const refreshUser = async () => {
     const data = await getUserApi();
-    if (!data) return;
+    if (!data) {
+      setUser(null);
+      return;
+    }
     setUser(data);
-    return data;
   };
 
   useEffect(() => {

@@ -9,7 +9,7 @@ function Settings() {
   const { user } = useAuth();
 
   useEffect(() => {
-    if (!user) return;
+    if (user === null) return;
   }, [user]);
 
   return (
