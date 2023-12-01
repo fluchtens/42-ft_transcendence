@@ -114,6 +114,18 @@ export class ChatGateway implements OnModuleInit {
     }
   }
 
+  async refreshUserData(userId: number){
+    try {
+      const updatedUserData = await this.userService.getUserById(userId);
+  
+      this.usersData.set(userId, updatedUserData);
+
+      console.log(`User data refreshed for user with ID ${userId}`);
+    } catch (error) {
+      console.error(`Error refreshing user data: ${error.message}`);
+    }
+  }
+
   async getChannelData(
     client: Socket,
     channelId: string,
@@ -259,7 +271,8 @@ export class ChatGateway implements OnModuleInit {
     const userId: number = client.handshake.auth.userId;
     if (userId) {
       const channelIsPublic  = await this.chatService.isChannelPublic(channelId);
-      if (channelIsPublic) {
+      const isMember = await this.chatService.findMemberInChannel(channelId, userId);
+      if (channelIsPublic && !isMember) {
         const channel = await this.chatService.getChannelById(channelId);
         return channel;
       }
@@ -427,6 +440,15 @@ export class ChatGateway implements OnModuleInit {
       }
     } else {
       console.log('User ID not available.410');
+    }
+  }
+
+  @SubscribeMessage('refreshUser')
+  async handleRefreshUser(
+    @ConnectedSocket() client: Socket) {
+    const userId : number = client.handshake.auth.userId;
+    if (userId) {
+      await this.refreshUserData(userId);
     }
   }
 

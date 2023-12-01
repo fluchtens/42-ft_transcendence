@@ -18,7 +18,6 @@ function Channels() {
     });
 
     socket.on("channelDeleted", (deletedChannelId: string) => {
-      console.log("channelDeleted");
       setChannelIds((prevChannels) =>
         prevChannels.filter((channelId) => channelId !== deletedChannelId)
       );
@@ -27,11 +26,9 @@ function Channels() {
     socket.on("resetChannel", (channelId: string) => {
       socket.emit('getChannelStatus', channelId, (channel: Channel) => {
           setChannelsData((prevChannelsData) => {
-            console.log(channel);
             const updatedChannels = [...prevChannelsData];
             if (!channel.isMember && !channel.public) {
               const updatedChannels = prevChannelsData.filter((channelData) => channelData.id !== channel.id);
-              console.log(updatedChannels);
               return updatedChannels;
             }
             const channelIndex = updatedChannels.findIndex(

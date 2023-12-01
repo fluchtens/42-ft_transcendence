@@ -107,7 +107,11 @@ function Chat() {
       socket.off(`${id}/message`);
       socket.off(`${id}/member`);
     };
-  }, [id]);
+  }, [id, socket]);
+
+  useEffect(() => {
+    socket.emit("joinRoom", { channelId: id, getMessages: true });
+  }, [socket]);
 
   return (
     <>
