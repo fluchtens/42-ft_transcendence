@@ -36,6 +36,21 @@ const UserContextMenu = ({ user, type, cb }: UserContextMenuProps) => {
     navigate("/chat/1");
   };
 
+  const promoteOwner = async () => {
+    cb();
+    notifySuccess("promote owner");
+  };
+
+  const promoteAdmin = async () => {
+    cb();
+    notifySuccess("promote admin");
+  };
+
+  const demoteUser = async () => {
+    cb();
+    notifySuccess("demote user");
+  };
+
   const renderButtons = () => {
     switch (type) {
       case ContextMenuType.FRIEND:
@@ -49,8 +64,9 @@ const UserContextMenu = ({ user, type, cb }: UserContextMenuProps) => {
       case ContextMenuType.MEMBER:
         return (
           <>
-            <button onClick={removeFriend}>Promote administrator</button>
-            <button onClick={removeFriend}>Demote user</button>
+            <button onClick={promoteOwner}>Promote to owner rank</button>
+            <button onClick={promoteAdmin}>Promote to admin rank</button>
+            <button onClick={demoteUser}>Demote to user rank</button>
           </>
         );
       default:
