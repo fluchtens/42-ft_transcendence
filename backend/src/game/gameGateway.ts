@@ -265,9 +265,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('playerMotion')
 	playerMotion(sock: Socket, mo: gm.MotionType) {
-		//console.log('got motion', mo);
-		let userData = this._confirmStatus(sock, [UserStatus.Playing]);
-		if (!userData) return null;
+		// don't use confirm status to silently refuse and not send error
+		let userData = this.gameService.getUserData(sock.id);
+		if ( !userData ) return;
+		if ( userData.status !== UserStatus.Playing ) return;
 
 		let {player: whichPlayer, room, state: game} = this.gameService.getGameData(userData.id);
 		let now = Date.now();
