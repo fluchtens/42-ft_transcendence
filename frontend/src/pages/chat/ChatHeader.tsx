@@ -5,34 +5,51 @@ import { useEffect, useState } from "react";
 import { EditChannel } from "./EditChannel";
 import { Channel } from "../../types/chat.interface";
 import { FaDoorOpen } from "react-icons/fa6";
-import { notifySuccess } from "../../utils/notifications";
+import { notifyError, notifySuccess } from "../../utils/notifications";
+import { useChatSocket } from "../../hooks/useChatSocket";
+import { useNavigate } from "react-router-dom";
 
 interface ChatHeaderProps {
   channel: Channel;
   toggleMembersMenu: () => void;
 }
 
+
 const ChatHeader = ({ channel, toggleMembersMenu }: ChatHeaderProps) => {
   const [modal, setModal] = useState<boolean>(false);
+  const navigate = useNavigate();
+  const chatSocket = useChatSocket();
   const [editChannel, setEditChannel] = useState({
     name: "",
     isPublic: true,
     protected: false,
     password: "",
   });
-
+  
   const openEditMenuModal = () => {
     setModal(true);
   };
-
+  
   const closeModal = () => {
     setModal(false);
   };
-
+  
   const leaveChannel = () => {
-    notifySuccess("You left the channel successfully");
-  };
-
+    
+    chatSocket.emit("leaveChannel", channel.id, (result:string) => {
+        if (result === "The owner cannot leave the channel") {
+            notifyError("The owner cannot leave the channel");
+          }
+        else if (result){
+            notifyError("Fail to leave the channel");
+          }
+        if (!result) {
+            notifySuccess("You left the channel successfully");
+            navigate("/");
+          }
+          });
+        };
+          
   useEffect(() => {
     setEditChannel({
       name: channel.name,

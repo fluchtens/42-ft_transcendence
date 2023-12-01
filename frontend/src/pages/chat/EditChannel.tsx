@@ -84,7 +84,6 @@ const EditChannel = ({
   };
 
   const deleteChannel = () => {
-    console.log(channel.id);
     socket.emit("deleteChannel", channel.id, (result: string) => {
       if (result) {
         notifyError(result);
