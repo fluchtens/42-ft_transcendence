@@ -5,11 +5,13 @@ import { Separator } from "../../components/Separator";
 import defaultAvatar from "/default_avatar.png";
 import styles from "./ProfileSettings.module.scss";
 import { useAuth } from "../../hooks/useAuth";
+import { useChatSocket } from "../../hooks/useChatSocket";
 
 function ProfileSettings() {
   const { user, refreshUser } = useAuth();
   const [username, setUsername] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const chatSocket = useChatSocket();
 
   const changeUsername = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value);
@@ -47,6 +49,7 @@ function ProfileSettings() {
     }
 
     await refreshUser();
+    chatSocket.emit("refreshUser");
   };
 
   useEffect(() => {
