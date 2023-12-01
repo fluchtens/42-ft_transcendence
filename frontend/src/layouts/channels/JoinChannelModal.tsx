@@ -22,9 +22,7 @@ const JoinChannelModal = ({ channel, closeModal }: JoinChannelModalProps) => {
 
   const submitData = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('fk');
     if (channel.public && !channel.isMember) {
-      console.log('wtffff')
       socket.emit(
         "joinPublicChannel",
         { channelId: channel.id, password: password },
@@ -40,7 +38,6 @@ const JoinChannelModal = ({ channel, closeModal }: JoinChannelModalProps) => {
       );
     }
     else {
-      console.log('wtffff22')
       socket.emit("joinRoom", {channelId:channel.id, getMessages: true, password:password}, (result : boolean) => {
         if (result) {
           notifySuccess("You have joined the channel");
