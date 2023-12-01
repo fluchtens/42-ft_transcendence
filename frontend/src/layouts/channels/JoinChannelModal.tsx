@@ -30,23 +30,24 @@ const JoinChannelModal = ({ channel, closeModal }: JoinChannelModalProps) => {
           if (result) {
             navigate("/chat/" + channel.id);
             notifySuccess("You has joined the channel");
-          }
-          else {
+          } else {
             notifyError("Error when try to join the channel");
           }
         }
       );
-    }
-    else {
-      socket.emit("joinRoom", {channelId:channel.id, getMessages: true, password:password}, (result : boolean) => {
-        if (result) {
-          notifySuccess("You has joined the channel");
-          navigate("/chat/" + channel.id);
+    } else {
+      socket.emit(
+        "joinRoom",
+        { channelId: channel.id, getMessages: true, password: password },
+        (result: boolean) => {
+          if (result) {
+            notifySuccess("You has joined the channel");
+            navigate("/chat/" + channel.id);
+          } else {
+            notifyError("Wrong password");
+          }
         }
-        else {
-          notifyError("Wrong password");
-        }
-      });
+      );
     }
     closeModal();
     setPassword("");
@@ -63,13 +64,17 @@ const JoinChannelModal = ({ channel, closeModal }: JoinChannelModalProps) => {
               type="password"
               value={password}
               onChange={changePassword}
-              placeholder="Enter a channel password"
+              placeholder="Channel password"
               required
             />
           </div>
         )}
-        <button onClick={() => closeModal()}>Cancel</button>
-        <button type="submit">Join</button>
+        <div className={styles.buttons}>
+          <button type="button" onClick={() => closeModal()}>
+            Cancel
+          </button>
+          <button type="submit">Join</button>
+        </div>
       </form>
     </Modal>
   );
