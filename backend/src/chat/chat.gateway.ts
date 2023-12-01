@@ -298,6 +298,26 @@ export class ChatGateway implements OnModuleInit {
     }
   }
 
+  @SubscribeMessage('getChannelInitialData')
+  async handleChannelInitialData(@ConnectedSocket() client: Socket,
+  @MessageBody() channelId: string) {
+    const userId: number = client.handshake.auth.userId;
+    if (userId) {
+      // const channelIsPublic  = await this.chatService.isChannelPublic(channelId);
+      // const isMember = await this.chatService.findMemberInChannel(channelId, userId);
+      // if (channelIsPublic && !isMember) {
+      //   const channel = await this.chatService.getChannelById(channelId);
+      //   return channel;
+      // }
+      const channel = await this.getChannelData(client, channelId, false);
+      return channel;
+    }
+    else {
+      console.log("userId Invalid getChannelStatus");
+      return ;
+    }
+  }
+
   @SubscribeMessage('getChannelStatus')
   async getChannelStatus(@ConnectedSocket() client: Socket,
   @MessageBody() channelId: string) {

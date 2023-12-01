@@ -71,33 +71,60 @@ function Channels() {
 
   useEffect(() => {
     channelIds.forEach((channelId) => {
-      socket.emit("joinRoom", { channelId: channelId, getMessages: false });
-      socket.on(`channelData:${channelId}`, (channelData: Channel) => {
+      // socket.emit("joinRoom", { channelId: channelId, getMessages: false });
+      // socket.on(`channelData:${channelId}`, (channelData: Channel) => {
+      //   setChannelsData((prevChannelsData) => {
+      //     const updatedChannels = [...prevChannelsData];
+      //     const channelIndex = updatedChannels.findIndex(
+      //       (channel) => channel.id === channelId
+      //     );
+      //     if (channelIndex !== -1) {
+      //       updatedChannels[channelIndex] = channelData;
+      //     } else {
+      //       updatedChannels.push(channelData);
+      //     }
+      //     const removeUsselesschannel = updatedChannels;
+      //     const channelsToRemove = removeUsselesschannel.filter(
+      //       (channel) => !channelIds.includes(channel.id)
+      //     );
+      //     channelsToRemove.forEach((channelToRemove) => {
+      //       const removeIndex = removeUsselesschannel.findIndex(
+      //         (channel) => channel.id === channelToRemove.id
+      //       );
+      //       if (removeIndex !== -1) {
+      //         removeUsselesschannel.splice(removeIndex, 1);
+      //       }
+      //     });
+      //     return removeUsselesschannel;
+      //   });
+      // });
+
+      socket.emit('getChannelInitialData', channelId, (channel: Channel) => {
         setChannelsData((prevChannelsData) => {
           const updatedChannels = [...prevChannelsData];
+          if (!channel.isMember && !channel.public) {
+            const updatedChannels = prevChannelsData.filter((channelData) => channelData.id !== channel.id);
+            return updatedChannels;
+          }
           const channelIndex = updatedChannels.findIndex(
             (channel) => channel.id === channelId
           );
           if (channelIndex !== -1) {
-            updatedChannels[channelIndex] = channelData;
-          } else {
-            updatedChannels.push(channelData);
-          }
-          const removeUsselesschannel = updatedChannels;
-          const channelsToRemove = removeUsselesschannel.filter(
-            (channel) => !channelIds.includes(channel.id)
-          );
-          channelsToRemove.forEach((channelToRemove) => {
-            const removeIndex = removeUsselesschannel.findIndex(
-              (channel) => channel.id === channelToRemove.id
-            );
-            if (removeIndex !== -1) {
-              removeUsselesschannel.splice(removeIndex, 1);
+            if (channel.isMember || channel.public) {
+              updatedChannels[channelIndex] = channel;
             }
-          });
-          return removeUsselesschannel;
+            else {
+              const filteredChannels = updatedChannels.filter(
+                (channel) => channel.id !== channelId
+              );
+              return filteredChannels;
+            }
+          } else {
+            updatedChannels.push(channel);
+          }
+          return updatedChannels;
         });
-      });
+    })
     });
 
     setChannelsData((prevChannelsData) => {
@@ -117,9 +144,9 @@ function Channels() {
     });
 
     return () => {
-      channelIds.forEach((channelId) => {
-        socket.off(`channelData:${channelId}`);
-      });
+      // channelIds.forEach((channelId) => {
+      //   socket.off(`channelData:${channelId}`);
+      // });
     };
   }, [channelIds]);
 
