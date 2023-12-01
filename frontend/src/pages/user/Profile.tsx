@@ -41,7 +41,7 @@ export default function Profile() {
         <div className={styles.container}>
           <ul className={styles.profile}>
             <li>
-              <UserDetails user={targetUser} stats={stats} />{" "}
+              <UserDetails user={targetUser} stats={stats} />
             </li>
             <li>
               <UserHistory history={history} />

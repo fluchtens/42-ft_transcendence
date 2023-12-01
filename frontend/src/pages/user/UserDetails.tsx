@@ -16,11 +16,7 @@ interface UserDetailsProps {
 
 const UserDetails = ({ user, stats }: UserDetailsProps) => {
   const totalMatches = stats.wonMatches + stats.lostMatches;
-
-  let winLossRatio = 0;
-  if (stats.lostMatches !== 0) {
-    winLossRatio = stats.wonMatches / stats.lostMatches;
-  }
+  const winLossRatio = stats.wonMatches / stats.lostMatches;
 
   return (
     <div className={styles.container}>
