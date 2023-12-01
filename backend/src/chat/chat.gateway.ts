@@ -549,7 +549,7 @@ export class ChatGateway implements OnModuleInit {
             throw new Error("member is in the channel");
           if (result) {
             const user = await this.getOrAddUserData(userId);
-            const message = user.username + ' have added ' + member.username;
+            const message = user.username + ' has added ' + member.username;
             const messageData = await this.chatService.addMessage(
               userId,
               channelId,
@@ -623,15 +623,16 @@ export class ChatGateway implements OnModuleInit {
                   member: joinChannel,
                   user: user,
                 });
-              const channelInfo = await this.getChannelData(
-                client,
-                channel.id,
-                true,
-                channelDto.password,
-              );
-              this.server
-                .to(String(userId))
-                .emit(`channelData:${channel.id}`, channelInfo);
+              // const channelInfo = await this.getChannelData(
+              //   client,
+              //   channel.id,
+              //   true,
+              //   channelDto.password,
+              // );
+              // this.server
+              //   .to(String(userId))
+              //   .emit(`channelData:${channel.id}`, channelInfo);
+              this.server.to(String(userId)).emit("resetChannel", channel.id);
               return true;
             } else {
               throw new Error('error when join the channel');
@@ -659,7 +660,6 @@ export class ChatGateway implements OnModuleInit {
     if (userId) {
       try {
         const { channelId, password } = changeChannelPasswordDto;
-        console.log(channelId, password );
         const protect = await this.chatService.updateChannelWithPassword(userId, channelId, password);
         return "";
       }
@@ -737,7 +737,7 @@ export class ChatGateway implements OnModuleInit {
           const changeChannel = await this.chatService.updateChannelVisibility(userId, channelId, isPublic);
           if (changeChannel) {
             const user = await this.getOrAddUserData(userId);
-            const message = user.username + " Have changed the channel visibility";
+            const message = user.username + " Has changed the channel visibility";
             const messageData = await this.chatService.addMessage(
               userId,
               channelId,
@@ -796,7 +796,6 @@ export class ChatGateway implements OnModuleInit {
         messageData.user = user;
         this.server.to(channelId).emit(`${channelId}/message`, messageData);
         if (channel.isConnected) {
-          console.log(this.userConnections.get(userId), typeof(this.userConnections.get(userId)));
           const connectedUsersSet = this.connectedUsers.get(channelId);
           if (!connectedUsersSet)
             throw new Error ("Cannot find the channel connection to leave")
@@ -804,18 +803,19 @@ export class ChatGateway implements OnModuleInit {
           sockets.forEach((socket) => {
             this.roomService.leaveRoom(socket, channelId);
             connectedUsersSet.delete(socket.id);
-
           });
           this.roomService.leaveRoom(client, channelId);
           const result: string = await this.chatService.deleteMember(userId, channelId);
           if (result) {
-            if (!channel.public) {
-              this.server.to(String(userId)).emit("channelDeleted");
-            }
-            else {
-              const channelData = await this.getChannelData(client, channelId, false);
-              this.server.to(String(userId)).emit(`channelData:${channelId}`, channelData);
-            }
+            // if (!channel.public) {
+            //   this.server.to(String(userId)).emit("channelDeleted");
+            // }
+            // else {
+              this.server.to(String(userId)).emit("resetChannel", channelId);
+              // const channelData = await this.getChannelData(client, channelId, false);
+              // this.server.to(String(userId)).emit(`channelData:${channelId}`, channelData);
+              // this.server.to(channelId).emit(`channelData:${channelId}`, channelData);
+            // }
             return "";
           }
         }

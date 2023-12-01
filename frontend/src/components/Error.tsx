@@ -13,7 +13,7 @@ function Error() {
         </h1>
         <h2>Oops! Page Not Be Found</h2>
         <p>
-          Sorry but the page you are looking for does not exist, have been
+          Sorry but the page you are looking for does not exist, has been
           removed. name changed or is temporarily unavailable
         </p>
         <Link to="/" className={styles.homeLink}>

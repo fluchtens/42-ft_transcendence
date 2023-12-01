@@ -272,7 +272,7 @@ export class ChatService {
         return newMember;
       }
     } catch (error) {
-      console.error('Error when try to add a new member to channel', error);
+      console.error('Error when trying to add a new member to channel', error);
       throw error;
     }
   }
@@ -292,7 +292,7 @@ export class ChatService {
         throw new Error('User not found in channel');
       }
       if (existingMember.role === newRole) {
-        throw new Error('This member already have this Role');
+        throw new Error('This member already has this Role');
       }
       if (memberRole === 'GUEST' || memberRole === 'ADMIN') {
         throw new Error('You have no permission!');

@@ -29,7 +29,7 @@ const JoinChannelModal = ({ channel, closeModal }: JoinChannelModalProps) => {
         (result: boolean) => {
           if (result) {
             navigate("/chat/" + channel.id);
-            notifySuccess("You have joined the channel");
+            notifySuccess("You has joined the channel");
           }
           else {
             notifyError("Error when try to join the channel");
@@ -40,7 +40,7 @@ const JoinChannelModal = ({ channel, closeModal }: JoinChannelModalProps) => {
     else {
       socket.emit("joinRoom", {channelId:channel.id, getMessages: true, password:password}, (result : boolean) => {
         if (result) {
-          notifySuccess("You have joined the channel");
+          notifySuccess("You has joined the channel");
           navigate("/chat/" + channel.id);
         }
         else {
