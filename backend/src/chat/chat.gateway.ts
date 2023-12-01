@@ -512,6 +512,8 @@ export class ChatGateway implements OnModuleInit {
             channelId,
             member.id,
           );
+          if (!result)
+            throw new Error("member is in the channel");
           if (result) {
             const user = await this.getOrAddUserData(userId);
             const message = user.username + ' have added ' + member.username;

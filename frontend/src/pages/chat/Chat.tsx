@@ -64,7 +64,7 @@ function Chat() {
       },
       (result: string) => {
         if (result) {
-          notifyError(result);
+          notifyError("Fail to add Member");
         }
       }
     );
