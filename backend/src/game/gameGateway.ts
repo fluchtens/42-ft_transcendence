@@ -147,9 +147,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		for (let [key, {host}] of [...this.gameService.invites]) {
 			try {
 				let user = await this.userService.getUserById(host.id);
-				gamesInfo.push({name: key, host: user.username});
+				let rating = await this._rating(host.id);
+				gamesInfo.push({name: key, host: user.username, rating});
 			} catch {
-				gamesInfo.push( {name: key, host: '[unkown user]'});
+				gamesInfo.push( {name: key, host: '[unkown user]', rating: -1});
 			}
 		}
 		return gamesInfo;

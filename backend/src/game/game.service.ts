@@ -365,8 +365,7 @@ export class GameService {
 					this.pendingDelete.add(userId);
 				}
 			}
-// 		}, 10000);
-		}, 100000); // TESTING
+		}, 10000);
 	}
 
 	lobbyJoinGame (

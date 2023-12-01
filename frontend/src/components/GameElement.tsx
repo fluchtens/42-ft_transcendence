@@ -187,7 +187,7 @@ function GamesTable(
 		);
 	}
 
-	const fields = new Map([ ['Game Name', 'name'], ['Host', 'host'] ]);
+	const fields = new Map([ ['Game Name', 'name'], ['Host', 'host'], ['Rating', 'rating'] ]);
 	function joinButton(enabled: boolean, onClick : () => undefined ) {
 		return (
 			enabled
