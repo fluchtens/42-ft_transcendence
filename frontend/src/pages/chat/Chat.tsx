@@ -79,7 +79,6 @@ function Chat() {
         setMembers(channelData.members);
         setChannel(channelData);
       }
-      console.log("getChannelData", channelData)
       // setMessages(channelData.messages);
       // setMembers(channelData.members);
       setLoading(false);
@@ -111,7 +110,6 @@ function Chat() {
       setMembers((prevMembers) =>
         prevMembers.filter((member) => member.member.userId !== deletedMemberId)
       );
-      console.log('getMember');
     });
     socket.emit("joinRoom", { channelId: id, getMessages: true });
 
@@ -170,6 +168,8 @@ function Chat() {
                         user={member.user}
                         contextMenu={contextMenu === member.user.id}
                         contextMenuType={ContextMenuType.MEMBER}
+                        channel={channel}
+                        member={member.member}
                         toggleContextMenu={() =>
                           toggleContextMenu(member.user.id)
                         }

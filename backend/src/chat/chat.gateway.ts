@@ -704,11 +704,21 @@ export class ChatGateway implements OnModuleInit {
         const { channelId, memberId, newRole } = changeRoleDto;
         if (channelId && memberId && newRole) {
           const changeRole = await this.chatService.changeMemberRole(userId, channelId, memberId, newRole);
-
           const userMember = await this.getOrAddUserData(Number(memberId));
-            this.server
-              .to(channelId)
-              .emit(`${channelId}/member`, { member: changeRole, user: userMember });
+          if (changeRole) {
+            const userData = await this.getOrAddUserData(userId);
+            const message = userData.username + " changed the role of " + userMember.username + " to " + newRole;
+            const messageSend = await this.chatService.addMessage(
+              userId,
+              channelId,
+              message,
+              );
+              if (!messageSend) throw new Error('Message cannot be send');
+              const messageData: Messages = messageSend;
+              messageData.user = userData;
+            this.server.to(channelId).emit(`${channelId}/message`, messageData);
+          }
+          this.server.to(channelId).emit(`${channelId}/refreshPage`, channelId);
           console.log(changeRole);
           return null;
         }
