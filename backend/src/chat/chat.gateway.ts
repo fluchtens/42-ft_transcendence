@@ -145,7 +145,7 @@ export class ChatGateway implements OnModuleInit {
   
       this.usersData.set(userId, updatedUserData);
 
-      console.log(`User data refreshed for user with ID ${userId}`);
+      // console.log(`User data refreshed for user with ID ${userId}`);
     } catch (error) {
       console.error(`Error refreshing user data: ${error.message}`);
     }
@@ -160,7 +160,6 @@ export class ChatGateway implements OnModuleInit {
     let channelData: ChannelData;
     try {
       const connection: boolean = this.verifyUserConnection(client.id, channelId);
-      console.log('checkConnection', connection)
       const channelInfo = await this.chatService.getChannelById(
         channelId,
         password,
@@ -169,8 +168,9 @@ export class ChatGateway implements OnModuleInit {
         channelData = new ChannelData();
         channelData.isConnected = connection;
         channelData.inviteCode = channelInfo.inviteCode;
-      channelData.id = channelInfo.id;
-      channelData.name = channelInfo.name;
+        channelData.id = channelInfo.id;
+        channelData.name = channelInfo.name;
+        console.log('checkConnection',channelInfo.name, connection)
       channelData.public = channelInfo.public;
       const userInChannel = await this.chatService.findMemberInChannel(
         channelData.id,
@@ -616,7 +616,6 @@ export class ChatGateway implements OnModuleInit {
           channelDto.channelId,
           );
           if (channel) {
-            console.log(channelDto.channelId);
             const member = await this.chatService.findMemberInChannel(channelDto.channelId, userId);
             if (member) {
               throw new Error("member is in channel")
@@ -627,7 +626,7 @@ export class ChatGateway implements OnModuleInit {
               channelDto.password,
             );
             if (joinChannel) {
-              
+
               let connectedUsersSet = this.connectedUsers.get(channel.id);
               if (!connectedUsersSet) {
                 connectedUsersSet = new Set<string>();
@@ -683,7 +682,6 @@ export class ChatGateway implements OnModuleInit {
         const { channelId, password } = changeChannelPasswordDto;
         const protect = await this.chatService.updateChannelWithPassword(userId, channelId, password);
         this.server.emit("resetChannel", channelId);
-        console.log("protection", protect);
         return "";
       }
       catch (error) {
@@ -787,16 +785,21 @@ export class ChatGateway implements OnModuleInit {
           const connection: boolean = this.verifyUserConnection(client.id, channelId);
           if (!connection) {
             const passwordVerify = await this.chatService.passwordChannelVerify(channelId, password);
+            console.log('password', passwordVerify, channelId, password);
             if (passwordVerify) {
+              console.log("heheheheheh")
               let connectedUsersSet = this.connectedUsers.get(channelId);
               if (!connectedUsersSet) {
                 connectedUsersSet = new Set<string>();
                 this.connectedUsers.set(channelId, connectedUsersSet);
               }
               connectedUsersSet.add(client.id);
-              console.log(this.connectedUsers);
               this.server.emit('resetChannel', channelId);
+              this.server.to(String(userId)).emit(`${channelId}/refreshPage`);
               return true;
+            }
+            else {
+              throw new Error ("Wrong password");
             }
           }
         } catch (error) {
