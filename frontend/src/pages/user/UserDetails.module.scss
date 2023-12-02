@@ -11,11 +11,25 @@
     gap: 3rem;
     text-align: left;
 
-    img {
-      width: 14rem;
-      height: 14rem;
-      border-radius: 50%;
-      object-fit: cover;
+    .user {
+      flex-direction: column;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.75rem;
+
+      img {
+        width: 14rem;
+        height: 14rem;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+
+      h2 {
+        font-size: map-get($text-xl, font-size);
+        line-height: map-get($text-xl, line-height);
+        font-weight: $font-semibold;
+      }
     }
 
     .details {

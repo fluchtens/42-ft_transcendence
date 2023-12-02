@@ -5,17 +5,11 @@ import { User } from "../../types/user.interface";
 import { getLeaderboardApi, getUserStatsApi } from "../../services/user.api";
 import defaultAvatar from "/default_avatar.png";
 import { Link } from "react-router-dom";
+import winLossRatio from "../../utils/winLossRatio";
 
 function Leaderboard() {
   const { user } = useAuth();
   const [users, setUsers] = useState<User[] | null>(null);
-
-  const winLossRatio = (wonMatches: number, lostMatches: number) => {
-    if (lostMatches === 0) {
-      return "...";
-    }
-    return wonMatches / lostMatches;
-  };
 
   useEffect(() => {
     const fetchData = async () => {
