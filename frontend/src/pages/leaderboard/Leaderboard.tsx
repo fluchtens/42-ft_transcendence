@@ -4,6 +4,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { User } from "../../types/user.interface";
 import { getLeaderboardApi, getUserStatsApi } from "../../services/user.api";
 import defaultAvatar from "/default_avatar.png";
+import { Link } from "react-router-dom";
 
 function Leaderboard() {
   const { user } = useAuth();
@@ -65,7 +66,12 @@ function Leaderboard() {
                       ) : (
                         <img src={defaultAvatar} />
                       )}
-                      {user.username}
+                      <Link
+                        className={styles.link}
+                        to={`/user/${user.username}`}
+                      >
+                        {user.username}
+                      </Link>
                     </td>
                     <td className={styles.responsiveStat}>
                       {user.wonMatches + user.lostMatches}
