@@ -1,6 +1,6 @@
-import { blockUserApi, removeFriendApi } from "../../services/friendship.api";
-import { User } from "../../types/user.interface";
-import { notifyError, notifySuccess } from "../../utils/notifications";
+import { blockUserApi, removeFriendApi } from "../services/friendship.api";
+import { User } from "../types/user.interface";
+import { notifyError, notifySuccess } from "../utils/notifications";
 import styles from "./UserContextMenu.module.scss";
 import { Link, useNavigate } from "react-router-dom";
 

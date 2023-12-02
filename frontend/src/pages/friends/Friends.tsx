@@ -7,11 +7,11 @@ import {
   getFriendsApi,
   sendFriendRequestApi,
 } from "../../services/friendship.api";
-import { UserElement } from "./UserElement";
+import { UserElement } from "../../components/UserElement";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import { UserReqElement } from "./UserReqElement";
 import { useAuth } from "../../hooks/useAuth";
-import { ContextMenuType } from "./UserContextMenu";
+import { ContextMenuType } from "../../components/UserContextMenu";
 import { useFriendshipSocket } from "../../hooks/useFriendshipSocket";
 import { AddUserBar } from "../../components/AddingBar";
 

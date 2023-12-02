@@ -1,7 +1,7 @@
 import defaultAvatar from "/default_avatar.png";
 import styles from "./UserElement.module.scss";
 import { ContextMenuType, UserContextMenu } from "./UserContextMenu";
-import { User } from "../../types/user.interface";
+import { User } from "../types/user.interface";
 
 interface UserElementProps {
   user: User;
@@ -21,9 +21,9 @@ const UserElement = ({
   const isOffline = user.status === "Offline";
 
   return (
-    <div className={styles.friendContainer}>
+    <>
       <button
-        className={`${styles.friendBtn} ${contextMenu ? styles.activeBtn : ""}`}
+        className={`${styles.button} ${contextMenu ? styles.activeBtn : ""}`}
         onClick={toggleContextMenu}
       >
         {user.avatar ? <img src={user.avatar} /> : <img src={defaultAvatar} />}
@@ -68,7 +68,7 @@ const UserElement = ({
           cb={toggleContextMenu}
         />
       )}
-    </div>
+    </>
   );
 };
 

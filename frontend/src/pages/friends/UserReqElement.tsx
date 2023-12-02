@@ -7,7 +7,10 @@ import {
   acceptFriendRequestApi,
   declineFriendRequestApi,
 } from "../../services/friendship.api";
-import { ContextMenuType, UserContextMenu } from "./UserContextMenu";
+import {
+  ContextMenuType,
+  UserContextMenu,
+} from "../../components/UserContextMenu";
 import { User } from "../../types/user.interface";
 
 interface UserReqElementProps {
