@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { MainNavLink } from "./MainNavLink";
 import { NavLink } from "./NavLink";
@@ -15,6 +15,7 @@ import { MdLeaderboard } from "react-icons/md";
 export default function Header() {
   const { user, refreshUser } = useAuth();
   const [navMenu, setNavMenu] = useState<boolean>(false);
+  const navMenuRef = useRef<HTMLUListElement>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(Boolean(user));
   const firendshipSocket = useFriendshipSocket();
 
@@ -34,6 +35,17 @@ export default function Header() {
   };
 
   useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (navMenuRef.current) {
+        if (!navMenuRef.current.contains(e.target as Node)) {
+          setNavMenu(false);
+        }
+      }
+    };
+    document.addEventListener("mousedown", handler);
+  }, []);
+
+  useEffect(() => {
     setIsLoggedIn(Boolean(user));
   }, [user]);
 
@@ -42,7 +54,10 @@ export default function Header() {
       <nav className={styles.navBar}>
         <div className={styles.links}>
           <MainNavLink toggleNavMenu={toggleNavMenu} />
-          <ul className={`${navMenu ? styles.navListMenu : styles.navList}`}>
+          <ul
+            ref={navMenuRef}
+            className={`${navMenu ? styles.navListMenu : styles.navList}`}
+          >
             <li>
               <NavLink
                 path="/"
