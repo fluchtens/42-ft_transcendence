@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import styles from "./Chat.module.scss";
 import { ChatHeader } from "./ChatHeader";
 import { MessageElement } from "./MessageElement";
@@ -25,6 +25,7 @@ function Chat() {
   const { user } = useAuth();
   const { id } = useParams();
   const socket = useChatSocket();
+  const navigate = useNavigate();
 
   const toggleMembersMenu = () => {
     setMembersMenu(!membersMenu);
@@ -78,9 +79,14 @@ function Chat() {
         setMembers(channelData.members);
         setChannel(channelData);
       }
+      console.log("getChannelData", channelData)
       // setMessages(channelData.messages);
       // setMembers(channelData.members);
       setLoading(false);
+    });
+
+    socket.on(`${id}/refreshPage`, () => {
+      socket.emit("joinRoom", { channelId: id, getMessages: true });
     });
 
     socket.on(`${id}/messageDeleted`, (deletedMessageId: string) => {
@@ -97,10 +103,15 @@ function Chat() {
       setMembers((prevMembers) => [...prevMembers, member]);
     });
 
-    socket.on(`${id}/memberDeleted`, (deletedMemberId: string) => {
+    socket.on(`${id}/channelDeleted`, () => {
+      navigate("/");
+    });
+
+    socket.on(`${id}/memberDeleted`, (deletedMemberId: Number) => {
       setMembers((prevMembers) =>
-        prevMembers.filter((member) => member.member.id !== deletedMemberId)
+        prevMembers.filter((member) => member.member.userId !== deletedMemberId)
       );
+      console.log('getMember');
     });
     socket.emit("joinRoom", { channelId: id, getMessages: true });
 
@@ -109,25 +120,9 @@ function Chat() {
       socket.off(`${id}/messageDeleted`);
       socket.off(`${id}/message`);
       socket.off(`${id}/member`);
+      socket.off(`${id}/channelDeleted`);
     };
   }, [id, socket]);
-
-  useEffect(() => {
-    socket.on(`channelData:${id}`, (channelData: Channel) => {
-      if (channelData.messages && channelData.members) {
-        setMessages(channelData.messages);
-        setMembers(channelData.members);
-        setChannel(channelData);
-      }
-      // setMessages(channelData.messages);
-      // setMembers(channelData.members);
-      setLoading(false);
-    });
-    socket.emit("joinRoom", { channelId: id, getMessages: true });
-    return () => {
-      socket.off(`channelData:${id}`);
-    };
-  }, [socket, id]);
 
   return (
     <>
