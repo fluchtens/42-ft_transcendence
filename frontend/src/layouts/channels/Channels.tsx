@@ -1,6 +1,6 @@
 import { useAuth } from "../../hooks/useAuth";
 import { ChannelElement } from "./ChannelElement";
-import { AddChannelBar } from "./AddChannelBar";
+import { AddChannelBar } from "../../components/AddingBar";
 import styles from "./Channels.module.scss";
 import { useEffect, useState } from "react";
 import { Channel } from "../../types/chat.interface";
@@ -24,33 +24,34 @@ function Channels() {
     });
 
     socket.on("resetChannel", (channelId: string) => {
-      socket.emit('getChannelStatus', channelId, (channel: Channel) => {
+      socket.emit("getChannelStatus", channelId, (channel: Channel) => {
         // console.log('channelData', user?.username, channel);
-          setChannelsData((prevChannelsData) => {
-            const updatedChannels = [...prevChannelsData];
-            if (!channel.isMember && !channel.public) {
-              const updatedChannels = prevChannelsData.filter((channelData) => channelData.id !== channel.id);
-              return updatedChannels;
-            }
-            const channelIndex = updatedChannels.findIndex(
-              (channel) => channel.id === channelId
+        setChannelsData((prevChannelsData) => {
+          const updatedChannels = [...prevChannelsData];
+          if (!channel.isMember && !channel.public) {
+            const updatedChannels = prevChannelsData.filter(
+              (channelData) => channelData.id !== channel.id
             );
-            if (channelIndex !== -1) {
-              if (channel.isMember || channel.public) {
-                updatedChannels[channelIndex] = channel;
-              }
-              else {
-                const filteredChannels = updatedChannels.filter(
-                  (channel) => channel.id !== channelId
-                );
-                return filteredChannels;
-              }
-            } else {
-              updatedChannels.push(channel);
-            }
             return updatedChannels;
-          });
-      })
+          }
+          const channelIndex = updatedChannels.findIndex(
+            (channel) => channel.id === channelId
+          );
+          if (channelIndex !== -1) {
+            if (channel.isMember || channel.public) {
+              updatedChannels[channelIndex] = channel;
+            } else {
+              const filteredChannels = updatedChannels.filter(
+                (channel) => channel.id !== channelId
+              );
+              return filteredChannels;
+            }
+          } else {
+            updatedChannels.push(channel);
+          }
+          return updatedChannels;
+        });
+      });
     });
 
     return () => {
@@ -72,11 +73,13 @@ function Channels() {
 
   useEffect(() => {
     channelIds.forEach((channelId) => {
-      socket.emit('getChannelInitialData', channelId, (channel: Channel) => {
+      socket.emit("getChannelInitialData", channelId, (channel: Channel) => {
         setChannelsData((prevChannelsData) => {
           const updatedChannels = [...prevChannelsData];
           if (!channel.isMember && !channel.public) {
-            const updatedChannels = prevChannelsData.filter((channelData) => channelData.id !== channel.id);
+            const updatedChannels = prevChannelsData.filter(
+              (channelData) => channelData.id !== channel.id
+            );
             return updatedChannels;
           }
           const channelIndex = updatedChannels.findIndex(
@@ -85,8 +88,7 @@ function Channels() {
           if (channelIndex !== -1) {
             if (channel.isMember || channel.public) {
               updatedChannels[channelIndex] = channel;
-            }
-            else {
+            } else {
               const filteredChannels = updatedChannels.filter(
                 (channel) => channel.id !== channelId
               );
@@ -97,7 +99,7 @@ function Channels() {
           }
           return updatedChannels;
         });
-    })
+      });
     });
     setChannelsData((prevChannelsData) => {
       const updatedChannels = [...prevChannelsData];

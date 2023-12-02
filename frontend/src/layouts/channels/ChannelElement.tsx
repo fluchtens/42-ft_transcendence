@@ -3,6 +3,7 @@ import { Channel } from "../../types/chat.interface";
 import { useState } from "react";
 import { JoinChannelModal } from "./JoinChannelModal";
 import { useNavigate } from "react-router-dom";
+import { RiGitRepositoryPrivateFill } from "react-icons/ri";
 
 interface ChannelElementProps {
   channel: Channel;
@@ -26,37 +27,20 @@ const ChannelElement = ({ channel }: ChannelElementProps) => {
 
   return (
     <>
-      {channel.public && (
-        <div className={styles.container}>
-          <button className={styles.channelBtn} onClick={joinChannel}>
-            <div>
-              <p className={styles.name}>{channel.name}</p>
-              {channel.protected ? (
-                <p className={styles.status}>Public with password</p>
-              ) : (
-                <p className={styles.status}>Public</p>
-              )}
-            </div>
-          </button>
+      <button className={styles.button} onClick={joinChannel}>
+        <p className={styles.name}>{channel.name}</p>
+        <div className={styles.infos}>
+          {channel.public ? (
+            <p className={styles.status}>Public</p>
+          ) : (
+            <p className={styles.status}>Private</p>
+          )}
+          {channel.protected && (
+            <RiGitRepositoryPrivateFill className={styles.icon} />
+          )}
         </div>
-      )}
-      {!channel.public && (
-        <div className={styles.container}>
-          <button className={styles.channelBtn} onClick={joinChannel}>
-            <div>
-              <p className={styles.name}>{channel.name}</p>
-              {channel.protected ? (
-                <p className={styles.status}>Private with password</p>
-              ) : (
-                <p className={styles.status}>Private</p>
-              )}
-            </div>
-          </button>
-        </div>
-      )}
-      {modal && (
-        <JoinChannelModal channel={channel} closeModal={closeModal} />
-      )}
+      </button>
+      {modal && <JoinChannelModal channel={channel} closeModal={closeModal} />}
     </>
   );
 };

@@ -1,7 +1,23 @@
+import { IoPersonAddSharp } from "react-icons/io5";
+import styles from "./AddingBar.module.scss";
 import { FaPlus } from "react-icons/fa6";
-import styles from "./AddChannelBar.module.scss";
+import { CreateChannel } from "../layouts/channels/CreateChannel";
 import { useState } from "react";
-import { CreateChannel } from "./CreateChannel";
+
+interface AddUserBarProps {
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSubmit: (e: React.FormEvent) => void;
+}
+
+const AddUserBar = ({ value, onChange, onSubmit }: AddUserBarProps) => (
+  <form className={styles.form} onSubmit={onSubmit}>
+    <input type="text" value={value} onChange={onChange} required />
+    <button type="submit">
+      <IoPersonAddSharp className={styles.icon} />
+    </button>
+  </form>
+);
 
 const AddChannelBar = () => {
   const [modal, setModal] = useState<boolean>(false);
@@ -29,7 +45,7 @@ const AddChannelBar = () => {
 
   return (
     <>
-      <form className={styles.addFriend} onSubmit={openModal}>
+      <form className={styles.form} onSubmit={openModal}>
         <input
           type="text"
           value={newChannel.name}
@@ -51,4 +67,4 @@ const AddChannelBar = () => {
   );
 };
 
-export { AddChannelBar };
+export { AddUserBar, AddChannelBar };

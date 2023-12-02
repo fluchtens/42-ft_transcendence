@@ -7,11 +7,11 @@ import { MessageElement } from "./MessageElement";
 import { MessageInput } from "./MessageInput";
 import { UserElement } from "../friends/UserElement";
 import { ContextMenuType } from "../friends/UserContextMenu";
-import { AddFriendBar } from "../friends/AddFriendBar";
 import { useChatSocket } from "../../hooks/useChatSocket";
 import { Channel, MemberUsers, Message } from "../../types/chat.interface";
 import { Loading } from "../../components/Loading";
 import { notifyError } from "../../utils/notifications";
+import { AddUserBar } from "../../components/AddingBar";
 
 function Chat() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -126,7 +126,7 @@ function Chat() {
     socket.emit("joinRoom", { channelId: id, getMessages: true });
     return () => {
       socket.off(`channelData:${id}`);
-    }
+    };
   }, [socket, id]);
 
   return (
@@ -163,7 +163,7 @@ function Chat() {
             <>
               <div className={styles.line}></div>
               <div className={styles.members}>
-                <AddFriendBar
+                <AddUserBar
                   value={addedMember}
                   onChange={changeAddedMember}
                   onSubmit={addMember}

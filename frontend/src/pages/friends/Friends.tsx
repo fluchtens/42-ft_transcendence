@@ -7,13 +7,13 @@ import {
   getFriendsApi,
   sendFriendRequestApi,
 } from "../../services/friendship.api";
-import { AddFriendBar } from "./AddFriendBar";
 import { UserElement } from "./UserElement";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import { UserReqElement } from "./UserReqElement";
 import { useAuth } from "../../hooks/useAuth";
 import { ContextMenuType } from "./UserContextMenu";
 import { useFriendshipSocket } from "../../hooks/useFriendshipSocket";
+import { AddUserBar } from "../../components/AddingBar";
 
 interface FriendsProps {
   styles: CSSModuleClasses;
@@ -93,7 +93,7 @@ function Friends({ styles }: FriendsProps) {
     <>
       {user && (
         <div className={styles.container}>
-          <AddFriendBar
+          <AddUserBar
             value={addUser}
             onChange={changeAddUser}
             onSubmit={sendRequest}
