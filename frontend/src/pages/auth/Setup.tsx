@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./Auth.module.scss";
 import { setupUserApi } from "../../services/auth.api";
-import { MainTitle } from "../../components/MainTitle";
+import { MainTitle } from "./MainTitle";
 import { useAuth } from "../../hooks/useAuth";
 
 function Setup() {
