@@ -320,30 +320,29 @@ export class ChatService {
   async changeMemberRole(
     userId: number,
     channelId: string,
-    memberChangeId: number,
+    memberChangeUserId: number,
     newRole: string,
   ) {
-    const memberRole: string = await this.findMemberRoleInChannel(
-      channelId,
-      Number(userId),
-    );
     try {
-      const existingMember = await this.findMemberInChannel(channelId, memberChangeId);
-      if (!existingMember) {
+      const userStatus = await this.findMemberInChannel(
+        channelId,
+        Number(userId),
+      );
+      const memberToChange = await this.findMemberInChannel(channelId, memberChangeUserId);
+      if (!memberToChange) {
         throw new Error('User not found in channel');
       }
-      if (existingMember.role === newRole) {
+      if (memberToChange.role === newRole) {
         throw new Error('This member already has this Role');
       }
-      if (memberRole === 'GUEST' || memberRole === 'ADMIN') {
+      if (userStatus.role === 'GUEST' || userStatus.role === 'ADMIN') {
         throw new Error('You have no permission!');
       }
-      const memberId = existingMember.id;
+      const memberId = memberToChange.id;
       switch (newRole) {
         case 'OWNER': {
-          if (memberRole !== 'OWNER')
+          if (userStatus.role !== 'OWNER')
             throw new Error('You have no permission!');
-
           const updateChannel = await this.prismaService.channel.update({
             where: {
               id : channelId,
@@ -351,7 +350,7 @@ export class ChatService {
             data: {
               user: {
                 connect: {
-                  id: memberChangeId,
+                  id: memberChangeUserId,
                 },
               },
             }
@@ -364,6 +363,16 @@ export class ChatService {
               role: MemberRole.OWNER,
             },
           });
+
+          const updatedOwnerMember = await this.prismaService.member.update({
+            where: {
+              id: userStatus.id,
+            },
+            data: {
+              role: MemberRole.ADMIN,
+            },
+          });
+
           return updatedMember;
         }
         case 'ADMIN': {
@@ -379,8 +388,6 @@ export class ChatService {
         }
 
         case 'GUEST': {
-          if (existingMember.role === 'ADMIN' && memberRole === 'ADMIN')
-            throw new Error('You have no permission');
           const updatedMember = await this.prismaService.member.update({
             where: {
               id: memberId,

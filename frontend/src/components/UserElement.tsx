@@ -2,11 +2,13 @@ import defaultAvatar from "/default_avatar.png";
 import styles from "./UserElement.module.scss";
 import { ContextMenuType, UserContextMenu } from "./UserContextMenu";
 import { User } from "../types/user.interface";
+import { Channel } from "../types/chat.interface";
 
 interface UserElementProps {
   user: User;
   contextMenu: boolean;
   contextMenuType: ContextMenuType;
+  channel: Channel;
   toggleContextMenu: () => void;
 }
 
@@ -14,6 +16,7 @@ const UserElement = ({
   user,
   contextMenu,
   contextMenuType,
+  channel,
   toggleContextMenu,
 }: UserElementProps) => {
   const isInGame = user.status === "In game";
@@ -65,6 +68,7 @@ const UserElement = ({
         <UserContextMenu
           user={user}
           type={contextMenuType}
+          channel={channel}
           cb={toggleContextMenu}
         />
       )}

@@ -1,4 +1,7 @@
+import { Socket } from "socket.io-client";
+import { useChatSocket } from "../hooks/useChatSocket";
 import { blockUserApi, removeFriendApi } from "../services/friendship.api";
+import { Channel } from "../types/chat.interface";
 import { User } from "../types/user.interface";
 import { notifyError, notifySuccess } from "../utils/notifications";
 import styles from "./UserContextMenu.module.scss";
@@ -13,11 +16,13 @@ export enum ContextMenuType {
 interface UserContextMenuProps {
   user: User;
   type: ContextMenuType;
+  channel: Channel;
   cb: () => void;
 }
 
-const UserContextMenu = ({ user, type, cb }: UserContextMenuProps) => {
+const UserContextMenu = ({ user, type, channel, cb }: UserContextMenuProps) => {
   const navigate = useNavigate();
+  const chatSocket = useChatSocket();
 
   const removeFriend = async () => {
     cb();
@@ -38,17 +43,43 @@ const UserContextMenu = ({ user, type, cb }: UserContextMenuProps) => {
 
   const promoteOwner = async () => {
     cb();
-    notifySuccess("promote owner");
+    chatSocket.emit('changeRole', {channelId: channel.id, memberId:user.id, newRole: "OWNER"}, (result: string) => {
+      if (!result) {
+        notifySuccess("promote owner");
+      }
+      else {
+        console.log(result);
+        notifyError("failed to promote to owner");
+      }
+    });
   };
 
   const promoteAdmin = async () => {
     cb();
-    notifySuccess("promote admin");
+    // console.log(channel);
+    // console.log(user.username);
+    chatSocket.emit('changeRole', {channelId: channel.id, memberId:user.id, newRole: "ADMIN"}, (result: string) => {
+      if (!result) {
+        notifySuccess("promote admin");
+      }
+      else {
+        console.log(result);
+        notifyError("failed to promote to admin");
+      }
+    });
   };
 
   const demoteUser = async () => {
     cb();
-    notifySuccess("demote user");
+    chatSocket.emit('changeRole', {channelId: channel.id, memberId:user.id, newRole: "GUEST"}, (result: string) => {
+      if (!result) {
+        notifySuccess("demote user");
+      }
+      else {
+        console.log(result);
+        notifyError("failed to demote user");
+      }
+    });
   };
 
   const renderButtons = () => {
