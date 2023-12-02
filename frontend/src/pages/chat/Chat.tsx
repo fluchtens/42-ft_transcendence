@@ -162,14 +162,14 @@ function Chat() {
                   onSubmit={addMember}
                 />
                 <ul>
-                  {members?.map((member) => (
+                  {members?.map((member: MemberUsers) => (
                     <li key={member.user.id}>
                       <UserElement
                         user={member.user}
+                        channel={channel}
+                        role={member.member.role}
                         contextMenu={contextMenu === member.user.id}
                         contextMenuType={ContextMenuType.MEMBER}
-                        channel={channel}
-                        member={member.member}
                         toggleContextMenu={() =>
                           toggleContextMenu(member.user.id)
                         }

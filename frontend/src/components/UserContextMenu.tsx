@@ -15,7 +15,7 @@ export enum ContextMenuType {
 interface UserContextMenuProps {
   user: User;
   type: ContextMenuType;
-  channel: Channel;
+  channel?: Channel;
   cb: () => void;
 }
 
@@ -42,43 +42,56 @@ const UserContextMenu = ({ user, type, channel, cb }: UserContextMenuProps) => {
 
   const promoteOwner = async () => {
     cb();
-    chatSocket.emit('changeRole', {channelId: channel.id, memberId:user.id, newRole: "OWNER"}, (result: string) => {
-      if (!result) {
-        notifySuccess("promote owner");
-      }
-      else {
-        console.log(result);
-        notifyError("failed to promote to owner");
-      }
-    });
+    if (channel) {
+      chatSocket.emit(
+        "changeRole",
+        { channelId: channel.id, memberId: user.id, newRole: "OWNER" },
+        (result: string) => {
+          if (!result) {
+            notifySuccess("promote owner");
+          } else {
+            console.log(result);
+            notifyError("failed to promote to owner");
+          }
+        }
+      );
+    }
   };
 
   const promoteAdmin = async () => {
     cb();
-    // console.log(channel);
-    // console.log(user.username);
-    chatSocket.emit('changeRole', {channelId: channel.id, memberId:user.id, newRole: "ADMIN"}, (result: string) => {
-      if (!result) {
-        notifySuccess("promote admin");
-      }
-      else {
-        console.log(result);
-        notifyError("failed to promote to admin");
-      }
-    });
+    if (channel) {
+      chatSocket.emit(
+        "changeRole",
+        { channelId: channel.id, memberId: user.id, newRole: "ADMIN" },
+        (result: string) => {
+          if (!result) {
+            notifySuccess("promote admin");
+          } else {
+            console.log(result);
+            notifyError("failed to promote to admin");
+          }
+        }
+      );
+    }
   };
 
   const demoteUser = async () => {
     cb();
-    chatSocket.emit('changeRole', {channelId: channel.id, memberId:user.id, newRole: "GUEST"}, (result: string) => {
-      if (!result) {
-        notifySuccess("demote user");
-      }
-      else {
-        console.log(result);
-        notifyError("failed to demote user");
-      }
-    });
+    if (channel) {
+      chatSocket.emit(
+        "changeRole",
+        { channelId: channel.id, memberId: user.id, newRole: "GUEST" },
+        (result: string) => {
+          if (!result) {
+            notifySuccess("demote user");
+          } else {
+            console.log(result);
+            notifyError("failed to demote user");
+          }
+        }
+      );
+    }
   };
 
   const renderButtons = () => {

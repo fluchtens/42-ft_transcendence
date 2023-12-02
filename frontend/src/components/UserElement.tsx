@@ -2,40 +2,48 @@ import defaultAvatar from "/default_avatar.png";
 import styles from "./UserElement.module.scss";
 import { ContextMenuType, UserContextMenu } from "./UserContextMenu";
 import { User } from "../types/user.interface";
-import { Channel, Member } from "../types/chat.interface";
+import { Channel } from "../types/chat.interface";
 
 interface UserElementProps {
   user: User;
+  channel?: Channel;
+  role?: string;
   contextMenu: boolean;
   contextMenuType: ContextMenuType;
-  channel: Channel;
-  member?: Member;
   toggleContextMenu: () => void;
 }
 
 const UserElement = ({
   user,
+  channel,
+  role,
   contextMenu,
   contextMenuType,
-  channel,
-  member,
   toggleContextMenu,
 }: UserElementProps) => {
   const isInGame = user.status === "In game";
   const isOnline = user.status === "Online";
   const isOffline = user.status === "Offline";
-  let haveMember:boolean = false;
 
-  if(member) {
-    haveMember = true;
-  }
+  const renderRole = (role: string) => {
+    switch (role) {
+      case "OWNER":
+        return "Owner";
+      case "ADMIN":
+        return "Administrator";
+      case "GUEST":
+        return "Member";
+      default:
+        return "Unknow";
+    }
+  };
 
   return (
     <>
       <button
         className={`${styles.button} ${contextMenu ? styles.activeBtn : ""}`}
         onClick={toggleContextMenu}
-        >
+      >
         {user.avatar ? <img src={user.avatar} /> : <img src={defaultAvatar} />}
         <div>
           {isInGame && (
@@ -67,23 +75,19 @@ const UserElement = ({
           {!isInGame && !isOnline && !isOffline && (
             <>
               <p className={styles.username}>{user.username}</p>
+              {role && <p className={styles.status}>{renderRole(role)}</p>}
             </>
-          )}
-          {haveMember && (
-             <>
-             <p>{member?.role}</p>
-           </>
           )}
         </div>
       </button>
       {contextMenu && (
         <UserContextMenu
-        user={user}
-        type={contextMenuType}
-        channel={channel}
-        cb={toggleContextMenu}
+          user={user}
+          type={contextMenuType}
+          channel={channel}
+          cb={toggleContextMenu}
         />
-        )}
+      )}
     </>
   );
 };

@@ -21,7 +21,7 @@ export interface Message {
 
 export interface Member {
   id: string;
-  role: MemberRole;
+  role: string;
   userId: number;
   channelId: string;
   silencedTime: Date;
@@ -32,10 +32,4 @@ export interface Member {
 export interface MemberUsers {
   member: Member;
   user: User;
-}
-
-enum MemberRole {
-  ADMIN,
-  MODERATOR,
-  GUEST,
 }
