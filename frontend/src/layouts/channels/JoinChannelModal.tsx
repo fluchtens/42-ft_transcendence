@@ -37,11 +37,12 @@ const JoinChannelModal = ({ channel, closeModal }: JoinChannelModalProps) => {
       );
     } else {
       socket.emit(
-        "joinRoom",
-        { channelId: channel.id, getMessages: true, password: password },
+        'connectToProtectedChannel',
+        { channelId: channel.id, password: password },
         (result: boolean) => {
+          console.log("connetion", result);
           if (result) {
-            notifySuccess("You has joined the channel");
+            notifySuccess("You has joined the channel password");
             navigate("/chat/" + channel.id);
           } else {
             notifyError("Wrong password");

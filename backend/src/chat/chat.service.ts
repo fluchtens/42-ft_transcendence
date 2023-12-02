@@ -50,6 +50,47 @@ export class ChatService {
     }
   }
 
+  async getSimpleChannelById(
+    channelId: string,
+  ): Promise<Channel> {
+    try {
+      if (!channelId) throw new BadRequestException('invalid channelId');
+      const channel = await this.prismaService.channel.findUnique({
+        where: {
+          id: channelId,
+        },
+      });
+      if (!channel) {
+        throw new NotFoundException('Channel not found');
+      }
+      return channel;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+  async passwordChannelVerify(channelId: string, password: string):Promise<boolean> {
+    try {
+      const channel = await this.prismaService.channel.findUnique({
+        where: {
+          id: channelId,
+        },
+      });
+      if (!channel) {
+        throw new NotFoundException('Channel not found');
+      }
+      const matchPwd = await bcrypt.compare(password, channel.password);
+        if (matchPwd) {
+          return true;
+        } else {
+          return false;
+        }
+    }
+    catch (error) {
+      throw new error;
+      return false;
+    }
+  }
+
   async getMemberById(memberId: string) {
     try {
       const member = await this.prismaService.member.findUnique({
@@ -624,9 +665,12 @@ export class ChatService {
       if (existingMember) {
         throw new Error('Member already exists in the channel');
       }
-      const channel = await this.getChannelById(channelId, password);
-      if (channel.password === 'true') {
-        throw new Error('need password to join channel');
+      const channel = await this.getSimpleChannelById(channelId);
+      if (channel.password) {
+        const checkPassword = await this.passwordChannelVerify(channelId, password);
+        if (!checkPassword) {
+          throw new Error ("Wrong Password");
+        }
       }
       const newMember = await this.prismaService.member.create({
         data: {
