@@ -1,4 +1,3 @@
-import { Socket } from "socket.io-client";
 import { useChatSocket } from "../hooks/useChatSocket";
 import { blockUserApi, removeFriendApi } from "../services/friendship.api";
 import { Channel } from "../types/chat.interface";

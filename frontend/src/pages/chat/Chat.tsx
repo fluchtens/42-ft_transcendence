@@ -169,6 +169,7 @@ function Chat() {
                         contextMenu={contextMenu === member.user.id}
                         contextMenuType={ContextMenuType.MEMBER}
                         channel={channel}
+                        member={member.member}
                         toggleContextMenu={() =>
                           toggleContextMenu(member.user.id)
                         }
