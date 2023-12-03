@@ -834,6 +834,7 @@ export class ChatGateway implements OnModuleInit {
               .to(channelId)
               .emit(`${channelId}/memberDeleted`, userIdKick);
           this.server.to(String(userIdKick)).emit(`${channelId}/channelDeleted`);
+          this.server.to(String(userIdKick)).emit('resetChannel', channelId);
           console.log(kickUser);
           return null;
         }
@@ -868,7 +869,6 @@ export class ChatGateway implements OnModuleInit {
             );
             console.log('password', passwordVerify, channelId, password);
             if (passwordVerify) {
-              console.log('heheheheheh');
               let connectedUsersSet = this.connectedUsers.get(channelId);
               if (!connectedUsersSet) {
                 connectedUsersSet = new Set<string>();
