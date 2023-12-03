@@ -75,8 +75,7 @@ export class ChatGateway implements OnModuleInit {
   private addSocketToUser(userId: number, socketData: Socket): void {
     let socket = this.userConnections.get(userId);
     if (!socket) {
-      socket = new Set<Socket>(),
-      this.userConnections.set(userId, socket);
+      (socket = new Set<Socket>()), this.userConnections.set(userId, socket);
     }
 
     socket.add(socketData);
@@ -139,10 +138,10 @@ export class ChatGateway implements OnModuleInit {
     }
   }
 
-  async refreshUserData(userId: number){
+  async refreshUserData(userId: number) {
     try {
       const updatedUserData = await this.userService.getUserById(userId);
-  
+
       this.usersData.set(userId, updatedUserData);
 
       // console.log(`User data refreshed for user with ID ${userId}`);
@@ -159,18 +158,21 @@ export class ChatGateway implements OnModuleInit {
   ): Promise<ChannelData> {
     let channelData: ChannelData;
     try {
-      const connection: boolean = this.verifyUserConnection(client.id, channelId);
+      const connection: boolean = this.verifyUserConnection(
+        client.id,
+        channelId,
+      );
       const channelInfo = await this.chatService.getChannelById(
         channelId,
         password,
         connection,
-        );
-        channelData = new ChannelData();
-        channelData.isConnected = connection;
-        channelData.inviteCode = channelInfo.inviteCode;
-        channelData.id = channelInfo.id;
-        channelData.name = channelInfo.name;
-        console.log('checkConnection',channelInfo.name, connection)
+      );
+      channelData = new ChannelData();
+      channelData.isConnected = connection;
+      channelData.inviteCode = channelInfo.inviteCode;
+      channelData.id = channelInfo.id;
+      channelData.name = channelInfo.name;
+      console.log('checkConnection', channelInfo.name, connection);
       channelData.public = channelInfo.public;
       const userInChannel = await this.chatService.findMemberInChannel(
         channelData.id,
@@ -181,7 +183,7 @@ export class ChatGateway implements OnModuleInit {
       } else {
         channelData.isMember = false;
       }
-      if (channelInfo.password){
+      if (channelInfo.password) {
         channelData.protected = true;
       }
       if (channelInfo.password === 'true' || !getMessages) {
@@ -264,7 +266,7 @@ export class ChatGateway implements OnModuleInit {
     const userId = client.handshake.auth.userId;
 
     this.removeSocketFromUser(userId, client);
-    
+
     this.connectedUsers.forEach((usersSet, channelId) => {
       if (usersSet.has(client.id)) {
         usersSet.delete(client.id);
@@ -300,40 +302,45 @@ export class ChatGateway implements OnModuleInit {
   }
 
   @SubscribeMessage('getChannelInitialData')
-  async handleChannelInitialData(@ConnectedSocket() client: Socket,
-  @MessageBody() channelId: string) {
+  async handleChannelInitialData(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() channelId: string,
+  ) {
     const userId: number = client.handshake.auth.userId;
     if (userId) {
       const channel = await this.getChannelData(client, channelId, false);
       return channel;
-    }
-    else {
-      console.log("userId Invalid getChannelStatus");
-      return ;
+    } else {
+      console.log('userId Invalid getChannelStatus');
+      return;
     }
   }
 
   @SubscribeMessage('getChannelStatus')
-  async getChannelStatus(@ConnectedSocket() client: Socket,
-  @MessageBody() channelId: string) {
+  async getChannelStatus(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() channelId: string,
+  ) {
     const userId: number = client.handshake.auth.userId;
     if (userId) {
-      const channelIsPublic  = await this.chatService.isChannelPublic(channelId);
-      const isMember = await this.chatService.findMemberInChannel(channelId, userId);
+      const channelIsPublic = await this.chatService.isChannelPublic(channelId);
+      const isMember = await this.chatService.findMemberInChannel(
+        channelId,
+        userId,
+      );
       if (channelIsPublic && !isMember) {
         const channel = await this.chatService.getChannelById(channelId);
-        const channeldata : Partial<ChannelData> = channel;
-        if (channel.password === "true") {
+        const channeldata: Partial<ChannelData> = channel;
+        if (channel.password === 'true') {
           channeldata.protected = true;
         }
         return channel;
       }
       const channel = await this.getChannelData(client, channelId, false);
       return channel;
-    }
-    else {
-      console.log("userId Invalid getChannelStatus");
-      return ;
+    } else {
+      console.log('userId Invalid getChannelStatus');
+      return;
     }
   }
 
@@ -355,10 +362,8 @@ export class ChatGateway implements OnModuleInit {
         // if (ChannelData.messages)
         //   console.log("emit test", ChannelData.name);
         this.server.to(client.id).emit(`channelData:${channelId}`, ChannelData);
-        if (ChannelData)
-         return true;
-        if (!ChannelData.isMember && !ChannelData.public)
-         return true;
+        if (ChannelData) return true;
+        if (!ChannelData.isMember && !ChannelData.public) return true;
       } catch (error) {
         console.error('Error joining room:', error.message);
         return false;
@@ -498,9 +503,8 @@ export class ChatGateway implements OnModuleInit {
   }
 
   @SubscribeMessage('refreshUser')
-  async handleRefreshUser(
-    @ConnectedSocket() client: Socket) {
-    const userId : number = client.handshake.auth.userId;
+  async handleRefreshUser(@ConnectedSocket() client: Socket) {
+    const userId: number = client.handshake.auth.userId;
     if (userId) {
       await this.refreshUserData(userId);
     }
@@ -511,11 +515,15 @@ export class ChatGateway implements OnModuleInit {
     @ConnectedSocket() client: Socket,
     @MessageBody() channelId: string,
   ) {
-    console.log(channelId)
+    console.log(channelId);
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
-        const channel : ChannelData = await this.getChannelData(client, channelId, true);
+        const channel: ChannelData = await this.getChannelData(
+          client,
+          channelId,
+          true,
+        );
         if (channel) {
           const deleted = await this.chatService.deleteChannel(
             userId,
@@ -532,7 +540,7 @@ export class ChatGateway implements OnModuleInit {
           }
           this.connectedUsers.delete(channelId);
           // console.log(deleted);
-          return "";
+          return '';
         } else {
           console.log('Error when get Channel data');
           throw new Error('Error when get Channel data');
@@ -556,8 +564,14 @@ export class ChatGateway implements OnModuleInit {
     if (userId) {
       try {
         const { channelId, memberUsername } = addMemberDto;
-        const member = await this.userService.findUserByUsername(memberUsername);
-        const friendship = await this.friendshipService.findFriendship(userId, member.id);
+        const member = await this.userService.findUserByUsername(
+          memberUsername,
+          false,
+        );
+        const friendship = await this.friendshipService.findFriendship(
+          userId,
+          member.id,
+        );
         if (!friendship || friendship.status !== FriendshipStatus.ACCEPTED) {
           throw new Error('You are not friends with this user');
         }
@@ -567,8 +581,7 @@ export class ChatGateway implements OnModuleInit {
             channelId,
             member.id,
           );
-          if (!result)
-            throw new Error("member is in the channel");
+          if (!result) throw new Error('member is in the channel');
           if (result) {
             const user = await this.getOrAddUserData(userId);
             const message = user.username + ' has added ' + member.username;
@@ -585,22 +598,24 @@ export class ChatGateway implements OnModuleInit {
             const userMember = await this.getOrAddUserData(Number(member.id));
             this.server
               .to(channelId)
-              .emit(`${channelId}/member`, { member: result, user: userMember });
+              .emit(`${channelId}/member`, {
+                member: result,
+                user: userMember,
+              });
             this.server.to(String(member.id)).emit('newChannel', channelId);
             return null;
           }
         } else {
           console.error('channelId or member not found, addMemberFail');
-          return "channelId or member not found, addMemberFail";
+          return 'channelId or member not found, addMemberFail';
         }
-      }
-      catch (error) {
+      } catch (error) {
         console.log(error.message);
         return error.message;
       }
     } else {
       console.log('User ID not available.504');
-      return "User ID not available.";
+      return 'User ID not available.';
     }
   }
 
@@ -614,51 +629,52 @@ export class ChatGateway implements OnModuleInit {
       try {
         const channel = await this.chatService.getChannelById(
           channelDto.channelId,
+        );
+        if (channel) {
+          const member = await this.chatService.findMemberInChannel(
+            channelDto.channelId,
+            userId,
           );
-          if (channel) {
-            const member = await this.chatService.findMemberInChannel(channelDto.channelId, userId);
-            if (member) {
-              throw new Error("member is in channel")
+          if (member) {
+            throw new Error('member is in channel');
+          }
+          const joinChannel = await this.chatService.joinPublicChannel(
+            userId,
+            channelDto.channelId,
+            channelDto.password,
+          );
+          if (joinChannel) {
+            let connectedUsersSet = this.connectedUsers.get(channel.id);
+            if (!connectedUsersSet) {
+              connectedUsersSet = new Set<string>();
+              this.connectedUsers.set(channel.id, connectedUsersSet);
             }
-            const joinChannel = await this.chatService.joinPublicChannel(
+
+            connectedUsersSet.add(client.id);
+            const user = await this.getOrAddUserData(userId);
+            const message = user.username + ' have joined the channel';
+            const messageData = await this.chatService.addMessage(
               userId,
               channelDto.channelId,
-              channelDto.password,
+              message,
             );
-            if (joinChannel) {
-
-              let connectedUsersSet = this.connectedUsers.get(channel.id);
-              if (!connectedUsersSet) {
-                connectedUsersSet = new Set<string>();
-                this.connectedUsers.set(channel.id, connectedUsersSet);
-              }
-
-              connectedUsersSet.add(client.id);
-              const user = await this.getOrAddUserData(userId);
-              const message = user.username + ' have joined the channel';
-              const messageData = await this.chatService.addMessage(
-                userId,
-                channelDto.channelId,
-                message,
-              );
-              const messageDataDto: Messages = messageData;
-              messageDataDto.user = user;
-              this.server
-                .to(channelDto.channelId)
-                .emit(`${channelDto.channelId}/message`, messageDataDto);
-              this.server
-                .to(channelDto.channelId)
-                .emit(`${channelDto.channelId}/member`, {
-                  member: joinChannel,
-                  user: user,
-                });
-              this.server.to(String(userId)).emit("resetChannel", channel.id);
-              return true;
-            } else {
-              throw new Error('error when join the channel');
-            }
+            const messageDataDto: Messages = messageData;
+            messageDataDto.user = user;
+            this.server
+              .to(channelDto.channelId)
+              .emit(`${channelDto.channelId}/message`, messageDataDto);
+            this.server
+              .to(channelDto.channelId)
+              .emit(`${channelDto.channelId}/member`, {
+                member: joinChannel,
+                user: user,
+              });
+            this.server.to(String(userId)).emit('resetChannel', channel.id);
+            return true;
+          } else {
+            throw new Error('error when join the channel');
           }
-          else {
+        } else {
           throw new Error('Channel not found');
         }
       } catch (error) {
@@ -680,11 +696,14 @@ export class ChatGateway implements OnModuleInit {
     if (userId) {
       try {
         const { channelId, password } = changeChannelPasswordDto;
-        const protect = await this.chatService.updateChannelWithPassword(userId, channelId, password);
-        this.server.emit("resetChannel", channelId);
-        return "";
-      }
-      catch (error) {
+        const protect = await this.chatService.updateChannelWithPassword(
+          userId,
+          channelId,
+          password,
+        );
+        this.server.emit('resetChannel', channelId);
+        return '';
+      } catch (error) {
         console.log(error.message);
         return error.message;
       }
@@ -697,33 +716,43 @@ export class ChatGateway implements OnModuleInit {
   @SubscribeMessage('changeRole')
   async handleChangeRole(
     @ConnectedSocket() client: Socket,
-    @MessageBody() changeRoleDto: ChangeRoleDto) {
+    @MessageBody() changeRoleDto: ChangeRoleDto,
+  ) {
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
         const { channelId, memberId, newRole } = changeRoleDto;
         if (channelId && memberId && newRole) {
-          const changeRole = await this.chatService.changeMemberRole(userId, channelId, memberId, newRole);
+          const changeRole = await this.chatService.changeMemberRole(
+            userId,
+            channelId,
+            memberId,
+            newRole,
+          );
           const userMember = await this.getOrAddUserData(Number(memberId));
           if (changeRole) {
             const userData = await this.getOrAddUserData(userId);
-            const message = userData.username + " changed the role of " + userMember.username + " to " + newRole;
+            const message =
+              userData.username +
+              ' changed the role of ' +
+              userMember.username +
+              ' to ' +
+              newRole;
             const messageSend = await this.chatService.addMessage(
               userId,
               channelId,
               message,
-              );
-              if (!messageSend) throw new Error('Message cannot be send');
-              const messageData: Messages = messageSend;
-              messageData.user = userData;
+            );
+            if (!messageSend) throw new Error('Message cannot be send');
+            const messageData: Messages = messageSend;
+            messageData.user = userData;
             this.server.to(channelId).emit(`${channelId}/message`, messageData);
           }
           this.server.to(channelId).emit(`${channelId}/refreshPage`, channelId);
           console.log(changeRole);
           return null;
         }
-      }
-      catch (error) {
+      } catch (error) {
         console.log(error.message);
         return error.message;
       }
@@ -742,12 +771,14 @@ export class ChatGateway implements OnModuleInit {
     if (userId) {
       try {
         const { channelId } = changeChannelPasswordDto;
-        const protect = await this.chatService.removePasswordFromChannel(userId, channelId)
-        this.server.emit("resetChannel", channelId);
-        console.log("Deleteprotection", protect);
-        return "";
-      }
-      catch (error) {
+        const protect = await this.chatService.removePasswordFromChannel(
+          userId,
+          channelId,
+        );
+        this.server.emit('resetChannel', channelId);
+        console.log('Deleteprotection', protect);
+        return '';
+      } catch (error) {
         console.log(error.message);
         return error.message;
       }
@@ -757,24 +788,27 @@ export class ChatGateway implements OnModuleInit {
     }
   }
 
-
   @SubscribeMessage('kickUser')
   async handleKickUser(
     @ConnectedSocket() client: Socket,
-    @MessageBody() kickUserDto: KickUserDto) {
+    @MessageBody() kickUserDto: KickUserDto,
+  ) {
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
-        const { channelId, userIdKick} = kickUserDto;
+        const { channelId, userIdKick } = kickUserDto;
         if (channelId && userIdKick) {
-          const kickUser = await this.chatService.kickUser(userId, channelId, userIdKick);
+          const kickUser = await this.chatService.kickUser(
+            userId,
+            channelId,
+            userIdKick,
+          );
           if (kickUser) {
           }
           console.log(kickUser);
           return null;
         }
-      }
-      catch (error) {
+      } catch (error) {
         console.log(error.message);
         return error.message;
       }
@@ -785,19 +819,27 @@ export class ChatGateway implements OnModuleInit {
   }
 
   @SubscribeMessage('connectToProtectedChannel')
-  async handleConnectToChannel(@ConnectedSocket() client: Socket,
-  @MessageBody() getChannelDto : GetChannelDto): Promise<boolean>{
+  async handleConnectToChannel(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() getChannelDto: GetChannelDto,
+  ): Promise<boolean> {
     {
       const userId = client.handshake.auth.userId;
-      const { channelId, password} = getChannelDto;
+      const { channelId, password } = getChannelDto;
       if (userId) {
         try {
-          const connection: boolean = this.verifyUserConnection(client.id, channelId);
+          const connection: boolean = this.verifyUserConnection(
+            client.id,
+            channelId,
+          );
           if (!connection) {
-            const passwordVerify = await this.chatService.passwordChannelVerify(channelId, password);
+            const passwordVerify = await this.chatService.passwordChannelVerify(
+              channelId,
+              password,
+            );
             console.log('password', passwordVerify, channelId, password);
             if (passwordVerify) {
-              console.log("heheheheheh")
+              console.log('heheheheheh');
               let connectedUsersSet = this.connectedUsers.get(channelId);
               if (!connectedUsersSet) {
                 connectedUsersSet = new Set<string>();
@@ -807,9 +849,8 @@ export class ChatGateway implements OnModuleInit {
               this.server.emit('resetChannel', channelId);
               this.server.to(String(userId)).emit(`${channelId}/refreshPage`);
               return true;
-            }
-            else {
-              throw new Error ("Wrong password");
+            } else {
+              throw new Error('Wrong password');
             }
           }
         } catch (error) {
@@ -824,17 +865,24 @@ export class ChatGateway implements OnModuleInit {
   }
 
   @SubscribeMessage('changeChannelVisibility')
-  async handlechangeChannelVisibility(@ConnectedSocket() client: Socket,
-  @MessageBody() changeChannelVisibilityDto : ChangeChannelVisibilityDto) {
+  async handlechangeChannelVisibility(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() changeChannelVisibilityDto: ChangeChannelVisibilityDto,
+  ) {
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
-        const { channelId, isPublic} = changeChannelVisibilityDto;
+        const { channelId, isPublic } = changeChannelVisibilityDto;
         if (channelId) {
-          const changeChannel = await this.chatService.updateChannelVisibility(userId, channelId, isPublic);
+          const changeChannel = await this.chatService.updateChannelVisibility(
+            userId,
+            channelId,
+            isPublic,
+          );
           if (changeChannel) {
             const user = await this.getOrAddUserData(userId);
-            const message = user.username + " Has changed the channel visibility";
+            const message =
+              user.username + ' Has changed the channel visibility';
             const messageData = await this.chatService.addMessage(
               userId,
               channelId,
@@ -853,8 +901,7 @@ export class ChatGateway implements OnModuleInit {
           }
           return null;
         }
-      }
-      catch (error) {
+      } catch (error) {
         console.log(error.message);
         return error.message;
       }
@@ -865,46 +912,57 @@ export class ChatGateway implements OnModuleInit {
   }
 
   @SubscribeMessage('leaveChannel')
-  async handleLeaveChannel(@ConnectedSocket() client: Socket, @MessageBody() channelId: string): Promise<string> {
+  async handleLeaveChannel(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() channelId: string,
+  ): Promise<string> {
     const userId: number = client.handshake.auth.userId;
     const user = await this.getOrAddUserData(userId);
     if (userId) {
       try {
         const channel = await this.getChannelData(client, channelId, false);
-        const userRole = await this.chatService.findMemberRoleInChannel(channelId, userId);
-        if (userRole === "OWNER")
-          throw new Error("The owner cannot leave the channel");
-        const message: string = user.username + " have leave the channel";
+        const userRole = await this.chatService.findMemberRoleInChannel(
+          channelId,
+          userId,
+        );
+        if (userRole === 'OWNER')
+          throw new Error('The owner cannot leave the channel');
+        const message: string = user.username + ' have leave the channel';
         const messageSend = await this.chatService.addMessage(
           userId,
           channelId,
           message,
         );
-        if (!messageSend) throw new Error('Error when sending the leave channel message');
+        if (!messageSend)
+          throw new Error('Error when sending the leave channel message');
         const messageData: Messages = messageSend;
         messageData.user = user;
         this.server.to(channelId).emit(`${channelId}/message`, messageData);
         if (channel.isConnected) {
           const connectedUsersSet = this.connectedUsers.get(channelId);
           if (!connectedUsersSet)
-            throw new Error ("Cannot find the channel connection to leave")
+            throw new Error('Cannot find the channel connection to leave');
           const sockets = this.userConnections.get(userId);
           sockets.forEach((socket) => {
             this.roomService.leaveRoom(socket, channelId);
             connectedUsersSet.delete(socket.id);
           });
           this.roomService.leaveRoom(client, channelId);
-          const result: string = await this.chatService.deleteMember(userId, channelId);
+          const result: string = await this.chatService.deleteMember(
+            userId,
+            channelId,
+          );
           if (result) {
-            this.server.to(String(userId)).emit("resetChannel", channelId);
-            this.server.to(channelId).emit(`${channelId}/memberDeleted`, userId);
-            return "";
+            this.server.to(String(userId)).emit('resetChannel', channelId);
+            this.server
+              .to(channelId)
+              .emit(`${channelId}/memberDeleted`, userId);
+            return '';
           }
         }
-      }
-      catch(error) {
+      } catch (error) {
         console.log(error.message);
-        return (error.message);
+        return error.message;
       }
     }
   }

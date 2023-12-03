@@ -32,17 +32,24 @@ export class UserService {
     }
   }
 
-  async findUserByUsername(username: string) {
+  async findUserByUsername(username: string, insensitive: boolean) {
     try {
-      const user = await this.prismaService.user.findFirst({
-        where: {
-          username: {
-            equals: username,
-            mode: 'insensitive',
+      if (insensitive) {
+        const user = await this.prismaService.user.findFirst({
+          where: {
+            username: {
+              equals: username,
+              mode: 'insensitive',
+            },
           },
-        },
-      });
-      return user;
+        });
+        return user;
+      } else {
+        const user = await this.prismaService.user.findUnique({
+          where: { username },
+        });
+        return user;
+      }
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -185,7 +192,7 @@ export class UserService {
   }
 
   async getUserByUsername(username: string) {
-    const user = await this.findUserByUsername(username);
+    const user = await this.findUserByUsername(username, false);
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -210,7 +217,7 @@ export class UserService {
     } else if (user.username === username) {
       throw new ConflictException('You already have this username');
     } else {
-      const searchUser = await this.findUserByUsername(username);
+      const searchUser = await this.findUserByUsername(username, true);
       if (searchUser && searchUser.id !== req.user.id) {
         throw new ConflictException('This username is already taken');
       }

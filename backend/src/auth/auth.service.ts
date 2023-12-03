@@ -76,7 +76,7 @@ export class AuthService {
   async register(body: RegisterDto) {
     const { username, password } = body;
 
-    const user = await this.userService.findUserByUsername(username);
+    const user = await this.userService.findUserByUsername(username, true);
     if (user) {
       throw new ConflictException('This username is already taken');
     }
@@ -92,7 +92,7 @@ export class AuthService {
   async login(session, body: LoginDto, res) {
     const { username, password } = body;
 
-    const user = await this.userService.findUserByUsername(username);
+    const user = await this.userService.findUserByUsername(username, false);
     if (!user || user.fortyTwoId) {
       throw new UnauthorizedException('Incorrect username or password');
     }
@@ -168,7 +168,7 @@ export class AuthService {
       throw new UnauthorizedException('You are not logged in');
     }
 
-    let user = await this.userService.findUserByUsername(username);
+    let user = await this.userService.findUserByUsername(username, true);
     if (user) {
       throw new ConflictException('This username is already taken');
     }
