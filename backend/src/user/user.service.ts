@@ -37,7 +37,7 @@ export class UserService {
       const user = await this.prismaService.user.findFirst({
         where: {
           username: {
-            contains: username,
+            equals: username,
             mode: 'insensitive',
           },
         },
