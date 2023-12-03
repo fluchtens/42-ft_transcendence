@@ -50,9 +50,7 @@ export class ChatService {
     }
   }
 
-  async getSimpleChannelById(
-    channelId: string,
-  ): Promise<Channel> {
+  async getSimpleChannelById(channelId: string): Promise<Channel> {
     try {
       if (!channelId) throw new BadRequestException('invalid channelId');
       const channel = await this.prismaService.channel.findUnique({
@@ -68,7 +66,10 @@ export class ChatService {
       throw new BadRequestException(error.message);
     }
   }
-  async passwordChannelVerify(channelId: string, password: string):Promise<boolean> {
+  async passwordChannelVerify(
+    channelId: string,
+    password: string,
+  ): Promise<boolean> {
     try {
       const channel = await this.prismaService.channel.findUnique({
         where: {
@@ -79,14 +80,13 @@ export class ChatService {
         throw new NotFoundException('Channel not found');
       }
       const matchPwd = await bcrypt.compare(password, channel.password);
-        if (matchPwd) {
-          return true;
-        } else {
-          return false;
-        }
-    }
-    catch (error) {
-      throw new error;
+      if (matchPwd) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      throw new error();
       return false;
     }
   }
@@ -328,7 +328,10 @@ export class ChatService {
         channelId,
         Number(userId),
       );
-      const memberToChange = await this.findMemberInChannel(channelId, memberChangeUserId);
+      const memberToChange = await this.findMemberInChannel(
+        channelId,
+        memberChangeUserId,
+      );
       if (!memberToChange) {
         throw new Error('User not found in channel');
       }
@@ -336,16 +339,16 @@ export class ChatService {
         throw new Error('This member already has this Role');
       }
       if (userStatus.role === 'GUEST' || userStatus.role === 'ADMIN') {
-        throw new Error('You have no permission!');
+        throw new Error("You don't have the required permissions!");
       }
       const memberId = memberToChange.id;
       switch (newRole) {
         case 'OWNER': {
           if (userStatus.role !== 'OWNER')
-            throw new Error('You have no permission!');
+            throw new Error("You don't have the required permissions!");
           const updateChannel = await this.prismaService.channel.update({
             where: {
-              id : channelId,
+              id: channelId,
             },
             data: {
               user: {
@@ -353,8 +356,8 @@ export class ChatService {
                   id: memberChangeUserId,
                 },
               },
-            }
-          })
+            },
+          });
           const updatedMember = await this.prismaService.member.update({
             where: {
               id: memberId,
@@ -510,7 +513,7 @@ export class ChatService {
         !(userRole === 'OWNER' || userRole === 'ADMIN') &&
         message.userId !== userId
       ) {
-        throw new Error('You have no permission to delete the message');
+        throw new Error('You are not authorized to delete the message!');
       }
       await this.prismaService.message.delete({
         where: {
@@ -559,18 +562,17 @@ export class ChatService {
     try {
       const userRole = await this.findMemberRoleInChannel(channelId, userId);
       const cryptedPassword: string = await bcrypt.hash(password, 10);
-      if (userRole === "OWNER") {
+      if (userRole === 'OWNER') {
         const result = await this.prismaService.channel.update({
           where: {
             id: channelId,
           },
           data: {
-            password: cryptedPassword ,
+            password: cryptedPassword,
           },
         });
-      }
-      else {
-        throw new Error("You are not the chat owner");
+      } else {
+        throw new Error('You are not the chat owner');
       }
     } catch (error) {
       console.error(error);
@@ -584,7 +586,7 @@ export class ChatService {
   ): Promise<string> {
     try {
       const memberRole = await this.findMemberRoleInChannel(channelId, userId);
-      if (memberRole === "OWNER") {
+      if (memberRole === 'OWNER') {
         await this.prismaService.channel.update({
           where: {
             id: channelId,
@@ -609,7 +611,7 @@ export class ChatService {
   ): Promise<string> {
     try {
       const userRole = await this.findMemberRoleInChannel(channelId, userId);
-      if (userRole === "OWNER") {
+      if (userRole === 'OWNER') {
         await this.prismaService.channel.update({
           where: {
             id: channelId,
@@ -674,9 +676,12 @@ export class ChatService {
       }
       const channel = await this.getSimpleChannelById(channelId);
       if (channel.password) {
-        const checkPassword = await this.passwordChannelVerify(channelId, password);
+        const checkPassword = await this.passwordChannelVerify(
+          channelId,
+          password,
+        );
         if (!checkPassword) {
-          throw new Error ("Wrong Password");
+          throw new Error('Wrong Password');
         }
       }
       const newMember = await this.prismaService.member.create({
@@ -700,13 +705,11 @@ export class ChatService {
             id: member.id,
           },
         });
-        return "member deleted";
-      }
-      else {
+        return 'member deleted';
+      } else {
         throw new Error("The member dons't exist");
       }
-    }
-    catch(error) {
+    } catch (error) {
       throw error;
     }
   }
@@ -714,16 +717,18 @@ export class ChatService {
   async kickUser(userId: number, channelId: string, userIdKick: number) {
     try {
       const userRole = await this.findMemberRoleInChannel(channelId, userId);
-      const userRoleKick = await this.findMemberRoleInChannel(channelId, userIdKick);
+      const userRoleKick = await this.findMemberRoleInChannel(
+        channelId,
+        userIdKick,
+      );
       if (userRole === 'ADMIN' || userRole === 'OWNER') {
         if (userRoleKick === 'OWNER') {
-          throw new Error('You cannot kick the chat owner')
+          throw new Error('You cannot kick the chat owner');
         }
         await this.deleteMember(userIdKick, channelId);
-        return "member deleted";
+        return 'member deleted';
       }
-    }
-    catch(error) {
+    } catch (error) {
       throw error;
     }
   }

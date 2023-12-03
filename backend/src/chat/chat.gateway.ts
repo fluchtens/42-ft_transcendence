@@ -596,12 +596,10 @@ export class ChatGateway implements OnModuleInit {
               .to(channelId)
               .emit(`${channelId}/message`, messageDataDto);
             const userMember = await this.getOrAddUserData(Number(member.id));
-            this.server
-              .to(channelId)
-              .emit(`${channelId}/member`, {
-                member: result,
-                user: userMember,
-              });
+            this.server.to(channelId).emit(`${channelId}/member`, {
+              member: result,
+              user: userMember,
+            });
             this.server.to(String(member.id)).emit('newChannel', channelId);
             return null;
           }
@@ -652,7 +650,7 @@ export class ChatGateway implements OnModuleInit {
 
             connectedUsersSet.add(client.id);
             const user = await this.getOrAddUserData(userId);
-            const message = user.username + ' have joined the channel';
+            const message = user.username + ' has joined the channel';
             const messageData = await this.chatService.addMessage(
               userId,
               channelDto.channelId,
@@ -927,7 +925,7 @@ export class ChatGateway implements OnModuleInit {
         );
         if (userRole === 'OWNER')
           throw new Error('The owner cannot leave the channel');
-        const message: string = user.username + ' have leave the channel';
+        const message: string = user.username + ' has left the channel';
         const messageSend = await this.chatService.addMessage(
           userId,
           channelId,
