@@ -4,7 +4,7 @@ import {
   getUserHistoryApi,
   getUserStatsApi,
 } from "../../services/user.api";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { User } from "../../types/user.interface";
 import styles from "./Profile.module.scss";
 import { UserDetails } from "./UserDetails";
@@ -13,17 +13,21 @@ import { UserHistory } from "./UserHistory";
 import { useAuth } from "../../hooks/useAuth";
 
 function Profile() {
-  const [targetUser, setTargetUser] = useState<User | null>(null);
+  const [targetUser, setTargetUser] = useState<User | null | undefined>();
   const [stats, setStats] = useState<Stats | null>(null);
   const [history, setHistory] = useState<Game[] | null>(null);
   const { user } = useAuth();
   const { username } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       if (username) {
         const userData = await getUserByUsernameApi(username);
-        if (!userData) return;
+        if (!userData) {
+          setTargetUser(null);
+          return;
+        }
         setTargetUser(userData);
 
         const userStats = await getUserStatsApi(userData.id);
@@ -37,6 +41,10 @@ function Profile() {
     if (user === null) return;
     fetchData();
   }, [user, username]);
+
+  if (targetUser === null) {
+    navigate("/");
+  }
 
   return (
     <>
