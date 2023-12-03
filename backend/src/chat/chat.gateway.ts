@@ -791,6 +791,7 @@ export class ChatGateway implements OnModuleInit {
     @ConnectedSocket() client: Socket,
     @MessageBody() kickUserDto: KickUserDto,
   ) {
+    console.log('lof');
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
@@ -801,8 +802,38 @@ export class ChatGateway implements OnModuleInit {
             channelId,
             userIdKick,
           );
+          const userMember = await this.getOrAddUserData(Number(userIdKick));
           if (kickUser) {
+            const userData = await this.getOrAddUserData(userId);
+            const message =
+              userData.username +
+              ' kicked ' +
+              userMember.username;
+            const messageSend = await this.chatService.addMessage(
+              userId,
+              channelId,
+              message,
+            );
+            if (!messageSend) throw new Error('Message cannot be send');
+            const messageData: Messages = messageSend;
+            messageData.user = userData;
+            this.server.to(channelId).emit(`${channelId}/message`, messageData);
+
+            const connectedUsersSet = this.connectedUsers.get(channelId);
+            if (!connectedUsersSet) {
+              throw new Error('Cannot find the channel connection to kick player');
+            }
+            const socketsConnected = this.userConnections.get(userIdKick);
+            socketsConnected.forEach((socket) => {
+              this.roomService.leaveRoom(socket, channelId);
+              connectedUsersSet.delete(socket.id);
+            });
           }
+          this.server.to(channelId).emit(`${channelId}/refreshPage`, channelId);
+          this.server
+              .to(channelId)
+              .emit(`${channelId}/memberDeleted`, userIdKick);
+          this.server.to(String(userIdKick)).emit(`${channelId}/channelDeleted`);
           console.log(kickUser);
           return null;
         }

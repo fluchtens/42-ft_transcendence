@@ -721,11 +721,13 @@ export class ChatService {
         channelId,
         userIdKick,
       );
-      if (userRole === 'ADMIN' || userRole === 'OWNER') {
-        if (userRoleKick === 'OWNER') {
-          throw new Error('You cannot kick the chat owner');
-        }
-        await this.deleteMember(userIdKick, channelId);
+      if ((userRole !== 'ADMIN' && userRole !== 'OWNER') || (userRole === 'ADMIN' && userRoleKick === 'ADMIN')) {
+        throw new Error("You have no permission to kick");
+      }
+      if (userRoleKick === 'OWNER') {
+        throw new Error('You cannot kick the chat owner');
+      }
+      if (await this.deleteMember(userIdKick, channelId)) {
         return 'member deleted';
       }
     } catch (error) {

@@ -94,6 +94,20 @@ const UserContextMenu = ({ user, type, channel, cb }: UserContextMenuProps) => {
     }
   };
 
+  const kickUser = async () => {
+    cb();
+    if (channel) {
+      chatSocket.emit("kickUser", {channelId: channel.id, userIdKick: user.id}, (result: string) => {
+        if (result) {
+          notifyError('failed to kick user');
+        }
+        else {
+          notifySuccess('The user was successful kicked');
+        }
+      });
+    }
+  }
+
   const renderButtons = () => {
     switch (type) {
       case ContextMenuType.FRIEND:
@@ -110,6 +124,7 @@ const UserContextMenu = ({ user, type, channel, cb }: UserContextMenuProps) => {
             <button onClick={promoteOwner}>Promote to owner rank</button>
             <button onClick={promoteAdmin}>Promote to admin rank</button>
             <button onClick={demoteUser}>Demote to user rank</button>
+            <button onClick={kickUser}>kick user</button>
           </>
         );
       default:
