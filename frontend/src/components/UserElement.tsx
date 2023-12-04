@@ -27,8 +27,6 @@ const UserElement = ({
   const isOnline = user.status === "Online";
   const isOffline = user.status === "Offline";
 
-  console.log(userRole);
-
   const renderRole = (role: string) => {
     switch (role) {
       case "OWNER":
