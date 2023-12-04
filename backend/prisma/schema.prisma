@@ -62,8 +62,8 @@ model Channel {
   messages Message[]
   members  Member[]
 
-  bannedUsers   Int[] @default([0])
-  silencedUsers Int[] @default([0])
+  bannedUsers   Int[] @default([])
+  silencedUsers Int[] @default([])
 
   CreatedAt DateTime @default(now())
   updatedAt DateTime @updatedAt

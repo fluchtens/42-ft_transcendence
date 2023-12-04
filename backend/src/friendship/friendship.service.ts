@@ -42,7 +42,7 @@ export class FriendshipService {
     }
   }
 
-  private async findBlockedRelation(senderId: number, receiverId: number) {
+  async findBlockedRelation(senderId: number, receiverId: number) {
     try {
       const friendship = await this.prismaService.friendship.findFirst({
         where: {
