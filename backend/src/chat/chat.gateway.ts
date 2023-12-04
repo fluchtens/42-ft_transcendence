@@ -48,6 +48,7 @@ import {
 import * as bcrypt from 'bcryptjs';
 import { FriendshipStatus, Member, User } from '@prisma/client';
 import { FriendshipService } from 'src/friendship/friendship.service';
+import { threadId } from 'worker_threads';
 
 @WebSocketGateway({
   namespace: 'chatSocket',
@@ -537,9 +538,9 @@ export class ChatGateway implements OnModuleInit {
               this.roomService.leaveRoom(client, channelId);
             });
             this.server.to(String(memberId)).emit('channelDeleted', channelId);
+            this.server.emit("channelDeleted", channelId);
           }
           this.connectedUsers.delete(channelId);
-          // console.log(deleted);
           return '';
         } else {
           console.log('Error when get Channel data');
