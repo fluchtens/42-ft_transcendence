@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate, useParams } from "react-router-dom";
 import styles from "./Chat.module.scss";
@@ -17,6 +17,7 @@ function Chat() {
   const [loading, setLoading] = useState<boolean>(true);
   const [channel, setChannel] = useState<Channel>();
   const [messages, setMessages] = useState<Message[]>([]);
+  const messagesRef = useRef<HTMLUListElement>(null);
   const [newMessage, setNewMessage] = useState<string>("");
   const [members, setMembers] = useState<MemberUsers[]>([]);
   const [addedMember, setAddedMember] = useState<string>("");
@@ -90,6 +91,12 @@ function Chat() {
   };
 
   useEffect(() => {
+    if (messagesRef.current) {
+      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  useEffect(() => {
     socket.on(`channelData:${id}`, (channelData: Channel) => {
       if (channelData.messages && channelData.members) {
         setMessages(channelData.messages);
@@ -99,7 +106,7 @@ function Chat() {
       setLoading(false);
     });
 
-    socket.on('refreshPage', () => {
+    socket.on("refreshPage", () => {
       socket.emit("joinRoom", { channelId: id, getMessages: true });
     });
 
@@ -144,10 +151,11 @@ function Chat() {
         <div className={styles.container}>
           <div className={styles.chat}>
             <ChatHeader
+              members={members}
               channel={channel}
               toggleMembersMenu={toggleMembersMenu}
             />
-            <ul>
+            <ul ref={messagesRef}>
               {messages?.map(
                 (message: Message) =>
                   message.user && (

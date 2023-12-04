@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Modal } from "../../components/Modal";
 import styles from "./EditChannel.module.scss";
 import { notifyError, notifySuccess } from "../../utils/notifications";
@@ -31,12 +30,6 @@ const EditChannel = ({
   closeModal,
   channel,
 }: EditChannelProps) => {
-  // const [isProtected, setIsProtected] = useState<boolean>(false);
-
-  // const changeIsProtected = () => {
-  //   setIsProtected(!isProtected);
-  // };
-
   const socket = useChatSocket();
 
   const changeName = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,7 +80,6 @@ const EditChannel = ({
     socket.emit("deleteChannel", channel.id, (result: string) => {
       if (result) {
         notifyError(result);
-
       } else {
         navigate("/");
         notifySuccess("Channel successfully deleted");
@@ -101,41 +93,50 @@ const EditChannel = ({
     e.preventDefault();
     // ta functui
     if (editChannel.password !== "") {
-      socket.emit("protectChannel", {
-        channelId: channel.id, password: editChannel.password
-      }, (result: string) => {
-        if (result === "You are not the chat owner") {
-          notifyError(result);
+      socket.emit(
+        "protectChannel",
+        {
+          channelId: channel.id,
+          password: editChannel.password,
+        },
+        (result: string) => {
+          if (result === "You are not the chat owner") {
+            notifyError(result);
+          } else if (!result) {
+            notifySuccess("Password Changed");
+          }
         }
-        else if (!result){
-          notifySuccess("Password Changed");
-        }
-      });
+      );
     }
     if (channel.protected && !editChannel.protected) {
-      socket.emit('deteleChannelProtection', {
-        channelId: channel.id
-      }, (result: string) => {
-        if (result === "You are not the chat owner") {
-          notifyError(result);
+      socket.emit(
+        "deteleChannelProtection",
+        {
+          channelId: channel.id,
+        },
+        (result: string) => {
+          if (result === "You are not the chat owner") {
+            notifyError(result);
+          } else if (!result) {
+            notifySuccess("Password Changed");
+          } else {
+            notifyError("result");
+          }
         }
-        else if (!result){
-          notifySuccess("Password Changed");
-        }
-        else {
-          notifyError("result");
-        }
-      });
+      );
       console.log("testing");
     }
-    socket.emit('changeChannelVisibility', {channelId: channel.id, isPublic:editChannel.isPublic}, (result: string) => {
-      if (!result){
-        notifySuccess("Channel successfully updated");
+    socket.emit(
+      "changeChannelVisibility",
+      { channelId: channel.id, isPublic: editChannel.isPublic },
+      (result: string) => {
+        if (!result) {
+          notifySuccess("Channel successfully updated");
+        } else {
+          notifyError("Failed to");
+        }
       }
-      else {
-        notifyError("Failed to")
-      }
-    });
+    );
     closeModal();
     resetProperties();
   };
@@ -202,7 +203,6 @@ const EditChannel = ({
           >
             Delete Channel
           </button>
-
           <div className={styles.rightBtns}>
             <button className={styles.cancel} type="button" onClick={cancel}>
               Cancel

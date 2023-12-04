@@ -3,20 +3,30 @@ import { HiUsers } from "react-icons/hi2";
 import styles from "./ChatHeader.module.scss";
 import { useEffect, useState } from "react";
 import { EditChannel } from "./EditChannel";
-import { Channel } from "../../types/chat.interface";
+import { Channel, MemberUsers } from "../../types/chat.interface";
 import { FaDoorOpen } from "react-icons/fa6";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import { useChatSocket } from "../../hooks/useChatSocket";
 import { useNavigate } from "react-router-dom";
+import { UnbanUser } from "./UnbanUser";
+import { FaBan } from "react-icons/fa";
+import { useAuth } from "../../hooks/useAuth";
 
 interface ChatHeaderProps {
   channel: Channel;
+  members: MemberUsers[];
   toggleMembersMenu: () => void;
 }
 
-
-const ChatHeader = ({ channel, toggleMembersMenu }: ChatHeaderProps) => {
-  const [modal, setModal] = useState<boolean>(false);
+const ChatHeader = ({
+  members,
+  channel,
+  toggleMembersMenu,
+}: ChatHeaderProps) => {
+  const { user } = useAuth();
+  const [role, setRole] = useState<string>("");
+  const [editChannelModal, setEditChannelModal] = useState<boolean>(false);
+  const [unbanUserModal, setUnbanUserModal] = useState<boolean>(false);
   const navigate = useNavigate();
   const chatSocket = useChatSocket();
   const [editChannel, setEditChannel] = useState({
@@ -25,31 +35,37 @@ const ChatHeader = ({ channel, toggleMembersMenu }: ChatHeaderProps) => {
     protected: false,
     password: "",
   });
-  
+
   const openEditMenuModal = () => {
-    setModal(true);
+    setEditChannelModal(true);
   };
-  
-  const closeModal = () => {
-    setModal(false);
+
+  const closeEditMenuModal = () => {
+    setEditChannelModal(false);
   };
-  
+
+  const openUnbanUserModal = () => {
+    setUnbanUserModal(true);
+  };
+
+  const closeUnbanUserModal = () => {
+    setUnbanUserModal(false);
+  };
+
   const leaveChannel = () => {
-    
-    chatSocket.emit("leaveChannel", channel.id, (result:string) => {
-        if (result === "The owner cannot leave the channel") {
-            notifyError("The owner cannot leave the channel");
-          }
-        else if (result){
-            notifyError("Fail to leave the channel");
-          }
-        if (!result) {
-            notifySuccess("You left the channel successfully");
-            navigate("/");
-          }
-          });
-        };
-          
+    chatSocket.emit("leaveChannel", channel.id, (result: string) => {
+      if (result === "The owner cannot leave the channel") {
+        notifyError("The owner cannot leave the channel");
+      } else if (result) {
+        notifyError("Fail to leave the channel");
+      }
+      if (!result) {
+        notifySuccess("You left the channel successfully");
+        navigate("/");
+      }
+    });
+  };
+
   useEffect(() => {
     setEditChannel({
       name: channel.name,
@@ -59,13 +75,36 @@ const ChatHeader = ({ channel, toggleMembersMenu }: ChatHeaderProps) => {
     });
   }, [channel]);
 
+  useEffect(() => {
+    if (user) {
+      members.map((member: MemberUsers) => {
+        if (user.id === member.member.userId) {
+          setRole(member.member.role);
+          return;
+        }
+      });
+    }
+  }, [members]);
+
   return (
     <>
       <div className={styles.header}>
         <div className={styles.leftBtns}>
-          <button onClick={openEditMenuModal}>
-            <IoSettings className={styles.icon} />
-          </button>
+          {role === "OWNER" && (
+            <>
+              <button onClick={openEditMenuModal}>
+                <IoSettings className={styles.icon} />
+              </button>
+            </>
+          )}
+          {role === "OWNER" ||
+            (role === "ADMIN" && (
+              <>
+                <button onClick={openUnbanUserModal}>
+                  <FaBan className={styles.icon} />
+                </button>
+              </>
+            ))}
           <button onClick={leaveChannel}>
             <FaDoorOpen className={styles.icon} />
           </button>
@@ -75,13 +114,16 @@ const ChatHeader = ({ channel, toggleMembersMenu }: ChatHeaderProps) => {
           <HiUsers className={styles.icon} />
         </button>
       </div>
-      {modal && (
+      {editChannelModal && (
         <EditChannel
           editChannel={editChannel}
           setEditChannel={setEditChannel}
-          closeModal={closeModal}
+          closeModal={closeEditMenuModal}
           channel={channel}
         />
+      )}
+      {unbanUserModal && (
+        <UnbanUser channel={channel} closeModal={closeUnbanUserModal} />
       )}
     </>
   );

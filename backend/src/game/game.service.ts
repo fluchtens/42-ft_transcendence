@@ -28,8 +28,6 @@ export class UserData {
     this._status = val;
   }
 
-  public rating = 0; // TODO get from db or something
-
   private _gameRoom: string | null = null;
   get gameRoom() {
     return this._gameRoom;
@@ -99,7 +97,7 @@ class MMQueue {
     ) => {},
   ) {}
 
-  add(userId, userRating, autolaunch = true) {
+  add(userId, userRating: number, autolaunch = true) {
     this.matchRequests.set(userId, {
       timestamp: Date.now(),
       rating: userRating,
@@ -152,15 +150,30 @@ class MMQueue {
     };
 
     let matches = [];
-    for (let i = sorted.length - 2; i >= 0; --i) {
-      let [req1, req2] = sorted.slice(i, 2);
+		while (sorted.length >= 2) {
+			let req2 = sorted.pop();
+			let req1 = sorted.pop();
       if (isMatch(req1, req2)) {
-        i--; // skip
         this.matchRequests.delete(req1.userId);
         this.matchRequests.delete(req2.userId);
         matches.push([req1.userId, req2.userId]);
-      }
-    }
+      } else {
+				sorted.push(req1);
+			}
+		}
+
+//     for (let i = sorted.length - 2; i >= 0; --i) {
+// 
+//       let [req1, req2] = [sorted[i], sorted[i + 1]];
+// 			console.log(`i ${i}`, 'req1', req1, 'req2', req2);
+//       if (isMatch(req1, req2)) {
+// 				console.log('match');
+//         i--; // skip
+//         this.matchRequests.delete(req1.userId);
+//         this.matchRequests.delete(req2.userId);
+//         matches.push([req1.userId, req2.userId]);
+//       }
+//     }
     return matches;
   }
 }
@@ -306,6 +319,7 @@ export class GameService {
 
   private genId() {
     // TODO something less hacky needed??
+    // Do we still need it at all now that we're not using it as a key for clients
     let id;
     do {
       id = 'game_' + String(Math.random()).slice(2);
@@ -385,6 +399,25 @@ export class GameService {
     resetTimer();
 
     return { gameRoom: gameId, game };
+  }
+
+  externalCreateGame(userId1, userId2, timeout = 10000) {
+    for (let userId of [userId1, userId2]) {
+      if (!this.users.get(userId)) {
+        this.users.set(userId, new UserData(userId));
+      }
+    }
+    this.launchGame(userId1, userId2);
+    setTimeout(() => {
+      for (let userId of [userId1, userId2]) {
+        if (
+          this.users.has(userId) &&
+          this.users.get(userId).sockets.size === 0
+        ) {
+          this.pendingDelete.add(userId);
+        }
+      }
+    }, timeout);
   }
 
   lobbyJoinGame(

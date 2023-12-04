@@ -90,8 +90,8 @@ export enum WhichPlayer { P1 = -1, P2 = 1 } // -1, 1 convenient as mult factor f
 export class GameState {
 	public player1: Player;
 	public player2: Player;
-	private _ball: Ball;
-	private _ballEntryTime;
+	private _ball: Ball = new Ball(0,0);
+	private _ballEntryTime = 1;
 	get ball(): Ball | null {
 		return (this._ballEntryTime >= this._lastUpdate)? null : this._ball;
 	}
@@ -168,6 +168,8 @@ export class GameState {
 					(PONG.paddleHeight - 1 + PONG.ballSize - 1);
 				newDyRatio = 2.01 * (newDyRatio - 0.5); // [0, 1] -> [-1, 1]
 				this.ball.dy = Math.trunc(PONG.ballMaxYSpeed * newDyRatio);
+
+				this.ball.y += Math.floor( this.ball.dy * (Math.abs(dx) / PONG.ballXSpeed) );
 			}
 		}
 
