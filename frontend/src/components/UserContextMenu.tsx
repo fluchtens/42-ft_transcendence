@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useChatSocket } from "../hooks/useChatSocket";
 import { blockUserApi, removeFriendApi } from "../services/friendship.api";
 import { Channel } from "../types/chat.interface";
@@ -5,6 +6,7 @@ import { User } from "../types/user.interface";
 import { notifyError, notifySuccess } from "../utils/notifications";
 import styles from "./UserContextMenu.module.scss";
 import { Link, useNavigate } from "react-router-dom";
+import { MuteUser } from "../pages/chat/MuteUser";
 
 export enum ContextMenuType {
   FRIEND = "FRIEND",
@@ -20,8 +22,17 @@ interface UserContextMenuProps {
 }
 
 const UserContextMenu = ({ user, type, channel, cb }: UserContextMenuProps) => {
+  const [muteModal, setMuteModal] = useState<boolean>(false);
   const navigate = useNavigate();
   const chatSocket = useChatSocket();
+
+  const openMuteModalModal = () => {
+    setMuteModal(true);
+  };
+
+  const closeMuteModal = () => {
+    setMuteModal(false);
+  };
 
   const removeFriend = async () => {
     cb();
@@ -97,16 +108,19 @@ const UserContextMenu = ({ user, type, channel, cb }: UserContextMenuProps) => {
   const kickUser = async () => {
     cb();
     if (channel) {
-      chatSocket.emit("kickUser", {channelId: channel.id, userIdKick: user.id}, (result: string) => {
-        if (result) {
-          notifyError('failed to kick user');
+      chatSocket.emit(
+        "kickUser",
+        { channelId: channel.id, userIdKick: user.id },
+        (result: string) => {
+          if (result) {
+            notifyError("failed to kick user");
+          } else {
+            notifySuccess("The user was successful kicked");
+          }
         }
-        else {
-          notifySuccess('The user was successful kicked');
-        }
-      });
+      );
     }
-  }
+  };
 
   const renderButtons = () => {
     switch (type) {
@@ -124,7 +138,9 @@ const UserContextMenu = ({ user, type, channel, cb }: UserContextMenuProps) => {
             <button onClick={promoteOwner}>Promote to owner rank</button>
             <button onClick={promoteAdmin}>Promote to admin rank</button>
             <button onClick={demoteUser}>Demote to user rank</button>
-            <button onClick={kickUser}>kick user</button>
+            <button onClick={kickUser}>Kick user</button>
+            <button onClick={kickUser}>Ban user</button>
+            <button onClick={openMuteModalModal}>Mute user</button>
           </>
         );
       default:
@@ -140,6 +156,14 @@ const UserContextMenu = ({ user, type, channel, cb }: UserContextMenuProps) => {
       <button onClick={sendPrivateMessage}>Send private message</button>
       <button onClick={blockUser}>Block all communication</button>
       {renderButtons()}
+      {muteModal && channel && (
+        <MuteUser
+          user={user}
+          channel={channel}
+          closeModal={closeMuteModal}
+          cb={cb}
+        />
+      )}
     </div>
   );
 };
