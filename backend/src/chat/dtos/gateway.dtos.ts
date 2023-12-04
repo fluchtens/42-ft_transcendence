@@ -54,6 +54,11 @@ export class ChangeChannelVisibilityDto {
   isPublic: boolean;
 }
 
+export class BanUserDto{
+  channelId: string;
+  userIdToBan: Number;
+}
+
 export class Messages {
   id: string;
   content: string;

@@ -95,7 +95,7 @@ function Chat() {
       setLoading(false);
     });
 
-    socket.on(`${id}/refreshPage`, () => {
+    socket.on('refreshPage', () => {
       socket.emit("joinRoom", { channelId: id, getMessages: true });
     });
 

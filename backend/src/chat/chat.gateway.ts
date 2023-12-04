@@ -44,10 +44,12 @@ import {
   ChangeChannelPasswordDto,
   KickUserDto,
   ChangeChannelVisibilityDto,
+  BanUserDto,
 } from './dtos/gateway.dtos';
 import * as bcrypt from 'bcryptjs';
 import { FriendshipStatus, Member, User } from '@prisma/client';
 import { FriendshipService } from 'src/friendship/friendship.service';
+import { threadId } from 'worker_threads';
 
 @WebSocketGateway({
   namespace: 'chatSocket',
@@ -141,10 +143,8 @@ export class ChatGateway implements OnModuleInit {
   async refreshUserData(userId: number) {
     try {
       const updatedUserData = await this.userService.getUserById(userId);
-
       this.usersData.set(userId, updatedUserData);
 
-      // console.log(`User data refreshed for user with ID ${userId}`);
     } catch (error) {
       console.error(`Error refreshing user data: ${error.message}`);
     }
@@ -507,6 +507,7 @@ export class ChatGateway implements OnModuleInit {
     const userId: number = client.handshake.auth.userId;
     if (userId) {
       await this.refreshUserData(userId);
+      this.server.emit('refreshPage');
     }
   }
 
@@ -537,9 +538,9 @@ export class ChatGateway implements OnModuleInit {
               this.roomService.leaveRoom(client, channelId);
             });
             this.server.to(String(memberId)).emit('channelDeleted', channelId);
+            this.server.emit("channelDeleted", channelId);
           }
           this.connectedUsers.delete(channelId);
-          // console.log(deleted);
           return '';
         } else {
           console.log('Error when get Channel data');
@@ -572,6 +573,11 @@ export class ChatGateway implements OnModuleInit {
           userId,
           member.id,
         );
+        const isBanned = await this.chatService.isUserBanned(channelId, userId);
+        if (isBanned) {
+          throw new Error("this user is banned");
+        }
+
         if (!friendship || friendship.status !== FriendshipStatus.ACCEPTED) {
           throw new Error('You are not friends with this user');
         }
@@ -635,6 +641,10 @@ export class ChatGateway implements OnModuleInit {
           );
           if (member) {
             throw new Error('member is in channel');
+          }
+          const isBanned = await this.chatService.isUserBanned(channelDto.channelId, userId);
+          if (isBanned) {
+            throw new Error("this user is banned");
           }
           const joinChannel = await this.chatService.joinPublicChannel(
             userId,
@@ -746,7 +756,7 @@ export class ChatGateway implements OnModuleInit {
             messageData.user = userData;
             this.server.to(channelId).emit(`${channelId}/message`, messageData);
           }
-          this.server.to(channelId).emit(`${channelId}/refreshPage`, channelId);
+          this.server.to(channelId).emit('refreshPage', channelId);
           console.log(changeRole);
           return null;
         }
@@ -791,7 +801,6 @@ export class ChatGateway implements OnModuleInit {
     @ConnectedSocket() client: Socket,
     @MessageBody() kickUserDto: KickUserDto,
   ) {
-    console.log('lof');
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
@@ -829,7 +838,7 @@ export class ChatGateway implements OnModuleInit {
               connectedUsersSet.delete(socket.id);
             });
           }
-          this.server.to(channelId).emit(`${channelId}/refreshPage`, channelId);
+          this.server.to(channelId).emit('refreshPage', channelId);
           this.server
               .to(channelId)
               .emit(`${channelId}/memberDeleted`, userIdKick);
@@ -876,7 +885,7 @@ export class ChatGateway implements OnModuleInit {
               }
               connectedUsersSet.add(client.id);
               this.server.emit('resetChannel', channelId);
-              this.server.to(String(userId)).emit(`${channelId}/refreshPage`);
+              this.server.to(String(userId)).emit('refreshPage');
               return true;
             } else {
               throw new Error('Wrong password');
@@ -994,5 +1003,68 @@ export class ChatGateway implements OnModuleInit {
         return error.message;
       }
     }
+  }
+
+  @SubscribeMessage('banUser')
+  async handleBanUser(@ConnectedSocket() client: Socket, @MessageBody() banUserDto: BanUserDto) {
+    const userId = Number(client.handshake.auth.userId);
+    if (userId) {
+      try {
+        const { channelId, userIdToBan } = banUserDto;
+        if (channelId && userIdToBan) {
+          const banUser = await this.chatService.banUser(
+            userId,
+            channelId,
+            Number(userIdToBan),
+          );
+          const userMember = await this.getOrAddUserData(Number(userIdToBan));
+          if (banUser) {
+            const userData = await this.getOrAddUserData(userId);
+            const message =
+              userData.username +
+              ' banded ' +
+              userMember.username;
+            const messageSend = await this.chatService.addMessage(
+              userId,
+              channelId,
+              message,
+            );
+            if (!messageSend) throw new Error('Message cannot be send');
+            const messageData: Messages = messageSend;
+            messageData.user = userData;
+            this.server.to(channelId).emit(`${channelId}/message`, messageData);
+
+            const connectedUsersSet = this.connectedUsers.get(channelId);
+            if (!connectedUsersSet) {
+              throw new Error('Cannot find the channel connection to ban player');
+            }
+            const socketsConnected = this.userConnections.get(Number(userIdToBan));
+            socketsConnected.forEach((socket) => {
+              this.roomService.leaveRoom(socket, channelId);
+              connectedUsersSet.delete(socket.id);
+            });
+          }
+          this.server.to(channelId).emit('refreshPage', channelId);
+          this.server
+              .to(channelId)
+              .emit(`${channelId}/memberDeleted`, userIdToBan);
+          this.server.to(String(userIdToBan)).emit(`${channelId}/channelDeleted`);
+          this.server.to(String(userIdToBan)).emit('resetChannel', channelId);
+          console.log(banUser);
+          return null;
+        }
+      } catch (error) {
+        console.log(error.message);
+        return error.message;
+      }
+    } else {
+      console.log('User ID not available.646');
+      return 'User ID not available.';
+    }
+  }
+
+  @SubscribeMessage('unbanUser')
+  async handleUnbanUser(@ConnectedSocket() client: Socket, @MessageBody() banUserDto: BanUserDto) {
+
   }
 }

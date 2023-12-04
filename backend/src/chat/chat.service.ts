@@ -734,4 +734,70 @@ export class ChatService {
       throw error;
     }
   }
+
+  async banUser(userId: number, channelId: string, userIdKick: number) {
+    try {
+      const userRole = await this.findMemberRoleInChannel(channelId, userId);
+      const userRoleKick = await this.findMemberRoleInChannel(
+        channelId,
+        userIdKick,
+      );
+      if ((userRole !== 'ADMIN' && userRole !== 'OWNER') || (userRole === 'ADMIN' && userRoleKick === 'ADMIN')) {
+        throw new Error("You have no permission to ban");
+      }
+      if (userRoleKick === 'OWNER') {
+        throw new Error('You cannot ban the chat owner');
+      }
+      if (await this.deleteMember(userIdKick, channelId)) {
+        const channel = await this.prismaService.channel.findUnique({
+          where: { id: channelId },
+        });      
+        if (!channel.bannedUsers.includes(userId)) {
+          await this.prismaService.channel.update({
+            where: { id: channelId },
+            data: {
+              bannedUsers: {
+                push: userId,
+              },
+            },
+          });
+        } 
+        return 'member banned';
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async unbanUser(channelId: string, userId: number): Promise<void> {
+    const channel = await this.prismaService.channel.findUnique({
+      where: { id: channelId },
+    });
+
+    if (channel.bannedUsers.includes(userId)) {
+      await this.prismaService.channel.update({
+        where: { id: channelId },
+        data: {
+          bannedUsers: {
+            set: channel.bannedUsers.filter((id) => id !== userId),
+          },
+        },
+      });
+    }
+  }
+
+  async  isUserBanned(channelId: string, userId: number): Promise<boolean> {
+    const channel = await this.prismaService.channel.findUnique({
+      where: { id: channelId },
+    });
+
+    console.log(channel);
+  
+    if (!channel) {
+      throw new Error('Le canal n\'existe pas.'); 
+    }
+  
+    return channel.bannedUsers.includes(userId);
+  }
+
 }
