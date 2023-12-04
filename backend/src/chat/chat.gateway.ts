@@ -1136,10 +1136,10 @@ export class ChatGateway implements OnModuleInit {
             userId,
           );
           const userRoleToMute = await this.chatService.findMemberRoleInChannel(channelId, userIdToMute);
-          if (userRoleToMute === "ADMIN" && userRole === "ADMIN") {
+          if ((userRoleToMute === "ADMIN" && userRole === "ADMIN") || userRoleToMute === 'OWNER') {
             throw new Error('Permission denied');
           }
-          if (userRole === 'ADMIN' || userRole === 'OWNER' && userRoleToMute !== 'OWNER') {
+          if (userRole === 'ADMIN' || userRole === 'OWNER') {
             const muteTime = addMinutes(new Date(), timeToMute);
             await this.chatService.muteMember(channelId, userIdToMute, muteTime);
             const userMember = await this.getOrAddUserData(Number(userIdToMute));
