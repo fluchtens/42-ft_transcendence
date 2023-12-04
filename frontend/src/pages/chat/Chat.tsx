@@ -147,6 +147,7 @@ function Chat() {
         <div className={styles.container}>
           <div className={styles.chat}>
             <ChatHeader
+              members={members}
               channel={channel}
               toggleMembersMenu={toggleMembersMenu}
             />

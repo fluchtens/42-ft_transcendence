@@ -1,43 +1,39 @@
 import { useState } from "react";
 import { Modal } from "../../components/Modal";
-import styles from "./MuteUser.module.scss";
+import styles from "./UnbanUser.module.scss";
 import { notifySuccess } from "../../utils/notifications";
 import { Channel } from "../../types/chat.interface";
-import { User } from "../../types/user.interface";
 
-interface MuteUserProps {
-  user: User;
+interface UnbanUserProps {
   channel: Channel;
   closeModal: () => void;
-  cb: () => void;
 }
 
-const MuteUser = ({ user, channel, closeModal, cb }: MuteUserProps) => {
-  const [time, setTime] = useState<string>("");
+const UnbanUser = ({ channel, closeModal }: UnbanUserProps) => {
+  const [unbanUser, setUnbanUser] = useState<string>("");
 
-  const changeTime = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTime(e.target.value);
+  const changeUnbanUser = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUnbanUser(e.target.value);
   };
 
   const submitData = (e: React.FormEvent) => {
     e.preventDefault();
-    cb();
-    notifySuccess("Mute");
+    notifySuccess("Unban");
     closeModal();
-    setTime("");
+    setUnbanUser("");
   };
 
   return (
     <Modal>
       <form className={styles.form} onSubmit={submitData}>
-        <h1>Mute {user.username}</h1>
+        <h1>Unban a user of {channel.name}</h1>
         <div className={styles.input}>
-          <label>Mute time (in minutes)</label>
+          <label>Username</label>
           <input
             type="text"
-            value={time}
-            onChange={changeTime}
-            placeholder="Mute time"
+            value={unbanUser}
+            onChange={changeUnbanUser}
+            placeholder="Username"
             required
           />
         </div>
@@ -45,11 +41,11 @@ const MuteUser = ({ user, channel, closeModal, cb }: MuteUserProps) => {
           <button type="button" onClick={() => closeModal()}>
             Cancel
           </button>
-          <button type="submit">Mute</button>
+          <button type="submit">Unban</button>
         </div>
       </form>
     </Modal>
   );
 };
 
-export { MuteUser };
+export { UnbanUser };
