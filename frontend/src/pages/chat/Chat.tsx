@@ -12,6 +12,7 @@ import { Channel, MemberUsers, Message } from "../../types/chat.interface";
 import { Loading } from "../../components/Loading";
 import { notifyError } from "../../utils/notifications";
 import { AddUserBar } from "../../components/AddingBar";
+import { getBlockedUsersApi } from "../../services/friendship.api";
 
 function Chat() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -87,6 +88,27 @@ function Chat() {
   };
 
   useEffect(() => {
+    const hideBlockedUsers = async () => {
+      const blockedUsers = await getBlockedUsersApi();
+      if (!blockedUsers) return;
+
+      setMessages((prevMessages) =>
+        prevMessages.map((message) => {
+          const isUserBlocked = blockedUsers.some(
+            (user) => message.userId === user.id
+          );
+          if (isUserBlocked) {
+            return {
+              ...message,
+              content: "Blocked message",
+            };
+          }
+          return message;
+        })
+      );
+    };
+
+    hideBlockedUsers();
     if (messagesRef.current) {
       messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
     }

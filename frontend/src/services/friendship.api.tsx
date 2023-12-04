@@ -9,6 +9,25 @@ const ERR_MSG = "An error occurred while processing your request.";
 /*                                   General                                  */
 /* -------------------------------------------------------------------------- */
 
+async function getBlockedUsersApi(): Promise<User[] | null> {
+  try {
+    const response = await fetch(`${API_URL}/block`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
 async function blockUserApi(userId: number): Promise<AuthRes> {
   try {
     const response = await fetch(`${API_URL}/block`, {
@@ -182,6 +201,7 @@ async function declineFriendRequestApi(userId: number): Promise<AuthRes> {
 }
 
 export {
+  getBlockedUsersApi,
   blockUserApi,
   unlockUserApi,
   getFriendsApi,

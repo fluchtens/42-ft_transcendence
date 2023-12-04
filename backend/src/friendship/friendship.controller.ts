@@ -26,6 +26,14 @@ export class FriendshipController {
   /*                                   General                                  */
   /* -------------------------------------------------------------------------- */
 
+  @Get('block')
+  @UseGuards(JwtAuthGuard)
+  async getBlockedUsers(@Req() req) {
+    const { id } = req.user;
+    const res = await this.friendshipService.getBlockedUsers(id);
+    return res;
+  }
+
   @Post('block')
   @UseGuards(JwtAuthGuard)
   async blockUser(@Req() req, @Body() body: UserIdDto) {
