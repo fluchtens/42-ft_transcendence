@@ -27,6 +27,19 @@ function Chat() {
   const socket = useChatSocket();
   const navigate = useNavigate();
 
+  const getMyRole = () => {
+    let role = undefined;
+    if (user) {
+      members.map((member: MemberUsers) => {
+        if (user.id === member.member.userId) {
+          role = member.member.role;
+          return;
+        }
+      });
+    }
+    return role;
+  };
+
   const toggleMembersMenu = () => {
     setMembersMenu(!membersMenu);
   };
@@ -65,7 +78,7 @@ function Chat() {
       },
       (result: string) => {
         if (result) {
-          notifyError("Fail to add Member");
+          notifyError(result);
         }
       }
     );
@@ -79,8 +92,6 @@ function Chat() {
         setMembers(channelData.members);
         setChannel(channelData);
       }
-      // setMessages(channelData.messages);
-      // setMembers(channelData.members);
       setLoading(false);
     });
 
@@ -166,6 +177,7 @@ function Chat() {
                     <li key={member.user.id}>
                       <UserElement
                         user={member.user}
+                        userRole={getMyRole()}
                         channel={channel}
                         role={member.member.role}
                         contextMenu={contextMenu === member.user.id}
