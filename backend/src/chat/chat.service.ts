@@ -784,6 +784,9 @@ export class ChatService {
         },
       });
     }
+    else {
+      throw new Error("The user are not banned");
+    }
   }
 
   async  isUserBanned(channelId: string, userId: number): Promise<boolean> {
@@ -800,4 +803,5 @@ export class ChatService {
     return channel.bannedUsers.includes(userId);
   }
 
+  // async muteUser()
 }
