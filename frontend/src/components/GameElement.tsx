@@ -187,7 +187,7 @@ function GamesTable(
 		);
 	}
 
-	const fields = new Map([ ['Game Name', 'name'], ['Host', 'host'] ]);
+	const fields = new Map([ ['Game Name', 'name'], ['Host', 'host'], ['Rating', 'rating'] ]);
 	function joinButton(enabled: boolean, onClick : () => undefined ) {
 		return (
 			enabled
@@ -310,16 +310,16 @@ function PongBoard({availWidth, availHeight}: {availWidth: number, availHeight: 
 	}
 
 	function handleKeyDown(ev: any) { // TODO some sort of 'KeyboardEvent' instead of 'any'
-		ev.preventDefault();
-		if (ev.repeat) return;
 		if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
+			ev.preventDefault();
+			if (ev.repeat) return;
 			pressed.current.add(ev.key);
 			socket.emit('playerMotion', dir());
 		}
 	}
 	function handleKeyUp(ev: any) {
-		ev.preventDefault();
 		if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
+			ev.preventDefault();
 			pressed.current.delete(ev.key); // refactor as one with _KeyUp?
 			socket.emit('playerMotion', dir());
 		}

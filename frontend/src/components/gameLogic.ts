@@ -1,17 +1,16 @@
-
 // Mathy utils
 // function qr(x: number, d:number) : [number, number] {
 // 	// assumes d > 0
 // 	// find q, r st. ( x = q * d + r ) with q positive int, and 0 <= r < d
 // 	let [q, r] = [x / d, x % d];
-// 	return [Math.floor(q), r >= 0 ? r : d + r]; 
+// 	return [Math.floor(q), r >= 0 ? r : d + r];
 // }
-// 
+//
 
 function clamp<Type>(min: Type, x: Type, max: Type) {
-	if (x < min) return min;
-	else if (x > max) return max;
-	else return x;
+  if (x < min) return min;
+  else if (x > max) return max;
+  else return x;
 }
 
 // function sign(x : number) {
@@ -19,32 +18,43 @@ function clamp<Type>(min: Type, x: Type, max: Type) {
 // }
 
 // Pong Logic
-export enum MotionType  { Up = -1, Still = 0, Down = 1 }; // -1, 1 convenient as mult factor for direction
-export const PONG = { // Parameters for PONG game
-	width: 300,
-	height: 200,
-	fps: 60,
-	get msFrame() { return 1000 / this.fps; },
-	margin: 20,
-	//
-	playerSpeed: 4, // pixels per frame
-	ballXSpeed: 2,
-	ballMaxYSpeed: 4, // determines angle when edge of paddle is hit
-	//
-	ballSize: 4,
-	get paddleWidth() { return this.ballSize },
-	paddleHeight: 20,
-	//
-	get player1X() { return this.margin; },
-	get player2X() {
-		return this.width - this.margin - this.paddleWidth;
-	},
-	//
-	winScore: 11,
-	//
-	startDelay: 3000,
-	newBallDelay: 500,
-}
+export enum MotionType {
+  Up = -1,
+  Still = 0,
+  Down = 1,
+} // -1, 1 convenient as mult factor for direction
+export const PONG = {
+  // Parameters for PONG game
+  width: 300,
+  height: 200,
+  fps: 60,
+  get msFrame() {
+    return 1000 / this.fps;
+  },
+  margin: 20,
+  //
+  playerSpeed: 4, // pixels per frame
+  ballXSpeed: 2,
+  ballMaxYSpeed: 4, // determines angle when edge of paddle is hit
+  //
+  ballSize: 4,
+  get paddleWidth() {
+    return this.ballSize;
+  },
+  paddleHeight: 20,
+  //
+  get player1X() {
+    return this.margin;
+  },
+  get player2X() {
+    return this.width - this.margin - this.paddleWidth;
+  },
+  //
+  winScore: 11,
+  //
+  startDelay: 3000,
+  newBallDelay: 500,
+};
 
 // export const PONG = { // Parameters for PONG game
 // 	width: 20,
@@ -69,229 +79,233 @@ export const PONG = { // Parameters for PONG game
 // }
 
 export class Player {
-	constructor(
-		public x: number,
-		public y: number,
-		public dy: number = 0,
-		public score: number = 0,
-	) {}
+  constructor(
+    public x: number,
+    public y: number,
+    public dy: number = 0,
+    public score: number = 0
+  ) {}
 }
 
 export class Ball {
-	constructor(
-		public x: number,
-		public y: number,
-		public dx: number = 0,
-		public dy: number = 0,
-	) {}
+  constructor(
+    public x: number,
+    public y: number,
+    public dx: number = 0,
+    public dy: number = 0
+  ) {}
 }
-	
-export enum WhichPlayer { P1 = -1, P2 = 1 } // -1, 1 convenient as mult factor for direction
+
+export enum WhichPlayer {
+  P1 = -1,
+  P2 = 1,
+} // -1, 1 convenient as mult factor for direction
 export class GameState {
-	public player1: Player;
-	public player2: Player;
-	private _ball: Ball;
-	private _ballEntryTime;
-	get ball(): Ball | null {
-		return (this._ballEntryTime >= this._lastUpdate)? null : this._ball;
-	}
+  public player1: Player;
+  public player2: Player;
+  private _ball: Ball;
+  private _ballEntryTime;
+  get ball(): Ball | null {
+    return this._ballEntryTime >= this._lastUpdate ? null : this._ball;
+  }
 
-	constructor(private _lastUpdate: number = Date.now()) {
-		let paddleY = Math.trunc((PONG.height - PONG.paddleHeight) / 2);
-	 	this.player1 = new Player(PONG.player1X, paddleY);
-	 	this.player2 = new Player(PONG.player2X, paddleY);
-		this.newBall(WhichPlayer.P1, this._lastUpdate, PONG.startDelay);
-	}
+  constructor(private _lastUpdate: number = Date.now()) {
+    let paddleY = Math.trunc((PONG.height - PONG.paddleHeight) / 2);
+    this.player1 = new Player(PONG.player1X, paddleY);
+    this.player2 = new Player(PONG.player2X, paddleY);
+    this.newBall(WhichPlayer.P1, this._lastUpdate, PONG.startDelay);
+  }
 
-	_updateHelper(frames: number) {
-		let handleWallCollisions = () => {
-			if (!this.ball) return;
-			while(true) {
-				if (this.ball.y < 0) {
-					this.ball.y *= -1;
-					this.ball.dy *= -1;
-				} else if (this.ball.y > PONG.height - PONG.ballSize) {
-					let dy = this.ball.y - (PONG.height - PONG.ballSize);
-					this.ball.y -= 2 * dy;
-					this.ball.dy *= -1;
-				} else {
-					break;
-				}
-			}
-		}
+  _updateHelper(frames: number) {
+    let handleWallCollisions = () => {
+      if (!this.ball) return;
+      while (true) {
+        if (this.ball.y < 0) {
+          this.ball.y *= -1;
+          this.ball.dy *= -1;
+        } else if (this.ball.y > PONG.height - PONG.ballSize) {
+          let dy = this.ball.y - (PONG.height - PONG.ballSize);
+          this.ball.y -= 2 * dy;
+          this.ball.dy *= -1;
+        } else {
+          break;
+        }
+      }
+    };
 
-		if (frames === 0) return;
+    if (frames === 0) return;
 
-		this.player1.y += frames * this.player1.dy;
-		this.player1.y = clamp(0, this.player1.y, PONG.height - PONG.paddleHeight);
-		this.player2.y += frames * this.player2.dy;
-		this.player2.y = clamp(0, this.player2.y, PONG.height - PONG.paddleHeight);
+    this.player1.y += frames * this.player1.dy;
+    this.player1.y = clamp(0, this.player1.y, PONG.height - PONG.paddleHeight);
+    this.player2.y += frames * this.player2.dy;
+    this.player2.y = clamp(0, this.player2.y, PONG.height - PONG.paddleHeight);
 
-		if (this.ball) {
-			this.ball.x += frames * this.ball.dx;
-			this.ball.y += frames * this.ball.dy;
-			handleWallCollisions();
-		}
+    if (this.ball) {
+      this.ball.x += frames * this.ball.dx;
+      this.ball.y += frames * this.ball.dy;
+      handleWallCollisions();
+    }
 
-		return this;
-	}
+    return this;
+  }
 
-	update( time = Date.now()) {
-		let totalFrames = Math.floor( (time - this._lastUpdate) / PONG.msFrame );
-		// maybe throw if negative
-		this._lastUpdate += totalFrames * PONG.msFrame;
-		let framesToBall = Math.ceil( (this._ballEntryTime - this._lastUpdate) / PONG.msFrame);
+  update(time = Date.now()) {
+    let totalFrames = Math.floor((time - this._lastUpdate) / PONG.msFrame);
+    // maybe throw if negative
+    this._lastUpdate += totalFrames * PONG.msFrame;
+    let framesToBall = Math.ceil(
+      (this._ballEntryTime - this._lastUpdate) / PONG.msFrame
+    );
 
-		if (0 < framesToBall && framesToBall <= totalFrames) {
-			this._updateHelper(framesToBall); 
-			totalFrames -= framesToBall;
-		}
+    if (0 < framesToBall && framesToBall <= totalFrames) {
+      this._updateHelper(framesToBall);
+      totalFrames -= framesToBall;
+    }
 
-		let handlePaddleCollision = () => {
-			if (!this.ball) return;
+    let handlePaddleCollision = () => {
+      if (!this.ball) return;
 
-			let which = (this.ball.dx < 0) ? WhichPlayer.P1 : WhichPlayer.P2;
-			if ((this.player(which).y - PONG.ballSize < this.ball.y)
-					&& (this.ball.y < (this.player(which).y + PONG.paddleHeight)) ) 
-			{
-				this.ball.dx *= -1; 
+      let which = this.ball.dx < 0 ? WhichPlayer.P1 : WhichPlayer.P2;
+      if (
+        this.player(which).y - PONG.ballSize < this.ball.y &&
+        this.ball.y < this.player(which).y + PONG.paddleHeight
+      ) {
+        this.ball.dx *= -1;
 
-				let dx = 0;
-				if (which === WhichPlayer.P1) 
-					dx = this.ball.x - (this.player1.x + PONG.paddleWidth);
-				else 
-					dx = this.ball.x - (this.player2.x - PONG.ballSize);
-				this.ball.x -= 2 * dx;
+        let dx = 0;
+        if (which === WhichPlayer.P1)
+          dx = this.ball.x - (this.player1.x + PONG.paddleWidth);
+        else dx = this.ball.x - (this.player2.x - PONG.ballSize);
+        this.ball.x -= 2 * dx;
 
-				let newDyRatio = 
-					(this.ball.y - (this.player(which).y - PONG.ballSize + 1)) /
-					(PONG.paddleHeight - 1 + PONG.ballSize - 1);
-				newDyRatio = 2.01 * (newDyRatio - 0.5); // [0, 1] -> [-1, 1]
-				this.ball.dy = Math.trunc(PONG.ballMaxYSpeed * newDyRatio);
-			}
-		}
+        let newDyRatio =
+          (this.ball.y - (this.player(which).y - PONG.ballSize + 1)) /
+          (PONG.paddleHeight - 1 + PONG.ballSize - 1);
+        newDyRatio = 2.01 * (newDyRatio - 0.5); // [0, 1] -> [-1, 1]
+        this.ball.dy = Math.trunc(PONG.ballMaxYSpeed * newDyRatio);
+      }
+    };
 
-		if (this.ball) {
-			let ballPassed = false; 
-			while (!ballPassed) {
-				ballPassed = ballPassed || this.ball.x <= this.player1.x - PONG.ballSize;
-				ballPassed = ballPassed || this.ball.x >= this.player2.x + PONG.paddleWidth;
-				if (ballPassed) break;
+    if (this.ball) {
+      let ballPassed = false;
+      while (!ballPassed) {
+        ballPassed =
+          ballPassed || this.ball.x <= this.player1.x - PONG.ballSize;
+        ballPassed =
+          ballPassed || this.ball.x >= this.player2.x + PONG.paddleWidth;
+        if (ballPassed) break;
 
-				let distXToPaddle = 0;
-				if (this.ball.dx < 0) // going left
-					distXToPaddle = (this.player1.x + PONG.paddleWidth - 1) - this.ball.x;
-				else
-					distXToPaddle = (this.player2.x) - (this.ball.x + PONG.ballSize - 1);
-				let framesToCross = Math.ceil(distXToPaddle / this.ball.dx)
-				framesToCross = Math.max(1, framesToCross);
-				if (framesToCross > totalFrames)
-					break;
+        let distXToPaddle = 0;
+        if (this.ball.dx < 0)
+          // going left
+          distXToPaddle = this.player1.x + PONG.paddleWidth - 1 - this.ball.x;
+        else distXToPaddle = this.player2.x - (this.ball.x + PONG.ballSize - 1);
+        let framesToCross = Math.ceil(distXToPaddle / this.ball.dx);
+        framesToCross = Math.max(1, framesToCross);
+        if (framesToCross > totalFrames) break;
 
-				this._updateHelper(framesToCross);
-				totalFrames -= framesToCross;
-				handlePaddleCollision();
+        this._updateHelper(framesToCross);
+        totalFrames -= framesToCross;
+        handlePaddleCollision();
+      }
+    }
+    this._updateHelper(totalFrames);
 
-			}
-		}
-		this._updateHelper(totalFrames);
+    return this;
+  }
 
-		return this;
-	}
+  player(which: WhichPlayer): Player {
+    return which === WhichPlayer.P1 ? this.player1 : this.player2;
+  }
 
-	player(which: WhichPlayer): Player {
-		return (which === WhichPlayer.P1) ? this.player1 : this.player2;
-	}
+  packet(
+    timestamp: number | null = null,
+    fields = ["player1", "player2", "_ball", "_ballEntryTime"]
+  ): { timestamp: number } {
+    if (timestamp) this.update(timestamp);
+    timestamp = timestamp || this._lastUpdate;
 
-	packet(
-		timestamp: number | null = null,
-		 	fields = ['player1', 'player2', '_ball', '_ballEntryTime']
-	) : {timestamp: number} 
-	{
-		if (timestamp)
-			this.update(timestamp);
-		timestamp = timestamp || this._lastUpdate;
+    let packet: any = { timestamp };
+    for (let key of fields) {
+      if (key in this)
+        // check types make sense ('as any')
+        packet[key] = (this as any)[key];
+    }
+    return packet;
+  }
 
-		let packet: any = {timestamp};
-		for (let key of fields) {
-				if (key in this) // check types make sense ('as any')
-					packet[key] = (this as any)[key];
-		}
-		return packet;
-	}
+  pushPacket(packet: { timestamp: number }) {
+    this._lastUpdate = packet.timestamp;
+    const allowedFields = ["player1", "player2", "_ball", "_ballEntryTime"];
+    for (let key of allowedFields) {
+      if (key in packet) {
+        (this as any)[key] = (packet as any)[key];
+      }
+    }
+    this.update();
+  }
 
-	pushPacket(packet: {timestamp: number}) {
-		this._lastUpdate = packet.timestamp;
-		const allowedFields = ['player1', 'player2', '_ball', '_ballEntryTime'];
-		for (let key of allowedFields) {
-			if (key in packet) {
-				(this as any)[key] = (packet as any)[key];
-			}
-		}
-		this.update();
-	}
+  newBall(
+    to: WhichPlayer,
+    when: number | null = null,
+    delay = PONG.newBallDelay
+  ) {
+    if (when) this.update(when);
 
-	newBall(to: WhichPlayer, when: number | null = null, delay = PONG.newBallDelay) {
-		if (when)
-			this.update(when);
+    this._ballEntryTime = this._lastUpdate + delay;
 
-		this._ballEntryTime = this._lastUpdate + delay;
+    this._ball = new Ball(0, 0);
+    this._ball.x = Math.floor((PONG.width - PONG.ballSize) / 2);
+    this._ball.y = Math.floor(Math.random() * (PONG.height - PONG.ballSize));
+    this._ball.dx = Number(to) * PONG.ballXSpeed;
+    this._ball.dy = Math.ceil(PONG.ballMaxYSpeed / 2);
+    if (Math.random() < 0.5) this._ball.dy *= -1;
+  }
 
-		this._ball = new Ball(0, 0);
-		this._ball.x = Math.floor((PONG.width - PONG.ballSize) / 2);
-		this._ball.y = Math.floor(Math.random() * (PONG.height - PONG.ballSize));
-		this._ball.dx = Number(to) * PONG.ballXSpeed;
-		this._ball.dy = Math.ceil(PONG.ballMaxYSpeed / 2);
-		if (Math.random() < 0.5) this._ball.dy *= -1;
-	}
+  updateScores(when: number | null = null) {
+    // TODO bad name for this function...
+    // more like "if scores should change do so and create new ball"
+    if (!this.ball) return { finish: false };
+    if (when) this.update(when);
 
-	updateScores(when: number | null = null) {
-		// TODO bad name for this function...
-		// more like "if scores should change do so and create new ball"
-		if (!this.ball) return {finish: false};
-		if (when)
-			this.update(when);
+    let scorer: WhichPlayer | null = null;
 
-		let scorer: WhichPlayer | null = null;
+    if (this.ball.x + PONG.ballSize - 1 < 0) {
+      scorer = WhichPlayer.P2;
+    } else if (this.ball.x >= PONG.width) {
+      scorer = WhichPlayer.P1;
+    }
 
-		if (this.ball.x + PONG.ballSize - 1 < 0) {
-			scorer = WhichPlayer.P2;
-		} else if ( this.ball.x >= PONG.width ) {
-			scorer = WhichPlayer.P1;
-		}
+    if (scorer) {
+      if (++this.player(scorer).score >= PONG.winScore)
+        return { finish: true, winner: scorer };
+      // 			this.newBall( -1 * scorer );
+      this.newBall(scorer); // TESTING
+    }
+    return { finish: false };
+  }
 
-		if (scorer) {
-			if (++this.player(scorer).score >= PONG.winScore)
-				return { finish: true, winner: scorer };
-// 			this.newBall( -1 * scorer );
-			this.newBall( scorer ); // TESTING
-		}
-		return {finish: false};
-	}
+  minTimeToPoint(from = Date.now()) {
+    if (!this.ball) return -1;
+    let offset = 50;
+    let time = this._lastUpdate;
+    if (this.ball.dx < 0)
+      time += ((-PONG.ballSize - this.ball.x) / this.ball.dx) * PONG.msFrame;
+    else time += ((PONG.width - this.ball.x) / this.ball.dx) * PONG.msFrame;
+    return time + offset - from;
+  }
 
-	minTimeToPoint(from = Date.now()) {
-		if (!this.ball) return -1;
-		let offset = 50;
-		let time = this._lastUpdate;
-		if (this.ball.dx < 0) 
-			time += (-PONG.ballSize - this.ball.x) / this.ball.dx * PONG.msFrame;
-		else 
-			time += (PONG.width - this.ball.x) / this.ball.dx * PONG.msFrame;
-		return time + offset - from;
-	}
+  setMotion(who: WhichPlayer, mo: MotionType, when: number | null = null) {
+    if (when) this.update(when);
+    this.player(who).dy = PONG.playerSpeed * Number(mo);
+  }
 
-	setMotion(who: WhichPlayer, mo: MotionType, when: number | null = null) {
-		if (when)
-			this.update(when);
-		this.player(who).dy = PONG.playerSpeed * Number(mo);
-	}
-	
-	timeToBall(from = Date.now()) {
-		return this._ballEntryTime - from;
-	}
+  timeToBall(from = Date.now()) {
+    return this._ballEntryTime - from;
+  }
 }
 
-// 	update(time = Date.now()) { 
+// 	update(time = Date.now()) {
 // 		function mirrorCut(x: number, cut: number, sign: number) : [boolean, number] {
 // 			if ( sign * x < sign * cut)
 // 				return [true, 2 * cut - x];
@@ -348,27 +362,26 @@ export class GameState {
 // 		// Make so positions etc, happen as whole number of pixels:
 // 		let elapsed = time - this._lastUpdate;
 // 		let [totalFrames, rem] = qr(elapsed, 1000 / PONG.fps); // get number of frames elapsed
-// 		this._lastUpdate += elapsed - rem; // pretend we're on 
+// 		this._lastUpdate += elapsed - rem; // pretend we're on
 // 																			 // the exact timestamp of the previous frame
 // 		//
-// 		const maxIter = 20; 
-// 		for (let i = 0; i < maxIter; ++i) { 
+// 		const maxIter = 20;
+// 		for (let i = 0; i < maxIter; ++i) {
 // 			if (!this.ball) break;
-// 			if ( !( PONG.player1X + PONG.paddleWidth <= this.ball.x 
+// 			if ( !( PONG.player1X + PONG.paddleWidth <= this.ball.x
 // 						 && this.ball.x <= PONG.player2X - PONG.ballSize))
 // 			{ break; } // already passed the goal
-// 
+//
 // 			let dist = (this.ball.dx < 0)? // signed distance to "goal"
 // 					(this.ball.x - (PONG.player1X + PONG.paddleWidth)) :
 // 					(this.ball.x - (PONG.player2X - PONG.ballSize));
-// 			let crossTime = Math.ceil( -dist / this.ball.dx ); // time (in frames) when the ball 
+// 			let crossTime = Math.ceil( -dist / this.ball.dx ); // time (in frames) when the ball
 // 																											// will cross the goal/hit the paddle
 // 			if (crossTime >= totalFrames)
 // 				break;
-// 
+//
 // 			updateHelper(crossTime);
 // 			handlePaddleCollision();
 // 		}
 // 		updateHelper(totalFrames);
 // 	}
-

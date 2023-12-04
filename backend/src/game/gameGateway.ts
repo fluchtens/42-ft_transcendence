@@ -17,6 +17,7 @@ import { UserService } from "src/user/user.service";
 
 // TODO question
 // UserStatus should be set only by the service and not the controller
+// I think that's done
 
 @WebSocketGateway({
 	namespace: '/gamesocket',
@@ -26,8 +27,6 @@ import { UserService } from "src/user/user.service";
 	}
 })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
-
-// 	gameService = new GameService(); // TODO use nest module system
 
 	constructor(
 		private readonly authService : AuthService,
@@ -50,6 +49,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			},
 			onFinish: ({gameRoom, game, winner, loser}) => {
 				(async () => {
+					// TODO handle db errors? users don't exist etc
 					let winnerRatingBefore = await this._rating(winner.id);
 					let loserRatingBefore = await this._rating(loser.id);
 
@@ -147,9 +147,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		for (let [key, {host}] of [...this.gameService.invites]) {
 			try {
 				let user = await this.userService.getUserById(host.id);
-				gamesInfo.push({name: key, host: user.username});
+				let rating = await this._rating(host.id);
+				gamesInfo.push({name: key, host: user.username, rating});
 			} catch {
-				gamesInfo.push( {name: key, host: '[unkown user]'});
+				gamesInfo.push( {name: key, host: '[unkown user]', rating: -1});
 			}
 		}
 		return gamesInfo;
@@ -164,7 +165,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		});
 	}
 
-	_confirmStatus(sock, accepted, errmsg = "Forbidden action") : UserData {
+	_confirmStatus(sock, accepted, errmsg = "Forbidden action (try to refresh)") : UserData {
 		let userData = this.gameService.getUserData(sock.id);
 		if ( !userData ) {
 			sock.emit('gameSocketError', "you have no active session.");
@@ -247,6 +248,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 		(async () => {
 			let rating = await this._rating(userData.id);
+			// TODO handle error db miss
 			this.server.to(userData.userRoom).emit('statusChange', UserStatus.Waiting);
 			this.gameService.joinQueue(userData.id, rating);
 			//console.log('did join');
@@ -265,9 +267,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('playerMotion')
 	playerMotion(sock: Socket, mo: gm.MotionType) {
-		//console.log('got motion', mo);
-		let userData = this._confirmStatus(sock, [UserStatus.Playing]);
-		if (!userData) return null;
+		// don't use confirm status to silently refuse and not send error
+		let userData = this.gameService.getUserData(sock.id);
+		if ( !userData ) return;
+		if ( userData.status !== UserStatus.Playing ) return;
 
 		let {player: whichPlayer, room, state: game} = this.gameService.getGameData(userData.id);
 		let now = Date.now();

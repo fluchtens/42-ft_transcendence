@@ -28,8 +28,6 @@ export class UserData {
     this._status = val;
   }
 
-  public rating = 0; // TODO get from db or something
-
   private _gameRoom: string | null = null;
   get gameRoom() {
     return this._gameRoom;
@@ -201,6 +199,7 @@ export class GameService {
     this.invites.set('test1', { host: new UserData(19) });
     this.invites.set('test2', { host: new UserData(42) });
 
+    this.externalCreateGame(1, 2); // alice and bob always play :P
     // 		gFriendshipGateway = this.friendshipGateway;
     // 		//
     // 		let alice = new UserData(1);
@@ -306,6 +305,7 @@ export class GameService {
 
   private genId() {
     // TODO something less hacky needed??
+    // Do we still need it at all now that we're not using it as a key for clients
     let id;
     do {
       id = 'game_' + String(Math.random()).slice(2);
@@ -385,6 +385,25 @@ export class GameService {
     resetTimer();
 
     return { gameRoom: gameId, game };
+  }
+
+  externalCreateGame(userId1, userId2) {
+    for (let userId of [userId1, userId2]) {
+      if (!this.users.get(userId)) {
+        this.users.set(userId, new UserData(userId));
+      }
+    }
+    this.launchGame(userId1, userId2);
+    setTimeout(() => {
+      for (let userId of [userId1, userId2]) {
+        if (
+          this.users.has(userId) &&
+          this.users.get(userId).sockets.size === 0
+        ) {
+          this.pendingDelete.add(userId);
+        }
+      }
+    }, 10000);
   }
 
   lobbyJoinGame(
