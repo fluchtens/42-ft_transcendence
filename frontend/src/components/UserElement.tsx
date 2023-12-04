@@ -6,6 +6,7 @@ import { Channel } from "../types/chat.interface";
 
 interface UserElementProps {
   user: User;
+  userRole?: string;
   channel?: Channel;
   role?: string;
   contextMenu: boolean;
@@ -15,6 +16,7 @@ interface UserElementProps {
 
 const UserElement = ({
   user,
+  userRole,
   channel,
   role,
   contextMenu,
@@ -24,6 +26,8 @@ const UserElement = ({
   const isInGame = user.status === "In game";
   const isOnline = user.status === "Online";
   const isOffline = user.status === "Offline";
+
+  console.log(userRole);
 
   const renderRole = (role: string) => {
     switch (role) {
@@ -83,6 +87,7 @@ const UserElement = ({
       {contextMenu && (
         <UserContextMenu
           user={user}
+          userRole={userRole}
           type={contextMenuType}
           channel={channel}
           cb={toggleContextMenu}

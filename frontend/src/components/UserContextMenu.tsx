@@ -16,12 +16,19 @@ export enum ContextMenuType {
 
 interface UserContextMenuProps {
   user: User;
+  userRole?: string;
   type: ContextMenuType;
   channel?: Channel;
   cb: () => void;
 }
 
-const UserContextMenu = ({ user, type, channel, cb }: UserContextMenuProps) => {
+const UserContextMenu = ({
+  user,
+  userRole,
+  type,
+  channel,
+  cb,
+}: UserContextMenuProps) => {
   const [muteModal, setMuteModal] = useState<boolean>(false);
   const navigate = useNavigate();
   const chatSocket = useChatSocket();
@@ -133,16 +140,27 @@ const UserContextMenu = ({ user, type, channel, cb }: UserContextMenuProps) => {
       case ContextMenuType.REQUEST:
         return null;
       case ContextMenuType.MEMBER:
-        return (
-          <>
-            <button onClick={promoteOwner}>Promote to owner rank</button>
-            <button onClick={promoteAdmin}>Promote to admin rank</button>
-            <button onClick={demoteUser}>Demote to user rank</button>
-            <button onClick={kickUser}>Kick user</button>
-            <button onClick={kickUser}>Ban user</button>
-            <button onClick={openMuteModalModal}>Mute user</button>
-          </>
-        );
+        if (userRole && userRole === "OWNER") {
+          return (
+            <>
+              <button onClick={promoteOwner}>Promote to owner rank</button>
+              <button onClick={promoteAdmin}>Promote to admin rank</button>
+              <button onClick={demoteUser}>Demote to user rank</button>
+              <button onClick={kickUser}>Kick user</button>
+              <button onClick={kickUser}>Ban user</button>
+              <button onClick={openMuteModalModal}>Mute user</button>
+            </>
+          );
+        } else if (userRole && userRole === "ADMIN") {
+          return (
+            <>
+              <button onClick={kickUser}>Kick user</button>
+              <button onClick={kickUser}>Ban user</button>
+              <button onClick={openMuteModalModal}>Mute user</button>
+            </>
+          );
+        }
+        return null;
       default:
         return null;
     }
