@@ -133,7 +133,7 @@ const EditChannel = ({
         if (!result) {
           notifySuccess("Channel successfully updated");
         } else {
-          notifyError("Failed to");
+          notifyError("Failed to change channel visibility");
         }
       }
     );

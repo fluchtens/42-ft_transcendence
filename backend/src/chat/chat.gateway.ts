@@ -575,7 +575,7 @@ export class ChatGateway implements OnModuleInit {
           userId,
           member.id,
         );
-        const isBanned = await this.chatService.isUserBanned(channelId, userId);
+        const isBanned = await this.chatService.isUserBanned(channelId, member.id);
         if (isBanned) {
           throw new Error('this user is banned');
         }
@@ -683,7 +683,7 @@ export class ChatGateway implements OnModuleInit {
                 user: user,
               });
             this.server.to(String(userId)).emit('resetChannel', channel.id);
-            return true;
+            return "";
           } else {
             throw new Error('error when join the channel');
           }
@@ -692,11 +692,11 @@ export class ChatGateway implements OnModuleInit {
         }
       } catch (error) {
         console.log(error.message);
-        return false;
+        return error.message;
       }
     } else {
       console.log('User ID not available.572');
-      return false;
+      return "User Id not avalaible";
     }
   }
 
@@ -1022,6 +1022,7 @@ export class ChatGateway implements OnModuleInit {
       try {
         const { channelId, userIdToBan } = banUserDto;
         if (channelId && userIdToBan) {
+          console.log('banuser ', userId, userIdToBan)
           const banUser = await this.chatService.banUser(
             userId,
             channelId,

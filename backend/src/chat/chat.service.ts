@@ -751,12 +751,12 @@ export class ChatService {
         const channel = await this.prismaService.channel.findUnique({
           where: { id: channelId },
         });      
-        if (!channel.bannedUsers.includes(userId)) {
+        if (!channel.bannedUsers.includes(userIdKick)) {
           await this.prismaService.channel.update({
             where: { id: channelId },
             data: {
               bannedUsers: {
-                push: userId,
+                push: userIdKick,
               },
             },
           });
