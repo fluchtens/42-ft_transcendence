@@ -61,8 +61,8 @@ function Chat() {
       channelId: id,
       message: newMessage,
     }, (result: string) => {
-      if (result === "sendMessage error You are muted!") {
-        notifyError("sendMessage error You are muted!");
+      if (result === "You are muted!") {
+        notifyError("You are muted!");
       }
     });
 

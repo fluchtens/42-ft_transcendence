@@ -453,7 +453,6 @@ export class ChatService {
       }
       throw new Error('no channelData or userData');
     } catch (error) {
-      console.error('error when add message', error);
       throw error;
     }
   }
