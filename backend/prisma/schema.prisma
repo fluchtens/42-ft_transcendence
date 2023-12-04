@@ -9,25 +9,38 @@ datasource db {
 }
 
 model User {
-  id              Int          @id @default(autoincrement())
-  username        String       @unique @db.VarChar(255)
-  fortyTwoId      Int?         @unique
-  avatar          String?      @db.VarChar(255)
-  password        String?      @db.VarChar(255)
-  twoFa           Boolean      @default(false)
-  twoFaSecret     String?      @db.VarChar(255)
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-  rating          Int          @default(1000)
-  addedFriends    Friendship[] @relation("sender")
-  acceptedFriends Friendship[] @relation("receiver")
-  DirectMessagesSender  DirectMessage[] @relation("Sender")
-  DirectMessagesReceiver  DirectMessage[] @relation("Receiver")
-  members         Member[]
-  channels        Channel[]
-  messages        Message[]
-  wonMatches      GameRecord[] @relation("won")
-  lostMatches     GameRecord[] @relation("lost")
+  id                     Int              @id @default(autoincrement())
+  username               String           @unique @db.VarChar(255)
+  fortyTwoId             Int?             @unique
+  avatar                 String?          @db.VarChar(255)
+  password               String?          @db.VarChar(255)
+  twoFa                  Boolean          @default(false)
+  twoFaSecret            String?          @db.VarChar(255)
+  rating                 Int              @default(1000)
+  wonMatches             GameRecord[]     @relation("won")
+  lostMatches            GameRecord[]     @relation("lost")
+  addedFriends           Friendship[]     @relation("sender")
+  acceptedFriends        Friendship[]     @relation("receiver")
+  privateMessageSender   PrivateMessage[] @relation("Sender")
+  privateMessageReceiver PrivateMessage[] @relation("Receiver")
+  channels               Channel[]
+  messages               Message[]
+  members                Member[]
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+}
+
+model GameRecord {
+  id                 Int      @id @default(autoincrement())
+  finished           DateTime @default(now())
+  winner             User     @relation(name: "won", fields: [winnerId], references: [id])
+  winnerId           Int
+  winnerRatingBefore Int
+  winnerRatingAfter  Int
+  loser              User     @relation(name: "lost", fields: [loserId], references: [id])
+  loserId            Int
+  loserRatingBefore  Int
+  loserRatingAfter   Int
 }
 
 model Friendship {
@@ -50,39 +63,32 @@ enum FriendshipStatus {
 }
 
 model Channel {
-  id         String  @id @default(uuid())
-  name       String
-  inviteCode String  @db.Text()
-  avatar     String? @db.VarChar(255)
-  password   String? @db.VarChar(255)
-  public     Boolean @default(false)
-
-  userId   Int
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  messages Message[]
-  members  Member[]
-
-  bannedUsers   Int[] @default([])
-  silencedUsers Int[] @default([])
-
-  CreatedAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String    @id @default(uuid())
+  name          String
+  inviteCode    String    @db.Text()
+  password      String?   @db.VarChar(255)
+  public        Boolean   @default(false)
+  userId        Int
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages      Message[]
+  members       Member[]
+  bannedUsers   Int[]     @default([])
+  silencedUsers Int[]     @default([])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   @@index([userId])
 }
 
 model Message {
-  id      String  @id @default(uuid())
-  content String  @db.Text()
-  edited  Boolean @default(false)
-
-  userId Int
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  id        String   @id @default(uuid())
+  content   String   @db.Text()
+  edited    Boolean  @default(false)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   channelId String
-  channels  Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
-
-  CreatedAt DateTime @default(now())
+  channels  Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([userId])
@@ -90,18 +96,15 @@ model Message {
 }
 
 model Member {
-  id   String     @id @default(uuid())
-  role MemberRole @default(GUEST)
-
-  userId Int
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  channelId String
-  channel   Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
-
-  silencedTime DateTime @default(now())
-  CreatedAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id           String     @id @default(uuid())
+  role         MemberRole @default(GUEST)
+  userId       Int
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  channelId    String
+  channel      Channel    @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  silencedTime DateTime   @default(now())
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 
   @@index([userId])
   @@index([channelId])
@@ -113,34 +116,16 @@ enum MemberRole {
   GUEST
 }
 
-model GameRecord {
-  id       Int      @id @default(autoincrement())
-  finished DateTime @default(now())
-
-  winner             User @relation(name: "won", fields: [winnerId], references: [id])
-  winnerId           Int
-  winnerRatingBefore Int
-  winnerRatingAfter  Int
-
-  loser             User @relation(name: "lost", fields: [loserId], references: [id])
-  loserId           Int
-  loserRatingBefore Int
-  loserRatingAfter  Int
-}
-
-model DirectMessage {
-  id        String  @id @default(uuid())
-  content   String  @db.Text()
-  edited    Boolean @default(false)
-
-  senderId  Int
-  sender    User    @relation(name: "Sender", fields: [senderId], references: [id])
-
+model PrivateMessage {
+  id         String   @id @default(uuid())
+  content    String   @db.Text()
+  edited     Boolean  @default(false)
+  senderId   Int
+  sender     User     @relation(name: "Sender", fields: [senderId], references: [id])
   receiverId Int
-  receiver   User   @relation(name: "Receiver", fields: [receiverId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  receiver   User     @relation(name: "Receiver", fields: [receiverId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@index([senderId])
   @@index([receiverId])
