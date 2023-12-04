@@ -95,11 +95,16 @@ const ChatHeader = ({
               <button onClick={openEditMenuModal}>
                 <IoSettings className={styles.icon} />
               </button>
-              <button onClick={openUnbanUserModal}>
-                <FaBan className={styles.icon} />
-              </button>
             </>
           )}
+          {role === "OWNER" ||
+            (role === "ADMIN" && (
+              <>
+                <button onClick={openUnbanUserModal}>
+                  <FaBan className={styles.icon} />
+                </button>
+              </>
+            ))}
           <button onClick={leaveChannel}>
             <FaDoorOpen className={styles.icon} />
           </button>
