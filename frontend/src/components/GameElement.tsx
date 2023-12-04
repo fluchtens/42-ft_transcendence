@@ -24,9 +24,8 @@ export default function GameElement() {
       setErrmsg(`Error: ${errmsg}`);
     });
 
-    // return () => {
-    //   sockRef.current.disconnect();
-    // };
+//     return () => {
+//     };
   }, []);
 
   return (
@@ -80,6 +79,7 @@ function GameElementContent() {
     });
     //cleanup
     return () => {
+			socket.emit("cancel", {silent : true});
       socket.off("statusChange");
       socket.off("winLose");
     };
@@ -93,10 +93,9 @@ function GameElementContent() {
           onClick={() => {
             setWinLose(WinLose.NA);
           }}
-        >
-          {" "}
-          OK{" "}
-        </button>
+        > 
+					{' OK '}
+			 	</button>
       </p>
     );
   }
@@ -107,7 +106,7 @@ function GameElementContent() {
   } else {
     switch (status) {
       case undefined:
-        content = <p> you are not logged in </p>;
+        content = <p>cannot reach server</p>;
         break;
       case UserStatus.Playing:
         content = <PongBoard availWidth={703} availHeight={501} />; // TODO get width dynamically
@@ -181,6 +180,7 @@ function GamesLobby({ waiting = false }) {
   return (
     <>
       <h1> Games Lobby </h1>
+			<hr/>
       {waiting ? (
         <>
           <p>Waiting for opponent... </p>
@@ -196,6 +196,10 @@ function GamesLobby({ waiting = false }) {
       ) : (
         <></>
       )}
+      {waiting ? <></> : <JoinQueue />}
+			<hr/>
+      {waiting ? <></> : <CreateGame />}
+			<hr/>
       <GamesTable
         gamesInfo={gamesInfo}
         onJoin={(gameName) => {
@@ -203,8 +207,6 @@ function GamesLobby({ waiting = false }) {
         }}
         joinEnable={!waiting}
       />
-      {waiting ? <></> : <CreateGame />}
-      {waiting ? <></> : <JoinQueue />}
     </>
   );
 }

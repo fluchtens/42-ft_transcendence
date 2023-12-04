@@ -172,7 +172,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			return null;
 		}
 		if ( !(new Set(accepted).has(userData.status)) ) {
-			sock.emit('gameSocketError', errmsg);
+			if (errmsg !== null)
+				sock.emit('gameSocketError', errmsg);
 			return null;
 		}
 		return userData;
@@ -215,8 +216,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	@SubscribeMessage('cancel')
-	cancel(sock: Socket) {
-		let userData = this._confirmStatus(sock, [UserStatus.Waiting]);
+	cancel(sock: Socket, {silent} : {silent: boolean} = {silent: false}) {
+		let userData = null;
+		if (silent)
+			userData = this._confirmStatus(sock, [UserStatus.Waiting], null);
+		else 
+			userData = this._confirmStatus(sock, [UserStatus.Waiting]);
+
 		if (!userData) return null;
 
 		if (this.gameService.lobbyCancelInvite(userData.id))
@@ -267,10 +273,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	@SubscribeMessage('playerMotion')
 	playerMotion(sock: Socket, mo: gm.MotionType) {
-		// don't use confirm status to silently refuse and not send error
-		let userData = this.gameService.getUserData(sock.id);
+		let userData = this._confirmStatus(sock, [UserStatus.Playing], null);
 		if ( !userData ) return;
-		if ( userData.status !== UserStatus.Playing ) return;
 
 		let {player: whichPlayer, room, state: game} = this.gameService.getGameData(userData.id);
 		let now = Date.now();
