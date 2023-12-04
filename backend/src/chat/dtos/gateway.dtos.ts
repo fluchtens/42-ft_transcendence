@@ -67,6 +67,7 @@ export class UnbanUserDto {
 export class MuteUserDto {
   channelId: string;
   userIdToMute: number;
+  timeToMute: number
 }
 
 export class Messages {

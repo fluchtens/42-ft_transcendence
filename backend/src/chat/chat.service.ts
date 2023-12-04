@@ -803,5 +803,18 @@ export class ChatService {
     return channel.bannedUsers.includes(userId);
   }
 
-  // async muteUser()
+  async muteMember(channelId: string, userId: number, silencedTime: Date): Promise<void> {
+    const member = await this.findMemberInChannel(channelId, userId);
+    if (member) {
+      await this.prismaService.member.update({
+        where: {id: member.id},
+        data: {
+          silencedTime: silencedTime,
+        }
+      });
+    }
+    else {
+      throw new Error("member not found")
+    }
+  }
 }

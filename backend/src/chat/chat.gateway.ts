@@ -398,6 +398,7 @@ export class ChatGateway implements OnModuleInit {
         }
       } catch (error) {
         console.error('sendMessage error', error.message);
+        return error.message;
       }
     }
     return;
@@ -1124,20 +1125,26 @@ export class ChatGateway implements OnModuleInit {
   @SubscribeMessage('muteUser')
   async handleMuteUser(@ConnectedSocket() client: Socket, @MessageBody() muteUserDto: MuteUserDto){
     const userId = Number(client.handshake.auth.userId);
+    const { addMinutes } = require('date-fns');
     if (userId) {
       try {
-        const { channelId, userIdToMute } = muteUserDto;
-        if (channelId && userIdToMute) {
+        const { channelId, userIdToMute, timeToMute } = muteUserDto;
+        if (channelId && userIdToMute && timeToMute > 0) {
           const userRole = await this.chatService.findMemberRoleInChannel(
             channelId,
             userId,
           );
-          if (userRole === 'ADMIN' || userRole === 'OWNER') {
-            await this.chatService.unbanUser(channelId, userIdToMute);
+          const userRoleToMute = await this.chatService.findMemberRoleInChannel(channelId, userIdToMute);
+          if (userRoleToMute === "ADMIN" && userRole === "ADMIN") {
+            throw new Error('Permission denied');
+          }
+          if (userRole === 'ADMIN' || userRole === 'OWNER' && userRoleToMute !== 'OWNER') {
+            const muteTime = addMinutes(new Date(), timeToMute);
+            await this.chatService.muteMember(channelId, userIdToMute, muteTime);
             const userMember = await this.getOrAddUserData(Number(userIdToMute));
             const userData = await this.getOrAddUserData(userId);
             const message =
-              userData.username + ' have muted ' + userMember.username;
+              userData.username + ' have muted ' + userMember.username + " for " + timeToMute + " minutes";
             const messageSend = await this.chatService.addMessage(
               userId,
               channelId,

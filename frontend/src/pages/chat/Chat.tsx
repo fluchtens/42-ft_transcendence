@@ -59,6 +59,10 @@ function Chat() {
     socket.emit("sendMessage", {
       channelId: id,
       message: newMessage,
+    }, (result: string) => {
+      if (result === "sendMessage error You are muted!") {
+        notifyError("sendMessage error You are muted!");
+      }
     });
 
     setNewMessage("");
