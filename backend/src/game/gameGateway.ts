@@ -39,7 +39,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		});
 
 		function newRatings(winnerRating: number, loserRating: number) {
-			let change = Math.ceil(Math.max(1, 25 + (winnerRating - loserRating) / 10));
+			let change = Math.ceil(Math.max(1, 25 + (loserRating - winnerRating) / 10));
 			return [winnerRating + change, loserRating - change];
 		} 
 
