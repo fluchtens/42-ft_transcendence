@@ -202,11 +202,13 @@ export class ChatGateway implements OnModuleInit {
         connectedUsersSet.add(client.id);
       }
       if (!channelInfo.password) channelData.protected = false;
-      const channelMembers =
-        await this.chatService.getChannelMembers(channelId);
+      const channelMembers = await this.chatService.getChannelMembers(
+        channelId,
+      );
       channelData.members = channelMembers;
-      const messagesRaw =
-        await this.chatService.getMessagesByChannel(channelId);
+      const messagesRaw = await this.chatService.getMessagesByChannel(
+        channelId,
+      );
 
       const messages: Messages[] = await Promise.all(
         messagesRaw.map(async (rawMessage) => {
@@ -575,7 +577,10 @@ export class ChatGateway implements OnModuleInit {
           userId,
           member.id,
         );
-        const isBanned = await this.chatService.isUserBanned(channelId, member.id);
+        const isBanned = await this.chatService.isUserBanned(
+          channelId,
+          member.id,
+        );
         if (isBanned) {
           throw new Error('this user is banned');
         }
@@ -683,7 +688,7 @@ export class ChatGateway implements OnModuleInit {
                 user: user,
               });
             this.server.to(String(userId)).emit('resetChannel', channel.id);
-            return "";
+            return '';
           } else {
             throw new Error('error when join the channel');
           }
@@ -696,7 +701,7 @@ export class ChatGateway implements OnModuleInit {
       }
     } else {
       console.log('User ID not available.572');
-      return "User Id not avalaible";
+      return 'User Id not avalaible';
     }
   }
 
@@ -1022,7 +1027,7 @@ export class ChatGateway implements OnModuleInit {
       try {
         const { channelId, userIdToBan } = banUserDto;
         if (channelId && userIdToBan) {
-          console.log('banuser ', userId, userIdToBan)
+          console.log('banuser ', userId, userIdToBan);
           const banUser = await this.chatService.banUser(
             userId,
             channelId,
@@ -1094,10 +1099,12 @@ export class ChatGateway implements OnModuleInit {
           );
           if (userRole === 'ADMIN' || userRole === 'OWNER') {
             await this.chatService.unbanUser(channelId, userIdToUnban);
-            const userMember = await this.getOrAddUserData(Number(userIdToUnban));
+            const userMember = await this.getOrAddUserData(
+              Number(userIdToUnban),
+            );
             const userData = await this.getOrAddUserData(userId);
             const message =
-              userData.username + ' have unban ' + userMember.username;
+              userData.username + ' has unban ' + userMember.username;
             const messageSend = await this.chatService.addMessage(
               userId,
               channelId,
@@ -1124,7 +1131,10 @@ export class ChatGateway implements OnModuleInit {
   }
 
   @SubscribeMessage('muteUser')
-  async handleMuteUser(@ConnectedSocket() client: Socket, @MessageBody() muteUserDto: MuteUserDto){
+  async handleMuteUser(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() muteUserDto: MuteUserDto,
+  ) {
     const userId = Number(client.handshake.auth.userId);
     const { addMinutes } = require('date-fns');
     if (userId) {
@@ -1135,17 +1145,34 @@ export class ChatGateway implements OnModuleInit {
             channelId,
             userId,
           );
-          const userRoleToMute = await this.chatService.findMemberRoleInChannel(channelId, userIdToMute);
-          if ((userRoleToMute === "ADMIN" && userRole === "ADMIN") || userRoleToMute === 'OWNER') {
+          const userRoleToMute = await this.chatService.findMemberRoleInChannel(
+            channelId,
+            userIdToMute,
+          );
+          if (
+            (userRoleToMute === 'ADMIN' && userRole === 'ADMIN') ||
+            userRoleToMute === 'OWNER'
+          ) {
             throw new Error('Permission denied');
           }
           if (userRole === 'ADMIN' || userRole === 'OWNER') {
             const muteTime = addMinutes(new Date(), timeToMute);
-            await this.chatService.muteMember(channelId, userIdToMute, muteTime);
-            const userMember = await this.getOrAddUserData(Number(userIdToMute));
+            await this.chatService.muteMember(
+              channelId,
+              userIdToMute,
+              muteTime,
+            );
+            const userMember = await this.getOrAddUserData(
+              Number(userIdToMute),
+            );
             const userData = await this.getOrAddUserData(userId);
             const message =
-              userData.username + ' have muted ' + userMember.username + " for " + timeToMute + " minutes";
+              userData.username +
+              ' has muted ' +
+              userMember.username +
+              ' for ' +
+              timeToMute +
+              ' minutes';
             const messageSend = await this.chatService.addMessage(
               userId,
               channelId,
