@@ -92,6 +92,16 @@ const EditChannel = ({
   const submitData = (e: React.FormEvent) => {
     e.preventDefault();
     // ta functui
+    if (editChannel.name !== channel.name) {
+      socket.emit('changeChannelname', { channelName:editChannel.name, channelId: channel.id }, (result: string) => {
+        if (result === "Invalid input") {
+          notifyError(result);
+        }
+        else if (!result) {
+          notifySuccess("channelName change to " + editChannel.name);
+        }
+      })
+    }
     if (editChannel.password !== "") {
       socket.emit(
         "protectChannel",
@@ -126,17 +136,19 @@ const EditChannel = ({
       );
       console.log("testing");
     }
-    socket.emit(
-      "changeChannelVisibility",
-      { channelId: channel.id, isPublic: editChannel.isPublic },
-      (result: string) => {
-        if (!result) {
-          notifySuccess("Channel successfully updated");
-        } else {
-          notifyError("Failed to change channel visibility");
+    if (editChannel.isPublic !== channel.public) {
+      socket.emit(
+        "changeChannelVisibility",
+        { channelId: channel.id, isPublic: editChannel.isPublic },
+        (result: string) => {
+          if (!result) {
+            notifySuccess("Channel successfully updated");
+          } else {
+            notifyError("Failed to change channel visibility");
+          }
         }
-      }
-    );
+      );
+    }
     closeModal();
     resetProperties();
   };

@@ -12,6 +12,11 @@ export class CreateChannelDto {
   password?: string;
 }
 
+export class ChangeChannelNameDto {
+  channelName: string;
+  channelId: string;
+}
+
 export class DeleteMessageDto {
   channelId: string;
   messageId: string;

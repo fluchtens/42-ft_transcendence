@@ -47,6 +47,7 @@ import {
   BanUserDto,
   UnbanUserDto,
   MuteUserDto,
+  ChangeChannelNameDto,
 } from './dtos/gateway.dtos';
 import * as bcrypt from 'bcryptjs';
 import { FriendshipStatus, Member, User } from '@prisma/client';
@@ -1201,6 +1202,48 @@ export class ChatGateway implements OnModuleInit {
             throw new Error('Permission denied');
           }
         }
+      } catch (error) {
+        console.log(error.message);
+        return error.message;
+      }
+    } else {
+      console.log('User ID not available.1118');
+      return 'User ID not available.';
+    }
+  }
+
+  @SubscribeMessage('changeChannelname')
+  async handleChangeChannelname(@ConnectedSocket() client: Socket,@MessageBody() changeChannelNameDto:ChangeChannelNameDto) {
+    const userId = Number(client.handshake.auth.userId);
+    if (userId) {
+      try {
+        const { channelName, channelId } = changeChannelNameDto;
+        const isChannelNameValid = !!channelName && typeof channelName === 'string' && channelName.length >= 3 && channelName.length <= 16;
+        if (!isChannelNameValid) {
+          throw new Error("Invalid input");
+        }
+        await this.chatService.changeChannelName(userId, channelId, channelName);
+
+        const userData = await this.getOrAddUserData(userId);
+        const message =
+          userData.username +
+          ' changed the name of the channel to ' +
+          channelName;
+
+        const messageSend = await this.chatService.addMessage(
+          userId,
+          channelId,
+          message,
+        );
+        if (!messageSend) throw new Error('Message cannot be send');
+        const messageData: Messages = messageSend;
+        messageData.user = userData;
+        this.server.to(channelId).emit(`${channelId}/message`, messageData);
+
+        this.server.to(channelId).emit('refreshPage', channelId);
+
+        this.server.emit('resetChannel', channelId);
+
       } catch (error) {
         console.log(error.message);
         return error.message;

@@ -246,6 +246,21 @@ export class ChatService {
     }
   }
 
+  async changeChannelName(userId: number, channelId: string, newChannelname: string) {
+    const userRole = await this.findMemberRoleInChannel(channelId, userId);
+    if (userRole !== 'OWNER'){
+      throw new Error("You don't has permission to change the channelName");
+    }
+    await this.prismaService.channel.update({
+      where: {
+        id: channelId
+      },
+      data: {
+        name: newChannelname
+      }
+    });
+  }
+
   async getUserChannels(userId: any): Promise<any> {
     if (!userId) throw new BadRequestException('userId not found');
     try {
