@@ -11,6 +11,7 @@
   background: $bg-secondary-color;
 
   .chat {
+    width: 0;
     flex: 1;
     flex-direction: column;
     display: flex;
@@ -40,6 +41,7 @@
         gap: 0.75rem;
         border-radius: $rounded;
         transition: background 0.3s ease;
+        word-break: break-all;
 
         &:hover {
           background: $extra-tertiary-color;
