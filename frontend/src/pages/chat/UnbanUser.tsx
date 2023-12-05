@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Modal } from "../../components/Modal";
 import styles from "./UnbanUser.module.scss";
-import { notifySuccess } from "../../utils/notifications";
+import { notifyError, notifySuccess } from "../../utils/notifications";
 import { Channel } from "../../types/chat.interface";
+import { useChatSocket } from "../../hooks/useChatSocket";
+import { userLoginApi } from "../../services/auth.api";
 
 interface UnbanUserProps {
   channel: Channel;
@@ -11,6 +13,7 @@ interface UnbanUserProps {
 
 const UnbanUser = ({ channel, closeModal }: UnbanUserProps) => {
   const [unbanUser, setUnbanUser] = useState<string>("");
+  const chatSocket = useChatSocket();
 
   const changeUnbanUser = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUnbanUser(e.target.value);
@@ -18,7 +21,17 @@ const UnbanUser = ({ channel, closeModal }: UnbanUserProps) => {
 
   const submitData = (e: React.FormEvent) => {
     e.preventDefault();
-    notifySuccess("Unban");
+    chatSocket.emit("unbanUser", {channelId: channel.id, userToUnban:unbanUser}, (result: string) => {
+      if (!result) {
+        notifySuccess(unbanUser + " has been unban");
+      }
+      else if (result === 'Permission denied') {
+        notifyError('Permission denied');
+      }
+      else {
+        notifyError('fail to unban the user');
+      }
+    });
     closeModal();
     setUnbanUser("");
   };

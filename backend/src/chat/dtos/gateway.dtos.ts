@@ -61,7 +61,7 @@ export class BanUserDto {
 
 export class UnbanUserDto {
   channelId: string;
-  userIdToUnban: number;
+  userToUnban: string;
 }
 
 export class MuteUserDto {

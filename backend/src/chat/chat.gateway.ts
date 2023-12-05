@@ -1086,7 +1086,12 @@ export class ChatGateway implements OnModuleInit {
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
-        const { channelId, userIdToUnban } = banUserDto;
+        const { channelId, userToUnban } = banUserDto;
+        const userToBanStatus = await this.userService.findUserByUsername(
+          userToUnban,
+          false,
+        );
+        const userIdToUnban = userToBanStatus.id;
         if (channelId && userIdToUnban) {
           const userRole = await this.chatService.findMemberRoleInChannel(
             channelId,
@@ -1108,7 +1113,7 @@ export class ChatGateway implements OnModuleInit {
             messageData.user = userData;
             this.server.to(channelId).emit(`${channelId}/message`, messageData);
             this.server.to(channelId).emit('refreshPage', channelId);
-            return null;
+            return "";
           } else {
             throw new Error('Permission denied');
           }
