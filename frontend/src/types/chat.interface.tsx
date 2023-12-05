@@ -25,7 +25,7 @@ export interface Member {
   userId: number;
   channelId: string;
   silencedTime: Date;
-  CreatedAt: Date;
+  createdAt: Date;
   updatedAt: Date;
 }
 
