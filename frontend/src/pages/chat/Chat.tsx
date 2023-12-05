@@ -18,7 +18,7 @@ function Chat() {
   const [loading, setLoading] = useState<boolean>(true);
   const [channel, setChannel] = useState<Channel>();
   const [messages, setMessages] = useState<Message[]>([]);
-  const messagesRef = useRef<HTMLUListElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
   const [newMessage, setNewMessage] = useState<string>("");
   const [members, setMembers] = useState<MemberUsers[]>([]);
   const [addedMember, setAddedMember] = useState<string>("");
@@ -95,33 +95,6 @@ function Chat() {
   };
 
   useEffect(() => {
-    const hideBlockedUsers = async () => {
-      const blockedUsers = await getBlockedUsersApi();
-      if (!blockedUsers) return;
-
-      setMessages((prevMessages) =>
-        prevMessages.map((message) => {
-          const isUserBlocked = blockedUsers.some(
-            (user) => message.userId === user.id
-          );
-          if (isUserBlocked) {
-            return {
-              ...message,
-              content: "Blocked message",
-            };
-          }
-          return message;
-        })
-      );
-    };
-
-    hideBlockedUsers();
-    if (messagesRef.current) {
-      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-    }
-  }, [messages]);
-
-  useEffect(() => {
     socket.on(`channelData:${id}`, (channelData: Channel) => {
       if (channelData.messages && channelData.members) {
         setMessages(channelData.messages);
@@ -169,6 +142,38 @@ function Chat() {
     };
   }, [id, socket]);
 
+  useEffect(() => {
+    const hideBlockedUsers = async () => {
+      const blockedUsers = await getBlockedUsersApi();
+      if (!blockedUsers) return;
+
+      setMessages((prevMessages) =>
+        prevMessages.map((message) => {
+          const isUserBlocked = blockedUsers.some(
+            (user) => message.userId === user.id
+          );
+          if (isUserBlocked) {
+            return {
+              ...message,
+              content: "Blocked message",
+            };
+          }
+          return message;
+        })
+      );
+    };
+    hideBlockedUsers();
+  }, [messages]);
+
+  useEffect(() => {
+    if (messages.length) {
+      messagesRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
+  }, [messages.length]);
+
   return (
     <>
       {loading && <Loading />}
@@ -180,7 +185,7 @@ function Chat() {
               channel={channel}
               toggleMembersMenu={toggleMembersMenu}
             />
-            <ul ref={messagesRef}>
+            <ul>
               {messages?.map(
                 (message: Message) =>
                   message.user && (
@@ -193,6 +198,7 @@ function Chat() {
                     </li>
                   )
               )}
+              <div ref={messagesRef} />
             </ul>
             <MessageInput
               content={newMessage}
