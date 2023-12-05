@@ -66,10 +66,10 @@ const UserContextMenu = ({
         { channelId: channel.id, memberId: user.id, newRole: "OWNER" },
         (result: string) => {
           if (!result) {
-            notifySuccess("promote owner");
+            notifySuccess("Successfully promoted to owner");
           } else {
             console.log(result);
-            notifyError("failed to promote to owner");
+            notifyError("Failed to promote to owner");
           }
         }
       );
@@ -84,10 +84,10 @@ const UserContextMenu = ({
         { channelId: channel.id, memberId: user.id, newRole: "ADMIN" },
         (result: string) => {
           if (!result) {
-            notifySuccess("promote admin");
+            notifySuccess("Successfully promoted to owner");
           } else {
             console.log(result);
-            notifyError("failed to promote to admin");
+            notifyError("Failed to promote to admin");
           }
         }
       );
@@ -102,10 +102,10 @@ const UserContextMenu = ({
         { channelId: channel.id, memberId: user.id, newRole: "GUEST" },
         (result: string) => {
           if (!result) {
-            notifySuccess("demote user");
+            notifySuccess("Successfully demoted to user");
           } else {
             console.log(result);
-            notifyError("failed to demote user");
+            notifyError("Failed to demote user");
           }
         }
       );
@@ -120,7 +120,7 @@ const UserContextMenu = ({
         { channelId: channel.id, userIdKick: user.id },
         (result: string) => {
           if (result) {
-            notifyError("failed to kick user");
+            notifyError("Failed to kick user");
           } else {
             notifySuccess("The user was successful kicked");
           }
@@ -137,7 +137,7 @@ const UserContextMenu = ({
         { channelId: channel.id, userIdToBan: user.id },
         (result: string) => {
           if (result) {
-            notifyError("failed to ban user");
+            notifyError("Failed to ban user");
           } else {
             notifySuccess("The user was successful banned");
           }
