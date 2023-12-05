@@ -15,6 +15,7 @@ import Leaderboard from "./pages/leaderboard/Leaderboard";
 import { AuthProvider } from "./hooks/useAuth";
 import { ChatSocketProvider } from "./hooks/useChatSocket";
 import { FriendshipSocketProvider } from "./hooks/useFriendshipSocket";
+import Game from "./pages/game/Game";
 
 function App() {
   const router = createBrowserRouter([
@@ -46,6 +47,10 @@ function App() {
         {
           path: "/game",
           element: <GameElement />,
+        },
+        {
+          path: "/gametest",
+          element: <Game />,
         },
         {
           path: "/chat/:id",

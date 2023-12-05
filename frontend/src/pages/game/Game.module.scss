@@ -1,16 +1,11 @@
 @import "../../styles/config.scss";
 
 .container {
-  width: 50rem;
-  min-height: 40rem;
-  padding: 1rem;
-  border-radius: 1.875rem;
+  min-height: calc(100vh - 10rem);
+  padding: 2rem;
+  border-radius: $rounded-xl;
   background: $bg-secondary-color;
-
-  h1 {
-    margin: 0;
-    font-size: 1.7rem;
-    font-weight: 600;
-    text-align: center;
-  }
+  flex-direction: column;
+  display: flex;
+  align-items: center;
 }
