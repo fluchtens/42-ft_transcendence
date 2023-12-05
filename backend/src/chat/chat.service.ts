@@ -453,7 +453,6 @@ export class ChatService {
       }
       throw new Error('no channelData or userData');
     } catch (error) {
-      console.error('error when add message', error);
       throw error;
     }
   }
@@ -752,12 +751,12 @@ export class ChatService {
         const channel = await this.prismaService.channel.findUnique({
           where: { id: channelId },
         });      
-        if (!channel.bannedUsers.includes(userId)) {
+        if (!channel.bannedUsers.includes(userIdKick)) {
           await this.prismaService.channel.update({
             where: { id: channelId },
             data: {
               bannedUsers: {
-                push: userId,
+                push: userIdKick,
               },
             },
           });
@@ -784,6 +783,9 @@ export class ChatService {
         },
       });
     }
+    else {
+      throw new Error("The user are not banned");
+    }
   }
 
   async  isUserBanned(channelId: string, userId: number): Promise<boolean> {
@@ -800,4 +802,18 @@ export class ChatService {
     return channel.bannedUsers.includes(userId);
   }
 
+  async muteMember(channelId: string, userId: number, silencedTime: Date): Promise<void> {
+    const member = await this.findMemberInChannel(channelId, userId);
+    if (member) {
+      await this.prismaService.member.update({
+        where: {id: member.id},
+        data: {
+          silencedTime: silencedTime,
+        }
+      });
+    }
+    else {
+      throw new Error("member not found")
+    }
+  }
 }

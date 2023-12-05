@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Modal } from "../../components/Modal";
 import styles from "./MuteUser.module.scss";
-import { notifySuccess } from "../../utils/notifications";
+import { notifyError, notifySuccess } from "../../utils/notifications";
 import { Channel } from "../../types/chat.interface";
 import { User } from "../../types/user.interface";
+import { useChatSocket } from "../../hooks/useChatSocket";
 
 interface MuteUserProps {
   user: User;
@@ -13,18 +14,28 @@ interface MuteUserProps {
 }
 
 const MuteUser = ({ user, channel, closeModal, cb }: MuteUserProps) => {
-  const [time, setTime] = useState<string>("");
+  const [time, setTime] = useState<number>(0);
+  const socket = useChatSocket();
 
   const changeTime = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTime(e.target.value);
+    setTime(e.target.valueAsNumber);
   };
 
   const submitData = (e: React.FormEvent) => {
     e.preventDefault();
     cb();
-    notifySuccess("Mute");
+    socket.emit('muteUser', {
+      channelId: channel.id, userIdToMute:user.id, timeToMute: time
+    }, (result:string) => {
+      if (!result) {
+        notifySuccess('muteUser');
+      }
+      else {
+        notifyError(result);
+      }
+    })
     closeModal();
-    setTime("");
+    setTime(0);
   };
 
   return (
@@ -34,7 +45,7 @@ const MuteUser = ({ user, channel, closeModal, cb }: MuteUserProps) => {
         <div className={styles.input}>
           <label>Mute time (in minutes)</label>
           <input
-            type="text"
+            type="number"
             value={time}
             onChange={changeTime}
             placeholder="Mute time"

@@ -129,6 +129,23 @@ const UserContextMenu = ({
     }
   };
 
+  const banUser = async () => {
+    cb();
+    if (channel) {
+      chatSocket.emit(
+        "banUser",
+        { channelId: channel.id, userIdToBan: user.id },
+        (result: string) => {
+          if (result) {
+            notifyError("failed to ban user");
+          } else {
+            notifySuccess("The user was successful banned");
+          }
+        }
+      );
+    }
+  };
+
   const renderButtons = () => {
     switch (type) {
       case ContextMenuType.FRIEND:
@@ -147,7 +164,7 @@ const UserContextMenu = ({
               <button onClick={promoteAdmin}>Promote to admin rank</button>
               <button onClick={demoteUser}>Demote to user rank</button>
               <button onClick={kickUser}>Kick user</button>
-              <button onClick={kickUser}>Ban user</button>
+              <button onClick={banUser}>Ban user</button>
               <button onClick={openMuteModalModal}>Mute user</button>
             </>
           );
@@ -155,7 +172,7 @@ const UserContextMenu = ({
           return (
             <>
               <button onClick={kickUser}>Kick user</button>
-              <button onClick={kickUser}>Ban user</button>
+              <button onClick={banUser}>Ban user</button>
               <button onClick={openMuteModalModal}>Mute user</button>
             </>
           );

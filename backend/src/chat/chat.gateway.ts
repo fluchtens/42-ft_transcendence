@@ -45,6 +45,8 @@ import {
   KickUserDto,
   ChangeChannelVisibilityDto,
   BanUserDto,
+  UnbanUserDto,
+  MuteUserDto,
 } from './dtos/gateway.dtos';
 import * as bcrypt from 'bcryptjs';
 import { FriendshipStatus, Member, User } from '@prisma/client';
@@ -144,7 +146,6 @@ export class ChatGateway implements OnModuleInit {
     try {
       const updatedUserData = await this.userService.getUserById(userId);
       this.usersData.set(userId, updatedUserData);
-
     } catch (error) {
       console.error(`Error refreshing user data: ${error.message}`);
     }
@@ -397,6 +398,7 @@ export class ChatGateway implements OnModuleInit {
         }
       } catch (error) {
         console.error('sendMessage error', error.message);
+        return error.message;
       }
     }
     return;
@@ -538,7 +540,7 @@ export class ChatGateway implements OnModuleInit {
               this.roomService.leaveRoom(client, channelId);
             });
             this.server.to(String(memberId)).emit('channelDeleted', channelId);
-            this.server.emit("channelDeleted", channelId);
+            this.server.emit('channelDeleted', channelId);
           }
           this.connectedUsers.delete(channelId);
           return '';
@@ -573,9 +575,9 @@ export class ChatGateway implements OnModuleInit {
           userId,
           member.id,
         );
-        const isBanned = await this.chatService.isUserBanned(channelId, userId);
+        const isBanned = await this.chatService.isUserBanned(channelId, member.id);
         if (isBanned) {
-          throw new Error("this user is banned");
+          throw new Error('this user is banned');
         }
 
         if (!friendship || friendship.status !== FriendshipStatus.ACCEPTED) {
@@ -642,9 +644,12 @@ export class ChatGateway implements OnModuleInit {
           if (member) {
             throw new Error('member is in channel');
           }
-          const isBanned = await this.chatService.isUserBanned(channelDto.channelId, userId);
+          const isBanned = await this.chatService.isUserBanned(
+            channelDto.channelId,
+            userId,
+          );
           if (isBanned) {
-            throw new Error("this user is banned");
+            throw new Error('this user is banned');
           }
           const joinChannel = await this.chatService.joinPublicChannel(
             userId,
@@ -678,7 +683,7 @@ export class ChatGateway implements OnModuleInit {
                 user: user,
               });
             this.server.to(String(userId)).emit('resetChannel', channel.id);
-            return true;
+            return "";
           } else {
             throw new Error('error when join the channel');
           }
@@ -687,11 +692,11 @@ export class ChatGateway implements OnModuleInit {
         }
       } catch (error) {
         console.log(error.message);
-        return false;
+        return error.message;
       }
     } else {
       console.log('User ID not available.572');
-      return false;
+      return "User Id not avalaible";
     }
   }
 
@@ -815,9 +820,7 @@ export class ChatGateway implements OnModuleInit {
           if (kickUser) {
             const userData = await this.getOrAddUserData(userId);
             const message =
-              userData.username +
-              ' kicked ' +
-              userMember.username;
+              userData.username + ' kicked ' + userMember.username;
             const messageSend = await this.chatService.addMessage(
               userId,
               channelId,
@@ -830,7 +833,9 @@ export class ChatGateway implements OnModuleInit {
 
             const connectedUsersSet = this.connectedUsers.get(channelId);
             if (!connectedUsersSet) {
-              throw new Error('Cannot find the channel connection to kick player');
+              throw new Error(
+                'Cannot find the channel connection to kick player',
+              );
             }
             const socketsConnected = this.userConnections.get(userIdKick);
             socketsConnected.forEach((socket) => {
@@ -840,9 +845,11 @@ export class ChatGateway implements OnModuleInit {
           }
           this.server.to(channelId).emit('refreshPage', channelId);
           this.server
-              .to(channelId)
-              .emit(`${channelId}/memberDeleted`, userIdKick);
-          this.server.to(String(userIdKick)).emit(`${channelId}/channelDeleted`);
+            .to(channelId)
+            .emit(`${channelId}/memberDeleted`, userIdKick);
+          this.server
+            .to(String(userIdKick))
+            .emit(`${channelId}/channelDeleted`);
           this.server.to(String(userIdKick)).emit('resetChannel', channelId);
           console.log(kickUser);
           return null;
@@ -1006,12 +1013,16 @@ export class ChatGateway implements OnModuleInit {
   }
 
   @SubscribeMessage('banUser')
-  async handleBanUser(@ConnectedSocket() client: Socket, @MessageBody() banUserDto: BanUserDto) {
+  async handleBanUser(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() banUserDto: BanUserDto,
+  ) {
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
         const { channelId, userIdToBan } = banUserDto;
         if (channelId && userIdToBan) {
+          console.log('banuser ', userId, userIdToBan)
           const banUser = await this.chatService.banUser(
             userId,
             channelId,
@@ -1021,9 +1032,7 @@ export class ChatGateway implements OnModuleInit {
           if (banUser) {
             const userData = await this.getOrAddUserData(userId);
             const message =
-              userData.username +
-              ' banded ' +
-              userMember.username;
+              userData.username + ' banded ' + userMember.username;
             const messageSend = await this.chatService.addMessage(
               userId,
               channelId,
@@ -1036,9 +1045,13 @@ export class ChatGateway implements OnModuleInit {
 
             const connectedUsersSet = this.connectedUsers.get(channelId);
             if (!connectedUsersSet) {
-              throw new Error('Cannot find the channel connection to ban player');
+              throw new Error(
+                'Cannot find the channel connection to ban player',
+              );
             }
-            const socketsConnected = this.userConnections.get(Number(userIdToBan));
+            const socketsConnected = this.userConnections.get(
+              Number(userIdToBan),
+            );
             socketsConnected.forEach((socket) => {
               this.roomService.leaveRoom(socket, channelId);
               connectedUsersSet.delete(socket.id);
@@ -1046,9 +1059,11 @@ export class ChatGateway implements OnModuleInit {
           }
           this.server.to(channelId).emit('refreshPage', channelId);
           this.server
-              .to(channelId)
-              .emit(`${channelId}/memberDeleted`, userIdToBan);
-          this.server.to(String(userIdToBan)).emit(`${channelId}/channelDeleted`);
+            .to(channelId)
+            .emit(`${channelId}/memberDeleted`, userIdToBan);
+          this.server
+            .to(String(userIdToBan))
+            .emit(`${channelId}/channelDeleted`);
           this.server.to(String(userIdToBan)).emit('resetChannel', channelId);
           console.log(banUser);
           return null;
@@ -1064,7 +1079,95 @@ export class ChatGateway implements OnModuleInit {
   }
 
   @SubscribeMessage('unbanUser')
-  async handleUnbanUser(@ConnectedSocket() client: Socket, @MessageBody() banUserDto: BanUserDto) {
+  async handleUnbanUser(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() banUserDto: UnbanUserDto,
+  ) {
+    const userId = Number(client.handshake.auth.userId);
+    if (userId) {
+      try {
+        const { channelId, userIdToUnban } = banUserDto;
+        if (channelId && userIdToUnban) {
+          const userRole = await this.chatService.findMemberRoleInChannel(
+            channelId,
+            userId,
+          );
+          if (userRole === 'ADMIN' || userRole === 'OWNER') {
+            await this.chatService.unbanUser(channelId, userIdToUnban);
+            const userMember = await this.getOrAddUserData(Number(userIdToUnban));
+            const userData = await this.getOrAddUserData(userId);
+            const message =
+              userData.username + ' have unban ' + userMember.username;
+            const messageSend = await this.chatService.addMessage(
+              userId,
+              channelId,
+              message,
+            );
+            if (!messageSend) throw new Error('Message cannot be send');
+            const messageData: Messages = messageSend;
+            messageData.user = userData;
+            this.server.to(channelId).emit(`${channelId}/message`, messageData);
+            this.server.to(channelId).emit('refreshPage', channelId);
+            return null;
+          } else {
+            throw new Error('Permission denied');
+          }
+        }
+      } catch (error) {
+        console.log(error.message);
+        return error.message;
+      }
+    } else {
+      console.log('User ID not available.1118');
+      return 'User ID not available.';
+    }
+  }
 
+  @SubscribeMessage('muteUser')
+  async handleMuteUser(@ConnectedSocket() client: Socket, @MessageBody() muteUserDto: MuteUserDto){
+    const userId = Number(client.handshake.auth.userId);
+    const { addMinutes } = require('date-fns');
+    if (userId) {
+      try {
+        const { channelId, userIdToMute, timeToMute } = muteUserDto;
+        if (channelId && userIdToMute && timeToMute > 0) {
+          const userRole = await this.chatService.findMemberRoleInChannel(
+            channelId,
+            userId,
+          );
+          const userRoleToMute = await this.chatService.findMemberRoleInChannel(channelId, userIdToMute);
+          if ((userRoleToMute === "ADMIN" && userRole === "ADMIN") || userRoleToMute === 'OWNER') {
+            throw new Error('Permission denied');
+          }
+          if (userRole === 'ADMIN' || userRole === 'OWNER') {
+            const muteTime = addMinutes(new Date(), timeToMute);
+            await this.chatService.muteMember(channelId, userIdToMute, muteTime);
+            const userMember = await this.getOrAddUserData(Number(userIdToMute));
+            const userData = await this.getOrAddUserData(userId);
+            const message =
+              userData.username + ' have muted ' + userMember.username + " for " + timeToMute + " minutes";
+            const messageSend = await this.chatService.addMessage(
+              userId,
+              channelId,
+              message,
+            );
+            if (!messageSend) throw new Error('Message cannot be send');
+            const messageData: Messages = messageSend;
+            messageData.user = userData;
+            this.server.to(channelId).emit(`${channelId}/message`, messageData);
+            this.server.to(channelId).emit('refreshPage', channelId);
+            return null;
+          } else {
+            throw new Error('Permission denied');
+          }
+        }
+      } catch (error) {
+        console.log(error.message);
+        return error.message;
+      }
+    } else {
+      console.log('User ID not available.1118');
+      return 'User ID not available.';
+    }
   }
 }

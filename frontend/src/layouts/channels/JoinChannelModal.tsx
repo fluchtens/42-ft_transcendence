@@ -23,27 +23,24 @@ const JoinChannelModal = ({ channel, closeModal }: JoinChannelModalProps) => {
   const submitData = (e: React.FormEvent) => {
     e.preventDefault();
     if (channel.public && !channel.isMember) {
-      console.log("connetion111111");
       socket.emit(
         "joinPublicChannel",
         { channelId: channel.id, password: password },
-        (result: boolean) => {
+        (result: string) => {
           console.log("connetion", result);
-          if (result) {
+          if (!result) {
             navigate("/chat/" + channel.id);
             notifySuccess("You has joined the channel");
-          } else {
-            notifyError("Error when try to join the channel");
+          } else if (result === "this user is banned"){
+            notifyError("You are banned");
           }
         }
       );
     } else {
-      console.log("connetion22222");
       socket.emit(
         'connectToProtectedChannel',
         { channelId: channel.id, password: password },
         (result: boolean) => {
-          console.log("connetionHere", result);
           if (result) {
             notifySuccess("You has joined the channel password");
             navigate("/chat/" + channel.id);
@@ -53,7 +50,6 @@ const JoinChannelModal = ({ channel, closeModal }: JoinChannelModalProps) => {
         }
       );
     }
-    console.log("connetionmpm");
     closeModal();
     setPassword("");
   };
