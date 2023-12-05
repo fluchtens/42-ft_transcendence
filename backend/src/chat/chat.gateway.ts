@@ -1253,4 +1253,20 @@ export class ChatGateway implements OnModuleInit {
       return 'User ID not available.';
     }
   }
+
+  @SubscribeMessage('privateMessage')
+  async handlePrivateMessage(@ConnectedSocket() client: Socket, @MessageBody() userIdToConnect : number) {
+    const userId = Number(client.handshake.auth.userId);
+    if (userId) {
+      try {
+       
+      } catch (error) {
+        console.log(error.message);
+        return error.message;
+      }
+    } else {
+      console.log('User ID not available.1118');
+      return 'User ID not available.';
+    }  
+  }
 }
