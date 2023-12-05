@@ -381,10 +381,13 @@ export class ChatGateway implements OnModuleInit {
   async handleSendMessage(
     @ConnectedSocket() client: Socket,
     @MessageBody() messageDto: SendMessageDto,
-  ): Promise<void> {
+  ): Promise<string> {
     const userId = client.handshake.auth.userId;
     const { channelId, message } = messageDto;
-    if (userId && channelId && message) {
+    const isChannelIdValid = !!channelId && typeof channelId === 'string' && channelId.length >= 1 && channelId.length <= 2000;
+    const isMessageValid = !!message && typeof message === 'string' && message.length >= 1 && message.length <= 2000;
+    const isDtoValid = isChannelIdValid && isMessageValid;
+    if (isDtoValid ) {
       try {
         const channel = await this.chatService.getChannelById(channelId);
         if (channel) {
@@ -402,6 +405,9 @@ export class ChatGateway implements OnModuleInit {
         console.error('sendMessage error', error.message);
         return error.message;
       }
+    }
+    else {
+      return "invalid input";
     }
     return;
   }
@@ -469,19 +475,14 @@ export class ChatGateway implements OnModuleInit {
   async createChannel(
     @ConnectedSocket() client: Socket,
     @MessageBody() createChannelDto: CreateChannelDto,
-  ) {
+  ): Promise<string> {
     const userId = Number(client.handshake.auth.userId);
     let { channelName } = createChannelDto;
     const { isPublic, password } = createChannelDto;
+    const isChannelNameValid = !!channelName && typeof channelName === 'string' && channelName.length >= 3 && channelName.length <= 16;
     if (userId) {
-      if (!channelName) {
-        try {
-          const user = await this.getOrAddUserData(userId);
-          channelName = user.username + '_channel';
-        } catch (error) {
-          console.error('createchannel error', error.message);
-          throw new BadRequestException();
-        }
+      if (!isChannelNameValid) {
+        throw new Error("invalid input");
       }
       try {
         const channelData = await this.chatService.createChannel(
@@ -499,7 +500,7 @@ export class ChatGateway implements OnModuleInit {
         }
       } catch (error) {
         console.error('createchannel error', error.message);
-        throw new BadRequestException();
+        return error.message;
       }
     } else {
       console.log('User ID not available.410');
@@ -569,6 +570,13 @@ export class ChatGateway implements OnModuleInit {
     if (userId) {
       try {
         const { channelId, memberUsername } = addMemberDto;
+        const isNotEmpty = memberUsername !== undefined && memberUsername !== null && memberUsername !== '';
+        const isString = typeof memberUsername === 'string';
+        const isMemberUsernameValid = isNotEmpty && isString;
+        const errorMessage = !isNotEmpty ? 'Username cannot be empty' : !isString ? 'Username must be a string' : '';
+        if (!isMemberUsernameValid) {
+          throw new Error(errorMessage);
+        }
         const member = await this.userService.findUserByUsername(
           memberUsername,
           false,

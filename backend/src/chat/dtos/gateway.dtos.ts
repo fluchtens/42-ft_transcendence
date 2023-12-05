@@ -2,21 +2,11 @@ import { Member, MemberRole, User } from '@prisma/client';
 import { IsNotEmpty, IsString, Length, Matches } from 'class-validator';
 
 export class SendMessageDto {
-  @IsNotEmpty({ message: 'Message cannot be empty' })
-  @IsString({ message: 'Message must be a string' })
-  @Length(1, 2000, {
-    message: 'Message must be between 1 and 2000 characters long',
-  })
   channelId: string;
   message: string;
 }
 
 export class CreateChannelDto {
-  @IsNotEmpty({ message: 'Channel name cannot be empty' })
-  @IsString({ message: 'Channel name must be a string' })
-  @Length(3, 16, {
-    message: 'Channel name must be between 3 and 16 characters long',
-  })
   channelName: string;
   isPublic: boolean;
   password?: string;
@@ -35,8 +25,6 @@ export class ChangeMessageDto {
 
 export class AddMemberDto {
   channelId: string;
-  @IsNotEmpty({ message: 'Username cannot be empty' })
-  @IsString({ message: 'Username must be a string' })
   memberUsername: string;
 }
 

@@ -63,7 +63,10 @@ function Chat() {
       message: newMessage,
     }, (result: string) => {
       if (result === "You are muted!") {
-        notifyError("You are muted!");
+        notifyError(result);
+      }
+      else if (result === 'invalid input') {
+        notifyError(result);
       }
     });
 
