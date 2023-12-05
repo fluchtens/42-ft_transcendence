@@ -90,21 +90,12 @@ const ChatHeader = ({
     <>
       <div className={styles.header}>
         <div className={styles.leftBtns}>
-          {role === "OWNER" && (
-            <>
-              <button onClick={openEditMenuModal}>
-                <IoSettings className={styles.icon} />
-              </button>
-            </>
-          )}
-          {role === "OWNER" ||
-            (role === "ADMIN" && (
-              <>
-                <button onClick={openUnbanUserModal}>
-                  <FaBan className={styles.icon} />
-                </button>
-              </>
-            ))}
+          <button onClick={openEditMenuModal}>
+            <IoSettings className={styles.icon} />
+          </button>
+          <button onClick={openUnbanUserModal}>
+            <FaBan className={styles.icon} />
+          </button>
           <button onClick={leaveChannel}>
             <FaDoorOpen className={styles.icon} />
           </button>
