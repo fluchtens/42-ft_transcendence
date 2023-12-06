@@ -48,6 +48,7 @@ import {
   UnbanUserDto,
   MuteUserDto,
   ChangeChannelNameDto,
+  PrivateChannelData,
 } from './dtos/gateway.dtos';
 import * as bcrypt from 'bcryptjs';
 import { FriendshipStatus, Member, User } from '@prisma/client';
@@ -1259,7 +1260,12 @@ export class ChatGateway implements OnModuleInit {
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
-       
+        let channelId : string = await this.chatService.findPrivateChannel(userId, userIdToConnect);
+        if (!channelId) {
+          channelId = await this.chatService.createPrivateChannel(userId, userIdToConnect);
+        }
+        console.log(channelId);
+        return channelId;
       } catch (error) {
         console.log(error.message);
         return error.message;
@@ -1268,5 +1274,82 @@ export class ChatGateway implements OnModuleInit {
       console.log('User ID not available.1118');
       return 'User ID not available.';
     }  
+  }
+
+  @SubscribeMessage('sendPrivateMessage')
+  async handlePrivateSendMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() messageDto: SendMessageDto,
+  ): Promise<string> {
+    const userId = client.handshake.auth.userId;
+    const { channelId, message } = messageDto;
+    const isChannelIdValid = !!channelId && typeof channelId === 'string' && channelId.length >= 1 && channelId.length <= 2000;
+    const isMessageValid = !!message && typeof message === 'string' && message.length >= 1 && message.length <= 2000;
+    const isDtoValid = isChannelIdValid && isMessageValid;
+    if (isDtoValid ) {
+      try {
+        const messageSend = await this.chatService.addPrivateMessage(
+          userId,
+          channelId,
+          message,
+        );
+        if (!messageSend) throw new Error('Message cannot be send');
+        const messageData: Messages = messageSend;
+        messageData.user = await this.getOrAddUserData(userId);
+        this.server.emit(`${channelId}/message`, messageData);
+      } catch (error) {
+        console.error('sendMessage error', error.message);
+        return error.message;
+      }
+    }
+    else {
+      return "invalid input";
+    }
+    return;
+  }
+
+  @SubscribeMessage('getPrivateChannelData')
+  async handleGetPrivateChannelData(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() channelId: string,
+  ): Promise<PrivateChannelData> {
+    const userId = client.handshake.auth.userId;
+    const canConnect = await this.chatService.canConnectToPrivateChannel(channelId, userId);
+    if (canConnect) {
+      try {
+        const channel = await this.chatService.getPrivateChannelData(channelId);
+        const messagesRaw = await this.chatService.getPrivateMessages(channelId);
+        const messages: Messages[] = await Promise.all(
+          messagesRaw.map(async (rawMessage) => {
+            const user = await this.getOrAddUserData(rawMessage.userId);
+            return new Messages(
+              rawMessage.id,
+              rawMessage.content,
+              rawMessage.userId,
+              user,
+            );
+          }),
+        );
+        const channelData = new PrivateChannelData();
+        channelData.id = channel.id;
+        if (channel.receiverId === userId) {
+          const user = await this.getOrAddUserData(channel.senderId);
+          channelData.name = user.username + " private channel";
+        }
+        else {
+          const user = await this.getOrAddUserData(channel.receiverId);
+          channelData.name = user.username + " private channel";
+        }
+        channelData.messages = messages;
+        return channelData;
+      } catch (error) {
+        console.error('sendMessage error', error.message);
+        return null;
+      }
+    }
+    else {
+      return null;
+    }
+    return;
   }
 }

@@ -114,3 +114,9 @@ export class ChannelData {
   messages: Messages[];
   members: any[];
 }
+
+export class PrivateChannelData {
+  id: string;
+  name: string;
+  messages: Messages[];
+}

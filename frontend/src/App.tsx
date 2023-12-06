@@ -8,6 +8,7 @@ import TwoFaAuth from "./pages/auth/TwoFaAuth";
 import Profile from "./pages/user/Profile";
 import GameElement from "./components/GameElement";
 import Chat from "./pages/chat/Chat";
+import PrivateChat from "./pages/chat/PrivateChat";
 import Friends from "./pages/friends/Friends";
 import FriendStyles from "./pages/friends/Friends.module.scss";
 import Settings from "./pages/settings/Settings";
@@ -50,6 +51,10 @@ function App() {
         {
           path: "/chat/:id",
           element: <Chat />,
+        },
+        {
+          path: "/privatechat/:id",
+          element: <PrivateChat />,
         },
         {
           path: "/friends",
