@@ -103,7 +103,15 @@ export class FriendshipGateway {
 
   onModuleInit() {
     this.server.on('connection', (socket) => {
-      this.roomService.joinRoom(socket, String(socket.handshake.auth.userId))
+      try {
+        if (!this.roomService.getRoomClients(String(socket.handshake.auth.userId) + "/friendship")) {
+          this.roomService.createRoom(String(socket.handshake.auth.userId) + "/friendship")
+        }
+        this.roomService.joinRoom(socket, String(socket.handshake.auth.userId) + "/friendship")
+      }
+      catch (error) {
+        console.log(error);
+      }
     });
   }
 
@@ -119,7 +127,7 @@ export class FriendshipGateway {
 
   @SubscribeMessage('reloadList')
   handleReloadList(@MessageBody() reloadListDto: ReloadListDto) {
-    this.server.to(String(reloadListDto.myUserId)).emit('reloadList');
-    this.server.to(String(reloadListDto.userId)).emit('reloadList');
+    this.server.to(String(reloadListDto.myUserId) + "/friendship").emit('reloadList');
+    this.server.to(String(reloadListDto.userId) + "/friendship").emit('reloadList');
   }
 }
