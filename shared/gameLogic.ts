@@ -34,11 +34,12 @@ export interface Game {
 
 export function makeGame(
 	{type, args = null} : {type : 'classic' | 'wall', args?: any},
-	startTime = Date.now()
+	startTime: number = Date.now(),
 ) { // TODO ctor args?
 	if (type === 'classic') {
 		return new ClassicGame(startTime);
 	} else {
+		console.log('In make: type', type, 'args', args, 'time', startTime);
 		if (args)
 			return new WallGame(startTime, args);
 		else
@@ -237,7 +238,7 @@ export class ClassicGame implements Game {
 
 	packet(
 		timestamp: number | null = null,
-		 	fields = ['player1', 'player2', '_ball', '_ballEntryTime']
+		fields = ['player1', 'player2', '_ball', '_ballEntryTime']
 	) : {timestamp: number} 
 	{
 		if (timestamp)
@@ -341,22 +342,22 @@ export const WALL_PONG = {
 	newBallDelay: 0.5,
 }
 
-class Segment {
-	x: number;
-	y: number;
-	size: number;
-	vertical: boolean;
-	get horizontal() { return !this.vertical }
-	set horizontal(val) { this.vertical = !val }
-
-	constructor({x, y, size, vertical}: {x: number, y: number, size: number, vertical: boolean}) 
-	{
-		this.x = x;
-		this.y = y;
-		this.size = size;
-		this.vertical = vertical;
-	}
-}
+// class Segment {
+// 	x: number;
+// 	y: number;
+// 	size: number;
+// 	vertical: boolean;
+// 	get horizontal() { return !this.vertical }
+// 	set horizontal(val) { this.vertical = !val }
+// 
+// 	constructor({x, y, size, vertical}: {x: number, y: number, size: number, vertical: boolean}) 
+// 	{
+// 		this.x = x;
+// 		this.y = y;
+// 		this.size = size;
+// 		this.vertical = vertical;
+// 	}
+// }
 
 class Rectangle {
 	x: number;
@@ -371,18 +372,76 @@ class Rectangle {
 		this.w = w;
 		this.h = h;
 	}
+}
 
-	get top() { 
-		return new Segment({x: this.x, y: this.y, size: this.w, vertical: false})
+function positiveMin(...args) {
+	let filtered = args.filter( (x) => (x >= 0));
+	return (filtered.length === 0) ? -1 : Math.min(...filtered);
+}
+
+type Impact = { t: number, hit: Rectangle | MovingRectangle, vertical: boolean }
+
+function timeToImpactStill(projectile, target) {
+	function top(rect) { 
+		return rect.y;
 	}
-	get bottom() { 
-		return new Segment({x: this.x, y: this.y + this.h, size: this.w, vertical: false})
+	function bottom(rect) { 
+		return rect.y + rect.h;
 	}
-	get left() { 
-		return new Segment({x: this.x, y: this.y, size: this.h, vertical: true})
+	function left(rect) { 
+		return rect.x;
 	}
-	get right() { 
-		return new Segment({x: this.x + this.w, y: this.y, size: this.h, vertical: true})
+	function right(rect) { 
+		return rect.x + rect.w;
+	}
+
+	let ret : Impact[] = [];
+
+	let tY: number | null = null;
+	if (projectile.dy != 0) {
+		let targetY = (projectile.dy > 0) ? top(target) : bottom(target);
+		let projY = (projectile.dy > 0) ? bottom(projectile) : top(projectile);
+
+		tY = (targetY - projY) / projectile.dy;
+		let tmpProj = new MovingRectangle(projectile);
+		console.log('ty', tY);
+		move(tmpProj, tY);
+		if (tY >= 0 && right(tmpProj) >= left(target) && left(tmpProj) <= right(target)) {
+			ret.push[{t: tY, hit: target, vertical: false}];
+		}
+	}
+
+	let tX: number | null = null;
+	if (projectile.dx != 0) {
+		let targetX = (projectile.dx > 0) ? left(target) : right(target);
+		let projX = (projectile.dx > 0) ? right(projectile) : left(projectile);
+
+		tX = (targetX - projX) / projectile.dx;
+		let tmpProj = new MovingRectangle(projectile);
+		move(tmpProj, tX);
+		if (tX > 0 && bottom(tmpProj) >= top(target) && top(tmpProj) <= bottom(target)) {
+			ret.push[{t: tX, hit: target, vertical: true}];
+		}
+	}
+
+	console.log('hits', ret);
+	return ret;
+}
+
+function timeToImpact(projectile, target) {
+	console.log('target', target, 'proj', projectile);
+	if (target?.dx || target?.dy) {
+		// "compute in reference frame of target"
+		let tmpTarget = new Rectangle(target);
+		let tmpProj = new MovingRectangle(projectile);
+
+		tmpProj.dx -= target.dx;
+		tmpProj.dy -= target.dy;
+
+		return timeToImpactStill(tmpProj, tmpTarget)
+			.map(({t, hit, vertical}) => ({t, hit: target, vertical}));
+	} else {
+		return timeToImpactStill(projectile, target);
 	}
 }
 
@@ -400,13 +459,19 @@ class MovingRectangle extends Rectangle {
 	dy: number;
 }
 
+function move(rect, dt: number) {
+	rect.x += dt * rect.dx;
+	rect.y += dt * rect.dy;
+}
 
 export class WallGame {
 	ball: MovingRectangle;
 	players: [MovingRectangle, MovingRectangle];
 	scores = [0, 0];
 	mapName: string;
+	walls = [];
 	get type(): 'wall' { return 'wall' };
+	private _lastUpdate: number;
 
 	constructor(startTime = Date.now(), {mapName}: {mapName: string} = {mapName: 'default'}) {
 		{ // Init ball
@@ -414,7 +479,11 @@ export class WallGame {
 			let y = (WALL_PONG.height - WALL_PONG.ballSize) / 2;
 			let s = WALL_PONG.ballSize;
 
-			this.ball = new MovingRectangle({x, y, w: s, h: s});
+			// TESTING
+			this.ball = new MovingRectangle(
+				{x, y, w: s, h: s, dx: WALL_PONG.ballXSpeed, dy: WALL_PONG.ballMaxYSpeed}
+			);
+// 			this.ball = new MovingRectangle({x, y, w: s, h: s});
 		}
 		{ // Init player paddles
 			let y = (WALL_PONG.height - WALL_PONG.paddleHeight) / 2;
@@ -429,18 +498,121 @@ export class WallGame {
 			this.players = [p0, p1];
 		}
 		this.mapName = mapName;
+		console.log('ctor time', startTime);
+		this._lastUpdate = startTime;
+
+		this.walls.push(new Rectangle({x:0, y:0, w:WALL_PONG.width, h:0}));
+		this.walls.push(new Rectangle({x:0, y:WALL_PONG.height, w: WALL_PONG.width, h:0}));
 	}
 
-	update( time: number = 0 ) { return this; }
+	_preUpdate(dt) {
+// 		console.log('pre update', this, 'dt', dt);
+		for (let rect of [this.ball, ...this.players]) {
+			move(rect, dt);
+		}
+		for (let p of this.players) {
+			p.y = clamp(0, p.y, WALL_PONG.height - WALL_PONG.paddleHeight);
+		}
+// 		console.log('post update', this)
+	}
+
+	update( time: number = Date.now() ) { 
+		let searchImpact = (candidate, targets, type) => {
+			let t = -1;
+			for (let target of targets) {
+				t = positiveMin(timeToImpact(this.ball, target), t);
+			}
+
+			console.log('search', type, ':', t);
+			if (t < 0) 
+				return candidate;
+			else if (candidate.t < 0) 
+				return {t, type};
+			else
+				return candidate.t < t ? candidate : {t, type};
+		}
+
+// 		while (true) { TODO
+		for (let i = 0; i < 10; ++i) { // prevent infinite loops if i got it wrong
+			let {t: tImpact, type} = {t: -1, type: 'none'};
+			({t: tImpact, type} = searchImpact({t: tImpact, type}, this.walls, 'wall'));
+			({t: tImpact, type} = searchImpact({t: tImpact, type}, this.players, 'paddle'));
+			console.log('found impact', tImpact, type);
+
+// 			for (let wall of this.walls) {
+// 				tImpact = positiveMin(timeToImpact(this.ball, wall), tImpact);
+// // 				let t = timeToImpact(this.ball, wall);
+// // 				if (t >= 0 && tImpact < 0)
+// // 					tImpact = t;
+// // 				else if (t >= 0)
+// // 					tImpact = Math.min(t, tImpact);
+// // 				console.log('t_impact', tImpact)
+// 			}
+
+
+			if (tImpact < 0 || tImpact * 1000 > time - this._lastUpdate ) 
+				break;
+
+			this._preUpdate(tImpact);
+			if (type === 'wall') {
+				this.ball.dy *= -1;
+			} else if (type === 'paddle') {
+				console.log('hello???', this.ball);
+				this.ball.dx *= -1
+				// TODO compute effects
+			}
+			this._lastUpdate += 1000 * tImpact;
+		}
+
+		this._preUpdate((time - this._lastUpdate) / 1000);
+		this._lastUpdate = time;
+		return this;
+	}
+
 	updateScores (time: number = 0): {finish: boolean, winner?: WhichPlayer}
  	{ 
 		return { finish: false} 
 	}
 
-	packet( from: number = 0) { return {timestamp : 0 } };
-	pushPacket( packet: { timestamp: number } ) {};
+	packet(
+		timestamp: number | null = null,
+		fields = ['players', 'scores', 'ball', '_lastUpdate'],
+	) : {timestamp: number} 
+	{
+		if (timestamp)
+			this.update(timestamp);
+		timestamp = timestamp || this._lastUpdate;
 
-	setMotion(who: WhichPlayer, mo: MotionType, when : number = 0) {};
+		let packet: any = {timestamp};
+		for (let key of fields) {
+				if (key in this) // check types make sense ('as any')
+					packet[key] = (this as any)[key];
+		}
+		return packet;
+	}
+
+	pushPacket(packet: {timestamp: number}) {
+		this._lastUpdate = packet.timestamp;
+		const allowedFields = ['players', 'scores', 'ball', '_lastUpdate'];
+		for (let key of allowedFields) {
+			if (key in packet) {
+				(this as any)[key] = (packet as any)[key];
+			}
+		}
+		this.update();
+	}
+
+	_whichIndex(which: WhichPlayer) {
+		return which === WhichPlayer.P1? 0 : 1;
+	}
+
+	setMotion(who: WhichPlayer, mo: MotionType, when : number = null) {
+		if (when)
+			this.update(when);
+		this.players[this._whichIndex(who)].dy = WALL_PONG.playerSpeed * Number(mo);
+		console.log('MOTION', this);
+	};
+	//
 
 	minTimeToPoint(from: number = 0) { return 10000};
 	timeToBall() { return 0; }
