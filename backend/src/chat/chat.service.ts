@@ -846,7 +846,7 @@ export class ChatService {
 
   async createPrivateChannel(senderId: number, receiverId: number) {
     try {
-      const channel = await this.prismaService.privateMessage.create({
+      const channel = await this.prismaService.privateMessageChannel.create({
         data: {
           sender: {
             connect: {
@@ -874,7 +874,7 @@ export class ChatService {
     receiverId: number,
   ): Promise<string> {
     try {
-      const channel = await this.prismaService.privateMessage.findFirst({
+      const channel = await this.prismaService.privateMessageChannel.findFirst({
         where: {
           OR: [
             {
@@ -908,21 +908,21 @@ export class ChatService {
       return null;
     }
     try {
-      const channelData = await this.prismaService.privateMessage.findUnique({
-        where: {
-          id: privateMessageId,
-        },
-      });
+      const channelData =
+        await this.prismaService.privateMessageChannel.findUnique({
+          where: {
+            id: privateMessageId,
+          },
+        });
       if (channelData) {
-        const newMessage =
-          await this.prismaService.privateMessageChannel.create({
-            data: {
-              content: messageContent,
-              userId: userId,
-              privateMessageId: channelData.id,
-            },
-          });
-        await this.prismaService.privateMessage.update({
+        const newMessage = await this.prismaService.privateMessage.create({
+          data: {
+            content: messageContent,
+            userId: userId,
+            privateMessageId: channelData.id,
+          },
+        });
+        await this.prismaService.privateMessageChannel.update({
           where: {
             id: privateMessageId,
           },
@@ -947,11 +947,13 @@ export class ChatService {
     userId: number,
   ): Promise<boolean> {
     try {
-      const channel = await this.prismaService.privateMessage.findUnique({
-        where: {
-          id: channelId,
+      const channel = await this.prismaService.privateMessageChannel.findUnique(
+        {
+          where: {
+            id: channelId,
+          },
         },
-      });
+      );
       if (channel.receiverId === userId || channel.senderId === userId) {
         return true;
       }
@@ -964,7 +966,7 @@ export class ChatService {
 
   async getPrivateMessages(privateChannelId: string) {
     try {
-      const messages = await this.prismaService.privateMessageChannel.findMany({
+      const messages = await this.prismaService.privateMessage.findMany({
         where: {
           privateMessageId: privateChannelId,
         },
@@ -976,7 +978,7 @@ export class ChatService {
   }
 
   async getPrivateChannelData(channelId: string) {
-    const channel = await this.prismaService.privateMessage.findUnique({
+    const channel = await this.prismaService.privateMessageChannel.findUnique({
       where: {
         id: channelId,
       },

@@ -58,7 +58,7 @@ function App() {
           element: <Chat />,
         },
         {
-          path: "/privatechat/:id",
+          path: "/pm/:id",
           element: <PrivateChat />,
         },
         {

@@ -58,17 +58,20 @@ function Chat() {
     e.preventDefault();
     if (!user || !newMessage) return;
 
-    socket.emit("sendMessage", {
-      channelId: id,
-      message: newMessage,
-    }, (result: string) => {
-      if (result === "You are muted!") {
-        notifyError(result);
+    socket.emit(
+      "sendMessage",
+      {
+        channelId: id,
+        message: newMessage,
+      },
+      (result: string) => {
+        if (result === "You are muted!") {
+          notifyError(result);
+        } else if (result === "invalid input") {
+          notifyError(result);
+        }
       }
-      else if (result === 'invalid input') {
-        notifyError(result);
-      }
-    });
+    );
 
     setNewMessage("");
   };

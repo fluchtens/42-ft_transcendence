@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import {  useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import styles from "./PrivateChat.module.scss";
 import { MessageElement } from "./MessageElement";
 import { MessageInput } from "./MessageInput";
@@ -20,8 +20,6 @@ function PrivateChat() {
   const { id } = useParams();
   const socket = useChatSocket();
 
-
-
   const changeNewMessage = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewMessage(e.target.value);
   };
@@ -30,34 +28,38 @@ function PrivateChat() {
     e.preventDefault();
     if (!user || !newMessage) return;
 
-    socket.emit("sendPrivateMessage", {
-      channelId: id,
-      message: newMessage,
-    }, (result: string) => {
-      if (result === 'invalid input') {
-        notifyError(result);
+    socket.emit(
+      "sendPrivateMessage",
+      {
+        channelId: id,
+        message: newMessage,
+      },
+      (result: string) => {
+        if (result === "invalid input") {
+          notifyError(result);
+        }
       }
-    });
+    );
 
     setNewMessage("");
   };
 
   useEffect(() => {
-    console.log('hello2')
-
-    socket.emit('getPrivateChannelData', id, (channelData: PrivateChannelData) => {
-      console.log('hello')
-      if (channelData) {
-        setMessages(channelData.messages);
-        setChannel(channelData);
+    socket.emit(
+      "getPrivateChannelData",
+      id,
+      (channelData: PrivateChannelData) => {
+        if (channelData) {
+          setMessages(channelData.messages);
+          setChannel(channelData);
+        }
+        setLoading(false);
       }
-      setLoading(false);
-    });
+    );
 
     socket.on(`${id}/message`, (message: Message) => {
       setMessages((prevMessages) => [...prevMessages, message]);
     });
-
 
     return () => {
       socket.off(`${id}/message`);

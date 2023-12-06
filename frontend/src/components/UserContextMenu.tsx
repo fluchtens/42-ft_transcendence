@@ -55,11 +55,10 @@ const UserContextMenu = ({
 
   const sendPrivateMessage = async () => {
     cb();
-    chatSocket.emit('privateMessage', user.id, (channelId: string) => {
-      console.log(channelId);
+    chatSocket.emit("privateMessage", user.id, (channelId: string) => {
       if (channelId) {
-        navigate("privatechat/" + channelId);
-        notifySuccess('You has joined the private chat');
+        navigate("/pm/" + channelId);
+        notifySuccess("You has joined the private chat");
       }
     });
   };
@@ -74,7 +73,6 @@ const UserContextMenu = ({
           if (!result) {
             notifySuccess("Successfully promoted to owner");
           } else {
-            console.log(result);
             notifyError("Failed to promote to owner");
           }
         }
@@ -92,7 +90,6 @@ const UserContextMenu = ({
           if (!result) {
             notifySuccess("Successfully promoted to owner");
           } else {
-            console.log(result);
             notifyError("Failed to promote to admin");
           }
         }
@@ -110,7 +107,6 @@ const UserContextMenu = ({
           if (!result) {
             notifySuccess("Successfully demoted to user");
           } else {
-            console.log(result);
             notifyError("Failed to demote user");
           }
         }

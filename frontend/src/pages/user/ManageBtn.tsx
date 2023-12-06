@@ -12,6 +12,8 @@ import {
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import { ImBlocked } from "react-icons/im";
 import { FaUser } from "react-icons/fa6";
+import { useChatSocket } from "../../hooks/useChatSocket";
+
 interface ManageBtnProps {
   targetUser: User;
 }
@@ -23,6 +25,7 @@ const ManageBtn = ({ targetUser }: ManageBtnProps) => {
   const [isMe, setIsMe] = useState<boolean>(false);
   const [isFriend, setIsFriend] = useState<boolean>(false);
   const navigate = useNavigate();
+  const chatSocket = useChatSocket();
 
   const handleMenu = () => {
     setMenu(!menu);
@@ -32,8 +35,13 @@ const ManageBtn = ({ targetUser }: ManageBtnProps) => {
     navigate("/settings");
   };
 
-  const sendPrivateMessage = () => {
-    navigate("/chat/1");
+  const sendPrivateMessage = async () => {
+    chatSocket.emit("privateMessage", targetUser.id, (channelId: string) => {
+      if (channelId) {
+        navigate("/pm/" + channelId);
+        notifySuccess("You has joined the private chat");
+      }
+    });
   };
 
   const sendFriendRequest = async () => {

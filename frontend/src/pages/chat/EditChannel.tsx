@@ -93,14 +93,17 @@ const EditChannel = ({
     e.preventDefault();
     // ta functui
     if (editChannel.name !== channel.name) {
-      socket.emit('changeChannelname', { channelName:editChannel.name, channelId: channel.id }, (result: string) => {
-        if (result === "Invalid input") {
-          notifyError(result);
+      socket.emit(
+        "changeChannelname",
+        { channelName: editChannel.name, channelId: channel.id },
+        (result: string) => {
+          if (result === "Invalid input") {
+            notifyError(result);
+          } else if (!result) {
+            notifySuccess("channelName change to " + editChannel.name);
+          }
         }
-        else if (!result) {
-          notifySuccess("channelName change to " + editChannel.name);
-        }
-      })
+      );
     }
     if (editChannel.password !== "") {
       socket.emit(
@@ -134,7 +137,6 @@ const EditChannel = ({
           }
         }
       );
-      console.log("testing");
     }
     if (editChannel.isPublic !== channel.public) {
       socket.emit(

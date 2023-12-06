@@ -27,18 +27,17 @@ const JoinChannelModal = ({ channel, closeModal }: JoinChannelModalProps) => {
         "joinPublicChannel",
         { channelId: channel.id, password: password },
         (result: string) => {
-          console.log("connetion", result);
           if (!result) {
             navigate("/chat/" + channel.id);
             notifySuccess("You has joined the channel");
-          } else if (result === "this user is banned"){
+          } else if (result === "this user is banned") {
             notifyError("You are banned");
           }
         }
       );
     } else {
       socket.emit(
-        'connectToProtectedChannel',
+        "connectToProtectedChannel",
         { channelId: channel.id, password: password },
         (result: boolean) => {
           if (result) {

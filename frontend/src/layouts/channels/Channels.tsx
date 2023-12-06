@@ -25,7 +25,6 @@ function Channels() {
 
     socket.on("resetChannel", (channelId: string) => {
       socket.emit("getChannelStatus", channelId, (channel: Channel) => {
-        // console.log('channelData', user?.username, channel);
         setChannelsData((prevChannelsData) => {
           const updatedChannels = [...prevChannelsData];
           if (!channel.isMember && !channel.public) {

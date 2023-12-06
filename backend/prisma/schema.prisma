@@ -24,9 +24,9 @@ model User {
   channels               Channel[]
   messages               Message[]
   members                Member[]
-  privateMessageChannels PrivateMessageChannel[]
-  privateMessageSender   PrivateMessage[]        @relation("Sender")
-  privateMessageReceiver PrivateMessage[]        @relation("Receiver")
+  privateMessages        PrivateMessage[]
+  privateMessageSender   PrivateMessageChannel[] @relation("Sender")
+  privateMessageReceiver PrivateMessageChannel[] @relation("Receiver")
   createdAt              DateTime                @default(now())
   updatedAt              DateTime                @updatedAt
 }
@@ -119,33 +119,30 @@ enum MemberRole {
   GUEST
 }
 
-model PrivateMessageChannel {
-  id      String  @id @default(uuid())
-  content String  @db.Text()
-  edited  Boolean @default(false)
-
-  userId Int
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+model PrivateMessage {
+  id               String                @id @default(uuid())
+  content          String                @db.Text()
+  edited           Boolean               @default(false)
+  userId           Int
+  user             User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   privateMessageId String
-  privateMessages  PrivateMessage @relation(fields: [privateMessageId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  privateMessages  PrivateMessageChannel @relation(fields: [privateMessageId], references: [id], onDelete: Cascade)
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
 
   @@index([userId])
   @@index([privateMessageId])
 }
 
-model PrivateMessage {
-  id         String                  @id @default(uuid())
-  messages   PrivateMessageChannel[]
+model PrivateMessageChannel {
+  id         String           @id @default(uuid())
+  messages   PrivateMessage[]
   senderId   Int
-  sender     User                    @relation(name: "Sender", fields: [senderId], references: [id])
+  sender     User             @relation(name: "Sender", fields: [senderId], references: [id])
   receiverId Int
-  receiver   User                    @relation(name: "Receiver", fields: [receiverId], references: [id])
-  createdAt  DateTime                @default(now())
-  updatedAt  DateTime                @updatedAt
+  receiver   User             @relation(name: "Receiver", fields: [receiverId], references: [id])
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
 
   @@index([senderId])
   @@index([receiverId])
