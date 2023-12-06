@@ -1,7 +1,7 @@
 import { IoGameController, IoSettings } from "react-icons/io5";
 import { HiUsers } from "react-icons/hi2";
 import styles from "./ChatHeader.module.scss";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { EditChannel } from "./actions/EditChannel";
 import { Channel, MemberUsers, Message } from "../../types/chat.interface";
 import { FaDoorOpen } from "react-icons/fa6";
