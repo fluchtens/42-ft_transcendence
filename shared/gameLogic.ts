@@ -18,6 +18,34 @@ function clamp<Type>(min: Type, x: Type, max: Type) {
 // 	return Number(x > 0) - Number(x < 0);
 // }
 
+export interface Game {
+	type: 'classic' | 'wall';
+
+	update(time? : number) : Game;
+	updateScores(time? : number) : {finish: boolean, winner?: WhichPlayer};
+
+	minTimeToPoint(from?: number) : number;
+
+	packet(timestamp? : number, fields? : string[]) : {timestamp: number};
+	pushPacket(packet:  { timestamp: number} ) : void;
+
+	setMotion(who: WhichPlayer, mo: MotionType, when?: number) : void;
+}
+
+export function makeGame(
+	{type, args = null} : {type : 'classic' | 'wall', args?: any},
+	startTime = Date.now()
+) { // TODO ctor args?
+	if (type === 'classic') {
+		return new ClassicGame(startTime);
+	} else {
+		if (args)
+			return new WallGame(startTime, args);
+		else
+			return new WallGame(startTime);
+	}
+}
+
 // Pong Logic
 export enum MotionType  { Up = -1, Still = 0, Down = 1 }; // -1, 1 convenient as mult factor for direction
 export const PONG = { // Parameters for PONG game
@@ -87,7 +115,7 @@ export class Ball {
 }
 	
 export enum WhichPlayer { P1 = -1, P2 = 1 } // -1, 1 convenient as mult factor for direction
-export class GameState {
+export class ClassicGame implements Game {
 	public player1: Player;
 	public player2: Player;
 	private _ball: Ball = new Ball(0,0);
@@ -95,6 +123,8 @@ export class GameState {
 	get ball(): Ball | null {
 		return (this._ballEntryTime >= this._lastUpdate)? null : this._ball;
 	}
+
+	get type(): 'classic' { return 'classic' };
 
 	constructor(private _lastUpdate: number = Date.now()) {
 		let paddleY = Math.trunc((PONG.height - PONG.paddleHeight) / 2);
@@ -292,6 +322,131 @@ export class GameState {
 		return this._ballEntryTime - from;
 	}
 }
+
+export const WALL_PONG = {
+	width: 3.0, // arbitrary float units
+	height: 2.0,
+	margin: 0.15,
+
+	playerSpeed: 1.4, // u per second
+	ballXSpeed: 1.0,
+	ballMaxYSpeed: 1.5, // must be higher than `playerSpeed`
+	
+	ballSize: 0.04,
+	get paddleWidth() { return this.ballSize },
+	paddleHeight: 0.20,
+
+	winScore: 11,
+	startDelay: 3.0,
+	newBallDelay: 0.5,
+}
+
+class Segment {
+	x: number;
+	y: number;
+	size: number;
+	vertical: boolean;
+	get horizontal() { return !this.vertical }
+	set horizontal(val) { this.vertical = !val }
+
+	constructor({x, y, size, vertical}: {x: number, y: number, size: number, vertical: boolean}) 
+	{
+		this.x = x;
+		this.y = y;
+		this.size = size;
+		this.vertical = vertical;
+	}
+}
+
+class Rectangle {
+	x: number;
+	y: number;
+	w: number;
+	h: number;
+
+	constructor({x, y, w, h}: {x: number, y: number, w: number, h: number}) 
+	{
+		this.x = x;
+		this.y = y;
+		this.w = w;
+		this.h = h;
+	}
+
+	get top() { 
+		return new Segment({x: this.x, y: this.y, size: this.w, vertical: false})
+	}
+	get bottom() { 
+		return new Segment({x: this.x, y: this.y + this.h, size: this.w, vertical: false})
+	}
+	get left() { 
+		return new Segment({x: this.x, y: this.y, size: this.h, vertical: true})
+	}
+	get right() { 
+		return new Segment({x: this.x + this.w, y: this.y, size: this.h, vertical: true})
+	}
+}
+
+class MovingRectangle extends Rectangle {
+	constructor(
+		{x, y, w, h, dx = 0, dy = 0}
+		: {x: number, y: number, w: number, h: number, dx?: number, dy?: number}
+	) {
+		super({x, y, w, h});
+		this.dx = dx;
+		this.dy = dy;
+	} 
+
+	dx: number;
+	dy: number;
+}
+
+
+export class WallGame {
+	ball: MovingRectangle;
+	players: [MovingRectangle, MovingRectangle];
+	scores = [0, 0];
+	mapName: string;
+	get type(): 'wall' { return 'wall' };
+
+	constructor(startTime = Date.now(), {mapName}: {mapName: string} = {mapName: 'default'}) {
+		{ // Init ball
+			let x = (WALL_PONG.width - WALL_PONG.ballSize) / 2;
+			let y = (WALL_PONG.height - WALL_PONG.ballSize) / 2;
+			let s = WALL_PONG.ballSize;
+
+			this.ball = new MovingRectangle({x, y, w: s, h: s});
+		}
+		{ // Init player paddles
+			let y = (WALL_PONG.height - WALL_PONG.paddleHeight) / 2;
+			let w = WALL_PONG.paddleWidth;
+			let h = WALL_PONG.paddleHeight;
+
+			let x = WALL_PONG.margin;
+			let p0 = new MovingRectangle({x, y, w, h});
+
+			x = WALL_PONG.width - (WALL_PONG.margin + WALL_PONG.paddleWidth);
+			let p1 = new MovingRectangle({x, y, w, h});
+			this.players = [p0, p1];
+		}
+		this.mapName = mapName;
+	}
+
+	update( time: number = 0 ) { return this; }
+	updateScores (time: number = 0): {finish: boolean, winner?: WhichPlayer}
+ 	{ 
+		return { finish: false} 
+	}
+
+	packet( from: number = 0) { return {timestamp : 0 } };
+	pushPacket( packet: { timestamp: number } ) {};
+
+	setMotion(who: WhichPlayer, mo: MotionType, when : number = 0) {};
+
+	minTimeToPoint(from: number = 0) { return 10000};
+	timeToBall() { return 0; }
+}
+
+
 
 // 	update(time = Date.now()) { 
 // 		function mirrorCut(x: number, cut: number, sign: number) : [boolean, number] {

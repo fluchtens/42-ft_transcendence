@@ -109,7 +109,7 @@ function GameElementContent() {
         content = <p>cannot reach server</p>;
         break;
       case UserStatus.Playing:
-        content = <PongBoard availWidth={703} availHeight={501} />; // TODO get width dynamically
+        content = <PongBoard availWidth={900} availHeight={600} />;
         break;
       case UserStatus.Waiting:
         content = <GamesLobby waiting={true} />;
@@ -147,9 +147,23 @@ function GamesLobby({ waiting = false }) {
   // subcomponents
   function CreateGame() {
     let inputRef = useRef<null | HTMLInputElement>(null);
-    function requestCreate() {
-      if (!inputRef.current) throw new Error("Unexpected Error"); // (impossible path normally)
-      socket.emit("createInvite", inputRef.current.value);
+		let mapChoice = useRef<null | HTMLInputElement>(null);
+    function requestCreate(custom = false) {
+      if (!inputRef.current) return;
+			if (custom) {
+				if (!mapChoice.current) return;
+				//
+				socket.emit(
+					"createInvite", 
+					{ 
+						gameName: inputRef.current.value, 
+						type: 'wall',
+					 	args: { mapName: mapChoice.current.value }
+					}
+			 	);
+			} else {
+				socket.emit("createInvite", {gameName: inputRef.current.value});
+			}
     }
     return (
       <>
@@ -157,7 +171,16 @@ function GamesLobby({ waiting = false }) {
         <label>
           Game Name :<input ref={inputRef} />
         </label>
-        <button onClick={requestCreate}> create </button>
+				<p>
+					<button onClick={() => {requestCreate();}}> Create Classic Game</button>
+				</p>
+				<p>
+				Or use a custom map:
+				<select ref={mapChoice}>
+					<option value={'fooMap'}>Default</option>
+				</select>
+				<button onClick={() => {requestCreate(true)}}> Create Custom Map Game </button>
+				</p>
       </>
     );
   }
@@ -285,53 +308,39 @@ function PongBoard({
   availWidth: number;
   availHeight: number;
 }) {
-  const gameRef = useRef(new gm.GameState());
-  const socket = useContext(SocketContext);
-  const boardRef = useRef<HTMLCanvasElement | null>(null);
 
-  let scale = Math.min(
-    Math.floor(availWidth / gm.PONG.width),
-    Math.floor(availHeight / gm.PONG.height)
-  );
-  scale = Math.max(1, scale); // if not enough space, dumb crop
-  const [canvasWidth, canvasHeight] = [
-    gm.PONG.width * scale,
-    gm.PONG.height * scale,
-  ];
+	// DRAW FUNCTION
+	function drawCountdown(
+		cx: CanvasRenderingContext2D, 
+		seconds: number, 
+		{width, height}: {width: number, height: number},
+	) {
+		const cen = {
+			x: Math.floor((width + 1) / 2),
+			y: Math.floor((height + 1) / 2),
+		};
+		const textSize = Math.floor(height / 15);
+		cx.textAlign = "center";
+		cx.fillText( String(Math.ceil(seconds)), cen.x, cen.y + textSize / 2, textSize);
 
-  function drawGame(cx: CanvasRenderingContext2D) {
-    function drawCountdown(seconds: number) {
-      const center = {
-        x: Math.floor((canvasWidth + 1) / 2),
-        y: Math.floor((canvasHeight + 1) / 2),
-      };
-      const textSize = Math.floor(canvasHeight / 15);
-      cx.textAlign = "center";
-      cx.fillText(
-        String(Math.ceil(seconds)),
-        center.x,
-        center.y + textSize / 2,
-        textSize
-      );
+		const arcWidth = 10;
+		const frac = seconds % 1;
+		cx.beginPath();
+		cx.arc(cen.x, cen.y, textSize, 0, frac * 2 * Math.PI, false);
+		cx.arc(cen.x, cen.y, textSize + arcWidth, frac * 2 * Math.PI, 2 * Math.PI, true);
+		cx.fill();
+	}
 
-      const arcWidth = 10;
-      const frac = seconds % 1;
-      cx.beginPath();
-      cx.arc(center.x, center.y, textSize, 0, frac * 2 * Math.PI, false);
-      cx.arc(
-        center.x,
-        center.y,
-        textSize + arcWidth,
-        frac * 2 * Math.PI,
-        2 * Math.PI,
-        true
-      );
-      cx.fill();
-    }
+  function drawGame(
+		cx: CanvasRenderingContext2D, 
+		{width, height, scale} : {width: number, height: number, scale: number},
+	) {
     let game = gameRef.current;
+		if (!game || !cx)
+			return ;
 
     cx.fillStyle = "black";
-    cx.fillRect(0, 0, gm.PONG.width * scale, gm.PONG.height * scale);
+    cx.fillRect(0, 0, width, height);
     cx.fillStyle = "#00ff80"; // bluish green
     game.update();
 
@@ -347,36 +356,130 @@ function PongBoard({
       cx.fillRect(x * scale, y * scale, w, w);
     } else {
       let countdown = game.timeToBall() / 1000;
-      if (countdown > 0) drawCountdown(game.timeToBall() / 1000);
+      if (countdown > 0) drawCountdown(cx, game.timeToBall() / 1000, {width, height});
     }
 
     // display scores
-    cx.font = `${Math.floor(canvasHeight / 15)}px Monospace`;
+		let textHeight = Math.floor(height / 15);
+    cx.font = `${textHeight}px Monospace`;
     cx.textAlign = "left";
-    cx.fillText(String(game.player1.score), 0, 30);
+    cx.fillText(String(game.player1.score), 0, textHeight);
     cx.textAlign = "right";
-    cx.fillText(String(game.player2.score), gm.PONG.width * scale - 1, 30);
+    cx.fillText(String(game.player2.score), width - 1, textHeight);
     //
     requestAnimationFrame(() => {
-      drawGame(cx);
+      drawGame(cx, {width, height, scale});
     });
   }
 
-  useEffect(function () {
-    socket.emit("syncGame", (packet: { timestamp: number }) => {
-      gameRef.current.pushPacket(packet);
+	function drawWallGame(
+		cx: CanvasRenderingContext2D, 
+		{width, height} : {width: number, height: number},
+	) {
+		function rtop( r : number ): number { // real to pixel
+			return Math.ceil(r / gm.WALL_PONG.width * width);
+		}
+
+		let game: null | gm.WallGame = new gm.WallGame({mapName: 'fooMap'}); // TODO get actual game
+		if (!game || !cx)
+			return ;
+
+    game.update();
+
+    cx.fillStyle = "black";
+    cx.fillRect(0, 0, width, height);
+
+    cx.fillStyle = "#00ff80"; // bluish green
+
+    // display paddles
+		let [w, h] = [rtop(gm.WALL_PONG.paddleWidth), rtop(gm.WALL_PONG.paddleHeight)];
+    for (let { x, y } of game.players) {
+			[x, y] = [rtop(x), rtop(y)];
+      cx.fillRect(x, y, w, h);
+    }
+
+    // display ball
+    if (game.ball) {
+      let { x, y } = game.ball;
+			[x, y] = [rtop(x), rtop(y)];
+      cx.fillRect(x, y, w, w);
+    } else {
+      let countdown = game.timeToBall() / 1000;
+      if (countdown > 0) drawCountdown(cx, game.timeToBall() / 1000, {width, height});
+    }
+
+    // display scores
+		let textHeight = Math.floor(height / 15);
+    cx.font = `${textHeight}px Monospace`;
+    cx.textAlign = "left";
+    cx.fillText(String(game.scores[0]), 0, textHeight);
+    cx.textAlign = "right";
+    cx.fillText(String(game.scores[1]), width - 1, textHeight);
+    //
+    requestAnimationFrame(() => {
+      drawWallGame(cx, {width, height});
     });
+	}
+
+	// ACTUAL COMPONENT LOGIC
+  const gameRef = useRef<Game | null>(null);
+  const socket = useContext(SocketContext);
+  const boardRef = useRef<HTMLCanvasElement | null>(null);
+
+	let [canvasWidth, canvasHeight] = [availWidth, availHeight];
+	// reset them before drawGame in some cases
+
+  useEffect(function () {
+    socket.emit("syncGame", ({type, packet}) => {
+			if ( !gameRef.current ) {
+				console.log('pre-init game:', type, packet);
+				gameRef.current = gm.makeGame({type});
+				console.log('post-init game', gameRef.current);
+				gameRef.current.pushPacket(packet);
+				// problem how to get map TODO
+				//
+
+// 				let gameType = gameRef.current?.type;
+				// 		// TESTING
+				// 		let gameType = 'wall';
+				// 		gameRef.current = new gm.WallGame({mapName: 'fooMap'});
+
+				boardRef.current?.focus();
+				let cx = boardRef.current?.getContext("2d");
+				if (!cx) throw new Error("Unexpected bad state");
+
+				if (type === 'classic') { // TODO get type somehow
+					let scale = Math.min(
+						Math.floor(availWidth / gm.PONG.width),
+						Math.floor(availHeight / gm.PONG.height)
+					);
+					scale = Math.max(1, scale); // if not enough space, dumb crop
+					[canvasWidth, canvasHeight] = [
+						gm.PONG.width * scale,
+						gm.PONG.height * scale,
+					];
+					console.log('hi draw');
+					drawGame(cx, {width: canvasWidth, height: canvasHeight, scale});
+				} else if (type === 'wall') {
+					const [width, height] = [availWidth, availHeight]
+					drawWallGame(cx, {width, height});
+				}
+
+			} else {
+				gameRef.current.pushPacket(packet);
+			}
+    });
+
     socket.on("gameUpdate", (packet) => {
+			if (!gameRef.current) return;
+
       gameRef.current.pushPacket(packet);
       gameRef.current.update(); // TESTING
     });
 
-    boardRef.current?.focus();
-    let cx = boardRef.current?.getContext("2d");
-    if (!cx) throw new Error("Unexpected bad state");
-    drawGame(cx);
-
     return function cleanup() {
+			gameRef.current = null;
+			console.log('cancel draw');
       socket.off("gameUpdate");
     };
   }, []);
@@ -419,6 +522,30 @@ function PongBoard({
     </canvas>
   );
 }
+
+// function PongBox() {
+// 	let box = useRef<HTMLDivElement | null>(null);
+// 	let [dims, setDims] = useState<{width: number, height: number}>({width: 750, height: 500});
+// 
+// 	useEffect( () => {
+// 		addEventListener("resize", () => {
+// 			if (!box.current) return;
+// 
+// 			let newDims = { width: box.current.clientWidth, height: box.current.clientHeight};
+// 			setDims( newDims );
+// 			console.log(newDims);
+// 		});
+// 	}, []);
+// 
+// 	return (
+// 		<div ref={box} style={{width: '100%', height: '100%'}}>
+// 			<PongBoard 
+// 				availWidth={dims.width}
+// 				availHeight={dims.height} 
+// 			/>
+// 		</div>
+// 	);
+// }
 
 //
 //

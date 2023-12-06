@@ -182,12 +182,12 @@ class MMQueue {
 export class GameService {
   // unique game_invite name to info required to launch the game
   lobbyRoom = '_LOBBY_';
-  invites = new Map<string, { host: UserData /*, maybe game options etc*/ }>();
+  invites = new Map<string, { host: UserData, type: 'classic' | 'wall', args: any }>();
   userInvites = new Map<number, string>(); // userId -> inviteName, used for deleting
   // invites along their hosts
 
   // sockId to active games
-  games = new Map<string, gm.GameState>();
+  games = new Map<string, gm.Game>();
   userGames = new Map<number, { p: gm.WhichPlayer; gameId: string }>();
   // note: gameId is both key in `games` and socket.io room for game packets
 
@@ -198,10 +198,10 @@ export class GameService {
 
   queue = new MMQueue();
 
-  gameCallback = (props: { gameRoom: string; game: gm.GameState }) => {};
+  gameCallback = (props: { gameRoom: string; game: gm.Game }) => {};
   gameFinishCallback = (props: {
     gameRoom: string;
-    game: gm.GameState;
+    game: gm.Game;
     winner: UserData;
     loser: UserData;
   }) => {};
@@ -211,8 +211,8 @@ export class GameService {
 
   // TESTING
   constructor(public friendshipGateway: FriendshipGateway) {
-    this.invites.set('test1', { host: new UserData(19) });
-    this.invites.set('test2', { host: new UserData(42) });
+//     this.invites.set('test1', { host: new UserData(19) });
+//     this.invites.set('test2', { host: new UserData(42) });
 
     // 		gFriendshipGateway = this.friendshipGateway;
     // 		//
@@ -282,7 +282,7 @@ export class GameService {
 
   getGameData(
     userId: number,
-  ): { player: gm.WhichPlayer; room: string; state: gm.GameState } | null {
+  ): { player: gm.WhichPlayer; room: string; state: gm.Game } | null {
     let data = this.userGames.get(userId);
     if (!data) return null;
 
@@ -294,7 +294,13 @@ export class GameService {
   }
 
   // creating / join games
-  lobbyCreateInvite(userId: number, inviteName: string) {
+  lobbyCreateInvite(
+		userId: number,
+	 	inviteName: string,
+	 	type: 'classic' | 'wall' = 'classic',
+		args: any
+	) 
+	{
     let user = this.users.get(userId);
     if (!user) throw new Error('no such active user');
     if (this.invites.has(inviteName))
@@ -302,7 +308,8 @@ export class GameService {
 
     user.status = UserStatus.Waiting;
 
-    this.invites.set(inviteName, { host: user });
+    this.invites.set(inviteName, { host: user, type, args});
+		console.log('##### New Inivite', this.invites.get(inviteName));
     this.userInvites.set(userId, inviteName);
   }
 
@@ -327,13 +334,22 @@ export class GameService {
     return id;
   }
 
-  launchGame(userId1, userId2, startTime = Date.now()) {
+  launchGame(
+		userId1,
+	 	userId2,
+	 	{type, args} : {type: 'classic' | 'wall', args: any} = {type: 'classic', args: null},
+		startTime = Date.now()) 
+	{
     let player1 = this.users.get(userId1);
     let player2 = this.users.get(userId2);
     if (!player1 || !player2) throw new Error('no such active user');
 
     let gameId = this.genId();
-    let game = new gm.GameState(startTime);
+		console.log('pre-make', {type, args});
+    let game = gm.makeGame({type, args}, startTime);
+
+// 		if (!game) throw new Error("Unexpected"); // make typescript happy
+
     // 		game.newBall(gm.WhichPlayer.P1, startTime);
     // TESTING
     // 		game.ball.dx = - gm.PONG.ballXSpeed;
@@ -386,8 +402,8 @@ export class GameService {
         return;
       }
       game.update();
-      let { finish, winner } = game.updateScores();
-      if (finish) {
+      let { finish, winner = null } = game.updateScores();
+      if (finish && winner) {
         onFinish(winner);
       } else {
         this.gameCallback({ gameRoom: gameId, game });
@@ -432,7 +448,9 @@ export class GameService {
     if (!joiner) throw new Error('no such active user');
 
     this.invites.delete(inviteName);
-    return this.launchGame(pending.host.id, joiner.id, startTime);
+
+		let {host, type, ...args} = pending;
+    return this.launchGame(host.id, joiner.id, {type, ...args}, startTime);
   }
 
   joinQueue(userId, userRating) {
