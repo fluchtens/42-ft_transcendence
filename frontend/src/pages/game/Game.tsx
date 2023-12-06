@@ -6,34 +6,28 @@ import { Separator } from "../../components/Separator";
 
 const SOCK_HOST = import.meta.env.VITE_BACK_URL;
 const gameSocket = io(`${SOCK_HOST}/gamesocket`, {
-  // autoConnect: false,
   withCredentials: true,
-  // maybe set those to check connection is alive with shorter timeouts
-  // retries
-  // ackTimeout
 });
+
 const SocketContext = createContext<Socket>(gameSocket);
 
-// TODO io.on('connection', () => {refresh();}) or something
-// for reconnections
-export default function Game() {
+/* -------------------------------------------------------------------------- */
+/*                                   General                                  */
+/* -------------------------------------------------------------------------- */
+
+function Game() {
   let sockRef = useRef<Socket>(gameSocket);
   let [errmsg, setErrmsg] = useState<string | null>(null);
 
   useEffect(() => {
-    // sockRef.current.connect();
     sockRef.current.on("gameSocketError", (errmsg: string) => {
       setErrmsg(`Error: ${errmsg}`);
     });
-
-    // return () => {
-    //   sockRef.current.disconnect();
-    // };
   }, []);
 
   return (
     <SocketContext.Provider value={sockRef.current}>
-      {errmsg ? (
+      {errmsg && (
         <p style={{ color: "red" }}>
           {errmsg}
           <button
@@ -44,31 +38,35 @@ export default function Game() {
             x
           </button>
         </p>
-      ) : (
-        <></>
       )}
       <GameElementContent />
     </SocketContext.Provider>
   );
 }
 
+export default Game;
+
+/* -------------------------------------------------------------------------- */
+/*                             GameElementContent                             */
+/* -------------------------------------------------------------------------- */
+
 enum UserStatus {
   Normal,
   Waiting,
   Playing,
 }
-function GameElementContent() {
-  enum WinLose {
-    NA = 0,
-    Win,
-    Lose,
-  }
+
+enum WinLose {
+  NA = 0,
+  Win,
+  Lose,
+}
+
+const GameElementContent = () => {
   const socket = useContext(SocketContext);
   const [status, setStatus] = useState<UserStatus | undefined>(undefined);
   const [winLose, setWinLose] = useState(WinLose.NA);
 
-  // authenticate and get status + log
-  // set hooks for changes of status
   useEffect(() => {
     socket.emit("getStatus", (gotStatus: UserStatus | undefined) => {
       setStatus(gotStatus);
@@ -80,7 +78,7 @@ function GameElementContent() {
     socket.on("winLose", (gotWin: boolean) => {
       setWinLose(gotWin ? WinLose.Win : WinLose.Lose);
     });
-    //cleanup
+
     return () => {
       socket.off("statusChange");
       socket.off("winLose");
@@ -124,128 +122,161 @@ function GameElementContent() {
   }
 
   return content;
-}
+};
 
-function GamesLobby({ waiting = false }) {
+/* -------------------------------------------------------------------------- */
+/*                                 GamesLobby                                 */
+/* -------------------------------------------------------------------------- */
+
+const GamesLobby = ({ waiting = false }) => {
   type GamesList = Array<{ name: string; host: string }>;
   const socket = useContext(SocketContext);
   const [gamesInfo, setGamesInfo] = useState<GamesList>([]);
 
-  useEffect(() => {
-    // 		socket.emit('joinLobby', (gotGamesInfo: GamesList) => {
-    // 		 	setGamesInfo(gotGamesInfo);
-    // 		});
+  const CreateGame = () => {
+    const [matchName, setMatchName] = useState<string>("");
 
+    const changeMatchName = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setMatchName(e.target.value);
+    };
+
+    const requestCreate = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (waiting || !matchName) return;
+      socket.emit("createInvite", matchName);
+      setMatchName("");
+    };
+
+    return (
+      <form onSubmit={requestCreate}>
+        <label>Match Name</label>
+        <input
+          type="text"
+          value={matchName}
+          onChange={changeMatchName}
+          placeholder="Enter a match name"
+          required
+          disabled={waiting}
+        />
+        {waiting ? (
+          <button className={styles.disabled} type="submit">
+            Create Match
+          </button>
+        ) : (
+          <button className={styles.enabled} type="submit">
+            Create Match
+          </button>
+        )}
+      </form>
+    );
+  };
+
+  const JoinQueue = () => {
+    const joinQueue = () => {
+      socket.emit("joinQueue");
+    };
+
+    const cancelQueue = () => {
+      socket.emit("cancel");
+    };
+
+    return (
+      <div className={styles.joinQueue}>
+        {!waiting ? (
+          <>
+            <label> Join matchmaking queue </label>
+            <button className={styles.confirm} onClick={joinQueue}>
+              Find an opponent
+            </button>
+          </>
+        ) : (
+          <>
+            <label>Waiting for opponent...</label>
+            <button className={styles.cancel} onClick={cancelQueue}>
+              Cancel
+            </button>
+          </>
+        )}
+      </div>
+    );
+  };
+
+  useEffect(() => {
     socket.on("gameListUpdate", (gotGamesInfo: GamesList) => {
       setGamesInfo(gotGamesInfo);
     });
     socket.emit("joinLobby");
 
-    // cleanup
     return () => {
       socket.off("gameListUpdate");
     };
   }, []);
 
-  // subcomponents
-  function CreateGame() {
-    let inputRef = useRef<null | HTMLInputElement>(null);
-    function requestCreate() {
-      if (!inputRef.current) throw new Error("Unexpected Error"); // (impossible path normally)
-      socket.emit("createInvite", inputRef.current.value);
-    }
-    return (
-      <>
-        <h2> Create Public Invite </h2>
-        <label>
-          Game Name :<input ref={inputRef} />
-        </label>
-        <button onClick={requestCreate}> create </button>
-      </>
-    );
-  }
-
-  function JoinQueue() {
-    return (
-      <>
-        <h2> Join Matchmaking Queue </h2>
-        <button
-          onClick={() => {
-            socket.emit("joinQueue");
-          }}
-        >
-          {" "}
-          Find Opponent{" "}
-        </button>
-      </>
-    );
-  }
-
   return (
     <div className={styles.container}>
-      <h1> Games Lobby </h1>
-      <Separator />
-      {!waiting && <JoinQueue />}
-      {waiting && (
-        <>
-          <p>Waiting for opponent... </p>
-          <button
-            onClick={() => {
-              socket.emit("cancel");
-            }}
-          >
-            {" "}
-            Cancel{" "}
-          </button>
-        </>
-      )}
-      <GamesTable
-        gamesInfo={gamesInfo}
-        onJoin={(gameName) => {
-          socket.emit("joinGame", gameName);
-        }}
-        joinEnable={!waiting}
-      />
-      {waiting ? <></> : <CreateGame />}
+      <div className={styles.options}>
+        <div className={styles.createMatch}>
+          <h1>Create match</h1>
+          <Separator />
+          <CreateGame />
+        </div>
+        <div className={styles.findMatch}>
+          <h1>Find match</h1>
+          <Separator />
+          <div className={styles.findMatchOptions}>
+            <JoinQueue />
+            <GamesTable
+              gamesInfo={gamesInfo}
+              onJoin={(gameName) => {
+                socket.emit("joinGame", gameName);
+              }}
+              joinEnable={!waiting}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
-}
+};
 
-function GamesTable({
-  gamesInfo,
-  onJoin,
-  joinEnable = true,
-}: {
+/* -------------------------------------------------------------------------- */
+/*                                 GamesTable                                 */
+/* -------------------------------------------------------------------------- */
+
+interface GamesTableProps {
   gamesInfo: Array<{ name: string; host: string }>;
   onJoin: (gameName: string) => undefined;
   joinEnable: boolean;
-}) {
-  if (gamesInfo.length === 0) {
-    return (
-      <>
-        {" "}
-        <h2>Joinable Games</h2> <p> [ None ] </p>{" "}
-      </>
-    );
-  }
+}
 
+const GamesTable = ({
+  gamesInfo,
+  onJoin,
+  joinEnable = true,
+}: GamesTableProps) => {
   const fields = new Map([
-    ["Game Name", "name"],
+    ["Name", "name"],
     ["Host", "host"],
     ["Rating", "rating"],
   ]);
-  function joinButton(enabled: boolean, onClick: () => undefined) {
+
+  const joinButton = (enabled: boolean, onClick: () => undefined) => {
     return enabled ? (
-      <button onClick={onClick}> join </button>
+      <button className={styles.enabled} onClick={onClick}>
+        Join
+      </button>
     ) : (
-      <button disabled> join </button>
+      <button className={styles.disabled} disabled>
+        Join
+      </button>
     );
-  }
-  function itemRow(item: { name: string }) {
+  };
+
+  const itemRow = (item: { name: string }, index: number) => {
     return (
-      <tr>
-        {[...fields.values()].map((key) => (
-          <td>{(item as any)[key]}</td>
+      <tr key={index}>
+        {[...fields.values()].map((key, index) => (
+          <td key={index}>{(item as any)[key]}</td>
         ))}
         <td>
           {joinButton(joinEnable, () => {
@@ -254,37 +285,48 @@ function GamesTable({
         </td>
       </tr>
     );
-  }
+  };
 
   let fieldkeys = [...fields.keys()];
   fieldkeys.push("Join");
   let headerRow = (
     <tr>
-      {fieldkeys.map((field) => (
-        <th>{field}</th>
+      {fieldkeys.map((field, index) => (
+        <th key={index}>{field}</th>
       ))}
     </tr>
   );
-  let rows = gamesInfo.map((item) => itemRow(item));
+  let rows = gamesInfo.map((item, index) => itemRow(item, index));
 
   return (
-    <>
-      <h2> Joinable games </h2>
-      <table>
-        <thead>{headerRow}</thead>
-        <tbody>{rows}</tbody>
-      </table>
-    </>
+    <div className={styles.joinableGames}>
+      <label>Joinable matchs</label>
+      {gamesInfo.length === 0 ? (
+        <>
+          <p>No matchs available</p>
+        </>
+      ) : (
+        <>
+          <table>
+            <thead>{headerRow}</thead>
+            <tbody>{rows}</tbody>
+          </table>
+        </>
+      )}
+    </div>
   );
-}
+};
 
-function PongBoard({
-  availWidth,
-  availHeight,
-}: {
+/* -------------------------------------------------------------------------- */
+/*                                 GamesTable                                 */
+/* -------------------------------------------------------------------------- */
+
+interface PongBoardProps {
   availWidth: number;
   availHeight: number;
-}) {
+}
+
+const PongBoard = ({ availWidth, availHeight }: PongBoardProps) => {
   const gameRef = useRef(new gm.GameState());
   const socket = useContext(SocketContext);
   const boardRef = useRef<HTMLCanvasElement | null>(null);
@@ -418,4 +460,4 @@ function PongBoard({
       Cannot load pong game.
     </canvas>
   );
-}
+};

@@ -5,7 +5,222 @@
   padding: 2rem;
   border-radius: $rounded-xl;
   background: $bg-secondary-color;
-  flex-direction: column;
-  display: flex;
-  align-items: center;
+
+  .options {
+    flex-direction: column;
+    display: flex;
+    align-items: left;
+    gap: 2rem;
+
+    .createMatch {
+      width: 100%;
+
+      form {
+        flex-direction: column;
+        display: flex;
+        align-items: left;
+        gap: 0.25rem;
+
+        label {
+          display: block;
+          font-size: map-get($text-lg, font-size);
+          line-height: map-get($text-lg, line-height);
+          font-weight: $font-medium;
+        }
+
+        input {
+          max-width: 20rem;
+          height: 2rem;
+          padding: 0 1rem 0 1rem;
+          box-sizing: border-box;
+          border: none;
+          border-radius: $rounded;
+          outline: none;
+          background: $extra-tertiary-color;
+          font-size: map-get($text-sm, font-size);
+          line-height: map-get($text-sm, line-height);
+          font-weight: $font-normal;
+          color: $text-primary-color;
+        }
+
+        button {
+          all: unset;
+          margin-top: 0.5rem;
+          margin-right: auto;
+          padding: 0.5rem 1rem;
+          border-radius: $rounded-lg;
+          transition: background 0.3s ease;
+          font-size: map-get($text-sm, font-size);
+          line-height: map-get($text-sm, line-height);
+          font-weight: $font-medium;
+          color: white;
+          cursor: pointer;
+
+          &.enabled {
+            background: $sucess-primary-color;
+
+            &:hover {
+              background: $sucess-secondary-color;
+            }
+          }
+
+          &.disabled {
+            background: $extra-tertiary-color;
+          }
+        }
+      }
+    }
+
+    .findMatch {
+      width: 100%;
+
+      .findMatchOptions {
+        flex-direction: column;
+        display: flex;
+        align-items: left;
+        gap: 1rem;
+
+        .joinQueue {
+          label {
+            display: block;
+            font-size: map-get($text-lg, font-size);
+            line-height: map-get($text-lg, line-height);
+            font-weight: $font-medium;
+          }
+
+          button {
+            all: unset;
+            margin-top: 0.25rem;
+            padding: 0.5rem 1rem;
+            border-radius: $rounded-lg;
+            transition: background 0.3s ease;
+            font-size: map-get($text-sm, font-size);
+            line-height: map-get($text-sm, line-height);
+            font-weight: $font-medium;
+            color: white;
+            cursor: pointer;
+
+            &.confirm {
+              background: $sucess-primary-color;
+
+              &:hover {
+                background: $sucess-secondary-color;
+              }
+            }
+
+            &.cancel {
+              background: #762c2d;
+
+              &:hover {
+                background: #da3633;
+              }
+            }
+          }
+        }
+
+        .joinableGames {
+          label {
+            display: block;
+            font-size: map-get($text-lg, font-size);
+            line-height: map-get($text-lg, line-height);
+            font-weight: $font-medium;
+          }
+
+          p {
+            font-size: map-get($text-sm, font-size);
+            line-height: map-get($text-sm, line-height);
+            font-weight: $font-normal;
+            color: $text-secondary-color;
+          }
+
+          table {
+            width: 100%;
+            text-align: center;
+
+            thead {
+              th {
+                font-size: map-get($text-base, font-size);
+                line-height: map-get($text-base, line-height);
+                font-weight: $font-semibold;
+
+                &:nth-child(1) {
+                  text-align: left;
+                }
+              }
+            }
+
+            tbody {
+              td {
+                padding: 0.5rem 0;
+                font-size: map-get($text-base, font-size);
+                line-height: map-get($text-base, line-height);
+                font-weight: $font-normal;
+                border-bottom: 1px solid rgb(255, 255, 255, 0.05);
+
+                &:nth-child(1) {
+                  text-align: left;
+                }
+
+                button {
+                  all: unset;
+                  padding: 0.5rem 1rem;
+                  border-radius: $rounded-lg;
+                  transition: background 0.3s ease;
+                  font-size: map-get($text-sm, font-size);
+                  line-height: map-get($text-sm, line-height);
+                  font-weight: $font-medium;
+                  color: white;
+                  cursor: pointer;
+
+                  &.enabled {
+                    background: $sucess-primary-color;
+
+                    &:hover {
+                      background: $sucess-secondary-color;
+                    }
+                  }
+
+                  &.disabled {
+                    background: $extra-tertiary-color;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+
+    .options {
+      align-items: center;
+      gap: 1rem;
+      text-align: center;
+
+      .createMatch {
+        form {
+          align-items: center;
+
+          button {
+            margin-right: 0;
+          }
+        }
+      }
+    }
+
+    .toggleTwoFa {
+      text-align: center;
+      align-items: center;
+
+      button {
+        margin-top: 1rem;
+        margin-right: 0;
+      }
+    }
+  }
 }
