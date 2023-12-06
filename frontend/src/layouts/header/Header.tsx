@@ -76,8 +76,8 @@ export default function Header() {
             </li>
             <li>
               <NavLink
-                path="/chat"
-                text="CHAT"
+                path="/channels"
+                text="CHANNELS"
                 icon={<BsFillChatDotsFill />}
                 cb={closeNavMenu}
               />

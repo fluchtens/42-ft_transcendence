@@ -2,10 +2,11 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import Home from "../../pages/home/Home";
 import Header from "../header/Header";
 import Friends from "../../pages/friends/Friends";
-import Channels from "../channels/Channels";
+import Channels from "../../pages/channels/Channels";
 import { Notify, notifyError } from "../../utils/notifications";
 import styles from "./Layout.module.scss";
-import FriendStyles from "../friends/Friends.module.scss";
+import friendStyles from "../friends/Friends.module.scss";
+import channelStyles from "../channels/Channels.module.scss";
 import { useAuth } from "../../hooks/useAuth";
 import { useEffect } from "react";
 
@@ -40,9 +41,9 @@ function Layout() {
     <div className={styles.container}>
       {!isAuthPage() && <Header />}
       <div className={styles.main}>
-        {!isAuthPage() && <Channels />}
+        {!isAuthPage() && <Channels styles={channelStyles} />}
         <main>{isHomePage() ? <Home /> : <Outlet />}</main>
-        {!isAuthPage() && <Friends styles={FriendStyles} />}
+        {!isAuthPage() && <Friends styles={friendStyles} />}
       </div>
       <Notify />
     </div>
