@@ -6,7 +6,7 @@ import { User } from "../types/user.interface";
 import { notifyError, notifySuccess } from "../utils/notifications";
 import styles from "./UserContextMenu.module.scss";
 import { Link, useNavigate } from "react-router-dom";
-import { MuteUser } from "../pages/chat/MuteUser";
+import { MuteUser } from "../pages/chat/actions/MuteUser";
 
 export enum ContextMenuType {
   FRIEND = "FRIEND",

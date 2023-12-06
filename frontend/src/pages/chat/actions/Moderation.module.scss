@@ -1,4 +1,4 @@
-@import "../../styles/config.scss";
+@import "../../../styles/config.scss";
 
 .form {
   padding: 1.5rem;
@@ -9,6 +9,7 @@
   border-radius: $rounded-lg;
   background: $bg-secondary-color;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  text-align: center;
 
   .input {
     flex-direction: column;

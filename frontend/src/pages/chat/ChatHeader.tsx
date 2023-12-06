@@ -2,13 +2,13 @@ import { IoSettings } from "react-icons/io5";
 import { HiUsers } from "react-icons/hi2";
 import styles from "./ChatHeader.module.scss";
 import { useEffect, useState } from "react";
-import { EditChannel } from "./EditChannel";
+import { EditChannel } from "./actions/EditChannel";
 import { Channel, MemberUsers } from "../../types/chat.interface";
 import { FaDoorOpen } from "react-icons/fa6";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import { useChatSocket } from "../../hooks/useChatSocket";
 import { useNavigate } from "react-router-dom";
-import { UnbanUser } from "./UnbanUser";
+import { UnbanUser } from "./actions/UnbanUser";
 import { FaBan } from "react-icons/fa";
 import { useAuth } from "../../hooks/useAuth";
 
@@ -86,16 +86,35 @@ const ChatHeader = ({
     }
   }, [members]);
 
+  const renderButtons = () => {
+    switch (role) {
+      case "OWNER":
+        return (
+          <>
+            <button onClick={openEditMenuModal}>
+              <IoSettings className={styles.icon} />
+            </button>
+            <button onClick={openUnbanUserModal}>
+              <FaBan className={styles.icon} />
+            </button>
+          </>
+        );
+      case "ADMIN":
+        return (
+          <button onClick={openUnbanUserModal}>
+            <FaBan className={styles.icon} />
+          </button>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <>
       <div className={styles.header}>
         <div className={styles.leftBtns}>
-          <button onClick={openEditMenuModal}>
-            <IoSettings className={styles.icon} />
-          </button>
-          <button onClick={openUnbanUserModal}>
-            <FaBan className={styles.icon} />
-          </button>
+          {renderButtons()}
           <button onClick={leaveChannel}>
             <FaDoorOpen className={styles.icon} />
           </button>

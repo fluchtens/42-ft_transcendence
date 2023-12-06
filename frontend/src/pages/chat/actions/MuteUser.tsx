@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Modal } from "../../components/Modal";
-import styles from "./MuteUser.module.scss";
-import { notifyError, notifySuccess } from "../../utils/notifications";
-import { Channel } from "../../types/chat.interface";
-import { User } from "../../types/user.interface";
-import { useChatSocket } from "../../hooks/useChatSocket";
+import { Modal } from "../../../components/Modal";
+import styles from "./Moderation.module.scss";
+import { notifyError, notifySuccess } from "../../../utils/notifications";
+import { Channel } from "../../../types/chat.interface";
+import { User } from "../../../types/user.interface";
+import { useChatSocket } from "../../../hooks/useChatSocket";
 
 interface MuteUserProps {
   user: User;
@@ -24,16 +24,21 @@ const MuteUser = ({ user, channel, closeModal, cb }: MuteUserProps) => {
   const submitData = (e: React.FormEvent) => {
     e.preventDefault();
     cb();
-    socket.emit('muteUser', {
-      channelId: channel.id, userIdToMute:user.id, timeToMute: time
-    }, (result:string) => {
-      if (!result) {
-        notifySuccess('muteUser');
+    socket.emit(
+      "muteUser",
+      {
+        channelId: channel.id,
+        userIdToMute: user.id,
+        timeToMute: time,
+      },
+      (result: string) => {
+        if (!result) {
+          notifySuccess("muteUser");
+        } else {
+          notifyError(result);
+        }
       }
-      else {
-        notifyError(result);
-      }
-    })
+    );
     closeModal();
     setTime(0);
   };
