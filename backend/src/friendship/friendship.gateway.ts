@@ -1,5 +1,4 @@
 import {
-  ConnectedSocket,
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
@@ -8,7 +7,11 @@ import {
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
 import { RoomsService } from 'src/chat/room.service';
-import { ReloadListDto } from './friendship.dtos';
+
+interface ReloadListType {
+  reqUserId: number;
+  targetUserId: number;
+}
 
 interface UserStatus {
   status: 'Online' | 'In game';
@@ -24,10 +27,11 @@ interface UserStatus {
 })
 export class FriendshipGateway {
   private userStatus: Map<number, UserStatus> = new Map();
-  public code = Math.random();
 
-  constructor(private readonly authService: AuthService,
-              private readonly roomService: RoomsService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly roomService: RoomsService,
+  ) {}
 
   @WebSocketServer()
   server: Server;
@@ -70,6 +74,24 @@ export class FriendshipGateway {
     this.server.emit('reloadList');
   }
 
+  onModuleInit() {
+    this.server.on('connection', (socket) => {
+      if (
+        !this.roomService.getRoomClients(
+          String(socket.handshake.auth.userId) + '/friendship',
+        )
+      ) {
+        this.roomService.createRoom(
+          String(socket.handshake.auth.userId) + '/friendship',
+        );
+      }
+      this.roomService.joinRoom(
+        socket,
+        String(socket.handshake.auth.userId) + '/friendship',
+      );
+    });
+  }
+
   handleConnection(client: Socket) {
     try {
       const cookie = client.handshake.headers.cookie;
@@ -101,21 +123,6 @@ export class FriendshipGateway {
     }
   }
 
-  onModuleInit() {
-    this.server.on('connection', (socket) => {
-      try {
-        if (!this.roomService.getRoomClients(String(socket.handshake.auth.userId) + "/friendship")) {
-          this.roomService.createRoom(String(socket.handshake.auth.userId) + "/friendship")
-        }
-        this.roomService.joinRoom(socket, String(socket.handshake.auth.userId) + "/friendship")
-      }
-      catch (error) {
-        console.log(error);
-      }
-    });
-  }
-
-
   handleDisconnect(client: Socket) {
     const userId = client.handshake.auth.userId;
     const socketId = client.id;
@@ -126,8 +133,8 @@ export class FriendshipGateway {
   }
 
   @SubscribeMessage('reloadList')
-  handleReloadList(@MessageBody() reloadListDto: ReloadListDto) {
-    this.server.to(String(reloadListDto.myUserId) + "/friendship").emit('reloadList');
-    this.server.to(String(reloadListDto.userId) + "/friendship").emit('reloadList');
+  handleReloadList(@MessageBody() { reqUserId, targetUserId }: ReloadListType) {
+    this.server.to(String(reqUserId) + '/friendship').emit('reloadList');
+    this.server.to(String(targetUserId) + '/friendship').emit('reloadList');
   }
 }
