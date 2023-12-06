@@ -34,6 +34,8 @@ import {
 } from './dtos/gateway.dtos';
 import { FriendshipStatus, User } from '@prisma/client';
 import { FriendshipService } from 'src/friendship/friendship.service';
+import { GameService } from 'src/game/game.service';
+import { GameGatewayModule } from 'src/game/gameGateway.module';
 
 @WebSocketGateway({
   namespace: 'chatSocket',
@@ -49,11 +51,13 @@ export class ChatGateway implements OnModuleInit {
     private readonly userService: UserService,
     private readonly roomService: RoomsService,
     private readonly friendshipService: FriendshipService,
+    private readonly gameService: GameService,
   ) {}
 
   private connectedUsers: Map<string, Set<string>> = new Map();
   private usersData: Map<number, Partial<User>> = new Map();
   private userConnections: Map<number, Set<Socket>> = new Map();
+  private waitingUsers: Map<string, Socket> = new Map();
 
   @WebSocketServer()
   server: Server;
@@ -1316,5 +1320,49 @@ export class ChatGateway implements OnModuleInit {
       return null;
     }
     return;
+  }
+
+  @SubscribeMessage('createGame')
+  async handleCreateGame(@ConnectedSocket() client: Socket, @MessageBody() channelId: string) {
+    const userId = client.handshake.auth.userId;
+    if (userId) {
+      try {
+        if (!this.waitingUsers.has(userId)) {
+          this.waitingUsers.set(userId, client);
+          let channel = await this.chatService.getChannelById(channelId);
+          if (channel) {
+            const messageSend = await this.chatService.addMessage(
+              userId,
+              channelId,
+              "Can you beat me?",
+            );
+            if (!messageSend) throw new Error('Message cannot be send');
+            const messageData: Messages = messageSend;
+            messageData.user = await this.getOrAddUserData(userId);
+            messageData.gameInvit = true;
+            this.server.to(channelId).emit(`${channelId}/message`, messageData);
+          }
+          else {
+            channel = await this.chatService.getPrivateChannelData(channelId);
+            if (channel) {
+              const messageSend = await this.chatService.addPrivateMessage(
+                userId,
+                channelId,
+                "Can you beat me?",
+              );
+              if (!messageSend) throw new Error('Message cannot be send');
+              const messageData: Messages = messageSend;
+              messageData.user = await this.getOrAddUserData(userId);
+              messageData.gameInvit = true;
+              this.server.emit(`${channelId}/message`, messageData);
+            }
+          }
+          
+        }
+      }
+      catch {
+
+      }
+    }
   }
 }
