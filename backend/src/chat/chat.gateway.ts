@@ -1045,7 +1045,7 @@ export class ChatGateway implements OnModuleInit {
           if (banUser) {
             const userData = await this.getOrAddUserData(userId);
             const message =
-              userData.username + ' banded ' + userMember.username;
+              userData.username + ' banned ' + userMember.username;
             const messageSend = await this.chatService.addMessage(
               userId,
               channelId,
