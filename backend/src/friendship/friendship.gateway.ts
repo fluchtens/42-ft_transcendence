@@ -119,7 +119,6 @@ export class FriendshipGateway {
       this.server.emit('reloadList');
     } catch (error) {
       client.disconnect(true);
-      console.error(`client ${client.id} disconnected`, error.message);
     }
   }
 

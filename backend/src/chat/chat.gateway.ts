@@ -235,14 +235,14 @@ export class ChatGateway implements OnModuleInit {
       if (!token) {
         throw new Error('access_token not found');
       }
+
       const decodedToken = this.authService.verifyAccessToken(token);
       client.handshake.auth.userId = decodedToken.id;
-      // this.addSocketToUser(client.handshake.auth.userId, client.id);
-      const userId = client.handshake.auth.userId;
 
+      const userId = client.handshake.auth.userId;
       this.addSocketToUser(userId, client);
     } catch (error) {
-      console.error('not connected', error.message);
+      client.disconnect(true);
     }
   }
 
