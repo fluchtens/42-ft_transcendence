@@ -1,15 +1,4 @@
-import {
-  BadGatewayException,
-  BadRequestException,
-  Body,
-  Inject,
-  OnModuleInit,
-  Param,
-  Req,
-  UseGuards,
-  forwardRef,
-} from '@nestjs/common';
-
+import { OnModuleInit } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -17,17 +6,10 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Request } from 'express';
-import { env } from 'process';
-
 import { Server } from 'socket.io';
 import { Socket } from 'socket.io';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ChatService } from './chat.service';
-import { ChatController } from './chat.controller';
 import { AuthService } from 'src/auth/auth.service';
-import { ExecutionContextHost } from '@nestjs/core/helpers/execution-context-host';
-import cookieParser from 'cookie-parser';
 import { UserService } from 'src/user/user.service';
 import { RoomsService } from './room.service';
 import {
@@ -50,10 +32,8 @@ import {
   ChangeChannelNameDto,
   PrivateChannelData,
 } from './dtos/gateway.dtos';
-import * as bcrypt from 'bcryptjs';
-import { FriendshipStatus, Member, User } from '@prisma/client';
+import { FriendshipStatus, User } from '@prisma/client';
 import { FriendshipService } from 'src/friendship/friendship.service';
-import { threadId } from 'worker_threads';
 
 @WebSocketGateway({
   namespace: 'chatSocket',
@@ -386,10 +366,18 @@ export class ChatGateway implements OnModuleInit {
   ): Promise<string> {
     const userId = client.handshake.auth.userId;
     const { channelId, message } = messageDto;
-    const isChannelIdValid = !!channelId && typeof channelId === 'string' && channelId.length >= 1 && channelId.length <= 2000;
-    const isMessageValid = !!message && typeof message === 'string' && message.length >= 1 && message.length <= 2000;
+    const isChannelIdValid =
+      !!channelId &&
+      typeof channelId === 'string' &&
+      channelId.length >= 1 &&
+      channelId.length <= 2000;
+    const isMessageValid =
+      !!message &&
+      typeof message === 'string' &&
+      message.length >= 1 &&
+      message.length <= 2000;
     const isDtoValid = isChannelIdValid && isMessageValid;
-    if (isDtoValid ) {
+    if (isDtoValid) {
       try {
         const channel = await this.chatService.getChannelById(channelId);
         if (channel) {
@@ -407,9 +395,8 @@ export class ChatGateway implements OnModuleInit {
         console.error('sendMessage error', error.message);
         return error.message;
       }
-    }
-    else {
-      return "invalid input";
+    } else {
+      return 'invalid input';
     }
     return;
   }
@@ -481,10 +468,14 @@ export class ChatGateway implements OnModuleInit {
     const userId = Number(client.handshake.auth.userId);
     let { channelName } = createChannelDto;
     const { isPublic, password } = createChannelDto;
-    const isChannelNameValid = !!channelName && typeof channelName === 'string' && channelName.length >= 3 && channelName.length <= 16;
+    const isChannelNameValid =
+      !!channelName &&
+      typeof channelName === 'string' &&
+      channelName.length >= 3 &&
+      channelName.length <= 16;
     if (userId) {
       if (!isChannelNameValid) {
-        throw new Error("invalid input");
+        throw new Error('invalid input');
       }
       try {
         const channelData = await this.chatService.createChannel(
@@ -572,10 +563,17 @@ export class ChatGateway implements OnModuleInit {
     if (userId) {
       try {
         const { channelId, memberUsername } = addMemberDto;
-        const isNotEmpty = memberUsername !== undefined && memberUsername !== null && memberUsername !== '';
+        const isNotEmpty =
+          memberUsername !== undefined &&
+          memberUsername !== null &&
+          memberUsername !== '';
         const isString = typeof memberUsername === 'string';
         const isMemberUsernameValid = isNotEmpty && isString;
-        const errorMessage = !isNotEmpty ? 'Username cannot be empty' : !isString ? 'Username must be a string' : '';
+        const errorMessage = !isNotEmpty
+          ? 'Username cannot be empty'
+          : !isString
+          ? 'Username must be a string'
+          : '';
         if (!isMemberUsernameValid) {
           throw new Error(errorMessage);
         }
@@ -1130,7 +1128,7 @@ export class ChatGateway implements OnModuleInit {
             messageData.user = userData;
             this.server.to(channelId).emit(`${channelId}/message`, messageData);
             this.server.to(channelId).emit('refreshPage', channelId);
-            return "";
+            return '';
           } else {
             throw new Error('Permission denied');
           }
@@ -1214,16 +1212,27 @@ export class ChatGateway implements OnModuleInit {
   }
 
   @SubscribeMessage('changeChannelname')
-  async handleChangeChannelname(@ConnectedSocket() client: Socket,@MessageBody() changeChannelNameDto:ChangeChannelNameDto) {
+  async handleChangeChannelname(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() changeChannelNameDto: ChangeChannelNameDto,
+  ) {
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
         const { channelName, channelId } = changeChannelNameDto;
-        const isChannelNameValid = !!channelName && typeof channelName === 'string' && channelName.length >= 3 && channelName.length <= 16;
+        const isChannelNameValid =
+          !!channelName &&
+          typeof channelName === 'string' &&
+          channelName.length >= 3 &&
+          channelName.length <= 16;
         if (!isChannelNameValid) {
-          throw new Error("Invalid input");
+          throw new Error('Invalid input');
         }
-        await this.chatService.changeChannelName(userId, channelId, channelName);
+        await this.chatService.changeChannelName(
+          userId,
+          channelId,
+          channelName,
+        );
 
         const userData = await this.getOrAddUserData(userId);
         const message =
@@ -1244,7 +1253,6 @@ export class ChatGateway implements OnModuleInit {
         this.server.to(channelId).emit('refreshPage', channelId);
 
         this.server.emit('resetChannel', channelId);
-
       } catch (error) {
         console.log(error.message);
         return error.message;
@@ -1256,13 +1264,22 @@ export class ChatGateway implements OnModuleInit {
   }
 
   @SubscribeMessage('privateMessage')
-  async handlePrivateMessage(@ConnectedSocket() client: Socket, @MessageBody() userIdToConnect : number) {
+  async handlePrivateMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() userIdToConnect: number,
+  ) {
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
-        let channelId : string = await this.chatService.findPrivateChannel(userId, userIdToConnect);
+        let channelId: string = await this.chatService.findPrivateChannel(
+          userId,
+          userIdToConnect,
+        );
         if (!channelId) {
-          channelId = await this.chatService.createPrivateChannel(userId, userIdToConnect);
+          channelId = await this.chatService.createPrivateChannel(
+            userId,
+            userIdToConnect,
+          );
         }
         console.log(channelId);
         return channelId;
@@ -1273,7 +1290,7 @@ export class ChatGateway implements OnModuleInit {
     } else {
       console.log('User ID not available.1118');
       return 'User ID not available.';
-    }  
+    }
   }
 
   @SubscribeMessage('sendPrivateMessage')
@@ -1283,10 +1300,18 @@ export class ChatGateway implements OnModuleInit {
   ): Promise<string> {
     const userId = client.handshake.auth.userId;
     const { channelId, message } = messageDto;
-    const isChannelIdValid = !!channelId && typeof channelId === 'string' && channelId.length >= 1 && channelId.length <= 2000;
-    const isMessageValid = !!message && typeof message === 'string' && message.length >= 1 && message.length <= 2000;
+    const isChannelIdValid =
+      !!channelId &&
+      typeof channelId === 'string' &&
+      channelId.length >= 1 &&
+      channelId.length <= 2000;
+    const isMessageValid =
+      !!message &&
+      typeof message === 'string' &&
+      message.length >= 1 &&
+      message.length <= 2000;
     const isDtoValid = isChannelIdValid && isMessageValid;
-    if (isDtoValid ) {
+    if (isDtoValid) {
       try {
         const messageSend = await this.chatService.addPrivateMessage(
           userId,
@@ -1301,9 +1326,8 @@ export class ChatGateway implements OnModuleInit {
         console.error('sendMessage error', error.message);
         return error.message;
       }
-    }
-    else {
-      return "invalid input";
+    } else {
+      return 'invalid input';
     }
     return;
   }
@@ -1314,11 +1338,16 @@ export class ChatGateway implements OnModuleInit {
     @MessageBody() channelId: string,
   ): Promise<PrivateChannelData> {
     const userId = client.handshake.auth.userId;
-    const canConnect = await this.chatService.canConnectToPrivateChannel(channelId, userId);
+    const canConnect = await this.chatService.canConnectToPrivateChannel(
+      channelId,
+      userId,
+    );
     if (canConnect) {
       try {
         const channel = await this.chatService.getPrivateChannelData(channelId);
-        const messagesRaw = await this.chatService.getPrivateMessages(channelId);
+        const messagesRaw = await this.chatService.getPrivateMessages(
+          channelId,
+        );
         const messages: Messages[] = await Promise.all(
           messagesRaw.map(async (rawMessage) => {
             const user = await this.getOrAddUserData(rawMessage.userId);
@@ -1334,11 +1363,10 @@ export class ChatGateway implements OnModuleInit {
         channelData.id = channel.id;
         if (channel.receiverId === userId) {
           const user = await this.getOrAddUserData(channel.senderId);
-          channelData.name = user.username + " private channel";
-        }
-        else {
+          channelData.name = user.username + ' private channel';
+        } else {
           const user = await this.getOrAddUserData(channel.receiverId);
-          channelData.name = user.username + " private channel";
+          channelData.name = user.username + ' private channel';
         }
         channelData.messages = messages;
         return channelData;
@@ -1346,8 +1374,7 @@ export class ChatGateway implements OnModuleInit {
         console.error('sendMessage error', error.message);
         return null;
       }
-    }
-    else {
+    } else {
       return null;
     }
     return;
