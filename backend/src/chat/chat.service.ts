@@ -246,18 +246,22 @@ export class ChatService {
     }
   }
 
-  async changeChannelName(userId: number, channelId: string, newChannelname: string) {
+  async changeChannelName(
+    userId: number,
+    channelId: string,
+    newChannelname: string,
+  ) {
     const userRole = await this.findMemberRoleInChannel(channelId, userId);
-    if (userRole !== 'OWNER'){
+    if (userRole !== 'OWNER') {
       throw new Error("You don't has permission to change the channelName");
     }
     await this.prismaService.channel.update({
       where: {
-        id: channelId
+        id: channelId,
       },
       data: {
-        name: newChannelname
-      }
+        name: newChannelname,
+      },
     });
   }
 
@@ -735,8 +739,11 @@ export class ChatService {
         channelId,
         userIdKick,
       );
-      if ((userRole !== 'ADMIN' && userRole !== 'OWNER') || (userRole === 'ADMIN' && userRoleKick === 'ADMIN')) {
-        throw new Error("You have no permission to kick");
+      if (
+        (userRole !== 'ADMIN' && userRole !== 'OWNER') ||
+        (userRole === 'ADMIN' && userRoleKick === 'ADMIN')
+      ) {
+        throw new Error('You have no permission to kick');
       }
       if (userRoleKick === 'OWNER') {
         throw new Error('You cannot kick the chat owner');
@@ -756,8 +763,11 @@ export class ChatService {
         channelId,
         userIdKick,
       );
-      if ((userRole !== 'ADMIN' && userRole !== 'OWNER') || (userRole === 'ADMIN' && userRoleKick === 'ADMIN')) {
-        throw new Error("You have no permission to ban");
+      if (
+        (userRole !== 'ADMIN' && userRole !== 'OWNER') ||
+        (userRole === 'ADMIN' && userRoleKick === 'ADMIN')
+      ) {
+        throw new Error('You have no permission to ban');
       }
       if (userRoleKick === 'OWNER') {
         throw new Error('You cannot ban the chat owner');
@@ -765,7 +775,7 @@ export class ChatService {
       if (await this.deleteMember(userIdKick, channelId)) {
         const channel = await this.prismaService.channel.findUnique({
           where: { id: channelId },
-        });      
+        });
         if (!channel.bannedUsers.includes(userIdKick)) {
           await this.prismaService.channel.update({
             where: { id: channelId },
@@ -775,7 +785,7 @@ export class ChatService {
               },
             },
           });
-        } 
+        }
         return 'member banned';
       }
     } catch (error) {
@@ -797,38 +807,40 @@ export class ChatService {
           },
         },
       });
-    }
-    else {
-      throw new Error("The user are not banned");
+    } else {
+      throw new Error('The user are not banned');
     }
   }
 
-  async  isUserBanned(channelId: string, userId: number): Promise<boolean> {
+  async isUserBanned(channelId: string, userId: number): Promise<boolean> {
     const channel = await this.prismaService.channel.findUnique({
       where: { id: channelId },
     });
 
     console.log(channel);
-  
+
     if (!channel) {
-      throw new Error('Le canal n\'existe pas.'); 
+      throw new Error("Le canal n'existe pas.");
     }
-  
+
     return channel.bannedUsers.includes(userId);
   }
 
-  async muteMember(channelId: string, userId: number, silencedTime: Date): Promise<void> {
+  async muteMember(
+    channelId: string,
+    userId: number,
+    silencedTime: Date,
+  ): Promise<void> {
     const member = await this.findMemberInChannel(channelId, userId);
     if (member) {
       await this.prismaService.member.update({
-        where: {id: member.id},
+        where: { id: member.id },
         data: {
           silencedTime: silencedTime,
-        }
+        },
       });
-    }
-    else {
-      throw new Error("member not found")
+    } else {
+      throw new Error('member not found');
     }
   }
 
@@ -838,27 +850,29 @@ export class ChatService {
         data: {
           sender: {
             connect: {
-              id: senderId
-            }
+              id: senderId,
+            },
           },
           receiver: {
             connect: {
-              id: receiverId
-            }
-          }
-        }
+              id: receiverId,
+            },
+          },
+        },
       });
       if (channel) {
         return channel.id;
       }
       return null;
-    }
-    catch {
-      throw new Error("Failed to create a private channel");
+    } catch {
+      throw new Error('Failed to create a private channel');
     }
   }
 
-  async findPrivateChannel(senderId: number, receiverId: number): Promise<string> {
+  async findPrivateChannel(
+    senderId: number,
+    receiverId: number,
+  ): Promise<string> {
     try {
       const channel = await this.prismaService.privateMessage.findFirst({
         where: {
@@ -878,18 +892,18 @@ export class ChatService {
         return channel.id;
       }
       return null;
-    }
-    catch {
-      console.log('chacherror')
+    } catch {
+      console.log('chacherror');
       return null;
     }
   }
 
-  async addPrivateMessage(userId: number,
+  async addPrivateMessage(
+    userId: number,
     privateMessageId: string,
     messageContent: string,
-    ) {
-    if (!userId || !privateMessageId|| !messageContent) {
+  ) {
+    if (!userId || !privateMessageId || !messageContent) {
       console.error('invalid input');
       return null;
     }
@@ -900,13 +914,14 @@ export class ChatService {
         },
       });
       if (channelData) {
-        const newMessage = await this.prismaService.messagePrivate.create({
-          data: {
-            content: messageContent,
-            userId: userId,
-            privateMessageId: channelData.id,
-          },
-        });
+        const newMessage =
+          await this.prismaService.privateMessageChannel.create({
+            data: {
+              content: messageContent,
+              userId: userId,
+              privateMessageId: channelData.id,
+            },
+          });
         await this.prismaService.privateMessage.update({
           where: {
             id: privateMessageId,
@@ -927,34 +942,35 @@ export class ChatService {
     }
   }
 
-  async canConnectToPrivateChannel(channelId: string, userId: number): Promise<boolean> {
+  async canConnectToPrivateChannel(
+    channelId: string,
+    userId: number,
+  ): Promise<boolean> {
     try {
       const channel = await this.prismaService.privateMessage.findUnique({
         where: {
-          id: channelId
+          id: channelId,
         },
       });
       if (channel.receiverId === userId || channel.senderId === userId) {
-        return true
+        return true;
       }
       return false;
-    }
-    catch {
-      console.log('hah')
+    } catch {
+      console.log('hah');
       return false;
     }
   }
 
   async getPrivateMessages(privateChannelId: string) {
     try {
-      const messages = await this.prismaService.messagePrivate.findMany({
+      const messages = await this.prismaService.privateMessageChannel.findMany({
         where: {
-          privateMessageId: privateChannelId
-        }
+          privateMessageId: privateChannelId,
+        },
       });
       return messages;
-    }
-    catch(error) {
+    } catch (error) {
       throw new Error(error.message);
     }
   }
@@ -962,8 +978,8 @@ export class ChatService {
   async getPrivateChannelData(channelId: string) {
     const channel = await this.prismaService.privateMessage.findUnique({
       where: {
-        id: channelId
-      }
+        id: channelId,
+      },
     });
     return channel;
   }
