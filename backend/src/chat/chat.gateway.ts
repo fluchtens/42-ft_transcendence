@@ -98,7 +98,6 @@ export class ChatGateway implements OnModuleInit {
       }
       this.roomService.joinRoom(client, userId);
     } catch (error) {
-      console.error('chat init rooms error socket io', error.message);
     }
   }
 
@@ -129,7 +128,6 @@ export class ChatGateway implements OnModuleInit {
       const updatedUserData = await this.userService.getUserById(userId);
       this.usersData.set(userId, updatedUserData);
     } catch (error) {
-      console.error(`Error refreshing user data: ${error.message}`);
     }
   }
 
@@ -155,7 +153,6 @@ export class ChatGateway implements OnModuleInit {
       channelData.inviteCode = channelInfo.inviteCode;
       channelData.id = channelInfo.id;
       channelData.name = channelInfo.name;
-      console.log('checkConnection', channelInfo.name, connection);
       channelData.public = channelInfo.public;
       const userInChannel = await this.chatService.findMemberInChannel(
         channelData.id,
@@ -213,7 +210,6 @@ export class ChatGateway implements OnModuleInit {
       channelData.members = memberDto;
       // channelData.isConnected = true;
     } catch (error) {
-      console.error('error getChannelData', error);
       throw error;
     }
     return channelData;
@@ -279,10 +275,8 @@ export class ChatGateway implements OnModuleInit {
         const channelIds = allChannels.map((channel) => channel.id);
         client.emit('allChannels', channelIds);
       } catch (error) {
-        console.error('error getting all channels:', error.message);
       }
     } else {
-      console.error('User ID not available.254');
     }
   }
 
@@ -296,7 +290,6 @@ export class ChatGateway implements OnModuleInit {
       const channel = await this.getChannelData(client, channelId, false);
       return channel;
     } else {
-      console.log('userId Invalid getChannelStatus');
       return;
     }
   }
@@ -324,7 +317,6 @@ export class ChatGateway implements OnModuleInit {
       const channel = await this.getChannelData(client, channelId, false);
       return channel;
     } else {
-      console.log('userId Invalid getChannelStatus');
       return;
     }
   }
@@ -344,17 +336,13 @@ export class ChatGateway implements OnModuleInit {
           getMessages,
           password,
         );
-        // if (ChannelData.messages)
-        //   console.log("emit test", ChannelData.name);
         this.server.to(client.id).emit(`channelData:${channelId}`, ChannelData);
         if (ChannelData) return true;
         if (!ChannelData.isMember && !ChannelData.public) return true;
       } catch (error) {
-        console.error('Error joining room:', error.message);
         return false;
       }
     } else {
-      console.error('User ID not available.281');
       return false;
     }
   }
@@ -392,7 +380,6 @@ export class ChatGateway implements OnModuleInit {
           this.server.to(channelId).emit(`${channelId}/message`, messageData);
         }
       } catch (error) {
-        console.error('sendMessage error', error.message);
         return error.message;
       }
     } else {
@@ -416,13 +403,10 @@ export class ChatGateway implements OnModuleInit {
             .to(channelId)
             .emit(`${channelId}/messageDeleted`, messageId);
         } else {
-          console.log('failed to delete message');
         }
       } catch (error) {
-        console.error(error);
       }
     } else {
-      console.log('UserID not available.');
     }
   }
 
@@ -450,13 +434,10 @@ export class ChatGateway implements OnModuleInit {
             .to(message.channelId)
             .emit(`channelData:${message.channelId}`, channelData);
         } else {
-          console.log('failed to update message');
         }
       } catch (error) {
-        console.error(error);
       }
     } else {
-      console.log('UserID not available.');
     }
   }
 
@@ -492,11 +473,9 @@ export class ChatGateway implements OnModuleInit {
           client.emit('newChannel', channelData.id);
         }
       } catch (error) {
-        console.error('createchannel error', error.message);
         return error.message;
       }
     } else {
-      console.log('User ID not available.410');
     }
   }
 
@@ -514,7 +493,6 @@ export class ChatGateway implements OnModuleInit {
     @ConnectedSocket() client: Socket,
     @MessageBody() channelId: string,
   ) {
-    console.log(channelId);
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
@@ -541,15 +519,12 @@ export class ChatGateway implements OnModuleInit {
           this.connectedUsers.delete(channelId);
           return '';
         } else {
-          console.log('Error when get Channel data');
           throw new Error('Error when get Channel data');
         }
       } catch (error) {
-        console.error(error.message);
         return error.message;
       }
     } else {
-      console.log('User ID not available.449');
       return 'User ID not available.450';
     }
   }
@@ -625,15 +600,12 @@ export class ChatGateway implements OnModuleInit {
             return null;
           }
         } else {
-          console.error('channelId or member not found, addMemberFail');
           return 'channelId or member not found, addMemberFail';
         }
       } catch (error) {
-        console.log(error.message);
         return error.message;
       }
     } else {
-      console.log('User ID not available.504');
       return 'User ID not available.';
     }
   }
@@ -704,11 +676,9 @@ export class ChatGateway implements OnModuleInit {
           throw new Error('Channel not found');
         }
       } catch (error) {
-        console.log(error.message);
         return error.message;
       }
     } else {
-      console.log('User ID not available.572');
       return 'User Id not avalaible';
     }
   }
@@ -730,11 +700,9 @@ export class ChatGateway implements OnModuleInit {
         this.server.emit('resetChannel', channelId);
         return '';
       } catch (error) {
-        console.log(error.message);
         return error.message;
       }
     } else {
-      console.log('User ID not available.594');
       return 'User ID not available';
     }
   }
@@ -775,15 +743,12 @@ export class ChatGateway implements OnModuleInit {
             this.server.to(channelId).emit(`${channelId}/message`, messageData);
           }
           this.server.to(channelId).emit('refreshPage', channelId);
-          console.log(changeRole);
           return null;
         }
       } catch (error) {
-        console.log(error.message);
         return error.message;
       }
     } else {
-      console.log('User ID not available.622');
       return 'User ID not available.';
     }
   }
@@ -802,14 +767,11 @@ export class ChatGateway implements OnModuleInit {
           channelId,
         );
         this.server.emit('resetChannel', channelId);
-        console.log('Deleteprotection', protect);
         return '';
       } catch (error) {
-        console.log(error.message);
         return error.message;
       }
     } else {
-      console.log('User ID not available.594');
       return 'User ID not available';
     }
   }
@@ -864,15 +826,12 @@ export class ChatGateway implements OnModuleInit {
             .to(String(userIdKick))
             .emit(`${channelId}/channelDeleted`);
           this.server.to(String(userIdKick)).emit('resetChannel', channelId);
-          console.log(kickUser);
           return null;
         }
       } catch (error) {
-        console.log(error.message);
         return error.message;
       }
     } else {
-      console.log('User ID not available.646');
       return 'User ID not available.';
     }
   }
@@ -896,7 +855,6 @@ export class ChatGateway implements OnModuleInit {
               channelId,
               password,
             );
-            console.log('password', passwordVerify, channelId, password);
             if (passwordVerify) {
               let connectedUsersSet = this.connectedUsers.get(channelId);
               if (!connectedUsersSet) {
@@ -912,11 +870,9 @@ export class ChatGateway implements OnModuleInit {
             }
           }
         } catch (error) {
-          console.error('Error joining room:', error.message);
           return false;
         }
       } else {
-        console.error('User ID not available.281');
         return false;
       }
     }
@@ -960,11 +916,9 @@ export class ChatGateway implements OnModuleInit {
           return null;
         }
       } catch (error) {
-        console.log(error.message);
         return error.message;
       }
     } else {
-      console.log('User ID not available.646');
       return 'User ID not available.';
     }
   }
@@ -1019,7 +973,6 @@ export class ChatGateway implements OnModuleInit {
           }
         }
       } catch (error) {
-        console.log(error.message);
         return error.message;
       }
     }
@@ -1035,7 +988,6 @@ export class ChatGateway implements OnModuleInit {
       try {
         const { channelId, userIdToBan } = banUserDto;
         if (channelId && userIdToBan) {
-          console.log('banuser ', userId, userIdToBan);
           const banUser = await this.chatService.banUser(
             userId,
             channelId,
@@ -1078,15 +1030,12 @@ export class ChatGateway implements OnModuleInit {
             .to(String(userIdToBan))
             .emit(`${channelId}/channelDeleted`);
           this.server.to(String(userIdToBan)).emit('resetChannel', channelId);
-          console.log(banUser);
           return null;
         }
       } catch (error) {
-        console.log(error.message);
         return error.message;
       }
     } else {
-      console.log('User ID not available.646');
       return 'User ID not available.';
     }
   }
@@ -1134,11 +1083,9 @@ export class ChatGateway implements OnModuleInit {
           }
         }
       } catch (error) {
-        console.log(error.message);
         return error.message;
       }
     } else {
-      console.log('User ID not available.1118');
       return 'User ID not available.';
     }
   }
@@ -1202,11 +1149,9 @@ export class ChatGateway implements OnModuleInit {
           }
         }
       } catch (error) {
-        console.log(error.message);
         return error.message;
       }
     } else {
-      console.log('User ID not available.1118');
       return 'User ID not available.';
     }
   }
@@ -1254,11 +1199,9 @@ export class ChatGateway implements OnModuleInit {
 
         this.server.emit('resetChannel', channelId);
       } catch (error) {
-        console.log(error.message);
         return error.message;
       }
     } else {
-      console.log('User ID not available.1118');
       return 'User ID not available.';
     }
   }
@@ -1281,14 +1224,11 @@ export class ChatGateway implements OnModuleInit {
             userIdToConnect,
           );
         }
-        console.log(channelId);
         return channelId;
       } catch (error) {
-        console.log(error.message);
         return error.message;
       }
     } else {
-      console.log('User ID not available.1118');
       return 'User ID not available.';
     }
   }
@@ -1323,7 +1263,6 @@ export class ChatGateway implements OnModuleInit {
         messageData.user = await this.getOrAddUserData(userId);
         this.server.emit(`${channelId}/message`, messageData);
       } catch (error) {
-        console.error('sendMessage error', error.message);
         return error.message;
       }
     } else {
@@ -1371,7 +1310,6 @@ export class ChatGateway implements OnModuleInit {
         channelData.messages = messages;
         return channelData;
       } catch (error) {
-        console.error('sendMessage error', error.message);
         return null;
       }
     } else {

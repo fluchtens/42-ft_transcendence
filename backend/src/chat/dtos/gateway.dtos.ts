@@ -79,17 +79,20 @@ export class Messages {
   id: string;
   content: string;
   userId: number;
+  gameInvit?: boolean;
   user?: Partial<User>;
   constructor(
     messageId: string,
     content: string,
     userId: number,
     user?: Partial<User>,
+    gameInvit?: boolean,
   ) {
     this.id = messageId;
     this.content = content;
     this.userId = userId;
     this.user = user;
+    this.gameInvit = gameInvit;
   }
 }
 

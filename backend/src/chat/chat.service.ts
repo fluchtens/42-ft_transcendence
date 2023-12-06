@@ -104,7 +104,6 @@ export class ChatService {
         throw new Error('no member found');
       }
     } catch (error) {
-      console.log(error);
     }
   }
 
@@ -120,7 +119,6 @@ export class ChatService {
       });
       return channelMembers;
     } catch (error) {
-      console.error('Error getting channel members:', error.message);
       throw error;
     }
   }
@@ -150,7 +148,6 @@ export class ChatService {
         return null;
       }
     } catch (error) {
-      console.error('Error when searching memberRole in channel: ', error);
       throw error;
     }
   }
@@ -182,7 +179,6 @@ export class ChatService {
     password?: string,
   ) {
     if (!userId) {
-      console.error('user invalid');
       return null;
     }
     try {
@@ -232,7 +228,6 @@ export class ChatService {
         return channel;
       }
     } catch (error) {
-      console.error('create channel ', error.message);
       throw new NotFoundException();
     }
   }
@@ -287,7 +282,6 @@ export class ChatService {
         return [];
       }
     } catch (error) {
-      console.error('Error when getUserChannels: ', error);
       throw error;
     }
   }
@@ -311,7 +305,6 @@ export class ChatService {
     memberId: number,
   ): Promise<any> {
     if (!userId || !channelId || !memberId) {
-      console.log('channelId or UserId invalid');
       return;
     }
     try {
@@ -320,7 +313,6 @@ export class ChatService {
         (member) => Number(member.userId) === Number(memberId),
       );
       if (existingMember) {
-        console.error('Member already exists in the channel');
         return null;
       } else {
         const newMember = await this.prismaService.member.create({
@@ -332,7 +324,6 @@ export class ChatService {
         return newMember;
       }
     } catch (error) {
-      console.error('Error when trying to add a new member to channel', error);
       throw error;
     }
   }
@@ -424,7 +415,6 @@ export class ChatService {
           throw new Error('Invalid role');
       }
     } catch (error) {
-      console.error('Error when changing roles', error);
       throw error;
     }
   }
@@ -435,7 +425,6 @@ export class ChatService {
     messageContent: string,
   ): Promise<Message | null> {
     if (!userId || !channelId || !messageContent) {
-      console.error('invalid input');
       return null;
     }
     try {
@@ -482,7 +471,6 @@ export class ChatService {
     newMessage: string,
   ): Promise<null | any> {
     if (!userId || !messageId || !newMessage) {
-      console.error('invalid input');
       return null;
     }
     try {
@@ -506,14 +494,12 @@ export class ChatService {
       });
       return updateMessage;
     } catch (error) {
-      console.error('error when add message', error);
       throw error;
     }
   }
 
   async deleteMessage(userId: number, messageId: string): Promise<null | any> {
     if (!userId || !messageId) {
-      console.error('invalid input');
       return null;
     }
     try {
@@ -540,14 +526,12 @@ export class ChatService {
       });
       return 'The message was succefull deleted!';
     } catch (error) {
-      console.log('error when delete the message', error);
       throw error;
     }
   }
 
   async deleteChannel(userId: number, channelId: string): Promise<null | any> {
     if (!userId || !channelId) {
-      console.error('invalid input');
       return null;
     }
     try {
@@ -567,7 +551,6 @@ export class ChatService {
       });
       return 'The channel was succefull deleted!';
     } catch (error) {
-      console.log('error when delete the channel', error);
       throw error;
     }
   }
@@ -593,7 +576,6 @@ export class ChatService {
         throw new Error('You are not the chat owner');
       }
     } catch (error) {
-      console.error(error);
       throw error;
     }
   }
@@ -617,7 +599,6 @@ export class ChatService {
       }
       return 'You are not the channel Owner';
     } catch (error) {
-      console.error(error);
       throw error;
     }
   }
@@ -642,7 +623,6 @@ export class ChatService {
       }
       throw new Error('Only the channel owner can change the visibility');
     } catch (error) {
-      console.error(error);
       throw error;
     }
   }
@@ -656,7 +636,6 @@ export class ChatService {
       });
       return channel?.public || false;
     } catch (error) {
-      console.error(error);
       throw error;
     }
   }
@@ -672,7 +651,6 @@ export class ChatService {
         return channels;
       }
     } catch (error) {
-      console.log(error.message);
     }
   }
 
@@ -817,8 +795,6 @@ export class ChatService {
       where: { id: channelId },
     });
 
-    console.log(channel);
-
     if (!channel) {
       throw new Error("Le canal n'existe pas.");
     }
@@ -893,7 +869,6 @@ export class ChatService {
       }
       return null;
     } catch {
-      console.log('chacherror');
       return null;
     }
   }
@@ -904,7 +879,6 @@ export class ChatService {
     messageContent: string,
   ) {
     if (!userId || !privateMessageId || !messageContent) {
-      console.error('invalid input');
       return null;
     }
     try {
@@ -959,7 +933,6 @@ export class ChatService {
       }
       return false;
     } catch {
-      console.log('hah');
       return false;
     }
   }
