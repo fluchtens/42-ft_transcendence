@@ -1,0 +1,92 @@
+@import "../../styles/config.scss";
+
+.container {
+  position: relative;
+  height: calc(100vh - 8rem);
+  padding: 1rem;
+  display: flex;
+  align-items: left;
+  gap: 1rem;
+  border-radius: $rounded-xl;
+  background: $bg-secondary-color;
+
+  .chat {
+    flex: 1;
+    flex-direction: column;
+    display: flex;
+    align-items: left;
+    gap: 1rem;
+
+    ul {
+      margin: 0;
+      padding: 0;
+      flex: 1;
+      flex-direction: column;
+      display: flex;
+      align-items: left;
+      gap: 1rem;
+      list-style-type: none;
+      overflow-y: auto;
+      scrollbar-width: none; // Firefox
+      -ms-overflow-style: none; // IE (Internet Explorer) and Edge
+
+      &::-webkit-scrollbar {
+        display: none; // WebKit-based browsers like Opera, Chrome, and Safari
+      }
+
+      li {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        border-radius: $rounded;
+        transition: background 0.3s ease;
+
+        &:hover {
+          background: $extra-tertiary-color;
+        }
+      }
+    }
+  }
+
+  .line {
+    width: 0.1rem;
+    border-radius: $rounded;
+    background: rgb(255, 255, 255, 0.1);
+  }
+
+  .members {
+    width: 14rem;
+    height: 100%;
+    flex-direction: column;
+    display: flex;
+    gap: 0.5rem;
+
+    ul {
+      margin: 0;
+      padding: 0;
+      flex-direction: column;
+      display: flex;
+      gap: 0.2rem;
+      list-style-type: none;
+      overflow-y: auto;
+      scrollbar-width: none; // Firefox
+      -ms-overflow-style: none; // IE (Internet Explorer) and Edge
+
+      &::-webkit-scrollbar {
+        display: none; // WebKit-based browsers like Opera, Chrome, and Safari
+      }
+    }
+  }
+}
+
+@media (max-width: 1280px) {
+  .container {
+    .line {
+      display: none;
+    }
+
+    .members {
+      display: none;
+    }
+  }
+}

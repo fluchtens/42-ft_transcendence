@@ -1,10 +1,14 @@
 import {
+  ConnectedSocket,
+  MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
+import { RoomsService } from 'src/chat/room.service';
+import { ReloadListDto } from './friendship.dtos';
 
 interface UserStatus {
   status: 'Online' | 'In game';
@@ -22,7 +26,8 @@ export class FriendshipGateway {
   private userStatus: Map<number, UserStatus> = new Map();
   public code = Math.random();
 
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService,
+              private readonly roomService: RoomsService) {}
 
   @WebSocketServer()
   server: Server;
@@ -96,16 +101,33 @@ export class FriendshipGateway {
     }
   }
 
+  onModuleInit() {
+    this.server.on('connection', (socket) => {
+      try {
+        if (!this.roomService.getRoomClients(String(socket.handshake.auth.userId) + "/friendship")) {
+          this.roomService.createRoom(String(socket.handshake.auth.userId) + "/friendship")
+        }
+        this.roomService.joinRoom(socket, String(socket.handshake.auth.userId) + "/friendship")
+      }
+      catch (error) {
+        console.log(error);
+      }
+    });
+  }
+
+
   handleDisconnect(client: Socket) {
     const userId = client.handshake.auth.userId;
     const socketId = client.id;
 
+    this.roomService.disconnectClient(client);
     this.removeSocketFromUser(userId, socketId);
     this.server.emit('reloadList');
   }
 
   @SubscribeMessage('reloadList')
-  handleReloadList() {
-    this.server.emit('reloadList');
+  handleReloadList(@MessageBody() reloadListDto: ReloadListDto) {
+    this.server.to(String(reloadListDto.myUserId) + "/friendship").emit('reloadList');
+    this.server.to(String(reloadListDto.userId) + "/friendship").emit('reloadList');
   }
 }

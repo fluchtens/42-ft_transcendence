@@ -12,6 +12,11 @@ export class CreateChannelDto {
   password?: string;
 }
 
+export class ChangeChannelNameDto {
+  channelName: string;
+  channelId: string;
+}
+
 export class DeleteMessageDto {
   channelId: string;
   messageId: string;
@@ -108,4 +113,10 @@ export class ChannelData {
   protected: boolean;
   messages: Messages[];
   members: any[];
+}
+
+export class PrivateChannelData {
+  id: string;
+  name: string;
+  messages: Messages[];
 }

@@ -33,3 +33,9 @@ export interface MemberUsers {
   member: Member;
   user: User;
 }
+
+export interface PrivateChannelData {
+  id: string;
+  name: string;
+  messages: Messages[];
+}

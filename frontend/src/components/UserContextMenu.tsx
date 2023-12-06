@@ -55,7 +55,13 @@ const UserContextMenu = ({
 
   const sendPrivateMessage = async () => {
     cb();
-    navigate("/chat/1");
+    chatSocket.emit('privateMessage', user.id, (channelId: string) => {
+      console.log(channelId);
+      if (channelId) {
+        navigate("privatechat/" + channelId);
+        notifySuccess('You has joined the private chat');
+      }
+    });
   };
 
   const promoteOwner = async () => {

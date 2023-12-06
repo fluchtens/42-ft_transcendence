@@ -26,6 +26,7 @@ model User {
   channels               Channel[]
   messages               Message[]
   members                Member[]
+  MessagePrivates        MessagePrivate[]
   createdAt              DateTime         @default(now())
   updatedAt              DateTime         @updatedAt
 }
@@ -86,13 +87,33 @@ model Message {
   edited    Boolean  @default(false)
   userId    Int
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  channelId String
-  channels  Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  channelId        String
+  channels         Channel        @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([channelId])
+}
+
+model MessagePrivate {
+  id        String   @id @default(uuid())
+  content   String   @db.Text()
+  edited    Boolean  @default(false)
+  
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  privateMessageId  String
+  privateMessages  PrivateMessage @relation(fields: [privateMessageId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([privateMessageId])
 }
 
 model Member {
@@ -102,7 +123,7 @@ model Member {
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   channelId    String
   channel      Channel    @relation(fields: [channelId], references: [id], onDelete: Cascade)
-  silencedTime DateTime   @default(now())
+  silencedTime DateTime?   @default(now())
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
@@ -118,12 +139,14 @@ enum MemberRole {
 
 model PrivateMessage {
   id         String   @id @default(uuid())
-  content    String   @db.Text()
-  edited     Boolean  @default(false)
+  messages   MessagePrivate[] 
+
   senderId   Int
   sender     User     @relation(name: "Sender", fields: [senderId], references: [id])
+
   receiverId Int
   receiver   User     @relation(name: "Receiver", fields: [receiverId], references: [id])
+
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 

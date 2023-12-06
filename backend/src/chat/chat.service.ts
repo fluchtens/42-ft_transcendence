@@ -246,6 +246,21 @@ export class ChatService {
     }
   }
 
+  async changeChannelName(userId: number, channelId: string, newChannelname: string) {
+    const userRole = await this.findMemberRoleInChannel(channelId, userId);
+    if (userRole !== 'OWNER'){
+      throw new Error("You don't has permission to change the channelName");
+    }
+    await this.prismaService.channel.update({
+      where: {
+        id: channelId
+      },
+      data: {
+        name: newChannelname
+      }
+    });
+  }
+
   async getUserChannels(userId: any): Promise<any> {
     if (!userId) throw new BadRequestException('userId not found');
     try {
@@ -815,5 +830,141 @@ export class ChatService {
     else {
       throw new Error("member not found")
     }
+  }
+
+  async createPrivateChannel(senderId: number, receiverId: number) {
+    try {
+      const channel = await this.prismaService.privateMessage.create({
+        data: {
+          sender: {
+            connect: {
+              id: senderId
+            }
+          },
+          receiver: {
+            connect: {
+              id: receiverId
+            }
+          }
+        }
+      });
+      if (channel) {
+        return channel.id;
+      }
+      return null;
+    }
+    catch {
+      throw new Error("Failed to create a private channel");
+    }
+  }
+
+  async findPrivateChannel(senderId: number, receiverId: number): Promise<string> {
+    try {
+      const channel = await this.prismaService.privateMessage.findFirst({
+        where: {
+          OR: [
+            {
+              senderId: senderId,
+              receiverId: receiverId,
+            },
+            {
+              senderId: receiverId,
+              receiverId: senderId,
+            },
+          ],
+        },
+      });
+      if (channel) {
+        return channel.id;
+      }
+      return null;
+    }
+    catch {
+      console.log('chacherror')
+      return null;
+    }
+  }
+
+  async addPrivateMessage(userId: number,
+    privateMessageId: string,
+    messageContent: string,
+    ) {
+    if (!userId || !privateMessageId|| !messageContent) {
+      console.error('invalid input');
+      return null;
+    }
+    try {
+      const channelData = await this.prismaService.privateMessage.findUnique({
+        where: {
+          id: privateMessageId,
+        },
+      });
+      if (channelData) {
+        const newMessage = await this.prismaService.messagePrivate.create({
+          data: {
+            content: messageContent,
+            userId: userId,
+            privateMessageId: channelData.id,
+          },
+        });
+        await this.prismaService.privateMessage.update({
+          where: {
+            id: privateMessageId,
+          },
+          data: {
+            messages: {
+              connect: {
+                id: newMessage.id,
+              },
+            },
+          },
+        });
+        return newMessage;
+      }
+      throw new Error('no channelData');
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async canConnectToPrivateChannel(channelId: string, userId: number): Promise<boolean> {
+    try {
+      const channel = await this.prismaService.privateMessage.findUnique({
+        where: {
+          id: channelId
+        },
+      });
+      if (channel.receiverId === userId || channel.senderId === userId) {
+        return true
+      }
+      return false;
+    }
+    catch {
+      console.log('hah')
+      return false;
+    }
+  }
+
+  async getPrivateMessages(privateChannelId: string) {
+    try {
+      const messages = await this.prismaService.messagePrivate.findMany({
+        where: {
+          privateMessageId: privateChannelId
+        }
+      });
+      return messages;
+    }
+    catch(error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async getPrivateChannelData(channelId: string) {
+    const channel = await this.prismaService.privateMessage.findUnique({
+      where: {
+        id: channelId
+      }
+    });
+    return channel;
   }
 }
