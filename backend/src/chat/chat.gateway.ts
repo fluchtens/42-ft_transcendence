@@ -760,7 +760,7 @@ export class ChatGateway implements OnModuleInit {
             const userData = await this.getOrAddUserData(userId);
             const message =
               userData.username +
-              ' changed the role of ' +
+              ' has changed the role of ' +
               userMember.username +
               ' to ' +
               newRole;
@@ -940,7 +940,7 @@ export class ChatGateway implements OnModuleInit {
           if (changeChannel) {
             const user = await this.getOrAddUserData(userId);
             const message =
-              user.username + ' Has changed the channel visibility';
+              user.username + ' has changed the channel visibility';
             const messageData = await this.chatService.addMessage(
               userId,
               channelId,
@@ -1237,7 +1237,7 @@ export class ChatGateway implements OnModuleInit {
         const userData = await this.getOrAddUserData(userId);
         const message =
           userData.username +
-          ' changed the name of the channel to ' +
+          ' has changed the name of the channel to ' +
           channelName;
 
         const messageSend = await this.chatService.addMessage(
