@@ -5,9 +5,15 @@ interface MessageElementProps {
   avatar: string;
   username: string;
   content: string;
+  gameInvit?: boolean;
 }
 
-const MessageElement = ({ avatar, username, content }: MessageElementProps) => (
+const MessageElement = ({
+  avatar,
+  username,
+  content,
+  gameInvit,
+}: MessageElementProps) => (
   <>
     <div className={styles.avatar}>
       {avatar ? <img src={avatar} /> : <img src={defaultAvatar} />}
@@ -16,6 +22,7 @@ const MessageElement = ({ avatar, username, content }: MessageElementProps) => (
       <p className={styles.user}>{username}</p>
       <p className={styles.content}>{content}</p>
     </div>
+    {gameInvit && <button className={styles.joinBtn}>Join</button>}
   </>
 );
 

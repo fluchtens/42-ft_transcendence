@@ -42,6 +42,10 @@ function Chat() {
     return role;
   };
 
+  const addNewMessage = (message: Message) => {
+    setMessages((prevMessages) => [...prevMessages, message]);
+  };
+
   const toggleMembersMenu = () => {
     setMembersMenu(!membersMenu);
   };
@@ -186,6 +190,7 @@ function Chat() {
             <ChatHeader
               members={members}
               channel={channel}
+              addNewMessage={addNewMessage}
               toggleMembersMenu={toggleMembersMenu}
             />
             <ul>
@@ -197,6 +202,7 @@ function Chat() {
                         avatar={message.user.avatar}
                         username={message.user.username}
                         content={message.content}
+                        gameInvit={message.gameInvit}
                       />
                     </li>
                   )

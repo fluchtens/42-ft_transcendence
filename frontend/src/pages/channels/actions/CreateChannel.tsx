@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Modal } from "../../components/Modal";
+import { Modal } from "../../../components/Modal";
 import styles from "./CreateChannel.module.scss";
-import { notifyError, notifySuccess } from "../../utils/notifications";
-import { useChatSocket } from "../../hooks/useChatSocket";
+import { notifyError, notifySuccess } from "../../../utils/notifications";
+import { useChatSocket } from "../../../hooks/useChatSocket";
 
 interface CreateChannelProps {
   newChannel: {
@@ -62,18 +62,21 @@ const CreateChannel = ({
   };
 
   const createChannel = () => {
-    socket.emit("createChannel", {
-      channelName: newChannel.name,
-      isPublic: newChannel.isPublic,
-      password: newChannel.password,
-    }, (result: string) => {
-      if (!result) {
-        notifySuccess("Channel successfully created");
+    socket.emit(
+      "createChannel",
+      {
+        channelName: newChannel.name,
+        isPublic: newChannel.isPublic,
+        password: newChannel.password,
+      },
+      (result: string) => {
+        if (!result) {
+          notifySuccess("Channel successfully created");
+        } else if (result === "invalid input") {
+          notifyError("Invalid input");
+        }
       }
-      else if (result === 'invalid input') {
-        notifyError('Invalid input')
-      }
-    });
+    );
   };
 
   const submitData = (e: React.FormEvent) => {

@@ -1,7 +1,7 @@
 import { IoPersonAddSharp } from "react-icons/io5";
 import styles from "./AddingBar.module.scss";
 import { FaPlus } from "react-icons/fa6";
-import { CreateChannel } from "../pages/channels/CreateChannel";
+import { CreateChannel } from "../pages/channels/actions/CreateChannel";
 import { useState } from "react";
 
 interface AddUserBarProps {

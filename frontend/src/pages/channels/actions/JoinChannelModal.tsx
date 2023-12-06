@@ -1,9 +1,9 @@
-import { Modal } from "../../components/Modal";
+import { Modal } from "../../../components/Modal";
 import styles from "./JoinChannelModal.module.scss";
-import { notifyError, notifySuccess } from "../../utils/notifications";
-import { Channel } from "../../types/chat.interface";
+import { notifyError, notifySuccess } from "../../../utils/notifications";
+import { Channel } from "../../../types/chat.interface";
 import { useState } from "react";
-import { useChatSocket } from "../../hooks/useChatSocket";
+import { useChatSocket } from "../../../hooks/useChatSocket";
 import { useNavigate } from "react-router-dom";
 
 interface JoinChannelModalProps {

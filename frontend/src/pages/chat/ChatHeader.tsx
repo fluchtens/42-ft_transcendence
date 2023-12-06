@@ -1,9 +1,9 @@
-import { IoSettings } from "react-icons/io5";
+import { IoGameController, IoSettings } from "react-icons/io5";
 import { HiUsers } from "react-icons/hi2";
 import styles from "./ChatHeader.module.scss";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { EditChannel } from "./actions/EditChannel";
-import { Channel, MemberUsers } from "../../types/chat.interface";
+import { Channel, MemberUsers, Message } from "../../types/chat.interface";
 import { FaDoorOpen } from "react-icons/fa6";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import { useChatSocket } from "../../hooks/useChatSocket";
@@ -11,16 +11,19 @@ import { useNavigate } from "react-router-dom";
 import { UnbanUser } from "./actions/UnbanUser";
 import { FaBan } from "react-icons/fa";
 import { useAuth } from "../../hooks/useAuth";
+import { getUserByIdApi } from "../../services/user.api";
 
 interface ChatHeaderProps {
   channel: Channel;
   members: MemberUsers[];
+  addNewMessage: (message: Message) => void;
   toggleMembersMenu: () => void;
 }
 
 const ChatHeader = ({
   members,
   channel,
+  addNewMessage,
   toggleMembersMenu,
 }: ChatHeaderProps) => {
   const { user } = useAuth();
@@ -64,6 +67,21 @@ const ChatHeader = ({
         navigate("/");
       }
     });
+  };
+
+  const createGameInvitation = async () => {
+    const user = await getUserByIdApi(1);
+    if (!user) return;
+
+    const newMessage = {
+      id: "qwertyuiop",
+      content: "Can you beat me?",
+      gameInvit: true,
+      userId: user.id,
+      user: user,
+    };
+    addNewMessage(newMessage);
+    notifySuccess("Game invitation has been sent successfully");
   };
 
   useEffect(() => {
@@ -120,9 +138,14 @@ const ChatHeader = ({
           </button>
         </div>
         <h1>{channel.name}</h1>
-        <button onClick={toggleMembersMenu}>
-          <HiUsers className={styles.icon} />
-        </button>
+        <div className={styles.rightBtns}>
+          <button onClick={createGameInvitation}>
+            <IoGameController className={styles.icon} />
+          </button>
+          <button onClick={toggleMembersMenu}>
+            <HiUsers className={styles.icon} />
+          </button>
+        </div>
       </div>
       {editChannelModal && (
         <EditChannel

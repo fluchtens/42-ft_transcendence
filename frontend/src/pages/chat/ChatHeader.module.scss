@@ -14,6 +14,13 @@
     gap: 0.5rem;
   }
 
+  .rightBtns {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
   button {
     width: 2rem;
     height: 2rem;

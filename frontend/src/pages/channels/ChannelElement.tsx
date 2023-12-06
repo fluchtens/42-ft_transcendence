@@ -1,7 +1,7 @@
 import styles from "./ChannelElement.module.scss";
 import { Channel } from "../../types/chat.interface";
 import { useState } from "react";
-import { JoinChannelModal } from "./JoinChannelModal";
+import { JoinChannelModal } from "./actions/JoinChannelModal";
 import { useNavigate } from "react-router-dom";
 import { RiGitRepositoryPrivateFill } from "react-icons/ri";
 

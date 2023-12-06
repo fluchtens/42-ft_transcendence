@@ -15,6 +15,7 @@ export interface Channel {
 export interface Message {
   id: string;
   content: string;
+  gameInvit?: boolean;
   userId: number;
   user?: User | null;
 }

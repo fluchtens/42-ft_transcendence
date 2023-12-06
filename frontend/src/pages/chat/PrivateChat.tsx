@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useParams } from "react-router-dom";
-import styles from "./PrivateChat.module.scss";
+import styles from "./Chat.module.scss";
 import { MessageElement } from "./MessageElement";
 import { MessageInput } from "./MessageInput";
 import { useChatSocket } from "../../hooks/useChatSocket";
