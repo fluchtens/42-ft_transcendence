@@ -607,6 +607,10 @@ export class ChatGateway implements OnModuleInit {
           return 'channelId or member not found, addMemberFail';
         }
       } catch (error) {
+        console.log(error.message)
+        if (error.message === "Cannot read properties of null (reading 'id')") {
+          return "Member not found";          
+        }
         return error.message;
       }
     } else {
