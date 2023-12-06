@@ -40,7 +40,7 @@ export class FriendshipController {
     const { id } = req.user;
     const { userId } = body;
     const res = await this.friendshipService.blockUser(id, userId);
-    this.friendshipGateway.handleReloadList();
+    this.friendshipGateway.handleReloadList({ myUserId: id, userId: userId });
     return res;
   }
 
@@ -50,7 +50,7 @@ export class FriendshipController {
     const { id } = req.user;
     const { userId } = body;
     const res = await this.friendshipService.unlockUser(id, userId);
-    this.friendshipGateway.handleReloadList();
+    this.friendshipGateway.handleReloadList({ myUserId: id, userId: userId });
     return res;
   }
 
@@ -69,7 +69,7 @@ export class FriendshipController {
     const { id } = req.user;
     const { userId } = body;
     const res = await this.friendshipService.removeFriend(id, userId);
-    this.friendshipGateway.handleReloadList();
+    this.friendshipGateway.handleReloadList({ myUserId: id, userId: userId });
     return res;
   }
 
@@ -90,7 +90,7 @@ export class FriendshipController {
     const { id } = req.user;
     const { userId } = body;
     const res = await this.friendshipService.sendFriendRequest(id, userId);
-    this.friendshipGateway.handleReloadList();
+    this.friendshipGateway.handleReloadList({ myUserId: id, userId: userId });
     return res;
   }
 
@@ -100,7 +100,7 @@ export class FriendshipController {
     const { id } = req.user;
     const { userId } = body;
     const res = await this.friendshipService.acceptFriendRequest(id, userId);
-    this.friendshipGateway.handleReloadList();
+    this.friendshipGateway.handleReloadList({ myUserId: id, userId: userId });
     return res;
   }
 
@@ -110,7 +110,7 @@ export class FriendshipController {
     const { id } = req.user;
     const { userId } = body;
     const res = await this.friendshipService.declineFriendRequest(id, userId);
-    this.friendshipGateway.handleReloadList();
+    this.friendshipGateway.handleReloadList({ myUserId: id, userId: userId });
     return res;
   }
 }
