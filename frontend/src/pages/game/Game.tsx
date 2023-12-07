@@ -100,7 +100,6 @@ const GameElementContent = () => {
         content = <></>;
         break;
       case UserStatus.Playing:
-        // content = <PongBoard availWidth={703} availHeight={501} />; // TODO get width dynamically
         break;
       case UserStatus.Waiting:
         content = <GamesLobby waiting={true} />;
@@ -420,7 +419,6 @@ const GamesTable = ({
 //   }
 
 //   function handleKeyDown(ev: any) {
-//     // TODO some sort of 'KeyboardEvent' instead of 'any'
 //     if (ev.key === "ArrowDown" || ev.key === "ArrowUp") {
 //       ev.preventDefault();
 //       if (ev.repeat) return;

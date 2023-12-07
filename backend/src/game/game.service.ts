@@ -86,7 +86,7 @@ class MMQueue {
     initialRange: 50, // +/-
     refreshRate: 1 / 5, // per sec (ie 1 every 5 sec)
   };
-  private _intervalHandle: ReturnType<typeof setInterval> = null; // what type is returned by `setInterval`? TODO
+  private _intervalHandle: ReturnType<typeof setInterval> = null;
 
   constructor(
     public onMatch: (userId1: number, userId2: number) => undefined = (

@@ -43,7 +43,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       },
       onFinish: ({ gameRoom, game, winner, loser }) => {
         (async () => {
-          // TODO handle db errors? users don't exist etc
           let winnerRatingBefore = await this._rating(winner.id);
           let loserRatingBefore = await this._rating(loser.id);
 
@@ -86,7 +85,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   server: Server;
 
   async _rating(userId: number) {
-    // TODO errors?
     return (await this.userService.getUserById(userId)).rating;
   }
 
@@ -262,7 +260,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     (async () => {
       let rating = await this._rating(userData.id);
-      // TODO handle error db miss
       this.server
         .to(userData.userRoom)
         .emit('statusChange', UserStatus.Waiting);

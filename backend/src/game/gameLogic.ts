@@ -22,7 +22,6 @@ export function makeGame(
   { type, args = null }: { type: 'classic' | 'wall'; args?: any },
   startTime: number = Date.now(),
 ) {
-  // TODO ctor args?
   if (type === 'classic') {
     return new ClassicGame(startTime);
   } else {
@@ -285,7 +284,7 @@ export class ClassicGame implements Game {
 
   minTimeToPoint(from = Date.now()) {
     let offset = 50;
-    if (!this.ball) return offset; // TODO why weird behavior when more
+    if (!this.ball) return offset;
     let time = this._lastUpdate;
     if (this.ball.dx < 0)
       time += ((-PONG.ballSize - this.ball.x) / this.ball.dx) * PONG.msFrame;
@@ -571,7 +570,7 @@ export class WallGame {
       let foundImpact = searchImpact(null, this.walls, 'wall');
       foundImpact = searchImpact(foundImpact, this.players, 'paddle');
       foundImpact = searchImpact(foundImpact, this.goals, 'goals');
-      if (!foundImpact) break; // TODO problem
+      if (!foundImpact) break;
 
       let { impact, type } = foundImpact;
       let { t, hit, vertical } = impact;

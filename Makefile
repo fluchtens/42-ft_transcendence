@@ -1,21 +1,13 @@
 all: build
 
-backend/src/game/gameLogic.ts: 
-	ln shared/gameLogic.ts backend/src/game/
-
-frontend/src/components/gameLogic.ts:
-	ln shared/gameLogic.ts frontend/src/components/
-
-share: | backend/src/game/gameLogic.ts frontend/src/components/gameLogic.ts
-
 install:
 	cd backend && npm install && npx prisma generate
 	cd frontend && npm install
 
-build: clean share
+build: clean
 	docker-compose up --build
 
-up: share
+up:
 	docker-compose down
 	docker-compose up
 
@@ -27,6 +19,6 @@ clean: down
 	rm -rf backend/uploads
 	docker system prune -a -f
 
-.PHONY: all install build up down clean share
+.PHONY: all install build up down clean
 
 .SILENT:
