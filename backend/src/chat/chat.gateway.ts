@@ -36,8 +36,6 @@ import {
 import { FriendshipStatus, User } from '@prisma/client';
 import { FriendshipService } from 'src/friendship/friendship.service';
 import { GameService } from 'src/game/game.service';
-import { GameGatewayModule } from 'src/game/gameGateway.module';
-import { error } from 'console';
 
 @WebSocketGateway({
   namespace: 'chatSocket',
@@ -74,7 +72,7 @@ export class ChatGateway implements OnModuleInit {
     this.userConnections.set(userId, socket);
   }
 
-  private removeSocketFromUser(userId: number, socketData: Socket) {
+  private removeSocketFromUser(userId: number, socketData: Socket): any {
     const userSocket = this.userConnections.get(userId);
     if (userSocket) {
       userSocket.delete(socketData);
@@ -87,7 +85,7 @@ export class ChatGateway implements OnModuleInit {
     }
   }
 
-  async InitRooms(client: Socket) {
+  async InitRooms(client: Socket): Promise<any> {
     const userId: string = String(client.handshake.auth.userId);
     try {
       const channels = await this.chatService.getUserChannels(
@@ -128,7 +126,7 @@ export class ChatGateway implements OnModuleInit {
     }
   }
 
-  async refreshUserData(userId: number) {
+  async refreshUserData(userId: number): Promise<any> {
     try {
       const updatedUserData = await this.userService.getUserById(userId);
       this.usersData.set(userId, updatedUserData);
@@ -220,7 +218,7 @@ export class ChatGateway implements OnModuleInit {
     return channelData;
   }
 
-  async handleConnection(@ConnectedSocket() client: Socket) {
+  async handleConnection(@ConnectedSocket() client: Socket): Promise<any> {
     try {
       const cookie = client.handshake.headers.cookie;
       if (!cookie) {
@@ -247,7 +245,7 @@ export class ChatGateway implements OnModuleInit {
     }
   }
 
-  handleDisconnect(client: Socket) {
+  handleDisconnect(client: Socket): any {
     this.roomService.disconnectClient(client);
     const userId = client.handshake.auth.userId;
 
@@ -263,7 +261,7 @@ export class ChatGateway implements OnModuleInit {
     });
   }
 
-  onModuleInit() {
+  onModuleInit(): any {
     this.server.on('connection', (socket) => {
       this.InitRooms(socket);
     });
@@ -288,7 +286,7 @@ export class ChatGateway implements OnModuleInit {
   async handleChannelInitialData(
     @ConnectedSocket() client: Socket,
     @MessageBody() channelId: string,
-  ) {
+  ): Promise<any> {
     const userId: number = client.handshake.auth.userId;
     if (userId) {
       const channel = await this.getChannelData(client, channelId, false);
@@ -302,7 +300,7 @@ export class ChatGateway implements OnModuleInit {
   async getChannelStatus(
     @ConnectedSocket() client: Socket,
     @MessageBody() channelId: string,
-  ) {
+  ): Promise<any> {
     const userId: number = client.handshake.auth.userId;
     if (userId) {
       const channelIsPublic = await this.chatService.isChannelPublic(channelId);
@@ -329,7 +327,7 @@ export class ChatGateway implements OnModuleInit {
   async handleJoinRoom(
     @ConnectedSocket() client: Socket,
     @MessageBody() getChannelDto: GetChannelDto,
-  ) {
+  ): Promise<any> {
     const userId = client.handshake.auth.userId;
     const { channelId, password, getMessages } = getChannelDto;
     if (userId) {
@@ -396,7 +394,7 @@ export class ChatGateway implements OnModuleInit {
   async handleDeleteMessage(
     @ConnectedSocket() client: Socket,
     @MessageBody() deleteMessageDto: DeleteMessageDto,
-  ) {
+  ): Promise<any> {
     const { messageId, channelId } = deleteMessageDto;
     const userId = client.handshake.auth.userId;
     if (userId) {
@@ -417,7 +415,7 @@ export class ChatGateway implements OnModuleInit {
   async handleUpdateMessage(
     @ConnectedSocket() client: Socket,
     @MessageBody() changeMessageDto: ChangeMessageDto,
-  ) {
+  ): Promise<any> {
     const { messageId, newMessage } = changeMessageDto;
     const userId = client.handshake.auth.userId;
     if (userId) {
@@ -482,7 +480,7 @@ export class ChatGateway implements OnModuleInit {
   }
 
   @SubscribeMessage('refreshUser')
-  async handleRefreshUser(@ConnectedSocket() client: Socket) {
+  async handleRefreshUser(@ConnectedSocket() client: Socket): Promise<any> {
     const userId: number = client.handshake.auth.userId;
     if (userId) {
       await this.refreshUserData(userId);
@@ -494,7 +492,7 @@ export class ChatGateway implements OnModuleInit {
   async handleDeleteChannel(
     @ConnectedSocket() client: Socket,
     @MessageBody() channelId: string,
-  ) {
+  ): Promise<any> {
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
@@ -535,7 +533,7 @@ export class ChatGateway implements OnModuleInit {
   async addMember(
     @ConnectedSocket() client: Socket,
     @MessageBody() addMemberDto: AddMemberDto,
-  ) {
+  ): Promise<any> {
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
@@ -619,7 +617,7 @@ export class ChatGateway implements OnModuleInit {
   async handleJoinPublicChannel(
     @ConnectedSocket() client: Socket,
     @MessageBody() channelDto: GetChannelDto,
-  ) {
+  ): Promise<any> {
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
@@ -692,7 +690,7 @@ export class ChatGateway implements OnModuleInit {
   async handleChannelProtection(
     @ConnectedSocket() client: Socket,
     @MessageBody() changeChannelPasswordDto: ChangeChannelPasswordDto,
-  ) {
+  ): Promise<any> {
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
@@ -716,7 +714,7 @@ export class ChatGateway implements OnModuleInit {
   async handleChangeRole(
     @ConnectedSocket() client: Socket,
     @MessageBody() changeRoleDto: ChangeRoleDto,
-  ) {
+  ): Promise<any> {
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
@@ -762,7 +760,7 @@ export class ChatGateway implements OnModuleInit {
   async handleDeteleChannelProtection(
     @ConnectedSocket() client: Socket,
     @MessageBody() changeChannelPasswordDto: ChangeChannelPasswordDto,
-  ) {
+  ): Promise<any> {
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
@@ -785,7 +783,7 @@ export class ChatGateway implements OnModuleInit {
   async handleKickUser(
     @ConnectedSocket() client: Socket,
     @MessageBody() kickUserDto: KickUserDto,
-  ) {
+  ): Promise<any> {
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
@@ -887,7 +885,7 @@ export class ChatGateway implements OnModuleInit {
   async handlechangeChannelVisibility(
     @ConnectedSocket() client: Socket,
     @MessageBody() changeChannelVisibilityDto: ChangeChannelVisibilityDto,
-  ) {
+  ): Promise<any> {
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
@@ -987,7 +985,7 @@ export class ChatGateway implements OnModuleInit {
   async handleBanUser(
     @ConnectedSocket() client: Socket,
     @MessageBody() banUserDto: BanUserDto,
-  ) {
+  ): Promise<any> {
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
@@ -1049,7 +1047,7 @@ export class ChatGateway implements OnModuleInit {
   async handleUnbanUser(
     @ConnectedSocket() client: Socket,
     @MessageBody() banUserDto: UnbanUserDto,
-  ) {
+  ): Promise<any> {
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
@@ -1099,7 +1097,7 @@ export class ChatGateway implements OnModuleInit {
   async handleMuteUser(
     @ConnectedSocket() client: Socket,
     @MessageBody() muteUserDto: MuteUserDto,
-  ) {
+  ): Promise<any> {
     const userId = Number(client.handshake.auth.userId);
     const { addMinutes } = require('date-fns');
     if (userId) {
@@ -1165,7 +1163,7 @@ export class ChatGateway implements OnModuleInit {
   async handleChangeChannelname(
     @ConnectedSocket() client: Socket,
     @MessageBody() changeChannelNameDto: ChangeChannelNameDto,
-  ) {
+  ): Promise<any> {
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
@@ -1215,7 +1213,7 @@ export class ChatGateway implements OnModuleInit {
   async handlePrivateMessage(
     @ConnectedSocket() client: Socket,
     @MessageBody() userIdToConnect: number,
-  ) {
+  ): Promise<any> {
     const userId = Number(client.handshake.auth.userId);
     if (userId) {
       try {
@@ -1327,7 +1325,7 @@ export class ChatGateway implements OnModuleInit {
   async handleCreateGame(
     @ConnectedSocket() client: Socket,
     @MessageBody() channelId: string,
-  ) {
+  ): Promise<any> {
     const userId = client.handshake.auth.userId;
     if (userId) {
       try {
@@ -1423,7 +1421,7 @@ export class ChatGateway implements OnModuleInit {
     }
   }
 
-  async removeGameRequest(request: CreateGameInfo) {
+  async removeGameRequest(request: CreateGameInfo): Promise<any> {
     if (request) {
       const { userId, channelId, privateChannel, messageId } = request;
       const user = await this.getOrAddUserData(userId);
@@ -1447,7 +1445,7 @@ export class ChatGateway implements OnModuleInit {
   async handleJoinGame(
     @ConnectedSocket() client: Socket,
     @MessageBody() acceptingUserId: number,
-  ) {
+  ): Promise<any> {
     const userId = client.handshake.auth.userId;
     if (userId) {
       if (userId === acceptingUserId) {
