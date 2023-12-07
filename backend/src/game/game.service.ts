@@ -1,14 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { FriendshipGateway } from 'src/friendship/friendship.gateway';
 import { Socket, Server } from 'socket.io';
-import { GameRouter } from './gameRouter.service';
 import * as gm from './gameLogic';
 
 export enum UserStatus {
   Normal,
   Waiting,
   Playing,
-} 
+}
 
 let gFriendshipGateway: FriendshipGateway | null = null;
 
@@ -149,17 +148,17 @@ class MMQueue {
     };
 
     let matches = [];
-		while (sorted.length >= 2) {
-			let req2 = sorted.pop();
-			let req1 = sorted.pop();
+    while (sorted.length >= 2) {
+      let req2 = sorted.pop();
+      let req1 = sorted.pop();
       if (isMatch(req1, req2)) {
         this.matchRequests.delete(req1.userId);
         this.matchRequests.delete(req2.userId);
         matches.push([req1.userId, req2.userId]);
       } else {
-				sorted.push(req1);
-			}
-		}
+        sorted.push(req1);
+      }
+    }
 
     return matches;
   }
@@ -170,9 +169,12 @@ export class GameService {
   // unique game_invite name to info required to launch the game
   lobbyRoom = '_LOBBY_';
 
-  invites = new Map<string, {id: number, host: UserData, type: 'classic' | 'wall', args: any }>();
+  invites = new Map<
+    string,
+    { id: number; host: UserData; type: 'classic' | 'wall'; args: any }
+  >();
   userInvites = new Map<number, string>(); // userId -> inviteName, used for deleting
-	private _lastInviteId = 0;
+  private _lastInviteId = 0;
   // invites along their hosts
 
   // sockId to active games
@@ -195,12 +197,11 @@ export class GameService {
     loser: UserData;
   }) => {};
 
-  constructor(public friendshipGateway: FriendshipGateway) {
-  }
+  constructor(public friendshipGateway: FriendshipGateway) {}
 
   queueSetCallback(callback) {
     this.queue.onMatch = (userId1, userId2) => {
-      let { gameRoom, game } = this.launchGame(userId1, userId2); 
+      let { gameRoom, game } = this.launchGame(userId1, userId2);
       callback({ gameRoom, game });
     };
   }
@@ -268,12 +269,11 @@ export class GameService {
 
   // creating / join games
   lobbyCreateInvite(
-		userId: number,
-	 	inviteName: string,
-	 	type: 'classic' | 'wall' = 'classic',
-		args: any
-	) 
-	{
+    userId: number,
+    inviteName: string,
+    type: 'classic' | 'wall' = 'classic',
+    args: any,
+  ) {
     let user = this.users.get(userId);
     if (!user) throw new Error('no such active user');
     if (this.invites.has(inviteName))
@@ -281,7 +281,12 @@ export class GameService {
 
     user.status = UserStatus.Waiting;
 
-    this.invites.set(inviteName, {id: this._lastInviteId++, host: user, type, args});
+    this.invites.set(inviteName, {
+      id: this._lastInviteId++,
+      host: user,
+      type,
+      args,
+    });
     this.userInvites.set(userId, inviteName);
   }
 
@@ -306,17 +311,20 @@ export class GameService {
   }
 
   launchGame(
-		userId1,
-	 	userId2,
-	 	{type, args} : {type: 'classic' | 'wall', args: any} = {type: 'classic', args: null},
-		startTime = Date.now()) 
-	{
+    userId1,
+    userId2,
+    { type, args }: { type: 'classic' | 'wall'; args: any } = {
+      type: 'classic',
+      args: null,
+    },
+    startTime = Date.now(),
+  ) {
     let player1 = this.users.get(userId1);
     let player2 = this.users.get(userId2);
     if (!player1 || !player2) throw new Error('no such active user');
 
     let gameId = this.genId();
-    let game = gm.makeGame({type, args}, startTime);
+    let game = gm.makeGame({ type, args }, startTime);
 
     this.games.set(gameId, game);
 
@@ -408,8 +416,8 @@ export class GameService {
 
     this.invites.delete(inviteName);
 
-		let {host, type, ...args} = pending;
-    return this.launchGame(host.id, joiner.id, {type, ...args}, startTime);
+    let { host, type, ...args } = pending;
+    return this.launchGame(host.id, joiner.id, { type, ...args }, startTime);
   }
 
   joinQueue(userId, userRating) {
