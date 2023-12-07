@@ -29,14 +29,8 @@ function Channels({ styles }: ChannelsProps) {
       );
     });
     
-    socket.on('joinGame', (result: string) => {
-      if (!result) {
-        notifySuccess('join game');
-        navigate("/game");
-      }
-      else if (result) {
-        notifyError('failed to join game');
-      }
+    socket.on('joinGame', () => {
+      navigate("/game");
     });
 
     socket.on("resetChannel", (channelId: string) => {
