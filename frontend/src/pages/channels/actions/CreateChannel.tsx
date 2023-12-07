@@ -70,6 +70,7 @@ const CreateChannel = ({
         password: newChannel.password,
       },
       (result: string) => {
+        console.log(result);
         if (!result) {
           notifySuccess("Channel successfully created");
         } else if (result === "invalid input") {

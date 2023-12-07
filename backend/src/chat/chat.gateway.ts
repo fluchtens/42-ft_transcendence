@@ -285,12 +285,17 @@ export class ChatGateway implements OnModuleInit {
   @SubscribeMessage('getChannelInitialData')
   async handleChannelInitialData(
     @ConnectedSocket() client: Socket,
-    @MessageBody() channelId: string,
+    @MessageBody() channelIds: string[],
   ): Promise<any> {
     const userId: number = client.handshake.auth.userId;
     if (userId) {
-      const channel = await this.getChannelData(client, channelId, false);
-      return channel;
+      const channels = await Promise.all(
+        channelIds.map(async (channelId) => {
+          const channel = await this.getChannelData(client, channelId, false);
+          return channel;
+        }),
+      );
+      return channels;
     } else {
       return;
     }
@@ -455,10 +460,10 @@ export class ChatGateway implements OnModuleInit {
       channelName.length >= 3 &&
       channelName.length <= 16;
     if (userId) {
-      if (!isChannelNameValid) {
-        throw new Error('invalid input');
-      }
       try {
+        if (!isChannelNameValid) {
+          throw new Error('invalid input');
+        }
         const channelData = await this.chatService.createChannel(
           userId,
           channelName,

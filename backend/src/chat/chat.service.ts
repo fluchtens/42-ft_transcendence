@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Channel, Member, MemberRole, Message } from '@prisma/client';
+import { Channel, Member, MemberRole, Message, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { v4 as uuidv4 } from 'uuid';
 import * as bcrypt from 'bcryptjs';
@@ -271,6 +271,9 @@ export class ChatService {
           members: {
             include: {
               channel: true,
+            },
+            orderBy: {
+              createdAt: Prisma.SortOrder.asc,
             },
           },
         },
