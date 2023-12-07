@@ -19,7 +19,7 @@ export class RoomsService {
     this.rooms.get(roomName).delete(socket);
   }
 
-  disconnectClient(socket: Socket) {
+  disconnectClient(socket: Socket): any {
     const connectedRooms = Object.keys(socket.rooms).filter((room) => room !== socket.id);
 
     connectedRooms.forEach((room) => {
