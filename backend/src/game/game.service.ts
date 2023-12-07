@@ -404,7 +404,6 @@ export class GameService {
         return;
       }
       game.update();
-			console.log('lolilol');
       let { finish, winner = null } = game.updateScores();
       if (finish && winner) {
         onFinish(winner);

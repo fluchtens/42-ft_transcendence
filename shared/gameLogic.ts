@@ -405,10 +405,9 @@ function timeToImpactStill(projectile: MovingRectangle, target: Rectangle) {
 
 		tY = (targetY - projY) / projectile.dy;
 		let tmpProj = new MovingRectangle(projectile);
-		console.log('ty', tY);
+// 		console.log('ty', tY);
 		move(tmpProj, tY);
 		if (tY >= 0 && right(tmpProj) >= left(target) && left(tmpProj) <= right(target)) {
-			console.log('hit Y');
 			ret.push({t: tY, hit: target, vertical: false});
 		}
 	}
@@ -419,23 +418,20 @@ function timeToImpactStill(projectile: MovingRectangle, target: Rectangle) {
 		let projX = (projectile.dx > 0) ? right(projectile) : left(projectile);
 
 		tX = (targetX - projX) / projectile.dx;
-		console.log('tx', tX);
+// 		console.log('tx', tX);
 		let tmpProj = new MovingRectangle(projectile);
 		move(tmpProj, tX);
 		if (tX > 0 && bottom(tmpProj) >= top(target) && top(tmpProj) <= bottom(target)) {
-			console.log('hit X');
 			ret.push({t: tX, hit: target, vertical: true});
 		}
 	}
 
-	console.log('hits', ret);
 	return ret;
 }
 
 function timeToImpact(projectile: MovingRectangle, target: Rectangle | MovingRectangle) {
-	console.log('target', target, 'proj', projectile);
+// 	console.log('target', target, 'proj', projectile);
 	if ( 'dx' in target) {
-// 	if (target?.dx || target?.dy) {
 		// "compute in reference frame of target"
 		let tmpTarget = new Rectangle(target);
 		let tmpProj = new MovingRectangle(projectile);
@@ -535,12 +531,13 @@ export class WallGame {
 
 			this.walls.push(new Rectangle({x: -s, y: 0, w: W + 2*s, h:0}));
 			this.walls.push(new Rectangle({x: -s, y: H, w: W + 2*s, h:0}));
-			if (this.maps.has(mapName)) {
-				console.log('####### ExTRA Walls#####', this.maps.get(mapName));
-				for (let wall of this.maps.get(mapName))
+
+			let mapWalls = this.maps.get(mapName);
+			if (mapWalls) {
+				for (let wall of mapWalls) {
 					this.walls.push(wall);
+				}
 			}
-			console.log('so:', this.walls);
 
 			this.goals.push(new Rectangle({x: -s, y: 0, w: 0, h: H}));
 			this.goals.push(new Rectangle({x: W + s, y: 0, w: 0, h: H}));
@@ -550,14 +547,11 @@ export class WallGame {
 	}
 
 	_preUpdate(dt: number, ball = true) {
-// 		console.log('pre update', this, 'dt', dt);
-
 		if (ball) move(this.ball, dt);
 		for (let p of this.players) {
 			move(p, dt);
 			p.y = clamp(0, p.y, WALL_PONG.height - WALL_PONG.paddleHeight);
 		}
-// 		console.log('post update', this)
 	}
 
 	update( time: number = Date.now() ) { 
@@ -576,13 +570,13 @@ export class WallGame {
 			candidate: null | {impact: Impact, type: string}, 
 			targets: Array<Rectangle | MovingRectangle>,
 		 	type: string) => {
-			console.log('\n******* ', type, ' *****');
+// 			console.log('\n******* ', type, ' *****');
 			let impacts : Impact[] = [];
 			for (let target of targets) {
 				impacts.splice(impacts.length, 0, ...timeToImpact(this.ball, target));
 // 				impacts = [...impacts, ...timeToImpact(this.ball, target)];
 			}
-			console.log('all impacts', impacts, 'cdt', candidate);
+// 			console.log('all impacts', impacts, 'cdt', candidate);
 			if (impacts.length === 0) {
 				return candidate;
 			} else {
@@ -595,16 +589,14 @@ export class WallGame {
 			}
 		}
 
-// 		while (true) { TODO
-		for (let i = 0; i < 10; ++i) { // prevent infinite loops if i got it wrong
-			console.log('walls', this.walls);
+		while (true) { 
 			let foundImpact = searchImpact(null, this.walls, 'wall');
 			foundImpact = searchImpact(foundImpact, this.players, 'paddle');
 			foundImpact = searchImpact(foundImpact, this.goals, 'goals');
 			if (!foundImpact) break; // TODO problem
 
 			let {impact, type} = foundImpact;
-			console.log('found', foundImpact);
+// 			console.log('found', foundImpact);
 			let {t, hit, vertical} = impact;
 			if (t < 0 || t * 1000 > time - this._lastUpdate ) 
 				break;
@@ -616,7 +608,6 @@ export class WallGame {
 				else
 					this.ball.dy *= -1;
 			} else if (type === 'paddle') {
-				console.log('hello???', this.ball);
 				this.ball.dx *= -1
 				let ratio = 
 					(this.ball.y - (hit.y - this.ball.h)) /
@@ -624,7 +615,6 @@ export class WallGame {
 				ratio = 2 * (ratio - 0.5); // 0,1 -> -1, 1
 				this.ball.dy = ratio * WALL_PONG.ballMaxYSpeed;
 			} else if (type === 'goals') {
-				console.log('foogoal');
 				let index: 0 | 1 = (hit.x < 0)? 1 : 0;
 				++this.scores[index];
 				this._newBall(index);
@@ -639,7 +629,6 @@ export class WallGame {
 	}
 
 	_newBall(to: 0 | 1, delay = WALL_PONG.newBallDelay) {
-		console.log('new ball');
 		this.ball.x = (WALL_PONG.width - WALL_PONG.ballSize) / 2;
 		this.ball.y = Math.random() * (WALL_PONG.height - WALL_PONG.ballSize);
 		this.ball.dx = ((to === 0)? -1 : 1) * WALL_PONG.ballXSpeed;
@@ -697,7 +686,6 @@ export class WallGame {
 		if (when)
 			this.update(when);
 		this.players[whichIndex(who)].dy = WALL_PONG.playerSpeed * Number(mo);
-		console.log('MOTION', this);
 	};
 
 	minTimeToPoint(from: number = Date.now()) { return 500};

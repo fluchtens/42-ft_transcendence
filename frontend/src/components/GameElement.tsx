@@ -110,8 +110,9 @@ function GameElementContent() {
   return content;
 }
 
+type GameInfo = {id: number, name: string, host: string, type:string, rating: number};
 function GamesLobby({ waiting = false }) {
-  type GamesList = Array<{ name: string; host: string }>;
+  type GamesList = Array<GameInfo>;
   const socket = useContext(SocketContext);
   const [gamesInfo, setGamesInfo] = useState<GamesList>([]);
 
@@ -231,7 +232,7 @@ function GamesTable({
   onJoin,
   joinEnable = true,
 }: {
-  gamesInfo: Array<{ name: string; host: string }>;
+  gamesInfo: Array<GameInfo>;
   onJoin: (gameName: string) => undefined;
   joinEnable: boolean;
 }) {
@@ -257,11 +258,11 @@ function GamesTable({
       <button disabled> join </button>
     );
   }
-  function itemRow(item: {id: number }) {
+  function itemRow(item: GameInfo) {
     return (
       <tr key={item.id}>
         {[...fields.values()].map((key) => (
-          <td>{(item as any)[key]}</td>
+          <td key={key}>{(item as any)[key]}</td>
         ))}
         <td>
           {joinButton(joinEnable, () => {
@@ -277,7 +278,7 @@ function GamesTable({
   let headerRow = (
     <tr>
       {fieldkeys.map((field) => (
-        <th>{field}</th>
+        <th key={field}>{field}</th>
       ))}
     </tr>
   );
@@ -435,7 +436,7 @@ function PongBoard({
 	// reset them before drawGame in some cases
 
   useEffect(function () {
-    socket.emit("syncGame", ({type, args, packet}: {type: 'classic' | 'wall', packet: any}) => {
+    socket.emit("syncGame", ({type, args, packet}: {type: 'classic' | 'wall', args:any, packet: any}) => {
 			if ( !gameRef.current ) {
 				console.log('pre-init game:', type, packet);
 				gameRef.current = gm.makeGame({type, args});
