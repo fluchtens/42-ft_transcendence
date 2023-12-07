@@ -1,22 +1,8 @@
-
-// Mathy utils
-// function qr(x: number, d:number) : [number, number] {
-// 	// assumes d > 0
-// 	// find q, r st. ( x = q * d + r ) with q positive int, and 0 <= r < d
-// 	let [q, r] = [x / d, x % d];
-// 	return [Math.floor(q), r >= 0 ? r : d + r]; 
-// }
-// 
-
 function clamp<Type>(min: Type, x: Type, max: Type) {
 	if (x < min) return min;
 	else if (x > max) return max;
 	else return x;
 }
-
-// function sign(x : number) {
-// 	return Number(x > 0) - Number(x < 0);
-// }
 
 export interface Game {
 	type: 'classic' | 'wall';
@@ -74,28 +60,6 @@ export const PONG = { // Parameters for PONG game
 	startDelay: 3000,
 	newBallDelay: 500,
 }
-
-// export const PONG = { // Parameters for PONG game
-// 	width: 20,
-// 	height: 11,
-// 	fps: 1,
-// 	get msFrame() { return 1000 / this.fps; },
-// 	margin: 1,
-// 	//
-// 	playerSpeed: 1, // pixels per frame
-// 	ballXSpeed: 1,
-// 	ballMaxYSpeed: 3, // determines angle when edge of paddle is hit
-// 	//
-// 	ballSize: 1,
-// 	get paddleWidth() { return this.ballSize },
-// 	paddleHeight: 5,
-// 	//
-// 	get player1X() { return this.margin; },
-// 	get player2X() {
-// 		return this.width - this.margin - this.paddleWidth;
-// 	},
-// 	winScore: 11,
-// }
 
 export class Player {
 	constructor(
@@ -279,8 +243,6 @@ export class ClassicGame implements Game {
 	}
 
 	updateScores(when: number | null = null) {
-		// TODO bad name for this function...
-		// more like "if scores should change do so and create new ball"
 		if (!this.ball) return {finish: false};
 		if (when)
 			this.update(when);
@@ -343,23 +305,6 @@ export const WALL_PONG = {
 	newBallDelay: 500, // ms
 }
 
-// class Segment {
-// 	x: number;
-// 	y: number;
-// 	size: number;
-// 	vertical: boolean;
-// 	get horizontal() { return !this.vertical }
-// 	set horizontal(val) { this.vertical = !val }
-// 
-// 	constructor({x, y, size, vertical}: {x: number, y: number, size: number, vertical: boolean}) 
-// 	{
-// 		this.x = x;
-// 		this.y = y;
-// 		this.size = size;
-// 		this.vertical = vertical;
-// 	}
-// }
-
 class Rectangle {
 	x: number;
 	y: number;
@@ -374,11 +319,6 @@ class Rectangle {
 		this.h = h;
 	}
 }
-
-// function positiveMin(...args) {
-// 	let filtered = args.filter( (x) => (x >= 0));
-// 	return (filtered.length === 0) ? -1 : Math.min(...filtered);
-// }
 
 type Impact = { t: number, hit: Rectangle | MovingRectangle, vertical: boolean }
 
@@ -406,7 +346,6 @@ function timeToImpactStill(projectile: MovingRectangle, target: Rectangle) {
 
 		tY = (targetY - projY) / projectile.dy;
 		let tmpProj = new MovingRectangle(projectile);
-// 		console.log('ty', tY);
 		move(tmpProj, tY);
 		if (tY >= 0 && right(tmpProj) >= left(target) && left(tmpProj) <= right(target)) {
 			ret.push({t: tY, hit: target, vertical: false});
@@ -419,7 +358,6 @@ function timeToImpactStill(projectile: MovingRectangle, target: Rectangle) {
 		let projX = (projectile.dx > 0) ? right(projectile) : left(projectile);
 
 		tX = (targetX - projX) / projectile.dx;
-// 		console.log('tx', tX);
 		let tmpProj = new MovingRectangle(projectile);
 		move(tmpProj, tX);
 		if (tX > 0 && bottom(tmpProj) >= top(target) && top(tmpProj) <= bottom(target)) {
@@ -431,9 +369,8 @@ function timeToImpactStill(projectile: MovingRectangle, target: Rectangle) {
 }
 
 function timeToImpact(projectile: MovingRectangle, target: Rectangle | MovingRectangle) {
-// 	console.log('target', target, 'proj', projectile);
 	if ( 'dx' in target) {
-		// "compute in reference frame of target"
+		// compute "in reference frame of target"
 		let tmpTarget = new Rectangle(target);
 		let tmpProj = new MovingRectangle(projectile);
 
@@ -495,17 +432,6 @@ export class WallGame {
 	private _nextBallTime: number = 0;
 
 	constructor(startTime = Date.now(), {mapName}: {mapName: string} = {mapName: 'default'}) {
-// 		{ // Init ball
-// 			let x = (WALL_PONG.width - WALL_PONG.ballSize) / 2;
-// 			let y = (WALL_PONG.height - WALL_PONG.ballSize) / 2;
-// 			let s = WALL_PONG.ballSize;
-// 
-// 			// TESTING
-// 			this.ball = new MovingRectangle(
-// 				{x, y, w: s, h: s, dx: WALL_PONG.ballXSpeed, dy: WALL_PONG.ballMaxYSpeed}
-// 			);
-// // 			this.ball = new MovingRectangle({x, y, w: s, h: s});
-// 		}
 		this.mapName = mapName;
 		console.log('ctor time', startTime);
 		this._lastUpdate = startTime;
@@ -542,8 +468,6 @@ export class WallGame {
 
 			this.goals.push(new Rectangle({x: -s, y: 0, w: 0, h: H}));
 			this.goals.push(new Rectangle({x: W + s, y: 0, w: 0, h: H}));
-// 			this.goals.push(new Rectangle({x: -s, y: -40, w: 0, h: 100}));
-// 			this.goals.push(new Rectangle({x: W + s, y: -40, w: 0, h: 100}));
 		}
 	}
 
@@ -571,17 +495,13 @@ export class WallGame {
 			candidate: null | {impact: Impact, type: string}, 
 			targets: Array<Rectangle | MovingRectangle>,
 		 	type: string) => {
-// 			console.log('\n******* ', type, ' *****');
 			let impacts : Impact[] = [];
 			for (let target of targets) {
 				impacts.splice(impacts.length, 0, ...timeToImpact(this.ball, target));
-// 				impacts = [...impacts, ...timeToImpact(this.ball, target)];
 			}
-// 			console.log('all impacts', impacts, 'cdt', candidate);
 			if (impacts.length === 0) {
 				return candidate;
 			} else {
-// 				let best = impacts.sort(({t:t1}, {t:t2}) => (t2 - t1))[0];
 				let best = impacts.sort(({t:t1}, {t:t2}) => (t1 - t2))[0];
 				if (!candidate)
 					return {impact: best, type};
@@ -597,7 +517,6 @@ export class WallGame {
 			if (!foundImpact) break; // TODO problem
 
 			let {impact, type} = foundImpact;
-// 			console.log('found', foundImpact);
 			let {t, hit, vertical} = impact;
 			if (t < 0 || t * 1000 > time - this._lastUpdate ) 
 				break;
@@ -705,87 +624,3 @@ export class WallGame {
 		return this._nextBallTime - this._lastUpdate; 
 	}
 }
-
-
-
-// 	update(time = Date.now()) { 
-// 		function mirrorCut(x: number, cut: number, sign: number) : [boolean, number] {
-// 			if ( sign * x < sign * cut)
-// 				return [true, 2 * cut - x];
-// 			else
-// 				return [false, x];
-// 		}
-// 		//
-// 		let handleWallCollision = () => {
-// 			let collision = false;
-// 			if (! this.ball ) return ;
-// 			//
-// 			do {
-// 				[collision, this.ball.y] = mirrorCut(this.ball.y, 0, 1); // top wall
-// 				if (!collision)
-// 					[collision, this.ball.y] = mirrorCut(this.ball.y, PONG.height - PONG.ballSize, -1); // bottom wall
-// 				//
-// 				if (collision)
-// 					this.ball.dy *= -1;
-// 			} while ( collision );
-// 		}
-// 		//
-// 		let updateHelper = (frames: number) => {
-// 			let [H, h] = [PONG.height, PONG.paddleHeight];
-// 			this.player1.y = clamp(0, this.player1.y + frames * this.player1.dy, H - h);
-// 			this.player2.y = clamp(0, this.player2.y + frames * this.player2.dy, H - h);
-// 			//
-// 			if (this.ball) {
-// 				this.ball.x += frames * this.ball.dx;
-// 				this.ball.y += frames * this.ball.dy;
-// 			}
-// 			//
-// 			handleWallCollision();
-// 			totalFrames -= frames;
-// 		}
-// 		//
-// 		let handlePaddleCollision = () => {
-// 			if (! this.ball) return;
-// 			//
-// 			const which = (this.ball.dx < 0) ? WhichPlayer.P1 : WhichPlayer.P2;
-// 			const relBallY = this.ball.y - (this.player(which).y - PONG.ballSize + 1);
-// 			const hitRange = PONG.paddleHeight + PONG.ballSize - 1;
-// 			if ( 0 <= relBallY && relBallY < hitRange) {
-// 				this.ball.dy = Math.floor(PONG.ballMaxYSpeed * ( 2*relBallY/(hitRange - 1) - 1));
-// 				this.ball.dx *= -1;
-// 				//
-// 				if (which === WhichPlayer.P1)
-// 					[, this.ball.x] = mirrorCut(this.ball.x, PONG.player1X + PONG.paddleWidth, 1);
-// 				else
-// 					[, this.ball.x] = mirrorCut(this.ball.x, PONG.player2X - PONG.ballSize, -1);
-// 			}
-// 			// TODO secondary collision (ie with the edge)
-// 		}
-// 		//
-// 		// Make so positions etc, happen as whole number of pixels:
-// 		let elapsed = time - this._lastUpdate;
-// 		let [totalFrames, rem] = qr(elapsed, 1000 / PONG.fps); // get number of frames elapsed
-// 		this._lastUpdate += elapsed - rem; // pretend we're on 
-// 																			 // the exact timestamp of the previous frame
-// 		//
-// 		const maxIter = 20; 
-// 		for (let i = 0; i < maxIter; ++i) { 
-// 			if (!this.ball) break;
-// 			if ( !( PONG.player1X + PONG.paddleWidth <= this.ball.x 
-// 						 && this.ball.x <= PONG.player2X - PONG.ballSize))
-// 			{ break; } // already passed the goal
-// 
-// 			let dist = (this.ball.dx < 0)? // signed distance to "goal"
-// 					(this.ball.x - (PONG.player1X + PONG.paddleWidth)) :
-// 					(this.ball.x - (PONG.player2X - PONG.ballSize));
-// 			let crossTime = Math.ceil( -dist / this.ball.dx ); // time (in frames) when the ball 
-// 																											// will cross the goal/hit the paddle
-// 			if (crossTime >= totalFrames)
-// 				break;
-// 
-// 			updateHelper(crossTime);
-// 			handlePaddleCollision();
-// 		}
-// 		updateHelper(totalFrames);
-// 	}
-

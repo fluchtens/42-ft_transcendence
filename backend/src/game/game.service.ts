@@ -8,7 +8,7 @@ export enum UserStatus {
   Normal,
   Waiting,
   Playing,
-} // TODO must stay in sync with frontend
+} 
 
 let gFriendshipGateway: FriendshipGateway | null = null;
 
@@ -77,7 +77,6 @@ export class UserData {
 
 class MMQueue {
   // Matchmaking queue
-  // TODO are data races possible if someone leaves the queue while we're matching??
 
   public matchRequests = new Map<
     string,
@@ -88,7 +87,7 @@ class MMQueue {
     initialRange: 50, // +/-
     refreshRate: 1 / 5, // per sec (ie 1 every 5 sec)
   };
-  private _intervalHandle: any = null; // what type is returned by `setInterval`? TODO
+  private _intervalHandle: ReturnType<typeof setInterval> = null; // what type is returned by `setInterval`? TODO
 
   constructor(
     public onMatch: (userId1: number, userId2: number) => undefined = (
@@ -162,18 +161,6 @@ class MMQueue {
 			}
 		}
 
-//     for (let i = sorted.length - 2; i >= 0; --i) {
-// 
-//       let [req1, req2] = [sorted[i], sorted[i + 1]];
-// 			console.log(`i ${i}`, 'req1', req1, 'req2', req2);
-//       if (isMatch(req1, req2)) {
-// 				console.log('match');
-//         i--; // skip
-//         this.matchRequests.delete(req1.userId);
-//         this.matchRequests.delete(req2.userId);
-//         matches.push([req1.userId, req2.userId]);
-//       }
-//     }
     return matches;
   }
 }
@@ -208,28 +195,12 @@ export class GameService {
     loser: UserData;
   }) => {};
 
-  // 	constructor( private readonly friendshipGateway : FriendshipGateway )
-  // 	{}
-
-  // TESTING
   constructor(public friendshipGateway: FriendshipGateway) {
-//     this.invites.set('test1', { host: new UserData(19) });
-//     this.invites.set('test2', { host: new UserData(42) });
-
-    // 		gFriendshipGateway = this.friendshipGateway;
-    // 		//
-    // 		let alice = new UserData(1);
-    // 		let bob = new UserData(2);
-    // 		alice.rating = 1100;
-    // 		bob.rating = 1000;
-    // 		this.users.set(1, bob);
-    // 		this.users.set(2, alice);
   }
-  // END TESTING
 
   queueSetCallback(callback) {
     this.queue.onMatch = (userId1, userId2) => {
-      let { gameRoom, game } = this.launchGame(userId1, userId2); // TODO this in ctor problems?
+      let { gameRoom, game } = this.launchGame(userId1, userId2); 
       callback({ gameRoom, game });
     };
   }
@@ -256,7 +227,7 @@ export class GameService {
 
   unbindSocket(sock: Socket) {
     let userId = this.socketUsers?.get(sock.id);
-    let user = userId ? this.users.get(userId) : null; // can userId be 0? (TODO)
+    let user = userId ? this.users.get(userId) : null;
 
     let deletions = { user: false, invite: false };
     if (!user) return deletions;
@@ -327,8 +298,7 @@ export class GameService {
   }
 
   private genId() {
-    // TODO something less hacky needed??
-    // Do we still need it at all now that we're not using it as a key for clients
+    // Do we still need it at all now that we're not using it as a key for clients?
     let id;
     do {
       id = 'game_' + String(Math.random()).slice(2);
@@ -350,16 +320,6 @@ export class GameService {
 		console.log('pre-make', {type, args});
     let game = gm.makeGame({type, args}, startTime);
 
-// 		if (!game) throw new Error("Unexpected"); // make typescript happy
-
-    // 		game.newBall(gm.WhichPlayer.P1, startTime);
-    // TESTING
-    // 		game.ball.dx = - gm.PONG.ballXSpeed;
-    // 		game.ball.dy = 0;
-    // 		game.ball.x = Math.floor(gm.PONG.width / 2);
-    // 		game.ball.y = Math.floor(gm.PONG.height / 2);
-    // END TESTING
-    // //
     this.games.set(gameId, game);
 
     let bindPlayer = (user, whichP) => {

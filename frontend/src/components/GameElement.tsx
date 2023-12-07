@@ -4,22 +4,15 @@ import * as gm from "./gameLogic";
 
 const SOCK_HOST = import.meta.env.VITE_BACK_URL;
 const gameSocket = io(`${SOCK_HOST}/gamesocket`, {
-  // autoConnect: false,
   withCredentials: true,
-  // maybe set those to check connection is alive with shorter timeouts
-  // retries
-  // ackTimeout
 });
 const SocketContext = createContext<Socket>(gameSocket);
 
-// TODO io.on('connection', () => {refresh();}) or something
-// for reconnections
 export default function GameElement() {
   let sockRef = useRef<Socket>(gameSocket);
   let [errmsg, setErrmsg] = useState<string | null>(null);
 
   useEffect(() => {
-    // sockRef.current.connect();
     sockRef.current.on("gameSocketError", (errmsg: string) => {
       setErrmsg(`Error: ${errmsg}`);
     });
@@ -117,9 +110,6 @@ function GamesLobby({ waiting = false }) {
   const [gamesInfo, setGamesInfo] = useState<GamesList>([]);
 
   useEffect(() => {
-    // 		socket.emit('joinLobby', (gotGamesInfo: GamesList) => {
-    // 		 	setGamesInfo(gotGamesInfo);
-    // 		});
 
     socket.on("gameListUpdate", (gotGamesInfo: GamesList) => {
       setGamesInfo(gotGamesInfo);
@@ -303,7 +293,7 @@ function PongBoard({
   availHeight: number;
 }) {
 
-	// DRAW FUNCTION
+	// DRAW FUNCTIONS
 	function drawCountdown(
 		cx: CanvasRenderingContext2D, 
 		seconds: number, 
@@ -442,19 +432,12 @@ function PongBoard({
 				gameRef.current = gm.makeGame({type, args});
 				console.log('post-init game', gameRef.current);
 				gameRef.current.pushPacket(packet);
-				// problem how to get map TODO
-				//
-
-// 				let gameType = gameRef.current?.type;
-				// 		// TESTING
-				// 		let gameType = 'wall';
-				// 		gameRef.current = new gm.WallGame({mapName: 'fooMap'});
 
 				boardRef.current?.focus();
 				let cx = boardRef.current?.getContext("2d");
 				if (!cx) throw new Error("Unexpected bad state");
 
-				if (type === 'classic') { // TODO get type somehow
+				if (type === 'classic') {
 					let scale = Math.min(
 						Math.floor(availWidth / gm.PONG.width),
 						Math.floor(availHeight / gm.PONG.height)
@@ -480,7 +463,7 @@ function PongBoard({
 			if (!gameRef.current) return;
 
       gameRef.current.pushPacket(packet);
-      gameRef.current.update(); // TESTING
+      gameRef.current.update();
     });
 
     return function cleanup() {
@@ -510,7 +493,7 @@ function PongBoard({
   function handleKeyUp(ev: any) {
     if (ev.key === "ArrowDown" || ev.key === "ArrowUp") {
       ev.preventDefault();
-      pressed.current.delete(ev.key); // refactor as one with _KeyUp?
+      pressed.current.delete(ev.key);
       socket.emit("playerMotion", dir());
     }
   }
@@ -553,75 +536,3 @@ function PongBoard({
 // 	);
 // }
 
-//
-//
-//
-//
-// 	useEffect( function () {
-// 		function draw() {
-// 			let cx = board?.current?.getContext('2d');
-// 			if (!cx || !gameState.current)
-// 				return ;
-// 			cx.fillStyle = 'black';
-// 			cx.fillRect(0, 0, gm.PONG.width, gm.PONG.height);
-// 			cx.fillStyle = '#00ff80'; // bluish green
-// 			let curState = gameState.current.cur;
-// 			curState.update();
-// 			// display paddles
-// 			let [w, h] = [gm.PONG.paddleWidth, gm.PONG.paddleHeight];
-// 			for (let {x, y} of [curState.player1, curState.player2]) {
-// 				cx.fillRect(x, y, w, h);
-// 			}
-// 			// display ball
-// 			if (curState.ball) {
-// 				let {x, y} = curState.ball;
-// 				cx.fillRect(x, y, w, w);
-// 			}
-// 			// display scores
-// 			cx.font = "30px Monospace";
-// 			cx.textAlign = "left";
-// 			cx.fillText(String(curState.player1.score), 0, 30);
-// 			cx.textAlign = "right";
-// 			cx.fillText(String(curState.player2.score), gm.PONG.width - 1, 30);
-// 			//
-// 			requestAnimationFrame(draw);
-// 		}
-//
-// 		socket.on('gameUpdate', (time, packet) => {
-// 			gameState.current?.push(packet, time);
-// 		});
-//
-// 		board.current?.focus();
-// 		draw();
-// 	}, []);
-//
-// 	const pressed = useRef< Set<string> >(new Set());
-// 	function dir(): gm.MotionType {
-// 		return Number(pressed.current.has("ArrowDown")) - Number(pressed.current.has("ArrowUp"));
-// 	}
-//
-// 	function handleKeyDown(ev: any) { // TODO some sort of 'KeyboardEvent' instead of 'any'
-// 		if (ev.repeat) return;
-// 		if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
-// 			pressed.current.add(ev.key);
-// 			socket.emit('changeMotion', dir());
-// 		}
-// 	}
-// 	function handleKeyUp(ev: any) {
-// 		if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
-// 			pressed.current.delete(ev.key); // refactor as one with _KeyUp?
-// 			socket.emit('changeMotion', dir());
-// 		}
-// 	}
-//
-// 	if (!gameState.current) return <></>;
-// 	//
-// 	return (
-// 		<canvas
-// 			ref={board} width={gm.PONG.width} height={gm.PONG.height}
-// 			tabIndex={0} // apperently needed for onKey* events?
-// 			onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
-// 		Cannot load pong game.
-// 		</canvas>
-// 	);
-// 	}
