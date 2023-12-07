@@ -304,7 +304,8 @@ export class ClassicGame implements Game {
 
 	minTimeToPoint(from = Date.now()) {
 		let offset = 50;
-		if (!this.ball) return offset; // TODO smarter
+		if (!this.ball) 
+			return offset; // TODO why weird behavior when more
 		let time = this._lastUpdate;
 		if (this.ball.dx < 0) 
 			time += (-PONG.ballSize - this.ball.x) / this.ball.dx * PONG.msFrame;
@@ -487,8 +488,8 @@ export class WallGame {
 	players: [MovingRectangle, MovingRectangle];
 	scores = [0, 0];
 	mapName: string;
-	walls = [];
-	goals = [];
+	walls: Rectangle[] = [];
+	goals: Rectangle[] = [];
 	get type(): 'wall' { return 'wall' };
 	private _lastUpdate: number;
 	private _nextBallTime: number = 0;
@@ -688,9 +689,19 @@ export class WallGame {
 		this.players[whichIndex(who)].dy = WALL_PONG.playerSpeed * Number(mo);
 	};
 
-	minTimeToPoint(from: number = Date.now()) { return 500};
+	minTimeToPoint(from: number = Date.now()) { 
+		let offset = 50;
+		let time = this._lastUpdate;
+		if (this._nextBallTime > time)
+			return offset + (this._nextBallTime - from);
+		time += Math.min(
+			Math.abs((this.goals[0].x - this.ball.x) / this.ball.dx * 1000),
+			Math.abs((this.goals[1].x - (this.ball.x + this.ball.w)) / this.ball.dx * 1000)
+		);
+		return time + offset - from;
+	}
 
-	timeToBall() { 
+	timeToBall(from = Date.now()) { 
 		return this._nextBallTime - this._lastUpdate; 
 	}
 }
