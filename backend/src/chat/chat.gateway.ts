@@ -1386,7 +1386,12 @@ export class ChatGateway implements OnModuleInit {
           this.waitingUsers.set(userId, createGameInfo);
         }
         else {
-          this.removeGameRequest(this.waitingUsers.get(userId));
+          try {
+            this.removeGameRequest(this.waitingUsers.get(userId));
+          }
+          catch {
+            return 'failed to delete game request';
+          }
           if (!createGameInfo.privateChannel) {
             const messageSend = await this.chatService.addMessage(
               userId,
