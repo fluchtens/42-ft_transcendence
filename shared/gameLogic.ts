@@ -330,9 +330,9 @@ export const WALL_PONG = {
 	height: 2.0,
 	margin: 0.15,
 
-	playerSpeed: 1.4, // u per second
+	playerSpeed: 1.8, // u per second
 	ballXSpeed: 1.0,
-	ballMaxYSpeed: 1.5, // must be higher than `playerSpeed`
+	ballMaxYSpeed: 2.0, // MUST be higher than `playerSpeed`
 	
 	ballSize: 0.04,
 	get paddleWidth() { return this.ballSize },
