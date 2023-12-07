@@ -1,8 +1,11 @@
 import { io, Socket } from "socket.io-client";
 import { useRef, useEffect, useState, createContext, useContext } from "react";
 import * as gm from "../../components/gameLogic";
-import styles from "./Game.module.scss";
 import { Separator } from "../../components/Separator";
+import { notifyError } from "../../utils/notifications";
+import styles from "./Game.module.scss";
+import lobbyStyles from "./GameLobby.module.scss";
+import winStyles from "./GameWin.module.scss";
 
 const SOCK_HOST = import.meta.env.VITE_BACK_URL;
 const gameSocket = io(`${SOCK_HOST}/gamesocket`, {
@@ -17,29 +20,24 @@ const SocketContext = createContext<Socket>(gameSocket);
 
 function Game() {
   let sockRef = useRef<Socket>(gameSocket);
-  let [errmsg, setErrmsg] = useState<string | null>(null);
 
   useEffect(() => {
     sockRef.current.on("gameSocketError", (errmsg: string) => {
-      setErrmsg(`Error: ${errmsg}`);
+      notifyError(errmsg);
     });
+
+    return () => {
+      sockRef.current.off("gameSocketError");
+    };
   }, []);
 
   return (
     <SocketContext.Provider value={sockRef.current}>
-      {errmsg && (
-        <p style={{ color: "red" }}>
-          {errmsg}
-          <button
-            onClick={() => {
-              setErrmsg(null);
-            }}
-          >
-            x
-          </button>
-        </p>
-      )}
-      <GameElementContent />
+      <div className={styles.container}>
+        <div className={styles.categories}>
+          <GameElementContent />
+        </div>
+      </div>
     </SocketContext.Provider>
   );
 }
@@ -85,21 +83,14 @@ const GameElementContent = () => {
     };
   }, []);
 
-  function WinScreen({ win = true }) {
+  const WinScreen = ({ win = true }) => {
     return (
-      <p>
-        <b> You {win ? "Win :)" : "Lose :("} !!! </b>
-        <button
-          onClick={() => {
-            setWinLose(WinLose.NA);
-          }}
-        >
-          {" "}
-          OK{" "}
-        </button>
-      </p>
+      <div className={winStyles.container}>
+        <h1>YOU {win ? "WIN" : "LOSE"}!</h1>
+        <button onClick={() => setWinLose(WinLose.NA)}>Back to lobby</button>
+      </div>
     );
-  }
+  };
 
   let content = <></>;
   if (winLose != WinLose.NA) {
@@ -107,7 +98,7 @@ const GameElementContent = () => {
   } else {
     switch (status) {
       case undefined:
-        content = <p> you are not logged in </p>;
+        content = <></>;
         break;
       case UserStatus.Playing:
         content = <PongBoard availWidth={703} availHeight={501} />; // TODO get width dynamically
@@ -159,11 +150,11 @@ const GamesLobby = ({ waiting = false }) => {
           disabled={waiting}
         />
         {waiting ? (
-          <button className={styles.disabled} type="submit">
+          <button className={lobbyStyles.disabled} type="submit">
             Create Match
           </button>
         ) : (
-          <button className={styles.enabled} type="submit">
+          <button className={lobbyStyles.enabled} type="submit">
             Create Match
           </button>
         )}
@@ -181,18 +172,18 @@ const GamesLobby = ({ waiting = false }) => {
     };
 
     return (
-      <div className={styles.joinQueue}>
+      <div className={lobbyStyles.joinQueue}>
         {!waiting ? (
           <>
             <label> Join matchmaking queue </label>
-            <button className={styles.confirm} onClick={joinQueue}>
+            <button className={lobbyStyles.confirm} onClick={joinQueue}>
               Find an opponent
             </button>
           </>
         ) : (
           <>
             <label>Waiting for opponent...</label>
-            <button className={styles.cancel} onClick={cancelQueue}>
+            <button className={lobbyStyles.cancel} onClick={cancelQueue}>
               Cancel
             </button>
           </>
@@ -213,26 +204,24 @@ const GamesLobby = ({ waiting = false }) => {
   }, []);
 
   return (
-    <div className={styles.container}>
-      <div className={styles.options}>
-        <div className={styles.createMatch}>
-          <h1>Create match</h1>
-          <Separator />
-          <CreateGame />
-        </div>
-        <div className={styles.findMatch}>
-          <h1>Find match</h1>
-          <Separator />
-          <div className={styles.findMatchOptions}>
-            <JoinQueue />
-            <GamesTable
-              gamesInfo={gamesInfo}
-              onJoin={(gameName) => {
-                socket.emit("joinGame", gameName);
-              }}
-              joinEnable={!waiting}
-            />
-          </div>
+    <div className={lobbyStyles.container}>
+      <div className={lobbyStyles.createMatch}>
+        <h1>Create match</h1>
+        <Separator />
+        <CreateGame />
+      </div>
+      <div className={lobbyStyles.findMatch}>
+        <h1>Find match</h1>
+        <Separator />
+        <div className={lobbyStyles.findMatchOptions}>
+          <JoinQueue />
+          <GamesTable
+            gamesInfo={gamesInfo}
+            onJoin={(gameName) => {
+              socket.emit("joinGame", gameName);
+            }}
+            joinEnable={!waiting}
+          />
         </div>
       </div>
     </div>
@@ -262,11 +251,11 @@ const GamesTable = ({
 
   const joinButton = (enabled: boolean, onClick: () => undefined) => {
     return enabled ? (
-      <button className={styles.enabled} onClick={onClick}>
+      <button className={lobbyStyles.enabled} onClick={onClick}>
         Join
       </button>
     ) : (
-      <button className={styles.disabled} disabled>
+      <button className={lobbyStyles.disabled} disabled>
         Join
       </button>
     );
@@ -299,7 +288,7 @@ const GamesTable = ({
   let rows = gamesInfo.map((item, index) => itemRow(item, index));
 
   return (
-    <div className={styles.joinableGames}>
+    <div className={lobbyStyles.joinableGames}>
       <label>Joinable matchs</label>
       {gamesInfo.length === 0 ? (
         <>
