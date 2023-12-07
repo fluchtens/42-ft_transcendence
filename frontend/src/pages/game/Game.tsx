@@ -1,6 +1,5 @@
 import { io, Socket } from "socket.io-client";
 import { useRef, useEffect, useState, createContext, useContext } from "react";
-import * as gm from "../../components/gameLogic";
 import { Separator } from "../../components/Separator";
 import { notifyError } from "../../utils/notifications";
 import styles from "./Game.module.scss";
@@ -101,7 +100,7 @@ const GameElementContent = () => {
         content = <></>;
         break;
       case UserStatus.Playing:
-        content = <PongBoard availWidth={703} availHeight={501} />; // TODO get width dynamically
+        // content = <PongBoard availWidth={703} availHeight={501} />; // TODO get width dynamically
         break;
       case UserStatus.Waiting:
         content = <GamesLobby waiting={true} />;
@@ -310,143 +309,143 @@ const GamesTable = ({
 /*                                 GamesTable                                 */
 /* -------------------------------------------------------------------------- */
 
-interface PongBoardProps {
-  availWidth: number;
-  availHeight: number;
-}
+// interface PongBoardProps {
+//   availWidth: number;
+//   availHeight: number;
+// }
 
-const PongBoard = ({ availWidth, availHeight }: PongBoardProps) => {
-  const gameRef = useRef(new gm.GameState());
-  const socket = useContext(SocketContext);
-  const boardRef = useRef<HTMLCanvasElement | null>(null);
+// const PongBoard = ({ availWidth, availHeight }: PongBoardProps) => {
+//   const gameRef = useRef(new gm.GameState());
+//   const socket = useContext(SocketContext);
+//   const boardRef = useRef<HTMLCanvasElement | null>(null);
 
-  let scale = Math.min(
-    Math.floor(availWidth / gm.PONG.width),
-    Math.floor(availHeight / gm.PONG.height)
-  );
-  scale = Math.max(1, scale); // if not enough space, dumb crop
-  const [canvasWidth, canvasHeight] = [
-    gm.PONG.width * scale,
-    gm.PONG.height * scale,
-  ];
+//   let scale = Math.min(
+//     Math.floor(availWidth / gm.PONG.width),
+//     Math.floor(availHeight / gm.PONG.height)
+//   );
+//   scale = Math.max(1, scale); // if not enough space, dumb crop
+//   const [canvasWidth, canvasHeight] = [
+//     gm.PONG.width * scale,
+//     gm.PONG.height * scale,
+//   ];
 
-  function drawGame(cx: CanvasRenderingContext2D) {
-    function drawCountdown(seconds: number) {
-      const center = {
-        x: Math.floor((canvasWidth + 1) / 2),
-        y: Math.floor((canvasHeight + 1) / 2),
-      };
-      const textSize = Math.floor(canvasHeight / 15);
-      cx.textAlign = "center";
-      cx.fillText(
-        String(Math.ceil(seconds)),
-        center.x,
-        center.y + textSize / 2,
-        textSize
-      );
+//   function drawGame(cx: CanvasRenderingContext2D) {
+//     function drawCountdown(seconds: number) {
+//       const center = {
+//         x: Math.floor((canvasWidth + 1) / 2),
+//         y: Math.floor((canvasHeight + 1) / 2),
+//       };
+//       const textSize = Math.floor(canvasHeight / 15);
+//       cx.textAlign = "center";
+//       cx.fillText(
+//         String(Math.ceil(seconds)),
+//         center.x,
+//         center.y + textSize / 2,
+//         textSize
+//       );
 
-      const arcWidth = 10;
-      const frac = seconds % 1;
-      cx.beginPath();
-      cx.arc(center.x, center.y, textSize, 0, frac * 2 * Math.PI, false);
-      cx.arc(
-        center.x,
-        center.y,
-        textSize + arcWidth,
-        frac * 2 * Math.PI,
-        2 * Math.PI,
-        true
-      );
-      cx.fill();
-    }
-    let game = gameRef.current;
+//       const arcWidth = 10;
+//       const frac = seconds % 1;
+//       cx.beginPath();
+//       cx.arc(center.x, center.y, textSize, 0, frac * 2 * Math.PI, false);
+//       cx.arc(
+//         center.x,
+//         center.y,
+//         textSize + arcWidth,
+//         frac * 2 * Math.PI,
+//         2 * Math.PI,
+//         true
+//       );
+//       cx.fill();
+//     }
+//     let game = gameRef.current;
 
-    cx.fillStyle = "black";
-    cx.fillRect(0, 0, gm.PONG.width * scale, gm.PONG.height * scale);
-    cx.fillStyle = "#00ff80"; // bluish green
-    game.update();
+//     cx.fillStyle = "black";
+//     cx.fillRect(0, 0, gm.PONG.width * scale, gm.PONG.height * scale);
+//     cx.fillStyle = "#00ff80"; // bluish green
+//     game.update();
 
-    // display paddles
-    let [w, h] = [gm.PONG.paddleWidth * scale, gm.PONG.paddleHeight * scale];
-    for (let { x, y } of [game.player1, game.player2]) {
-      cx.fillRect(x * scale, y * scale, w, h);
-    }
+//     // display paddles
+//     let [w, h] = [gm.PONG.paddleWidth * scale, gm.PONG.paddleHeight * scale];
+//     for (let { x, y } of [game.player1, game.player2]) {
+//       cx.fillRect(x * scale, y * scale, w, h);
+//     }
 
-    // display ball
-    if (game.ball) {
-      let { x, y } = game.ball;
-      cx.fillRect(x * scale, y * scale, w, w);
-    } else {
-      let countdown = game.timeToBall() / 1000;
-      if (countdown > 0) drawCountdown(game.timeToBall() / 1000);
-    }
+//     // display ball
+//     if (game.ball) {
+//       let { x, y } = game.ball;
+//       cx.fillRect(x * scale, y * scale, w, w);
+//     } else {
+//       let countdown = game.timeToBall() / 1000;
+//       if (countdown > 0) drawCountdown(game.timeToBall() / 1000);
+//     }
 
-    // display scores
-    cx.font = `${Math.floor(canvasHeight / 15)}px Monospace`;
-    cx.textAlign = "left";
-    cx.fillText(String(game.player1.score), 0, 30);
-    cx.textAlign = "right";
-    cx.fillText(String(game.player2.score), gm.PONG.width * scale - 1, 30);
-    //
-    requestAnimationFrame(() => {
-      drawGame(cx);
-    });
-  }
+//     // display scores
+//     cx.font = `${Math.floor(canvasHeight / 15)}px Monospace`;
+//     cx.textAlign = "left";
+//     cx.fillText(String(game.player1.score), 0, 30);
+//     cx.textAlign = "right";
+//     cx.fillText(String(game.player2.score), gm.PONG.width * scale - 1, 30);
+//     //
+//     requestAnimationFrame(() => {
+//       drawGame(cx);
+//     });
+//   }
 
-  useEffect(function () {
-    socket.emit("syncGame", (packet: { timestamp: number }) => {
-      gameRef.current.pushPacket(packet);
-    });
-    socket.on("gameUpdate", (packet) => {
-      gameRef.current.pushPacket(packet);
-      gameRef.current.update(); // TESTING
-    });
+//   useEffect(function () {
+//     socket.emit("syncGame", (packet: { timestamp: number }) => {
+//       gameRef.current.pushPacket(packet);
+//     });
+//     socket.on("gameUpdate", (packet) => {
+//       gameRef.current.pushPacket(packet);
+//       gameRef.current.update(); // TESTING
+//     });
 
-    boardRef.current?.focus();
-    let cx = boardRef.current?.getContext("2d");
-    if (!cx) throw new Error("Unexpected bad state");
-    drawGame(cx);
+//     boardRef.current?.focus();
+//     let cx = boardRef.current?.getContext("2d");
+//     if (!cx) throw new Error("Unexpected bad state");
+//     drawGame(cx);
 
-    return function cleanup() {
-      socket.off("gameUpdate");
-    };
-  }, []);
+//     return function cleanup() {
+//       socket.off("gameUpdate");
+//     };
+//   }, []);
 
-  const pressed = useRef<Set<string>>(new Set());
-  function dir(): gm.MotionType {
-    return (
-      Number(pressed.current.has("ArrowDown")) -
-      Number(pressed.current.has("ArrowUp"))
-    );
-  }
+//   const pressed = useRef<Set<string>>(new Set());
+//   function dir(): gm.MotionType {
+//     return (
+//       Number(pressed.current.has("ArrowDown")) -
+//       Number(pressed.current.has("ArrowUp"))
+//     );
+//   }
 
-  function handleKeyDown(ev: any) {
-    // TODO some sort of 'KeyboardEvent' instead of 'any'
-    if (ev.key === "ArrowDown" || ev.key === "ArrowUp") {
-      ev.preventDefault();
-      if (ev.repeat) return;
-      pressed.current.add(ev.key);
-      socket.emit("playerMotion", dir());
-    }
-  }
-  function handleKeyUp(ev: any) {
-    if (ev.key === "ArrowDown" || ev.key === "ArrowUp") {
-      ev.preventDefault();
-      pressed.current.delete(ev.key); // refactor as one with _KeyUp?
-      socket.emit("playerMotion", dir());
-    }
-  }
+//   function handleKeyDown(ev: any) {
+//     // TODO some sort of 'KeyboardEvent' instead of 'any'
+//     if (ev.key === "ArrowDown" || ev.key === "ArrowUp") {
+//       ev.preventDefault();
+//       if (ev.repeat) return;
+//       pressed.current.add(ev.key);
+//       socket.emit("playerMotion", dir());
+//     }
+//   }
+//   function handleKeyUp(ev: any) {
+//     if (ev.key === "ArrowDown" || ev.key === "ArrowUp") {
+//       ev.preventDefault();
+//       pressed.current.delete(ev.key); // refactor as one with _KeyUp?
+//       socket.emit("playerMotion", dir());
+//     }
+//   }
 
-  return (
-    <canvas
-      ref={boardRef}
-      width={canvasWidth}
-      height={canvasHeight}
-      tabIndex={0} // apperently needed for onKey* events?
-      onKeyDown={handleKeyDown}
-      onKeyUp={handleKeyUp}
-    >
-      Cannot load pong game.
-    </canvas>
-  );
-};
+//   return (
+//     <canvas
+//       ref={boardRef}
+//       width={canvasWidth}
+//       height={canvasHeight}
+//       tabIndex={0} // apperently needed for onKey* events?
+//       onKeyDown={handleKeyDown}
+//       onKeyUp={handleKeyUp}
+//     >
+//       Cannot load pong game.
+//     </canvas>
+//   );
+// };

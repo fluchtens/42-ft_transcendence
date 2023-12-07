@@ -42,10 +42,6 @@ function Chat() {
     return role;
   };
 
-  const addNewMessage = (message: Message) => {
-    setMessages((prevMessages) => [...prevMessages, message]);
-  };
-
   const toggleMembersMenu = () => {
     setMembersMenu(!membersMenu);
   };
@@ -190,7 +186,6 @@ function Chat() {
             <ChatHeader
               members={members}
               channel={channel}
-              addNewMessage={addNewMessage}
               toggleMembersMenu={toggleMembersMenu}
             />
             <ul>

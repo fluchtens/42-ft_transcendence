@@ -3,7 +3,7 @@ import { HiUsers } from "react-icons/hi2";
 import styles from "./ChatHeader.module.scss";
 import { useEffect, useState } from "react";
 import { EditChannel } from "./actions/EditChannel";
-import { Channel, MemberUsers, Message } from "../../types/chat.interface";
+import { Channel, MemberUsers } from "../../types/chat.interface";
 import { FaDoorOpen } from "react-icons/fa6";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import { useChatSocket } from "../../hooks/useChatSocket";
@@ -11,19 +11,16 @@ import { useNavigate } from "react-router-dom";
 import { UnbanUser } from "./actions/UnbanUser";
 import { FaBan } from "react-icons/fa";
 import { useAuth } from "../../hooks/useAuth";
-import { getUserByIdApi } from "../../services/user.api";
 
 interface ChatHeaderProps {
   channel: Channel;
   members: MemberUsers[];
-  addNewMessage: (message: Message) => void;
   toggleMembersMenu: () => void;
 }
 
 const ChatHeader = ({
   members,
   channel,
-  addNewMessage,
   toggleMembersMenu,
 }: ChatHeaderProps) => {
   const { user } = useAuth();
@@ -70,25 +67,11 @@ const ChatHeader = ({
   };
 
   const createGameInvitation = async () => {
-    // const user = await getUserByIdApi(1);
-    // if (!user) return;
-
-    // const newMessage = {
-    //   id: "qwertyuiop",
-    //   content: "Can you beat me?",
-    //   gameInvit: true,
-    //   userId: user.id,
-    //   user: user,
-    // };
-    // addNewMessage(newMessage);
-    chatSocket.emit('createGame', channel.id, (result: string) => {
-      if (!result)
-        notifySuccess("Game invitation has been sent successfully");
+    chatSocket.emit("createGame", channel.id, (result: string) => {
+      if (!result) notifySuccess("Game invitation has been sent successfully");
       else if (result === "New game request done") {
         notifySuccess(result);
-      }
-      else 
-        notifyError(result);
+      } else notifyError(result);
     });
   };
 

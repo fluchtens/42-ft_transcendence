@@ -678,6 +678,6 @@ export class WallGame {
   }
 
   timeToBall(from = Date.now()) {
-    return this._nextBallTime - this._lastUpdate;
+    return this._nextBallTime - from;
   }
 }
