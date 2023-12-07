@@ -1455,6 +1455,9 @@ export class ChatGateway implements OnModuleInit {
   async handleJoinGame(@ConnectedSocket() client: Socket, @MessageBody() acceptingUserId: number) {
     const userId = client.handshake.auth.userId;
     if (userId) {
+      if (userId === acceptingUserId){
+        return "You cannot join your game";
+      }
       const initiatingSocket = this.waitingUsers.get(acceptingUserId);
       if (initiatingSocket) {
         this.removeGameRequest(initiatingSocket);

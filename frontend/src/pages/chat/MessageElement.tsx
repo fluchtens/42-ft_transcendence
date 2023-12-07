@@ -27,7 +27,7 @@ const MessageElement = ({
           ('join game');
         }
         else if (result) {
-          notifyError('failed to join game');
+          notifyError(result);
         }
       });
     }
