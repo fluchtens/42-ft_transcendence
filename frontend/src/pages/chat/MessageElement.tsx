@@ -19,32 +19,35 @@ const MessageElement = ({
   gameInvit,
 }: MessageElementProps) => {
   const useChat = useChatSocket();
+
   const joiningGame = () => {
     if (gameInvit) {
-      useChat.emit('joinGame', userId, (result: string) => {
+      useChat.emit("joinGame", userId, (result: string) => {
         if (!result) {
-          notifySuccess
-          ('join game');
-        }
-        else if (result) {
+          notifySuccess("You have successfully joined the game");
+        } else if (result) {
           notifyError(result);
         }
       });
     }
-  }
+  };
 
-return(
-  <>
-    <div className={styles.avatar}>
-      {avatar ? <img src={avatar} /> : <img src={defaultAvatar} />}
-    </div>
-    <div className={styles.texts}>
-      <p className={styles.user}>{username}</p>
-      <p className={styles.content}>{content}</p>
-    </div>
-    {gameInvit && <button className={styles.joinBtn} onClick={joiningGame}>Join</button>}
-  </>
-);
-}
+  return (
+    <>
+      <div className={styles.avatar}>
+        {avatar ? <img src={avatar} /> : <img src={defaultAvatar} />}
+      </div>
+      <div className={styles.texts}>
+        <p className={styles.user}>{username}</p>
+        <p className={styles.content}>{content}</p>
+      </div>
+      {gameInvit && (
+        <button className={styles.joinBtn} onClick={joiningGame}>
+          Join
+        </button>
+      )}
+    </>
+  );
+};
 
 export { MessageElement };

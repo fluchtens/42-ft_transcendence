@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { Channel } from "../../types/chat.interface";
 import { useChatSocket } from "../../hooks/useChatSocket";
 import { useNavigate } from "react-router-dom";
-import { notifyError, notifySuccess } from "../../utils/notifications";
 
 interface ChannelsProps {
   styles: CSSModuleClasses;
@@ -28,8 +27,8 @@ function Channels({ styles }: ChannelsProps) {
         prevChannels.filter((channelId) => channelId !== deletedChannelId)
       );
     });
-    
-    socket.on('joinGame', () => {
+
+    socket.on("joinGame", () => {
       navigate("/game");
     });
 
@@ -67,7 +66,7 @@ function Channels({ styles }: ChannelsProps) {
       socket.off("newChannel");
       socket.off("channelDeleted");
       socket.off("resetChannel");
-      socket.off('joinGame');
+      socket.off("joinGame");
     };
   }, [socket]);
 

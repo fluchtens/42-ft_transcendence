@@ -103,8 +103,7 @@ export class ChatGateway implements OnModuleInit {
         this.roomService.createRoom(userId);
       }
       this.roomService.joinRoom(client, userId);
-    } catch (error) {
-    }
+    } catch (error) {}
   }
 
   verifyUserConnection(socketId: string, channelId: string): boolean {
@@ -133,8 +132,7 @@ export class ChatGateway implements OnModuleInit {
     try {
       const updatedUserData = await this.userService.getUserById(userId);
       this.usersData.set(userId, updatedUserData);
-    } catch (error) {
-    }
+    } catch (error) {}
   }
 
   async getChannelData(
@@ -281,8 +279,7 @@ export class ChatGateway implements OnModuleInit {
         const allChannels = [...channels, ...publicChannels];
         const channelIds = allChannels.map((channel) => channel.id);
         client.emit('allChannels', channelIds);
-      } catch (error) {
-      }
+      } catch (error) {}
     } else {
     }
   }
@@ -411,8 +408,7 @@ export class ChatGateway implements OnModuleInit {
             .emit(`${channelId}/messageDeleted`, messageId);
         } else {
         }
-      } catch (error) {
-      }
+      } catch (error) {}
     } else {
     }
   }
@@ -442,8 +438,7 @@ export class ChatGateway implements OnModuleInit {
             .emit(`channelData:${message.channelId}`, channelData);
         } else {
         }
-      } catch (error) {
-      }
+      } catch (error) {}
     } else {
     }
   }
@@ -610,9 +605,8 @@ export class ChatGateway implements OnModuleInit {
           return 'channelId or member not found, addMemberFail';
         }
       } catch (error) {
-        console.log(error.message)
         if (error.message === "Cannot read properties of null (reading 'id')") {
-          return "Member not found";          
+          return 'Member not found';
         }
         return error.message;
       }
@@ -1330,24 +1324,25 @@ export class ChatGateway implements OnModuleInit {
   }
 
   @SubscribeMessage('createGame')
-  async handleCreateGame(@ConnectedSocket() client: Socket, @MessageBody() channelId: string) {
+  async handleCreateGame(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() channelId: string,
+  ) {
     const userId = client.handshake.auth.userId;
     if (userId) {
       try {
-        let createGameInfo: CreateGameInfo =  new CreateGameInfo();
+        let createGameInfo: CreateGameInfo = new CreateGameInfo();
         createGameInfo.channelId = channelId;
         createGameInfo.socket = client;
         createGameInfo.userId = userId;
         let channel = await this.chatService.getChannelById(channelId);
         if (channel) {
           createGameInfo.privateChannel = false;
-        }
-        else {
+        } else {
           channel = await this.chatService.getPrivateChannelData(channelId);
           if (channel) {
             createGameInfo.privateChannel = true;
-          }
-          else {
+          } else {
             throw new Error('channel not found');
           }
         }
@@ -1356,23 +1351,7 @@ export class ChatGateway implements OnModuleInit {
             const messageSend = await this.chatService.addMessage(
               userId,
               channelId,
-              "Can you beat me?",
-              true,
-              );
-              if (!messageSend) throw new Error('Message cannot be send');
-              createGameInfo.messageId = messageSend.id;
-              const messageData: Messages = messageSend;
-              messageData.user = await this.getOrAddUserData(userId);
-              messageData.gameInvit = true;
-              this.server.to(channelId).emit(`${channelId}/message`, messageData);
-            }
-          else {
-            channel = await this.chatService.getPrivateChannelData(channelId);
-            if (channel) {
-              const messageSend = await this.chatService.addPrivateMessage(
-                userId,
-                channelId,
-              "Can you beat me?",
+              'Can you beat me?',
               true,
             );
             if (!messageSend) throw new Error('Message cannot be send');
@@ -1380,39 +1359,36 @@ export class ChatGateway implements OnModuleInit {
             const messageData: Messages = messageSend;
             messageData.user = await this.getOrAddUserData(userId);
             messageData.gameInvit = true;
-            this.server.emit(`${channelId}/message`, messageData);
-          }
+            this.server.to(channelId).emit(`${channelId}/message`, messageData);
+          } else {
+            channel = await this.chatService.getPrivateChannelData(channelId);
+            if (channel) {
+              const messageSend = await this.chatService.addPrivateMessage(
+                userId,
+                channelId,
+                'Can you beat me?',
+                true,
+              );
+              if (!messageSend) throw new Error('Message cannot be send');
+              createGameInfo.messageId = messageSend.id;
+              const messageData: Messages = messageSend;
+              messageData.user = await this.getOrAddUserData(userId);
+              messageData.gameInvit = true;
+              this.server.emit(`${channelId}/message`, messageData);
+            }
           }
           this.waitingUsers.set(userId, createGameInfo);
-        }
-        else {
+        } else {
           try {
             this.removeGameRequest(this.waitingUsers.get(userId));
-          }
-          catch {
+          } catch {
             return 'failed to delete game request';
           }
           if (!createGameInfo.privateChannel) {
             const messageSend = await this.chatService.addMessage(
               userId,
               channelId,
-              "Can you beat me?",
-              true,
-              );
-              if (!messageSend) throw new Error('Message cannot be send');
-              createGameInfo.messageId = messageSend.id;
-              const messageData: Messages = messageSend;
-              messageData.user = await this.getOrAddUserData(userId);
-              messageData.gameInvit = true;
-              this.server.to(channelId).emit(`${channelId}/message`, messageData);
-          }
-          else {
-            channel = await this.chatService.getPrivateChannelData(channelId);
-            if (channel) {
-              const messageSend = await this.chatService.addPrivateMessage(
-                userId,
-                channelId,
-              "Can you beat me?",
+              'Can you beat me?',
               true,
             );
             if (!messageSend) throw new Error('Message cannot be send');
@@ -1420,70 +1396,80 @@ export class ChatGateway implements OnModuleInit {
             const messageData: Messages = messageSend;
             messageData.user = await this.getOrAddUserData(userId);
             messageData.gameInvit = true;
-            this.server.emit(`${channelId}/message`, messageData);
-          }
+            this.server.to(channelId).emit(`${channelId}/message`, messageData);
+          } else {
+            channel = await this.chatService.getPrivateChannelData(channelId);
+            if (channel) {
+              const messageSend = await this.chatService.addPrivateMessage(
+                userId,
+                channelId,
+                'Can you beat me?',
+                true,
+              );
+              if (!messageSend) throw new Error('Message cannot be send');
+              createGameInfo.messageId = messageSend.id;
+              const messageData: Messages = messageSend;
+              messageData.user = await this.getOrAddUserData(userId);
+              messageData.gameInvit = true;
+              this.server.emit(`${channelId}/message`, messageData);
+            }
           }
           this.waitingUsers.set(userId, createGameInfo);
-          return "New game request done";
+          return 'New game request done';
         }
-      }
-      catch(error) {
-        console.log(error.message);
-        return ("failed to create a new game");
+      } catch (error) {
+        return 'failed to create a new game';
       }
     }
   }
 
   async removeGameRequest(request: CreateGameInfo) {
     if (request) {
-      const {  userId, channelId, privateChannel, messageId } = request;
+      const { userId, channelId, privateChannel, messageId } = request;
       const user = await this.getOrAddUserData(userId);
       if (!privateChannel) {
         const message = await this.chatService.deleteGameMessage(messageId);
-        console.log(message, request.messageId)
         if (message) {
           this.server
             .to(channelId)
             .emit(`${channelId}/messageDeleted`, messageId);
-        }        
-      }
-      else {
+        }
+      } else {
         const message = await this.chatService.deletePrivateMessage(messageId);
         if (message) {
-          this.server
-            .emit(`${channelId}/messageDeleted`, messageId);
+          this.server.emit(`${channelId}/messageDeleted`, messageId);
         }
       }
     }
   }
 
   @SubscribeMessage('joinGame')
-  async handleJoinGame(@ConnectedSocket() client: Socket, @MessageBody() acceptingUserId: number) {
+  async handleJoinGame(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() acceptingUserId: number,
+  ) {
     const userId = client.handshake.auth.userId;
     if (userId) {
-      if (userId === acceptingUserId){
-        return "You cannot join your game";
+      if (userId === acceptingUserId) {
+        return 'You cannot join your game';
       }
       const initiatingSocket = this.waitingUsers.get(acceptingUserId);
       if (initiatingSocket) {
         try {
           this.removeGameRequest(initiatingSocket);
-        }
-        catch {
+        } catch {
           return 'failed to delete game request';
         }
         this.gameService.externalCreateGame(acceptingUserId, userId);
         this.server.to(String(acceptingUserId)).emit('joinGame');
         this.server.to(String(userId)).emit('joinGame');
         this.waitingUsers.delete(acceptingUserId);
-        return "";
+        return '';
+      } else {
+        return 'Failed to join the game';
       }
-      else {
-        return "Failed to join the game";
-      }
-    }
-    else {
-      return "UserId not found"
+    } else {
+      return 'UserId not found';
     }
   }
 }
