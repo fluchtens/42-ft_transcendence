@@ -10,15 +10,10 @@ WORKDIR /app
 # Installs project dependencies
 COPY package.json package-lock.json ./
 RUN npm install
+COPY ./ ./
 
 # Setups prisma
 RUN npx prisma generate
-
-# Setups class-validator
-RUN npm i --save class-validator class-transformer
-
-# Gets source
-COPY ./ ./
 
 # Exposes port
 EXPOSE 3000
