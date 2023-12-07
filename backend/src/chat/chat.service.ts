@@ -91,7 +91,7 @@ export class ChatService {
     }
   }
 
-  async getMemberById(memberId: string) {
+  async getMemberById(memberId: string): Promise<any> {
     try {
       const member = await this.prismaService.member.findUnique({
         where: {
@@ -107,7 +107,7 @@ export class ChatService {
     }
   }
 
-  async getChannelMembers(channelId: string) {
+  async getChannelMembers(channelId: string): Promise<any> {
     try {
       const channelMembers = await this.prismaService.member.findMany({
         where: {
@@ -177,7 +177,7 @@ export class ChatService {
     channelName: string,
     isPublic: boolean,
     password?: string,
-  ) {
+  ): Promise<any> {
     if (!userId) {
       return null;
     }
@@ -232,7 +232,7 @@ export class ChatService {
     }
   }
 
-  async getAllChannels() {
+  async getAllChannels(): Promise<any> {
     try {
       const channels = await this.prismaService.channel.findMany();
       return channels;
@@ -245,7 +245,7 @@ export class ChatService {
     userId: number,
     channelId: string,
     newChannelname: string,
-  ) {
+  ): Promise<any> {
     const userRole = await this.findMemberRoleInChannel(channelId, userId);
     if (userRole !== 'OWNER') {
       throw new Error("You don't has permission to change the channelName");
@@ -286,7 +286,7 @@ export class ChatService {
     }
   }
 
-  async getMessagesByChannel(channelId: string) {
+  async getMessagesByChannel(channelId: string): Promise<any> {
     try {
       const messages = await this.prismaService.message.findMany({
         where: {
@@ -332,7 +332,7 @@ export class ChatService {
     channelId: string,
     memberChangeUserId: number,
     newRole: string,
-  ) {
+  ): Promise<any> {
     try {
       const userStatus = await this.findMemberInChannel(
         channelId,
@@ -561,7 +561,7 @@ export class ChatService {
     userId: number,
     channelId: string,
     password: string,
-  ) {
+  ): Promise<any> {
     try {
       const userRole = await this.findMemberRoleInChannel(channelId, userId);
       const cryptedPassword: string = await bcrypt.hash(password, 10);
@@ -642,7 +642,7 @@ export class ChatService {
     }
   }
 
-  async getAllPublicChannels() {
+  async getAllPublicChannels(): Promise<any> {
     try {
       const channels = this.prismaService.channel.findMany({
         where: {
@@ -660,7 +660,7 @@ export class ChatService {
     userId: number,
     channelId: string,
     password?: string,
-  ) {
+  ): Promise<any> {
     try {
       if (!userId) {
         throw new BadRequestException('userId not found');
@@ -712,7 +712,7 @@ export class ChatService {
     }
   }
 
-  async kickUser(userId: number, channelId: string, userIdKick: number) {
+  async kickUser(userId: number, channelId: string, userIdKick: number): Promise<any> {
     try {
       const userRole = await this.findMemberRoleInChannel(channelId, userId);
       const userRoleKick = await this.findMemberRoleInChannel(
@@ -736,7 +736,7 @@ export class ChatService {
     }
   }
 
-  async banUser(userId: number, channelId: string, userIdKick: number) {
+  async banUser(userId: number, channelId: string, userIdKick: number): Promise<any> {
     try {
       const userRole = await this.findMemberRoleInChannel(channelId, userId);
       const userRoleKick = await this.findMemberRoleInChannel(
@@ -822,7 +822,7 @@ export class ChatService {
     }
   }
 
-  async createPrivateChannel(senderId: number, receiverId: number) {
+  async createPrivateChannel(senderId: number, receiverId: number): Promise<any> {
     try {
       const channel = await this.prismaService.privateMessageChannel.create({
         data: {
@@ -880,7 +880,7 @@ export class ChatService {
     privateMessageId: string,
     messageContent: string,
     gameInvit?: boolean,
-  ) {
+  ): Promise<any> {
     if (!userId || !privateMessageId || !messageContent) {
       return null;
     }
@@ -941,7 +941,7 @@ export class ChatService {
     }
   }
 
-  async getPrivateMessages(privateChannelId: string) {
+  async getPrivateMessages(privateChannelId: string): Promise<any> {
     try {
       const messages = await this.prismaService.privateMessage.findMany({
         where: {
@@ -954,7 +954,7 @@ export class ChatService {
     }
   }
 
-  async getPrivateChannelData(channelId: string) {
+  async getPrivateChannelData(channelId: string): Promise<any> {
     const channel = await this.prismaService.privateMessageChannel.findUnique({
       where: {
         id: channelId,
