@@ -120,7 +120,7 @@ export class ClassicGame implements Game {
 	public player1: Player;
 	public player2: Player;
 	private _ball: Ball = new Ball(0,0);
-	private _ballEntryTime = 1;
+	private _ballEntryTime = 0;
 	get ball(): Ball | null {
 		return (this._ballEntryTime >= this._lastUpdate)? null : this._ball;
 	}
@@ -303,8 +303,8 @@ export class ClassicGame implements Game {
 	}
 
 	minTimeToPoint(from = Date.now()) {
-		if (!this.ball) return -1;
 		let offset = 50;
+		if (!this.ball) return offset; // TODO smarter
 		let time = this._lastUpdate;
 		if (this.ball.dx < 0) 
 			time += (-PONG.ballSize - this.ball.x) / this.ball.dx * PONG.msFrame;
@@ -338,8 +338,8 @@ export const WALL_PONG = {
 	paddleHeight: 0.20,
 
 	winScore: 11,
-	startDelay: 3.0,
-	newBallDelay: 0.5,
+	startDelay: 3000, // ms
+	newBallDelay: 500, // ms
 }
 
 // class Segment {
@@ -374,24 +374,25 @@ class Rectangle {
 	}
 }
 
-function positiveMin(...args) {
-	let filtered = args.filter( (x) => (x >= 0));
-	return (filtered.length === 0) ? -1 : Math.min(...filtered);
-}
+// function positiveMin(...args) {
+// 	let filtered = args.filter( (x) => (x >= 0));
+// 	return (filtered.length === 0) ? -1 : Math.min(...filtered);
+// }
 
 type Impact = { t: number, hit: Rectangle | MovingRectangle, vertical: boolean }
 
-function timeToImpactStill(projectile, target) {
-	function top(rect) { 
+function timeToImpactStill(projectile: MovingRectangle, target: Rectangle) {
+	type Rect = Rectangle | MovingRectangle
+	function top(rect: Rect) { 
 		return rect.y;
 	}
-	function bottom(rect) { 
+	function bottom(rect: Rect) { 
 		return rect.y + rect.h;
 	}
-	function left(rect) { 
+	function left(rect: Rect) { 
 		return rect.x;
 	}
-	function right(rect) { 
+	function right(rect: Rect) { 
 		return rect.x + rect.w;
 	}
 
@@ -407,7 +408,8 @@ function timeToImpactStill(projectile, target) {
 		console.log('ty', tY);
 		move(tmpProj, tY);
 		if (tY >= 0 && right(tmpProj) >= left(target) && left(tmpProj) <= right(target)) {
-			ret.push[{t: tY, hit: target, vertical: false}];
+			console.log('hit Y');
+			ret.push({t: tY, hit: target, vertical: false});
 		}
 	}
 
@@ -417,10 +419,12 @@ function timeToImpactStill(projectile, target) {
 		let projX = (projectile.dx > 0) ? right(projectile) : left(projectile);
 
 		tX = (targetX - projX) / projectile.dx;
+		console.log('tx', tX);
 		let tmpProj = new MovingRectangle(projectile);
 		move(tmpProj, tX);
 		if (tX > 0 && bottom(tmpProj) >= top(target) && top(tmpProj) <= bottom(target)) {
-			ret.push[{t: tX, hit: target, vertical: true}];
+			console.log('hit X');
+			ret.push({t: tX, hit: target, vertical: true});
 		}
 	}
 
@@ -428,9 +432,10 @@ function timeToImpactStill(projectile, target) {
 	return ret;
 }
 
-function timeToImpact(projectile, target) {
+function timeToImpact(projectile: MovingRectangle, target: Rectangle | MovingRectangle) {
 	console.log('target', target, 'proj', projectile);
-	if (target?.dx || target?.dy) {
+	if ( 'dx' in target) {
+// 	if (target?.dx || target?.dy) {
 		// "compute in reference frame of target"
 		let tmpTarget = new Rectangle(target);
 		let tmpProj = new MovingRectangle(projectile);
@@ -439,7 +444,7 @@ function timeToImpact(projectile, target) {
 		tmpProj.dy -= target.dy;
 
 		return timeToImpactStill(tmpProj, tmpTarget)
-			.map(({t, hit, vertical}) => ({t, hit: target, vertical}));
+			.map(({t, vertical}) => ({t, hit: target, vertical}));
 	} else {
 		return timeToImpactStill(projectile, target);
 	}
@@ -459,31 +464,58 @@ class MovingRectangle extends Rectangle {
 	dy: number;
 }
 
-function move(rect, dt: number) {
+function move(rect: MovingRectangle, dt: number) {
 	rect.x += dt * rect.dx;
 	rect.y += dt * rect.dy;
 }
 
+let gMaps: Map<string, Rectangle[]> = new Map();
+{
+	let [W, H] = [WALL_PONG.width, WALL_PONG.height];
+	let s = WALL_PONG.ballSize;
+	gMaps.set('default', []);
+	gMaps.set('midWall', [new Rectangle({x: (W - s) / 2, y: H / 3, w: s, h: H / 3})]);
+	gMaps.set('sideWalls', [
+		new Rectangle({x: (W - s) / 2, y: 0, w: s, h: H / 4}),
+		new Rectangle({x: (W - s) / 2, y: 3 * H / 4, w: s, h: H / 4}),
+	]);
+	gMaps.set('corridor', [
+		new Rectangle({x: W / 4, y: H / 3, w: W / 2, h: s}),
+		new Rectangle({x: W / 4, y: 2 * H / 3, w: W / 2, h: s}),
+	]);
+}
+
 export class WallGame {
+	get maps() { return gMaps; }
 	ball: MovingRectangle;
 	players: [MovingRectangle, MovingRectangle];
 	scores = [0, 0];
 	mapName: string;
 	walls = [];
+	goals = [];
 	get type(): 'wall' { return 'wall' };
 	private _lastUpdate: number;
+	private _nextBallTime: number = 0;
 
 	constructor(startTime = Date.now(), {mapName}: {mapName: string} = {mapName: 'default'}) {
-		{ // Init ball
-			let x = (WALL_PONG.width - WALL_PONG.ballSize) / 2;
-			let y = (WALL_PONG.height - WALL_PONG.ballSize) / 2;
+// 		{ // Init ball
+// 			let x = (WALL_PONG.width - WALL_PONG.ballSize) / 2;
+// 			let y = (WALL_PONG.height - WALL_PONG.ballSize) / 2;
+// 			let s = WALL_PONG.ballSize;
+// 
+// 			// TESTING
+// 			this.ball = new MovingRectangle(
+// 				{x, y, w: s, h: s, dx: WALL_PONG.ballXSpeed, dy: WALL_PONG.ballMaxYSpeed}
+// 			);
+// // 			this.ball = new MovingRectangle({x, y, w: s, h: s});
+// 		}
+		this.mapName = mapName;
+		console.log('ctor time', startTime);
+		this._lastUpdate = startTime;
+		{
 			let s = WALL_PONG.ballSize;
-
-			// TESTING
-			this.ball = new MovingRectangle(
-				{x, y, w: s, h: s, dx: WALL_PONG.ballXSpeed, dy: WALL_PONG.ballMaxYSpeed}
-			);
-// 			this.ball = new MovingRectangle({x, y, w: s, h: s});
+			this.ball = new MovingRectangle({x:0, y:0, w:s, h:s});
+			this._newBall(0, WALL_PONG.startDelay);
 		}
 		{ // Init player paddles
 			let y = (WALL_PONG.height - WALL_PONG.paddleHeight) / 2;
@@ -497,71 +529,108 @@ export class WallGame {
 			let p1 = new MovingRectangle({x, y, w, h});
 			this.players = [p0, p1];
 		}
-		this.mapName = mapName;
-		console.log('ctor time', startTime);
-		this._lastUpdate = startTime;
+		{
+			let [W, H] = [WALL_PONG.width, WALL_PONG.height];
+			let s = WALL_PONG.ballSize;
 
-		this.walls.push(new Rectangle({x:0, y:0, w:WALL_PONG.width, h:0}));
-		this.walls.push(new Rectangle({x:0, y:WALL_PONG.height, w: WALL_PONG.width, h:0}));
+			this.walls.push(new Rectangle({x: -s, y: 0, w: W + 2*s, h:0}));
+			this.walls.push(new Rectangle({x: -s, y: H, w: W + 2*s, h:0}));
+			if (this.maps.has(mapName)) {
+				console.log('####### ExTRA Walls#####', this.maps.get(mapName));
+				for (let wall of this.maps.get(mapName))
+					this.walls.push(wall);
+			}
+			console.log('so:', this.walls);
+
+			this.goals.push(new Rectangle({x: -s, y: 0, w: 0, h: H}));
+			this.goals.push(new Rectangle({x: W + s, y: 0, w: 0, h: H}));
+// 			this.goals.push(new Rectangle({x: -s, y: -40, w: 0, h: 100}));
+// 			this.goals.push(new Rectangle({x: W + s, y: -40, w: 0, h: 100}));
+		}
 	}
 
-	_preUpdate(dt) {
+	_preUpdate(dt: number, ball = true) {
 // 		console.log('pre update', this, 'dt', dt);
-		for (let rect of [this.ball, ...this.players]) {
-			move(rect, dt);
-		}
+
+		if (ball) move(this.ball, dt);
 		for (let p of this.players) {
+			move(p, dt);
 			p.y = clamp(0, p.y, WALL_PONG.height - WALL_PONG.paddleHeight);
 		}
 // 		console.log('post update', this)
 	}
 
 	update( time: number = Date.now() ) { 
-		let searchImpact = (candidate, targets, type) => {
-			let t = -1;
-			for (let target of targets) {
-				t = positiveMin(timeToImpact(this.ball, target), t);
+		if (this._nextBallTime > this._lastUpdate) {
+			if (time > this._nextBallTime) {
+				this._preUpdate((this._nextBallTime - this._lastUpdate) / 1000, false);
+				this._lastUpdate = this._nextBallTime;
+			} else {
+				this._preUpdate((time - this._lastUpdate) / 1000, false);
+				this._lastUpdate = time;
+				return this;
 			}
+		}
 
-			console.log('search', type, ':', t);
-			if (t < 0) 
+		let searchImpact = (
+			candidate: null | {impact: Impact, type: string}, 
+			targets: Array<Rectangle | MovingRectangle>,
+		 	type: string) => {
+			console.log('\n******* ', type, ' *****');
+			let impacts : Impact[] = [];
+			for (let target of targets) {
+				impacts.splice(impacts.length, 0, ...timeToImpact(this.ball, target));
+// 				impacts = [...impacts, ...timeToImpact(this.ball, target)];
+			}
+			console.log('all impacts', impacts, 'cdt', candidate);
+			if (impacts.length === 0) {
 				return candidate;
-			else if (candidate.t < 0) 
-				return {t, type};
-			else
-				return candidate.t < t ? candidate : {t, type};
+			} else {
+// 				let best = impacts.sort(({t:t1}, {t:t2}) => (t2 - t1))[0];
+				let best = impacts.sort(({t:t1}, {t:t2}) => (t1 - t2))[0];
+				if (!candidate)
+					return {impact: best, type};
+				else
+					return best.t < candidate.impact.t ? {impact: best, type} : candidate;
+			}
 		}
 
 // 		while (true) { TODO
 		for (let i = 0; i < 10; ++i) { // prevent infinite loops if i got it wrong
-			let {t: tImpact, type} = {t: -1, type: 'none'};
-			({t: tImpact, type} = searchImpact({t: tImpact, type}, this.walls, 'wall'));
-			({t: tImpact, type} = searchImpact({t: tImpact, type}, this.players, 'paddle'));
-			console.log('found impact', tImpact, type);
+			console.log('walls', this.walls);
+			let foundImpact = searchImpact(null, this.walls, 'wall');
+			foundImpact = searchImpact(foundImpact, this.players, 'paddle');
+			foundImpact = searchImpact(foundImpact, this.goals, 'goals');
+			if (!foundImpact) break; // TODO problem
 
-// 			for (let wall of this.walls) {
-// 				tImpact = positiveMin(timeToImpact(this.ball, wall), tImpact);
-// // 				let t = timeToImpact(this.ball, wall);
-// // 				if (t >= 0 && tImpact < 0)
-// // 					tImpact = t;
-// // 				else if (t >= 0)
-// // 					tImpact = Math.min(t, tImpact);
-// // 				console.log('t_impact', tImpact)
-// 			}
-
-
-			if (tImpact < 0 || tImpact * 1000 > time - this._lastUpdate ) 
+			let {impact, type} = foundImpact;
+			console.log('found', foundImpact);
+			let {t, hit, vertical} = impact;
+			if (t < 0 || t * 1000 > time - this._lastUpdate ) 
 				break;
 
-			this._preUpdate(tImpact);
+			this._preUpdate(t);
 			if (type === 'wall') {
-				this.ball.dy *= -1;
+				if (vertical)
+					this.ball.dx *= -1;
+				else
+					this.ball.dy *= -1;
 			} else if (type === 'paddle') {
 				console.log('hello???', this.ball);
 				this.ball.dx *= -1
-				// TODO compute effects
+				let ratio = 
+					(this.ball.y - (hit.y - this.ball.h)) /
+					(hit.h + this.ball.h);
+				ratio = 2 * (ratio - 0.5); // 0,1 -> -1, 1
+				this.ball.dy = ratio * WALL_PONG.ballMaxYSpeed;
+			} else if (type === 'goals') {
+				console.log('foogoal');
+				let index: 0 | 1 = (hit.x < 0)? 1 : 0;
+				++this.scores[index];
+				this._newBall(index);
 			}
-			this._lastUpdate += 1000 * tImpact;
+
+			this._lastUpdate += 1000 * t;
 		}
 
 		this._preUpdate((time - this._lastUpdate) / 1000);
@@ -569,14 +638,32 @@ export class WallGame {
 		return this;
 	}
 
-	updateScores (time: number = 0): {finish: boolean, winner?: WhichPlayer}
+	_newBall(to: 0 | 1, delay = WALL_PONG.newBallDelay) {
+		console.log('new ball');
+		this.ball.x = (WALL_PONG.width - WALL_PONG.ballSize) / 2;
+		this.ball.y = Math.random() * (WALL_PONG.height - WALL_PONG.ballSize);
+		this.ball.dx = ((to === 0)? -1 : 1) * WALL_PONG.ballXSpeed;
+		this.ball.dy = WALL_PONG.ballMaxYSpeed / 2;
+		this._nextBallTime = this._lastUpdate + delay;
+		if (Math.random() < 0.5) this.ball.dy *= -1;
+	}
+
+	updateScores (time: number | null = null): {finish: boolean, winner?: WhichPlayer}
  	{ 
-		return { finish: false} 
+		if (time)
+			this.update(time)
+
+		if (this.scores[0] >= 11)
+			return { finish: true, winner: WhichPlayer.P1};
+		else if (this.scores[1] >= 11)
+			return { finish: true, winner: WhichPlayer.P2};
+		else
+			return { finish: false} 
 	}
 
 	packet(
 		timestamp: number | null = null,
-		fields = ['players', 'scores', 'ball', '_lastUpdate'],
+		fields = ['players', 'scores', 'ball', '_lastUpdate', '_nextBallTime'],
 	) : {timestamp: number} 
 	{
 		if (timestamp)
@@ -593,7 +680,7 @@ export class WallGame {
 
 	pushPacket(packet: {timestamp: number}) {
 		this._lastUpdate = packet.timestamp;
-		const allowedFields = ['players', 'scores', 'ball', '_lastUpdate'];
+		const allowedFields = ['players', 'scores', 'ball', '_lastUpdate', '_nextBallTime'];
 		for (let key of allowedFields) {
 			if (key in packet) {
 				(this as any)[key] = (packet as any)[key];
@@ -602,20 +689,22 @@ export class WallGame {
 		this.update();
 	}
 
-	_whichIndex(which: WhichPlayer) {
-		return which === WhichPlayer.P1? 0 : 1;
-	}
+	setMotion(who: WhichPlayer, mo: MotionType, when : number | null = null) {
+		function whichIndex(which: WhichPlayer) {
+			return which === WhichPlayer.P1? 0 : 1;
+		}
 
-	setMotion(who: WhichPlayer, mo: MotionType, when : number = null) {
 		if (when)
 			this.update(when);
-		this.players[this._whichIndex(who)].dy = WALL_PONG.playerSpeed * Number(mo);
+		this.players[whichIndex(who)].dy = WALL_PONG.playerSpeed * Number(mo);
 		console.log('MOTION', this);
 	};
-	//
 
-	minTimeToPoint(from: number = 0) { return 10000};
-	timeToBall() { return 0; }
+	minTimeToPoint(from: number = Date.now()) { return 500};
+
+	timeToBall() { 
+		return this._nextBallTime - this._lastUpdate; 
+	}
 }
 
 

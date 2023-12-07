@@ -193,17 +193,25 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	}
 
 	@SubscribeMessage('createInvite')
-	createInvite(sock: Socket, gameName: string) {
+	createInvite(
+		sock: Socket, 
+		{gameName, type = 'classic', args = null}: 
+			{gameName: string, type?: 'classic' | 'wall', args?: any}
+	){
 		let userData = this._confirmStatus(sock, [UserStatus.Normal] );
 		if (!userData) return null;
 		
+		// TESTING
+		if (type === 'wall')
+			console.log('created custom game with:', args);
 // 		if (this.gameService.invites.has(gameName) )
 // 				throw new Error ("name already taken"); // TODO handle in client somehow
 
 		try {
-			this.gameService.lobbyCreateInvite(userData.id, gameName);
+			this.gameService.lobbyCreateInvite(userData.id, gameName, type, args);
 		} catch {
 			//console.log("caught error");
+			// TODO name can't be empty
 			sock.emit('gameSocketError', "name already taken");
 			return;
 		}
@@ -268,7 +276,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 		let {player: whichPlayer, room, state: game} = this.gameService.getGameData(userData.id);
 		//console.log('syncing', game);
-		return game.packet(Date.now());
+		let args = (game.type === 'wall')? { mapName: (game as gm.WallGame).mapName } : null;
+		return {type: game.type, args, packet: game.packet(Date.now())};
 	}
 
 	@SubscribeMessage('playerMotion')

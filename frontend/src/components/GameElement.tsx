@@ -23,9 +23,6 @@ export default function GameElement() {
     sockRef.current.on("gameSocketError", (errmsg: string) => {
       setErrmsg(`Error: ${errmsg}`);
     });
-
-//     return () => {
-//     };
   }, []);
 
   return (
@@ -33,13 +30,7 @@ export default function GameElement() {
       {errmsg ? (
         <p style={{ color: "red" }}>
           {errmsg}
-          <button
-            onClick={() => {
-              setErrmsg(null);
-            }}
-          >
-            x
-          </button>
+          <button onClick={() => { setErrmsg(null); }} > x </button>
         </p>
       ) : (
         <></>
@@ -49,11 +40,7 @@ export default function GameElement() {
   );
 }
 
-enum UserStatus {
-  Normal,
-  Waiting,
-  Playing,
-}
+enum UserStatus { Normal, Waiting, Playing, }
 function GameElementContent() {
   enum WinLose {
     NA = 0,
@@ -109,7 +96,7 @@ function GameElementContent() {
         content = <p>cannot reach server</p>;
         break;
       case UserStatus.Playing:
-        content = <PongBoard availWidth={900} availHeight={600} />;
+        content = <PongBoard availWidth={600} availHeight={400} />;
         break;
       case UserStatus.Waiting:
         content = <GamesLobby waiting={true} />;
@@ -147,7 +134,7 @@ function GamesLobby({ waiting = false }) {
   // subcomponents
   function CreateGame() {
     let inputRef = useRef<null | HTMLInputElement>(null);
-		let mapChoice = useRef<null | HTMLInputElement>(null);
+		let mapChoice = useRef<null | HTMLSelectElement>(null);
     function requestCreate(custom = false) {
       if (!inputRef.current) return;
 			if (custom) {
@@ -165,6 +152,7 @@ function GamesLobby({ waiting = false }) {
 				socket.emit("createInvite", {gameName: inputRef.current.value});
 			}
     }
+		let maps = (new gm.WallGame()).maps;
     return (
       <>
         <h2> Create Public Invite </h2>
@@ -177,7 +165,9 @@ function GamesLobby({ waiting = false }) {
 				<p>
 				Or use a custom map:
 				<select ref={mapChoice}>
-					<option value={'fooMap'}>Default</option>
+					{
+						[...maps.keys()].map( (mapName) => (<option value={mapName}>{mapName}</option>) )
+					}
 				</select>
 				<button onClick={() => {requestCreate(true)}}> Create Custom Map Game </button>
 				</p>
@@ -314,12 +304,16 @@ function PongBoard({
 		cx: CanvasRenderingContext2D, 
 		seconds: number, 
 		{width, height}: {width: number, height: number},
+		color = "#4000ff",
 	) {
 		const cen = {
 			x: Math.floor((width + 1) / 2),
 			y: Math.floor((height + 1) / 2),
 		};
 		const textSize = Math.floor(height / 15);
+		let saveColor = cx.fillStyle;
+		cx.fillStyle = color;
+		console.log('old color', saveColor, 'newColor', cx.fillStyle)
 		cx.textAlign = "center";
 		cx.fillText( String(Math.ceil(seconds)), cen.x, cen.y + textSize / 2, textSize);
 
@@ -329,13 +323,14 @@ function PongBoard({
 		cx.arc(cen.x, cen.y, textSize, 0, frac * 2 * Math.PI, false);
 		cx.arc(cen.x, cen.y, textSize + arcWidth, frac * 2 * Math.PI, 2 * Math.PI, true);
 		cx.fill();
+		cx.fillStyle = saveColor;
 	}
 
   function drawGame(
 		cx: CanvasRenderingContext2D, 
 		{width, height, scale} : {width: number, height: number, scale: number},
 	) {
-    let game = gameRef.current;
+    let game: any = gameRef.current; // will actually be `ClassicGame`
 		if (!game || !cx)
 			return ;
 
@@ -380,7 +375,7 @@ function PongBoard({
 			return Math.ceil(r / gm.WALL_PONG.width * width);
 		}
 
-		let game: null | gm.WallGame = new gm.WallGame({mapName: 'fooMap'}); // TODO get actual game
+		let game: any = gameRef.current; // will actually be `WallGame`
 		if (!game || !cx)
 			return ;
 
@@ -398,14 +393,10 @@ function PongBoard({
       cx.fillRect(x, y, w, h);
     }
 
-    // display ball
-    if (game.ball) {
-      let { x, y } = game.ball;
-			[x, y] = [rtop(x), rtop(y)];
-      cx.fillRect(x, y, w, w);
-    } else {
-      let countdown = game.timeToBall() / 1000;
-      if (countdown > 0) drawCountdown(cx, game.timeToBall() / 1000, {width, height});
+		// display walls
+    for (let { x, y, w, h } of game.walls) {
+			[x, y, w, h] = [x, y, w, h].map(rtop);
+      cx.fillRect(x, y, w, h);
     }
 
     // display scores
@@ -419,10 +410,21 @@ function PongBoard({
     requestAnimationFrame(() => {
       drawWallGame(cx, {width, height});
     });
+
+    // display ball
+		let countdown = game.timeToBall() / 1000;
+    if (countdown <= 0) {
+      let { x, y } = game.ball;
+			[x, y] = [rtop(x), rtop(y)];
+      cx.fillRect(x, y, w, w);
+    } else {
+			console.log('pre count');
+			drawCountdown(cx, game.timeToBall() / 1000, {width, height});
+    }
 	}
 
 	// ACTUAL COMPONENT LOGIC
-  const gameRef = useRef<Game | null>(null);
+  const gameRef = useRef<gm.Game | null>(null);
   const socket = useContext(SocketContext);
   const boardRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -430,10 +432,10 @@ function PongBoard({
 	// reset them before drawGame in some cases
 
   useEffect(function () {
-    socket.emit("syncGame", ({type, packet}) => {
+    socket.emit("syncGame", ({type, args, packet}: {type: 'classic' | 'wall', packet: any}) => {
 			if ( !gameRef.current ) {
 				console.log('pre-init game:', type, packet);
-				gameRef.current = gm.makeGame({type});
+				gameRef.current = gm.makeGame({type, args});
 				console.log('post-init game', gameRef.current);
 				gameRef.current.pushPacket(packet);
 				// problem how to get map TODO

@@ -402,6 +402,7 @@ export class GameService {
         return;
       }
       game.update();
+			console.log('lolilol');
       let { finish, winner = null } = game.updateScores();
       if (finish && winner) {
         onFinish(winner);
@@ -409,6 +410,7 @@ export class GameService {
         this.gameCallback({ gameRoom: gameId, game });
         // 				let nextTimepoint = Math.max(20, game.minTimeToPoint());
         let nextTimepoint = game.minTimeToPoint();
+				console.log('wait', nextTimepoint);
         setTimeout(resetTimer, nextTimepoint);
       }
     };
