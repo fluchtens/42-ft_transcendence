@@ -1,0 +1,38 @@
+@import "../../styles/config.scss";
+
+.container {
+  flex-direction: column;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+
+  h1 {
+    font-size: map-get($text-3xl, font-size);
+    line-height: map-get($text-3xl, line-height);
+    font-weight: $font-semibold;
+  }
+
+  button {
+    all: unset;
+    padding: 0.5rem 1rem;
+    border-radius: $rounded-lg;
+    background: $sucess-primary-color;
+    transition: background 0.3s ease;
+    font-size: map-get($text-base, font-size);
+    line-height: map-get($text-base, line-height);
+    font-weight: $font-medium;
+    color: white;
+    cursor: pointer;
+
+    &:hover {
+      background: $sucess-secondary-color;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+}
