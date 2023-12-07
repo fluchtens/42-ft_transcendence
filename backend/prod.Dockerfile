@@ -7,6 +7,9 @@ RUN apt-get update
 # Sets the working directory
 WORKDIR /app
 
+# # Create a volume for the uploads directory
+# VOLUME ["/app/uploads"]
+
 # Installs project dependencies
 COPY package.json package-lock.json ./
 RUN npm install
@@ -14,6 +17,9 @@ COPY ./ ./
 
 # Setups prisma
 RUN npx prisma generate
+
+# Build project app
+RUN npm run build
 
 # Exposes port
 EXPOSE 3000

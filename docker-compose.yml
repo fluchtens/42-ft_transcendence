@@ -19,7 +19,7 @@ services:
     image: transcendence-backend
     build:
       context: ./backend
-      dockerfile: ./dev.Dockerfile
+      dockerfile: ./prod.Dockerfile
     depends_on:
       - postgres
     env_file:
@@ -28,8 +28,9 @@ services:
       - 3000:3000
       - 5555:5555
     volumes:
-      - ./backend:/app
-      - /app/node_modules
+      - uploads:/app/uploads
+    # - ./backend:/app
+    # - /app/node_modules
     networks:
       - transcendence
     restart: always
@@ -39,16 +40,16 @@ services:
     image: transcendence-frontend
     build:
       context: ./frontend
-      dockerfile: ./dev.Dockerfile
+      dockerfile: ./prod.Dockerfile
     depends_on:
       - backend
     env_file:
       - .env
     ports:
       - 80:80
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
+    # volumes:
+    #   - ./frontend:/app
+    #   - /app/node_modules
     networks:
       - transcendence
     restart: always
@@ -59,3 +60,4 @@ networks:
 
 volumes:
   database:
+  uploads:

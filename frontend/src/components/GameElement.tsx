@@ -537,7 +537,6 @@ function PongBoard({
   }
 
   function handleKeyDown(ev: any) {
-    // TODO some sort of 'KeyboardEvent' instead of 'any'
     if (ev.key === "ArrowDown" || ev.key === "ArrowUp") {
       ev.preventDefault();
       if (ev.repeat) return;
