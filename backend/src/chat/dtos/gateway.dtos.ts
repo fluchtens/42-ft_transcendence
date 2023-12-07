@@ -1,4 +1,5 @@
 import { Member, MemberRole, User } from '@prisma/client';
+import { Socket } from 'socket.io';
 
 export class SendMessageDto {
   channelId: string;
@@ -121,4 +122,12 @@ export class PrivateChannelData {
   id: string;
   name: string;
   messages: Messages[];
+}
+
+export class CreateGameInfo{
+  userId: number;
+  messageId?: string;
+  channelId: string;
+  privateChannel: boolean;
+  socket: Socket;
 }

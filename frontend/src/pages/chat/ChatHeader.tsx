@@ -70,18 +70,26 @@ const ChatHeader = ({
   };
 
   const createGameInvitation = async () => {
-    const user = await getUserByIdApi(1);
-    if (!user) return;
+    // const user = await getUserByIdApi(1);
+    // if (!user) return;
 
-    const newMessage = {
-      id: "qwertyuiop",
-      content: "Can you beat me?",
-      gameInvit: true,
-      userId: user.id,
-      user: user,
-    };
-    addNewMessage(newMessage);
-    notifySuccess("Game invitation has been sent successfully");
+    // const newMessage = {
+    //   id: "qwertyuiop",
+    //   content: "Can you beat me?",
+    //   gameInvit: true,
+    //   userId: user.id,
+    //   user: user,
+    // };
+    // addNewMessage(newMessage);
+    chatSocket.emit('createGame', channel.id, (result: string) => {
+      if (!result)
+        notifySuccess("Game invitation has been sent successfully");
+      else if (result === "New game request done") {
+        notifySuccess(result);
+      }
+      else 
+        notifyError(result);
+    });
   };
 
   useEffect(() => {

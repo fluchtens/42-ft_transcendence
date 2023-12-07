@@ -202,6 +202,7 @@ function Chat() {
                         avatar={message.user.avatar}
                         username={message.user.username}
                         content={message.content}
+                        userId={message.user.id}
                         gameInvit={message.gameInvit}
                       />
                     </li>
