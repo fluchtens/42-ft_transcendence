@@ -1,6 +1,7 @@
 import { io, Socket } from "socket.io-client";
 import { useRef, useEffect, useState, createContext, useContext } from "react";
 import * as gm from "./gameLogic";
+import { notifyError } from "../utils/notifications";
 
 const SOCK_HOST = import.meta.env.VITE_BACK_URL;
 const gameSocket = io(`${SOCK_HOST}/gamesocket`, {
@@ -14,8 +15,13 @@ export default function GameElement() {
 
   useEffect(() => {
     sockRef.current.on("gameSocketError", (errmsg: string) => {
+      notifyError(errmsg);
       setErrmsg(`Error: ${errmsg}`);
     });
+
+    return () => {
+      sockRef.current.off("gameSocketError");
+    };
   }, []);
 
   return (

@@ -29,8 +29,8 @@ services:
       - 5555:5555
     volumes:
       - uploads:/app/uploads
-    # - ./backend:/app
-    # - /app/node_modules
+      # - ./backend:/app
+      # - /app/node_modules
     networks:
       - transcendence
     restart: always
@@ -48,8 +48,8 @@ services:
     ports:
       - 80:80
     # volumes:
-    #   - ./frontend:/app
-    #   - /app/node_modules
+    # - ./frontend:/app
+    # - /app/node_modules
     networks:
       - transcendence
     restart: always
