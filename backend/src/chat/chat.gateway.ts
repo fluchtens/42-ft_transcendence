@@ -37,6 +37,7 @@ import { FriendshipStatus, User } from '@prisma/client';
 import { FriendshipService } from 'src/friendship/friendship.service';
 import { GameService } from 'src/game/game.service';
 import { GameGatewayModule } from 'src/game/gameGateway.module';
+import { error } from 'console';
 
 @WebSocketGateway({
   namespace: 'chatSocket',
@@ -1460,15 +1461,24 @@ export class ChatGateway implements OnModuleInit {
       }
       const initiatingSocket = this.waitingUsers.get(acceptingUserId);
       if (initiatingSocket) {
-        this.removeGameRequest(initiatingSocket);
-        this.server.to(String(userId)).emit('joinGame');
+        try {
+          this.removeGameRequest(initiatingSocket);
+        }
+        catch {
+          return 'failed to delete game request';
+        }
+        this.gameService.externalCreateGame(acceptingUserId, userId);
         this.server.to(String(acceptingUserId)).emit('joinGame');
+        this.server.to(String(userId)).emit('joinGame');
         this.waitingUsers.delete(acceptingUserId);
         return "";
       }
       else {
         return "Failed to join the game";
       }
+    }
+    else {
+      return "UserId not found"
     }
   }
 }
