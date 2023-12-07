@@ -2,6 +2,10 @@ import { io, Socket } from "socket.io-client";
 import { useRef, useEffect, useState, createContext, useContext } from "react";
 import * as gm from "./gameLogic";
 import { notifyError } from "../utils/notifications";
+import { Separator } from "./Separator";
+import lobbyStyles from "./GameLobby.module.scss";
+import winStyles from "./GameWin.module.scss";
+import pongStyles from "./GamePong.module.scss";
 
 const SOCK_HOST = import.meta.env.VITE_BACK_URL;
 const gameSocket = io(`${SOCK_HOST}/gamesocket`, {
@@ -9,14 +13,16 @@ const gameSocket = io(`${SOCK_HOST}/gamesocket`, {
 });
 const SocketContext = createContext<Socket>(gameSocket);
 
+/* -------------------------------------------------------------------------- */
+/*                                     Game                                   */
+/* -------------------------------------------------------------------------- */
+
 export default function GameElement() {
   let sockRef = useRef<Socket>(gameSocket);
-  let [errmsg, setErrmsg] = useState<string | null>(null);
 
   useEffect(() => {
     sockRef.current.on("gameSocketError", (errmsg: string) => {
       notifyError(errmsg);
-      setErrmsg(`Error: ${errmsg}`);
     });
 
     return () => {
@@ -26,31 +32,21 @@ export default function GameElement() {
 
   return (
     <SocketContext.Provider value={sockRef.current}>
-      {errmsg ? (
-        <p style={{ color: "red" }}>
-          {errmsg}
-          <button
-            onClick={() => {
-              setErrmsg(null);
-            }}
-          >
-            {" "}
-            x{" "}
-          </button>
-        </p>
-      ) : (
-        <></>
-      )}
       <GameElementContent />
     </SocketContext.Provider>
   );
 }
+
+/* -------------------------------------------------------------------------- */
+/*                             GameElementContent                             */
+/* -------------------------------------------------------------------------- */
 
 enum UserStatus {
   Normal,
   Waiting,
   Playing,
 }
+
 function GameElementContent() {
   enum WinLose {
     NA = 0,
@@ -74,7 +70,7 @@ function GameElementContent() {
     socket.on("winLose", (gotWin: boolean) => {
       setWinLose(gotWin ? WinLose.Win : WinLose.Lose);
     });
-    //cleanup
+
     return () => {
       socket.emit("cancel", { silent: true });
       socket.off("statusChange");
@@ -84,16 +80,12 @@ function GameElementContent() {
 
   function WinScreen({ win = true }) {
     return (
-      <p>
-        <b> You {win ? "Win :)" : "Lose :("} !!! </b>
-        <button
-          onClick={() => {
-            setWinLose(WinLose.NA);
-          }}
-        >
-          {" OK "}
-        </button>
-      </p>
+      <div className={winStyles.container}>
+        <div className={winStyles.winContainer}>
+          <h1>YOU {win ? "WIN" : "LOSE"}!</h1>
+          <button onClick={() => setWinLose(WinLose.NA)}>Back to lobby</button>
+        </div>
+      </div>
     );
   }
 
@@ -103,22 +95,34 @@ function GameElementContent() {
   } else {
     switch (status) {
       case undefined:
-        content = <p>cannot reach server</p>;
+        content = <></>;
         break;
       case UserStatus.Playing:
-        content = <PongBoard availWidth={1280} availHeight={720} />;
+        content = <PongBoard availWidth={1020} availHeight={768} />;
         break;
       case UserStatus.Waiting:
-        content = <GamesLobby waiting={true} />;
+        content = (
+          <div className={lobbyStyles.container}>
+            <GamesLobby waiting={true} />
+          </div>
+        );
         break;
       case UserStatus.Normal:
-        content = <GamesLobby waiting={false} />;
+        content = (
+          <div className={lobbyStyles.container}>
+            <GamesLobby waiting={false} />
+          </div>
+        );
         break;
     }
   }
 
   return content;
 }
+
+/* -------------------------------------------------------------------------- */
+/*                                 GamesLobby                                 */
+/* -------------------------------------------------------------------------- */
 
 type GameInfo = {
   id: number;
@@ -127,60 +131,82 @@ type GameInfo = {
   type: string;
   rating: number;
 };
+
 function GamesLobby({ waiting = false }) {
   type GamesList = Array<GameInfo>;
   const socket = useContext(SocketContext);
   const [gamesInfo, setGamesInfo] = useState<GamesList>([]);
 
-  useEffect(() => {
-    socket.on("gameListUpdate", (gotGamesInfo: GamesList) => {
-      setGamesInfo(gotGamesInfo);
-    });
-    socket.emit("joinLobby");
-
-    // cleanup
-    return () => {
-      socket.off("gameListUpdate");
-    };
-  }, []);
-
-  // subcomponents
   function CreateGame() {
-    let inputRef = useRef<null | HTMLInputElement>(null);
+    const [basicMatchName, setBasicMatchName] = useState<string>("");
+    const [customMatchName, setCustomMatchName] = useState<string>("");
     let mapChoice = useRef<null | HTMLSelectElement>(null);
-    function requestCreate(custom = false) {
-      if (!inputRef.current) return;
-      if (custom) {
-        if (!mapChoice.current) return;
-        //
-        socket.emit("createInvite", {
-          gameName: inputRef.current.value,
-          type: "wall",
-          args: { mapName: mapChoice.current.value },
-        });
-      } else {
-        socket.emit("createInvite", { gameName: inputRef.current.value });
-      }
-    }
     let maps = new gm.WallGame().maps;
+
+    const createBasicMatch = (e: React.FormEvent) => {
+      e.preventDefault();
+      socket.emit("createInvite", { gameName: basicMatchName });
+      setBasicMatchName("");
+    };
+
+    const createCustomMatch = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!mapChoice.current) return;
+      socket.emit("createInvite", {
+        gameName: customMatchName,
+        type: "wall",
+        args: { mapName: mapChoice.current.value },
+      });
+      setCustomMatchName("");
+    };
+
     return (
-      <>
-        <h2> Create Public Invite </h2>
-        <label>
-          Game Name :<input ref={inputRef} />
-        </label>
-        <p>
-          <button
-            onClick={() => {
-              requestCreate();
-            }}
-          >
-            {" "}
-            Create Classic Game
-          </button>
-        </p>
-        <p>
-          Or use a custom map:
+      <div className={lobbyStyles.options}>
+        <form onSubmit={createBasicMatch}>
+          <h2>Create a basic match</h2>
+          <label>Match Name</label>
+          <input
+            type="text"
+            value={basicMatchName}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setBasicMatchName(e.target.value)
+            }
+            placeholder="Enter a match name"
+            required
+            disabled={waiting}
+          />
+          {waiting ? (
+            <button
+              className={lobbyStyles.disabled}
+              type="submit"
+              disabled={waiting}
+            >
+              Create basic match
+            </button>
+          ) : (
+            <button
+              className={lobbyStyles.enabled}
+              type="submit"
+              disabled={waiting}
+            >
+              Create basic match
+            </button>
+          )}
+        </form>
+        <form onSubmit={createCustomMatch}>
+          <h2>Create a custom match</h2>
+          <label>Match Name</label>
+          <input
+            type="text"
+            value={customMatchName}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setCustomMatchName(e.target.value)
+            }
+            placeholder="Enter a match name"
+            required
+            disabled={waiting}
+          />
+          <label>Match Map</label>
           <select ref={mapChoice}>
             {[...maps.keys()].map((mapName) => (
               <option value={mapName} key={mapName}>
@@ -188,67 +214,97 @@ function GamesLobby({ waiting = false }) {
               </option>
             ))}
           </select>
-          <button
-            onClick={() => {
-              requestCreate(true);
-            }}
-          >
-            {" "}
-            Create Custom Map Game{" "}
-          </button>
-        </p>
-      </>
-    );
-  }
-  function JoinQueue() {
-    return (
-      <>
-        <h2> Join Matchmaking Queue </h2>
-        <button
-          onClick={() => {
-            socket.emit("joinQueue");
-          }}
-        >
-          {" "}
-          Find Opponent{" "}
-        </button>
-      </>
+          {waiting ? (
+            <button
+              className={lobbyStyles.disabled}
+              type="submit"
+              disabled={waiting}
+            >
+              Create custom match
+            </button>
+          ) : (
+            <button
+              className={lobbyStyles.enabled}
+              type="submit"
+              disabled={waiting}
+            >
+              Create custom match
+            </button>
+          )}
+        </form>
+      </div>
     );
   }
 
+  function JoinQueue() {
+    const joinQueue = () => {
+      socket.emit("joinQueue");
+    };
+
+    const cancelQueue = () => {
+      socket.emit("cancel");
+    };
+
+    return (
+      <div className={lobbyStyles.joinQueue}>
+        {!waiting ? (
+          <>
+            <label> Join matchmaking queue </label>
+            <button className={lobbyStyles.confirm} onClick={joinQueue}>
+              Find an opponent
+            </button>
+          </>
+        ) : (
+          <>
+            <label>Waiting for opponent...</label>
+            <button className={lobbyStyles.cancel} onClick={cancelQueue}>
+              Cancel
+            </button>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  useEffect(() => {
+    socket.on("gameListUpdate", (gotGamesInfo: GamesList) => {
+      setGamesInfo(gotGamesInfo);
+    });
+    socket.emit("joinLobby");
+
+    return () => {
+      socket.off("gameListUpdate");
+    };
+  }, []);
+
   return (
-    <>
-      <h1> Games Lobby </h1>
-      <hr />
-      {waiting ? (
-        <>
-          <p>Waiting for opponent... </p>
-          <button
-            onClick={() => {
-              socket.emit("cancel");
+    <div className={lobbyStyles.lobbyContainer}>
+      <div className={lobbyStyles.createMatch}>
+        <h1>Create match</h1>
+        <Separator />
+        <CreateGame />
+      </div>
+      <div className={lobbyStyles.findMatch}>
+        <h1>Find match</h1>
+        <Separator />
+        <div className={lobbyStyles.findMatchOptions}>
+          <JoinQueue />
+          <GamesTable
+            gamesInfo={gamesInfo}
+            onJoin={(gameName) => {
+              socket.emit("joinGame", gameName);
             }}
-          >
-            {" "}
-            Cancel{" "}
-          </button>
-        </>
-      ) : (
-        <></>
-      )}
-      {waiting ? <></> : <JoinQueue />}
-      <hr />
-      {waiting ? <></> : <CreateGame />}
-      <hr />
-      <GamesTable
-        gamesInfo={gamesInfo}
-        onJoin={(gameName) => {
-          socket.emit("joinGame", gameName);
-        }}
-        joinEnable={!waiting}
-      />
-    </>
+            joinEnable={!waiting}
+          />
+        </div>
+      </div>
+    </div>
   );
 }
+
+/* -------------------------------------------------------------------------- */
+/*                                 GamesTable                                 */
+/* -------------------------------------------------------------------------- */
 
 function GamesTable({
   gamesInfo,
@@ -259,28 +315,25 @@ function GamesTable({
   onJoin: (gameName: string) => undefined;
   joinEnable: boolean;
 }) {
-  if (gamesInfo.length === 0) {
-    return (
-      <>
-        <h2>Joinable Games</h2>
-        <p> [ None ] </p>
-      </>
-    );
-  }
-
   const fields = new Map([
     ["Name", "name"],
     ["Host", "host"],
     ["Rating", "rating"],
     ["Type", "type"],
   ]);
+
   function joinButton(enabled: boolean, onClick: () => undefined) {
     return enabled ? (
-      <button onClick={onClick}> join </button>
+      <button className={lobbyStyles.enabled} onClick={onClick}>
+        Join
+      </button>
     ) : (
-      <button disabled> join </button>
+      <button className={lobbyStyles.disabled} disabled>
+        Join
+      </button>
     );
   }
+
   function itemRow(item: GameInfo) {
     return (
       <tr key={item.id}>
@@ -308,15 +361,27 @@ function GamesTable({
   let rows = gamesInfo.map((item) => itemRow(item));
 
   return (
-    <>
-      <h2> Joinable games </h2>
-      <table>
-        <thead>{headerRow}</thead>
-        <tbody>{rows}</tbody>
-      </table>
-    </>
+    <div className={lobbyStyles.joinableGames}>
+      <label>Joinable matchs</label>
+      {gamesInfo.length === 0 ? (
+        <>
+          <p>No matchs available</p>
+        </>
+      ) : (
+        <>
+          <table>
+            <thead>{headerRow}</thead>
+            <tbody>{rows}</tbody>
+          </table>
+        </>
+      )}
+    </div>
   );
 }
+
+/* -------------------------------------------------------------------------- */
+/*                                  PongBoard                                 */
+/* -------------------------------------------------------------------------- */
 
 function PongBoard({
   availWidth,
@@ -330,7 +395,7 @@ function PongBoard({
     cx: CanvasRenderingContext2D,
     seconds: number,
     { width, height }: { width: number; height: number },
-    color = "#4000ff"
+    color = "#00ff80"
   ) {
     const cen = {
       x: Math.floor((width + 1) / 2),
@@ -372,7 +437,7 @@ function PongBoard({
 
     cx.fillStyle = "black";
     cx.fillRect(0, 0, width, height);
-    cx.fillStyle = "#00ff80"; // bluish green
+    cx.fillStyle = "white"; // bluish green
     game.update();
 
     // display paddles
@@ -421,7 +486,7 @@ function PongBoard({
     cx.fillStyle = "black";
     cx.fillRect(0, 0, width, height);
 
-    cx.fillStyle = "#00ff80"; // bluish green
+    cx.fillStyle = "white"; // bluish green
 
     // display paddles
     let [w, h] = [
@@ -559,16 +624,20 @@ function PongBoard({
   }
 
   return (
-    <canvas
-      ref={boardRef}
-      width={canvasDim[0]}
-      height={canvasDim[1]}
-      tabIndex={0} // apparently needed for onKey* events?
-      onKeyDown={handleKeyDown}
-      onKeyUp={handleKeyUp}
-    >
-      Cannot load pong game.
-    </canvas>
+    <div className={pongStyles.container}>
+      <div className={pongStyles.gameContainer}>
+        <canvas
+          ref={boardRef}
+          width={canvasDim[0]}
+          height={canvasDim[1]}
+          tabIndex={0} // apparently needed for onKey* events?
+          onKeyDown={handleKeyDown}
+          onKeyUp={handleKeyUp}
+        >
+          Cannot load pong game.
+        </canvas>
+      </div>
+    </div>
   );
 }
 
