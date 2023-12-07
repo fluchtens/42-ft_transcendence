@@ -144,13 +144,17 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 	async _gamesInfo() {
 		let gamesInfo = [];
-		for (let [key, {host}] of [...this.gameService.invites]) {
+		for (let [key, {id, host, type, args}] of [...this.gameService.invites]) {
+			let gameType = 'classic';
+			if (type === 'wall') {
+				gameType = 'custom' + (args?.mapName ? ':' + args.mapName : '');
+			}
 			try {
 				let user = await this.userService.getUserById(host.id);
 				let rating = await this._rating(host.id);
-				gamesInfo.push({name: key, host: user.username, rating});
+				gamesInfo.push({id,  type: gameType, name: key, host: user.username, rating});
 			} catch {
-				gamesInfo.push( {name: key, host: '[unkown user]', rating: -1});
+				gamesInfo.push({id, type, name: key, host: '[unkown user]', rating: -1});
 			}
 		}
 		return gamesInfo;
@@ -201,6 +205,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		let userData = this._confirmStatus(sock, [UserStatus.Normal] );
 		if (!userData) return null;
 		
+		if (gameName === '') {
+			sock.emit('gameSocketError', "name can't be empty");
+			return null;
+		}
 		// TESTING
 		if (type === 'wall')
 			console.log('created custom game with:', args);
@@ -211,7 +219,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			this.gameService.lobbyCreateInvite(userData.id, gameName, type, args);
 		} catch {
 			//console.log("caught error");
-			// TODO name can't be empty
 			sock.emit('gameSocketError', "name already taken");
 			return;
 		}

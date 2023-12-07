@@ -182,8 +182,10 @@ class MMQueue {
 export class GameService {
   // unique game_invite name to info required to launch the game
   lobbyRoom = '_LOBBY_';
-  invites = new Map<string, { host: UserData, type: 'classic' | 'wall', args: any }>();
+
+  invites = new Map<string, {id: number, host: UserData, type: 'classic' | 'wall', args: any }>();
   userInvites = new Map<number, string>(); // userId -> inviteName, used for deleting
+	private _lastInviteId = 0;
   // invites along their hosts
 
   // sockId to active games
@@ -308,7 +310,7 @@ export class GameService {
 
     user.status = UserStatus.Waiting;
 
-    this.invites.set(inviteName, { host: user, type, args});
+    this.invites.set(inviteName, {id: this._lastInviteId++, host: user, type, args});
 		console.log('##### New Inivite', this.invites.get(inviteName));
     this.userInvites.set(userId, inviteName);
   }

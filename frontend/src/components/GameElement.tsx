@@ -166,7 +166,9 @@ function GamesLobby({ waiting = false }) {
 				Or use a custom map:
 				<select ref={mapChoice}>
 					{
-						[...maps.keys()].map( (mapName) => (<option value={mapName}>{mapName}</option>) )
+						[...maps.keys()].map( (mapName) => (
+							<option value={mapName} key={mapName}>{mapName}</option>
+						) )
 					}
 				</select>
 				<button onClick={() => {requestCreate(true)}}> Create Custom Map Game </button>
@@ -236,16 +238,17 @@ function GamesTable({
   if (gamesInfo.length === 0) {
     return (
       <>
-        {" "}
-        <h2>Joinable Games</h2> <p> [ None ] </p>{" "}
+        <h2>Joinable Games</h2> 
+				<p> [ None ] </p>
       </>
     );
   }
 
   const fields = new Map([
-    ["Game Name", "name"],
+    ["Name", "name"],
     ["Host", "host"],
     ["Rating", "rating"],
+		["Type", "type"]
   ]);
   function joinButton(enabled: boolean, onClick: () => undefined) {
     return enabled ? (
@@ -254,9 +257,9 @@ function GamesTable({
       <button disabled> join </button>
     );
   }
-  function itemRow(item: { name: string }) {
+  function itemRow(item: {id: number }) {
     return (
-      <tr>
+      <tr key={item.id}>
         {[...fields.values()].map((key) => (
           <td>{(item as any)[key]}</td>
         ))}
