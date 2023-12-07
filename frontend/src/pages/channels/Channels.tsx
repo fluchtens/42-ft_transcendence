@@ -29,9 +29,10 @@ function Channels({ styles }: ChannelsProps) {
       );
     });
 
-    socket.on("joinGame", () => {
-      navigate("/game");
-    });
+    // console.log('join');
+    // socket.on("joinGame", () => {
+    //   navigate("/game");
+    // });
 
     socket.on("resetChannel", (channelId: string) => {
       socket.emit("getChannelStatus", channelId, (channel: Channel) => {
@@ -67,7 +68,8 @@ function Channels({ styles }: ChannelsProps) {
       socket.off("newChannel");
       socket.off("channelDeleted");
       socket.off("resetChannel");
-      socket.off("joinGame");
+      // console.log("offgame");
+      // socket.off("joinGame");
     };
   }, [socket]);
 

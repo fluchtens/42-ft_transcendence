@@ -121,6 +121,10 @@ function Chat() {
       setMessages((prevMessages) => [...prevMessages, message]);
     });
 
+    socket.on("joinGame", () => {
+      navigate("/game");
+    });
+
     socket.on(`${id}/member`, (member: MemberUsers) => {
       setMembers((prevMembers) => [...prevMembers, member]);
     });
@@ -142,6 +146,7 @@ function Chat() {
       socket.off(`${id}/message`);
       socket.off(`${id}/member`);
       socket.off(`${id}/channelDeleted`);
+      socket.off('joinGame');
     };
   }, [id, socket]);
 
