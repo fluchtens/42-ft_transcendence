@@ -67,7 +67,7 @@ function Channels({ styles }: ChannelsProps) {
       socket.off("newChannel");
       socket.off("channelDeleted");
       socket.off("resetChannel");
-      socket.off('joingame');
+      socket.off('joinGame');
     };
   }, [socket]);
 
