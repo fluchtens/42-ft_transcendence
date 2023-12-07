@@ -60,9 +60,15 @@ function PrivateChat() {
     socket.on(`${id}/message`, (message: Message) => {
       setMessages((prevMessages) => [...prevMessages, message]);
     });
+    socket.on(`${id}/messageDeleted`, (deletedMessageId: string) => {
+      setMessages((prevMessages) =>
+        prevMessages.filter((message) => message.id !== deletedMessageId)
+      );
+    });
 
     return () => {
       socket.off(`${id}/message`);
+      socket.off(`${id}/messageDeleted`);
     };
   }, [id, socket]);
 
@@ -114,6 +120,8 @@ function PrivateChat() {
                         avatar={message.user.avatar}
                         username={message.user.username}
                         content={message.content}
+                        userId={message.user.id}
+                        gameInvit={message.gameInvit}
                       />
                     </li>
                   )

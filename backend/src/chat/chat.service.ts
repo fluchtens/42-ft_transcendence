@@ -423,6 +423,7 @@ export class ChatService {
     userId: number,
     channelId: string,
     messageContent: string,
+    gameInvit?: boolean,
   ): Promise<Message | null> {
     if (!userId || !channelId || !messageContent) {
       return null;
@@ -443,6 +444,7 @@ export class ChatService {
             content: messageContent,
             userId: userId,
             channelId: channelData.id,
+            gameInvit:gameInvit,
           },
         });
         await this.prismaService.channel.update({
@@ -877,6 +879,7 @@ export class ChatService {
     userId: number,
     privateMessageId: string,
     messageContent: string,
+    gameInvit?: boolean,
   ) {
     if (!userId || !privateMessageId || !messageContent) {
       return null;
@@ -894,6 +897,7 @@ export class ChatService {
             content: messageContent,
             userId: userId,
             privateMessageId: channelData.id,
+            gameInvit: gameInvit,
           },
         });
         await this.prismaService.privateMessageChannel.update({
@@ -957,5 +961,49 @@ export class ChatService {
       },
     });
     return channel;
+  }
+
+  async deletePrivateMessage(messageId: string): Promise<null | any> {
+    if (!messageId) {
+      return null;
+    }
+    try {
+      const message = await this.prismaService.privateMessage.findUnique({
+        where: {
+          id: messageId,
+        },
+      });
+      if (!message) throw new Error('Message not found');
+      await this.prismaService.privateMessage.delete({
+        where: {
+          id: messageId,
+        },
+      });
+      return 'The message was succefull deleted!';
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async deleteGameMessage( messageId: string): Promise<null | any> {
+    if (!messageId) {
+      return null;
+    }
+    try {
+      const message = await this.prismaService.message.findUnique({
+        where: {
+          id: messageId,
+        },
+      });
+      if (!message) throw new Error('Message not found');
+      await this.prismaService.message.delete({
+        where: {
+          id: messageId,
+        },
+      });
+      return 'The message was succefull deleted!';
+    } catch (error) {
+      throw error;
+    }
   }
 }

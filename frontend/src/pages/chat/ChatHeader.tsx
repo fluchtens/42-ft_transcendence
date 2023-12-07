@@ -81,8 +81,15 @@ const ChatHeader = ({
     //   user: user,
     // };
     // addNewMessage(newMessage);
-    chatSocket.emit('createGame', channel.id);
-    notifySuccess("Game invitation has been sent successfully");
+    chatSocket.emit('createGame', channel.id, (result: string) => {
+      if (!result)
+        notifySuccess("Game invitation has been sent successfully");
+      else if (result === "New game request done") {
+        notifySuccess(result);
+      }
+      else 
+        notifyError(result);
+    });
   };
 
   useEffect(() => {
