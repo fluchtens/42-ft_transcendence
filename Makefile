@@ -15,8 +15,6 @@ down:
 	docker-compose down --rmi all --volumes
 
 clean: down
-	rm -rf backend/prisma/migrations
-	rm -rf backend/uploads
 	docker system prune -a -f
 
 .PHONY: all install build up down clean
