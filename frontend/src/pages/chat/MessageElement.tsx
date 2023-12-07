@@ -1,4 +1,5 @@
 import { useChatSocket } from "../../hooks/useChatSocket";
+import { notifyError, notifySuccess } from "../../utils/notifications";
 import styles from "./MessageElement.module.scss";
 import defaultAvatar from "/default_avatar.png";
 
@@ -18,10 +19,17 @@ const MessageElement = ({
   gameInvit,
 }: MessageElementProps) => {
   const useChat = useChatSocket();
-
   const joiningGame = () => {
     if (gameInvit) {
-      useChat.emit('joinGame', userId);
+      useChat.emit('joinGame', userId, (result: string) => {
+        if (!result) {
+          notifySuccess
+          ('join game');
+        }
+        else if (result) {
+          notifyError('failed to join game');
+        }
+      });
     }
   }
 
