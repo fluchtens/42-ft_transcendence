@@ -89,7 +89,7 @@ function GameElementContent() {
         content = <p>cannot reach server</p>;
         break;
       case UserStatus.Playing:
-        content = <PongBoard availWidth={600} availHeight={400} />;
+        content = <PongBoard availWidth={1000} availHeight={600} />;
         break;
       case UserStatus.Waiting:
         content = <GamesLobby waiting={true} />;
@@ -307,7 +307,6 @@ function PongBoard({
 		const textSize = Math.floor(height / 15);
 		let saveColor = cx.fillStyle;
 		cx.fillStyle = color;
-		console.log('old color', saveColor, 'newColor', cx.fillStyle)
 		cx.textAlign = "center";
 		cx.fillText( String(Math.ceil(seconds)), cen.x, cen.y + textSize / 2, textSize);
 
@@ -412,7 +411,6 @@ function PongBoard({
 			[x, y] = [rtop(x), rtop(y)];
       cx.fillRect(x, y, w, w);
     } else {
-			console.log('pre count');
 			drawCountdown(cx, game.timeToBall() / 1000, {width, height});
     }
 	}
@@ -422,15 +420,14 @@ function PongBoard({
   const socket = useContext(SocketContext);
   const boardRef = useRef<HTMLCanvasElement | null>(null);
 
-	let [canvasWidth, canvasHeight] = [availWidth, availHeight];
+	let [canvasDim, setCanvasDim] = useState<[number, number]>([availWidth, availHeight]);
+// 	let [canvasWidth, canvasHeight] = [availWidth, availHeight];
 	// reset them before drawGame in some cases
 
   useEffect(function () {
     socket.emit("syncGame", ({type, args, packet}: {type: 'classic' | 'wall', args:any, packet: any}) => {
 			if ( !gameRef.current ) {
-				console.log('pre-init game:', type, packet);
 				gameRef.current = gm.makeGame({type, args});
-				console.log('post-init game', gameRef.current);
 				gameRef.current.pushPacket(packet);
 
 				boardRef.current?.focus();
@@ -443,17 +440,16 @@ function PongBoard({
 						Math.floor(availHeight / gm.PONG.height)
 					);
 					scale = Math.max(1, scale); // if not enough space, dumb crop
-					[canvasWidth, canvasHeight] = [
+					setCanvasDim([
 						gm.PONG.width * scale,
 						gm.PONG.height * scale,
-					];
-					console.log('hi draw');
+					]);
+					let [canvasWidth, canvasHeight] = canvasDim;
 					drawGame(cx, {width: canvasWidth, height: canvasHeight, scale});
 				} else if (type === 'wall') {
 					const [width, height] = [availWidth, availHeight]
 					drawWallGame(cx, {width, height});
 				}
-
 			} else {
 				gameRef.current.pushPacket(packet);
 			}
@@ -468,7 +464,6 @@ function PongBoard({
 
     return function cleanup() {
 			gameRef.current = null;
-			console.log('cancel draw');
       socket.off("gameUpdate");
     };
   }, []);
@@ -501,9 +496,9 @@ function PongBoard({
   return (
     <canvas
       ref={boardRef}
-      width={canvasWidth}
-      height={canvasHeight}
-      tabIndex={0} // apperently needed for onKey* events?
+      width={canvasDim[0]}
+      height={canvasDim[1]}
+      tabIndex={0} // apparently needed for onKey* events?
       onKeyDown={handleKeyDown}
       onKeyUp={handleKeyUp}
     >
