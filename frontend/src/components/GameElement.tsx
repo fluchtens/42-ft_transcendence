@@ -100,7 +100,7 @@ function GameElementContent() {
         content = <p>cannot reach server</p>;
         break;
       case UserStatus.Playing:
-        content = <PongBoard availWidth={1000} availHeight={800} />;
+        content = <PongBoard availWidth={1280} availHeight={720} />;
         break;
       case UserStatus.Waiting:
         content = <GamesLobby waiting={true} />;
@@ -494,11 +494,19 @@ function PongBoard({
               Math.floor(availHeight / gm.PONG.height)
             );
             scale = Math.max(1, scale); // if not enough space, dumb crop
-            setCanvasDim([gm.PONG.width * scale, gm.PONG.height * scale]);
-            let [canvasWidth, canvasHeight] = canvasDim;
-            drawGame(cx, { width: canvasWidth, height: canvasHeight, scale });
+            let [width, height] = [
+              gm.PONG.width * scale,
+              gm.PONG.height * scale,
+            ];
+            setCanvasDim([width, height]);
+            drawGame(cx, { width, height, scale });
           } else if (type === "wall") {
-            const [width, height] = [availWidth, availHeight];
+            let aspectRatio = gm.WALL_PONG.width / gm.WALL_PONG.height;
+            let [width, height] = [0, 0];
+            if (availWidth >= availHeight * aspectRatio)
+              [width, height] = [availHeight * aspectRatio, availHeight];
+            else [width, height] = [availWidth, availWidth / aspectRatio];
+            setCanvasDim([width, height]);
             drawWallGame(cx, { width, height });
           }
         } else {
