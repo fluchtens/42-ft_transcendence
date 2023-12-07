@@ -25,7 +25,6 @@ export function makeGame(
 	if (type === 'classic') {
 		return new ClassicGame(startTime);
 	} else {
-		console.log('In make: type', type, 'args', args, 'time', startTime);
 		if (args)
 			return new WallGame(startTime, args);
 		else
@@ -433,7 +432,6 @@ export class WallGame {
 
 	constructor(startTime = Date.now(), {mapName}: {mapName: string} = {mapName: 'default'}) {
 		this.mapName = mapName;
-		console.log('ctor time', startTime);
 		this._lastUpdate = startTime;
 		{
 			let s = WALL_PONG.ballSize;

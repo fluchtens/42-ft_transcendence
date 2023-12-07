@@ -282,7 +282,6 @@ export class GameService {
     user.status = UserStatus.Waiting;
 
     this.invites.set(inviteName, {id: this._lastInviteId++, host: user, type, args});
-		console.log('##### New Inivite', this.invites.get(inviteName));
     this.userInvites.set(userId, inviteName);
   }
 
@@ -317,7 +316,6 @@ export class GameService {
     if (!player1 || !player2) throw new Error('no such active user');
 
     let gameId = this.genId();
-		console.log('pre-make', {type, args});
     let game = gm.makeGame({type, args}, startTime);
 
     this.games.set(gameId, game);
@@ -359,7 +357,6 @@ export class GameService {
         this.pendingDelete.has(player1.id) &&
         this.pendingDelete.has(player2.id)
       ) {
-        console.log('game aborted bc both players disconnected');
         deleteGame();
         return;
       }
@@ -371,7 +368,6 @@ export class GameService {
         this.gameCallback({ gameRoom: gameId, game });
         // 				let nextTimepoint = Math.max(20, game.minTimeToPoint());
         let nextTimepoint = game.minTimeToPoint();
-				console.log('wait', nextTimepoint);
         setTimeout(resetTimer, nextTimepoint);
       }
     };
