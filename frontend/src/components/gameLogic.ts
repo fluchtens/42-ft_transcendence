@@ -270,9 +270,9 @@ export class WallGame {
     this.mapName = mapName;
     this._lastUpdate = startTime;
     {
-//       let s = WALL_PONG.ballSize;
-//       this.ball = new MovingRectangle({ x: 0, y: 0, w: s, h: s });
-//       this._newBall(0, WALL_PONG.startDelay);
+      let s = WALL_PONG.ballSize;
+      this.ball = new MovingRectangle({ x: 0, y: 0, w: s, h: s });
+      this._newBall(0, WALL_PONG.startDelay);
     }
     {
       // Init player paddles
@@ -284,14 +284,14 @@ export class WallGame {
       let p0 = new MovingRectangle({ x, y, w, h });
 
       x = WALL_PONG.width - (WALL_PONG.margin + WALL_PONG.paddleWidth);
-//       let p1 = new MovingRectangle({ x, y, w, h });
+      let p1 = new MovingRectangle({ x, y, w, h });
 
 			// TESTING
-			const eps = 0.4;
-			let p1 = new MovingRectangle({x, y: WALL_PONG.height - h - w - 2 * eps, w, h});
-
-			this.ball = new MovingRectangle({x, y: WALL_PONG.height - w - eps, w, h: w, dx: 0, dy: 0.2});
-			this._nextBallTime = this._lastUpdate + 2000;
+// 			const eps = 0.4;
+// 			let p1 = new MovingRectangle({x, y: WALL_PONG.height - h - w - 2 * eps, w, h});
+// 
+// 			this.ball = new MovingRectangle({x, y: WALL_PONG.height - w - eps, w, h: w, dx: 0, dy: 0.2});
+// 			this._nextBallTime = this._lastUpdate + 2000;
 			// END TESTING
 			
       this.players = [p0, p1];
@@ -347,7 +347,6 @@ export class WallGame {
 
 		const BOUNCE_LIMIT = 200; 
 		for (let i = 0; i <= BOUNCE_LIMIT; ++i) {
-			console.log('game loop', i);
 			if (this._nextBallTime > this._lastUpdate) {
 				if (time > this._nextBallTime) {
 					this._preUpdate((this._nextBallTime - this._lastUpdate) / 1000, false);
@@ -363,10 +362,9 @@ export class WallGame {
       foundImpact = searchImpact(foundImpact, this.players, 'paddle');
       foundImpact = searchImpact(foundImpact, this.goals, 'goals');
       if (!foundImpact || i >= BOUNCE_LIMIT) {
-				console.log("########## INFINIBOUNCE ########");
 				this.ball.dy = 0;
 				{ 
-					let [H, s] = [WALL_PONG.height, WALL_PONG.ballSize]; // TESTING
+					let [H, s] = [WALL_PONG.height, WALL_PONG.ballSize];
 					let eps = 1e-6;
 					this.ball.y = clamp(eps, this.ball.y, H - s - eps);
 					let [W, vx] = [WALL_PONG.width, WALL_PONG.ballXSpeed];
@@ -381,7 +379,6 @@ export class WallGame {
       let { impact, type } = foundImpact;
       let { t, hit, vertical } = impact;
       if (t < 0 || t * 1000 > time - this._lastUpdate) {
-				console.log('#### IMPACT LATER ########');
 				break;
 			}
 
