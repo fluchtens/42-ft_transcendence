@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { FriendshipGateway } from 'src/friendship/friendship.gateway';
-import { Socket, Server } from 'socket.io';
+import { Socket } from 'socket.io';
 import * as gm from './gameLogic';
 
 export enum UserStatus {
