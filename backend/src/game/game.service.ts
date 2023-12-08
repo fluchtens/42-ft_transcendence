@@ -387,9 +387,12 @@ export class GameService {
 
   externalCreateGame(userId1, userId2, timeout = 10000) {
     for (let userId of [userId1, userId2]) {
-      if (!this.users.get(userId)) {
+			let user = this.users.get(userId);
+      if (!user) {
         this.users.set(userId, new UserData(userId));
-      }
+      } else if (user.status !== UserStatus.Normal) {
+				throw userId;
+			}
     }
     this.launchGame(userId1, userId2);
     setTimeout(() => {

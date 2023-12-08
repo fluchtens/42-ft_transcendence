@@ -429,46 +429,46 @@ function PongBoard({
     cx.fillStyle = saveColor;
   }
 
-  function drawGame(
-    cx: CanvasRenderingContext2D,
-    { width, height, scale }: { width: number; height: number; scale: number }
-  ) {
-    let game: any = gameRef.current; // will actually be `ClassicGame`
-    if (!game || !cx) return;
-
-    cx.fillStyle = "black";
-    cx.fillRect(0, 0, width, height);
-    cx.fillStyle = "white"; // bluish green
-    game.update();
-
-    // display paddles
-    let [w, h] = [gm.PONG.paddleWidth * scale, gm.PONG.paddleHeight * scale];
-    for (let { x, y } of [game.player1, game.player2]) {
-      cx.fillRect(x * scale, y * scale, w, h);
-    }
-
-    // display ball
-    if (game.ball) {
-      let { x, y } = game.ball;
-      cx.fillRect(x * scale, y * scale, w, w);
-    } else {
-      let countdown = game.timeToBall() / 1000;
-      if (countdown > 0)
-        drawCountdown(cx, game.timeToBall() / 1000, { width, height });
-    }
-
-    // display scores
-    let textHeight = Math.floor(height / 15);
-    cx.font = `${textHeight}px Monospace`;
-    cx.textAlign = "left";
-    cx.fillText(String(game.player1.score), 0, textHeight);
-    cx.textAlign = "right";
-    cx.fillText(String(game.player2.score), width - 1, textHeight);
-    //
-    requestAnimationFrame(() => {
-      drawGame(cx, { width, height, scale });
-    });
-  }
+//   function drawGame(
+//     cx: CanvasRenderingContext2D,
+//     { width, height, scale }: { width: number; height: number; scale: number }
+//   ) {
+//     let game: any = gameRef.current; // will actually be `ClassicGame`
+//     if (!game || !cx) return;
+// 
+//     cx.fillStyle = "black";
+//     cx.fillRect(0, 0, width, height);
+//     cx.fillStyle = "white"; // bluish green
+//     game.update();
+// 
+//     // display paddles
+//     let [w, h] = [gm.PONG.paddleWidth * scale, gm.PONG.paddleHeight * scale];
+//     for (let { x, y } of [game.player1, game.player2]) {
+//       cx.fillRect(x * scale, y * scale, w, h);
+//     }
+// 
+//     // display ball
+//     if (game.ball) {
+//       let { x, y } = game.ball;
+//       cx.fillRect(x * scale, y * scale, w, w);
+//     } else {
+//       let countdown = game.timeToBall() / 1000;
+//       if (countdown > 0)
+//         drawCountdown(cx, game.timeToBall() / 1000, { width, height });
+//     }
+// 
+//     // display scores
+//     let textHeight = Math.floor(height / 15);
+//     cx.font = `${textHeight}px Monospace`;
+//     cx.textAlign = "left";
+//     cx.fillText(String(game.player1.score), 0, textHeight);
+//     cx.textAlign = "right";
+//     cx.fillText(String(game.player2.score), width - 1, textHeight);
+//     //
+//     requestAnimationFrame(() => {
+//       drawGame(cx, { width, height, scale });
+//     });
+//   }
 
   function drawWallGame(
     cx: CanvasRenderingContext2D,
@@ -537,8 +537,6 @@ function PongBoard({
     availWidth,
     availHeight,
   ]);
-  // 	let [canvasWidth, canvasHeight] = [availWidth, availHeight];
-  // reset them before drawGame in some cases
 
   useEffect(function () {
     socket.emit(
@@ -560,19 +558,7 @@ function PongBoard({
           let cx = boardRef.current?.getContext("2d");
           if (!cx) throw new Error("Unexpected bad state");
 
-          if (type === "classic") {
-            let scale = Math.min(
-              Math.floor(availWidth / gm.PONG.width),
-              Math.floor(availHeight / gm.PONG.height)
-            );
-            scale = Math.max(1, scale); // if not enough space, dumb crop
-            let [width, height] = [
-              gm.PONG.width * scale,
-              gm.PONG.height * scale,
-            ];
-            setCanvasDim([width, height]);
-            drawGame(cx, { width, height, scale });
-          } else if (type === "wall") {
+					{
             let aspectRatio = gm.WALL_PONG.width / gm.WALL_PONG.height;
             let [width, height] = [0, 0];
             if (availWidth >= availHeight * aspectRatio)
