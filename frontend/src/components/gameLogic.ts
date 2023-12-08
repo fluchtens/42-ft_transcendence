@@ -262,6 +262,7 @@ export class WallGame {
   }
   private _lastUpdate: number;
   private _nextBallTime: number = 0;
+	private _newBallFlag = true;
 
   constructor(
     startTime = Date.now(),
@@ -346,7 +347,7 @@ export class WallGame {
     };
 
 		const BOUNCE_LIMIT = 200; 
-		for (let i = 0; i <= BOUNCE_LIMIT; ++i) {
+		for (let i = 0; true; ++i) {
 			if (this._nextBallTime > this._lastUpdate) {
 				if (time > this._nextBallTime) {
 					this._preUpdate((this._nextBallTime - this._lastUpdate) / 1000, false);
@@ -367,7 +368,6 @@ export class WallGame {
 					let [H, s] = [WALL_PONG.height, WALL_PONG.ballSize];
 					let eps = 1e-6;
 					this.ball.y = clamp(eps, this.ball.y, H - s - eps);
-					let [W, vx] = [WALL_PONG.width, WALL_PONG.ballXSpeed];
 				}
 				let t = 0.05 + (foundImpact? foundImpact.impact.t : 0);
 				this._preUpdate(t);
@@ -422,10 +422,12 @@ export class WallGame {
   } {
     if (time) this.update(time);
 
-    if (this.scores[0] >= 11) return { finish: true, winner: WhichPlayer.P1 };
+    if (this.scores[0] >= 11) 
+			return { finish: true, winner: WhichPlayer.P1 };
     else if (this.scores[1] >= 11)
       return { finish: true, winner: WhichPlayer.P2 };
-    else return { finish: false };
+    else 
+			return { finish: false };
   }
 
   packet(
@@ -473,13 +475,19 @@ export class WallGame {
   minTimeToPoint(from: number = Date.now()) {
     let offset = 50;
     let time = this._lastUpdate;
-    if (this._nextBallTime > time) return offset + (this._nextBallTime - from);
+    if (this._nextBallTime > time) {
+			if (this._newBallFlag) {
+				this._newBallFlag = false;
+				return offset;
+			} else {
+				return offset + (this._nextBallTime - from);
+			}
+		}
     time += Math.min(
       Math.abs(((this.goals[0].x - this.ball.x) / this.ball.dx) * 1000),
       Math.abs(
         ((this.goals[1].x - (this.ball.x + this.ball.w)) / this.ball.dx) * 1000,
       ),
-			2000, // TESTING
     );
     return time + offset - from;
   }

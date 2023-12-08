@@ -276,7 +276,7 @@ export class GameService {
   ) {
     let user = this.users.get(userId);
     if (!user) throw new Error('no such active user');
-    inviteName = inviteName.trim().slice(0, 20);
+    inviteName = inviteName.trim().slice(0, 14);
     if (this.invites.has(inviteName))
       throw new Error('invite name already taken');
 
@@ -375,7 +375,6 @@ export class GameService {
         onFinish(winner);
       } else {
         this.gameCallback({ gameRoom: gameId, game });
-        // 				let nextTimepoint = Math.max(20, game.minTimeToPoint());
         let nextTimepoint = game.minTimeToPoint();
         setTimeout(resetTimer, nextTimepoint);
       }
