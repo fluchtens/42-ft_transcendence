@@ -1453,12 +1453,20 @@ export class ChatGateway implements OnModuleInit {
       }
       const initiatingSocket = this.waitingUsers.get(acceptingUserId);
       if (initiatingSocket) {
+				try {
+					this.gameService.externalCreateGame(acceptingUserId, userId);
+				} catch (busyId) {
+					if (busyId === acceptingUserId) {
+						return 'your opponent is already busy';
+					} else {
+						return 'you are already busy';
+					}
+				}
         try {
           this.removeGameRequest(initiatingSocket);
         } catch {
           return 'failed to delete game request';
         }
-        this.gameService.externalCreateGame(acceptingUserId, userId);
         this.server.to(String(acceptingUserId)).emit('joinGame');
         this.server.to(String(userId)).emit('joinGame');
         this.waitingUsers.delete(acceptingUserId);
