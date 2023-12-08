@@ -276,13 +276,18 @@ export class GameService {
   ) {
     let user = this.users.get(userId);
     if (!user) throw new Error('no such active user');
-		inviteName = inviteName.trim().slice(0, 20);
+    inviteName = inviteName.trim().slice(0, 20);
     if (this.invites.has(inviteName))
       throw new Error('invite name already taken');
 
     user.status = UserStatus.Waiting;
 
-    this.invites.set(inviteName, { id: this._lastInviteId++, host: user, type, args, });
+    this.invites.set(inviteName, {
+      id: this._lastInviteId++,
+      host: user,
+      type,
+      args,
+    });
     this.userInvites.set(userId, inviteName);
   }
 
@@ -361,7 +366,6 @@ export class GameService {
         this.pendingDelete.has(player1.id) &&
         this.pendingDelete.has(player2.id)
       ) {
-				console.log('game aborted');
         deleteGame();
         return;
       }
@@ -383,12 +387,12 @@ export class GameService {
 
   externalCreateGame(userId1, userId2, timeout = 10000) {
     for (let userId of [userId1, userId2]) {
-			let user = this.users.get(userId);
+      let user = this.users.get(userId);
       if (!user) {
         this.users.set(userId, new UserData(userId));
       } else if (user.status !== UserStatus.Normal) {
-				throw userId;
-			}
+        throw userId;
+      }
     }
     this.launchGame(userId1, userId2);
     setTimeout(() => {
