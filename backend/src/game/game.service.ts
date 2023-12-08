@@ -276,17 +276,13 @@ export class GameService {
   ) {
     let user = this.users.get(userId);
     if (!user) throw new Error('no such active user');
+		inviteName = inviteName.trim().slice(0, 20);
     if (this.invites.has(inviteName))
       throw new Error('invite name already taken');
 
     user.status = UserStatus.Waiting;
 
-    this.invites.set(inviteName, {
-      id: this._lastInviteId++,
-      host: user,
-      type,
-      args,
-    });
+    this.invites.set(inviteName, { id: this._lastInviteId++, host: user, type, args, });
     this.userInvites.set(userId, inviteName);
   }
 
