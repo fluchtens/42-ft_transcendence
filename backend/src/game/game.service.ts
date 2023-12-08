@@ -365,6 +365,7 @@ export class GameService {
         this.pendingDelete.has(player1.id) &&
         this.pendingDelete.has(player2.id)
       ) {
+				console.log('game aborted');
         deleteGame();
         return;
       }

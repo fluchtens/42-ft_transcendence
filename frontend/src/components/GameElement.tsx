@@ -98,7 +98,8 @@ function GameElementContent() {
         content = <></>;
         break;
       case UserStatus.Playing:
-        content = <PongBoard availWidth={1020} availHeight={768} />;
+//         content = <PongBoard availWidth={1020} availHeight={768} />;
+        content = <PongBoard availWidth={600} availHeight={400} />;
         break;
       case UserStatus.Waiting:
         content = (
