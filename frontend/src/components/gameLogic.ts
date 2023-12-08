@@ -368,7 +368,6 @@ export class WallGame {
 					let [H, s] = [WALL_PONG.height, WALL_PONG.ballSize];
 					let eps = 1e-6;
 					this.ball.y = clamp(eps, this.ball.y, H - s - eps);
-					let [W, vx] = [WALL_PONG.width, WALL_PONG.ballXSpeed];
 				}
 				let t = 0.05 + (foundImpact? foundImpact.impact.t : 0);
 				this._preUpdate(t);
