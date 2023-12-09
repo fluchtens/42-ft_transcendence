@@ -230,11 +230,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     let userData = null;
     if (silent)
       userData = this._confirmStatus(sock, [UserStatus.Waiting], null);
-    else userData = this._confirmStatus(sock, [UserStatus.Waiting]);
+    else 
+			userData = this._confirmStatus(sock, [UserStatus.Waiting]);
 
     if (!userData) return null;
 
-    if (this.gameService.lobbyCancelInvite(userData.id)) this._pushGameList();
+    if (this.gameService.lobbyCancelInvite(userData.id)) 
+			this._pushGameList();
 
     this.gameService.leaveQueue(userData.id);
 

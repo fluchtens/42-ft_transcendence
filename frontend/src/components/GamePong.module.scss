@@ -24,9 +24,8 @@
 
     canvas {
       border-radius: $rounded;
-      border: 5px solid white;
-      // border-top: 5px solid white;
-      // border-bottom: 5px solid white;
+      border-top: 10px solid #d3d3d3;
+      border-bottom: 10px solid #d3d3d3;
       outline: none;
     }
   }

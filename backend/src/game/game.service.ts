@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { FriendshipGateway } from 'src/friendship/friendship.gateway';
-import { Socket, Server } from 'socket.io';
+import { Socket } from 'socket.io';
 import * as gm from './gameLogic';
 
 export enum UserStatus {
@@ -276,6 +276,7 @@ export class GameService {
   ) {
     let user = this.users.get(userId);
     if (!user) throw new Error('no such active user');
+    inviteName = inviteName.trim().slice(0, 14);
     if (this.invites.has(inviteName))
       throw new Error('invite name already taken');
 
@@ -374,7 +375,6 @@ export class GameService {
         onFinish(winner);
       } else {
         this.gameCallback({ gameRoom: gameId, game });
-        // 				let nextTimepoint = Math.max(20, game.minTimeToPoint());
         let nextTimepoint = game.minTimeToPoint();
         setTimeout(resetTimer, nextTimepoint);
       }
@@ -386,8 +386,11 @@ export class GameService {
 
   externalCreateGame(userId1, userId2, timeout = 10000) {
     for (let userId of [userId1, userId2]) {
-      if (!this.users.get(userId)) {
+      let user = this.users.get(userId);
+      if (!user) {
         this.users.set(userId, new UserData(userId));
+      } else if (user.status !== UserStatus.Normal) {
+        throw userId;
       }
     }
     this.launchGame(userId1, userId2);
