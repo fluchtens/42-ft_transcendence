@@ -140,13 +140,17 @@ function Chat() {
     });
     socket.emit("joinRoom", { channelId: id, getMessages: true });
 
+    socket.on("joinGame", () => {
+      navigate("/game");
+    });
+
     return () => {
       socket.off(`channelData:${id}`);
       socket.off(`${id}/messageDeleted`);
       socket.off(`${id}/message`);
       socket.off(`${id}/member`);
       socket.off(`${id}/channelDeleted`);
-      socket.off('joinGame');
+      socket.off("joinGame");
     };
   }, [id, socket]);
 

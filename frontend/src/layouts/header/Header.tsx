@@ -15,7 +15,7 @@ import { MdLeaderboard } from "react-icons/md";
 export default function Header() {
   const { user, refreshUser } = useAuth();
   const [navMenu, setNavMenu] = useState<boolean>(false);
-  const navMenuRef = useRef<HTMLUListElement>(null);
+  const navMenuRef = useRef<HTMLDivElement>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(Boolean(user));
   const firendshipSocket = useFriendshipSocket();
 
@@ -52,12 +52,9 @@ export default function Header() {
   return (
     <header>
       <nav className={styles.navBar}>
-        <div className={styles.links}>
+        <div className={styles.links} ref={navMenuRef}>
           <MainNavLink toggleNavMenu={toggleNavMenu} />
-          <ul
-            ref={navMenuRef}
-            className={`${navMenu ? styles.navListMenu : styles.navList}`}
-          >
+          <ul className={`${navMenu ? styles.navListMenu : styles.navList}`}>
             <li>
               <NavLink
                 path="/"

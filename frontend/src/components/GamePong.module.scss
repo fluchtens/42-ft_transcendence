@@ -1,15 +1,18 @@
-@import "../../styles/config.scss";
+@import "../styles/config.scss";
 
 .container {
   min-height: calc(100vh - 10rem);
   padding: 2rem;
   border-radius: $rounded-xl;
   background: $bg-secondary-color;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-  .categories {
+  .gameContainer {
+    max-height: calc(100vh - 10rem);
     margin: 0;
     padding: 0;
-    max-height: calc(100vh - 10rem);
     list-style-type: none;
     overflow-y: auto;
     scrollbar-width: none; // Firefox
@@ -18,14 +21,23 @@
     &::-webkit-scrollbar {
       display: none; // WebKit-based browsers like Opera, Chrome, and Safari
     }
+
+    canvas {
+      border-radius: $rounded;
+      border: 5px solid white;
+      // border-top: 5px solid white;
+      // border-bottom: 5px solid white;
+      outline: none;
+    }
   }
 }
 
 @media (max-width: 768px) {
   .container {
+    min-height: calc(100vh - 8rem);
     padding: 1rem;
 
-    .categories {
+    .gameContainer {
       max-height: none;
       overflow-y: visible;
     }

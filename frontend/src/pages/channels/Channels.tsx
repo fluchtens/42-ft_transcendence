@@ -4,7 +4,6 @@ import { AddChannelBar } from "../../components/AddingBar";
 import { useEffect, useState } from "react";
 import { Channel } from "../../types/chat.interface";
 import { useChatSocket } from "../../hooks/useChatSocket";
-import { useNavigate } from "react-router-dom";
 
 interface ChannelsProps {
   styles: CSSModuleClasses;
@@ -15,7 +14,6 @@ function Channels({ styles }: ChannelsProps) {
   const [channelsDataRaw, setChannelsDataRaw] = useState<Channel[]>([]);
   const [channelsData, setChannelsData] = useState<Channel[]>([]);
   const socket = useChatSocket();
-  const navigate = useNavigate();
   const { user } = useAuth();
 
   useEffect(() => {
@@ -28,11 +26,6 @@ function Channels({ styles }: ChannelsProps) {
         prevChannels.filter((channelId) => channelId !== deletedChannelId)
       );
     });
-
-    // console.log('join');
-    // socket.on("joinGame", () => {
-    //   navigate("/game");
-    // });
 
     socket.on("resetChannel", (channelId: string) => {
       socket.emit("getChannelStatus", channelId, (channel: Channel) => {
@@ -68,8 +61,6 @@ function Channels({ styles }: ChannelsProps) {
       socket.off("newChannel");
       socket.off("channelDeleted");
       socket.off("resetChannel");
-      // console.log("offgame");
-      // socket.off("joinGame");
     };
   }, [socket]);
 
