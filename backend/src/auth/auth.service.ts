@@ -168,7 +168,14 @@ export class AuthService {
       throw new UnauthorizedException('You are not logged in');
     }
 
-    let user = await this.userService.findUserByUsername(username, true);
+    let user = await this.userService.findUserByFortyTwoId(fortyTwoId);
+    if (user) {
+      throw new UnauthorizedException(
+        'You already have another account linked to 42',
+      );
+    }
+
+    user = await this.userService.findUserByUsername(username, true);
     if (user) {
       throw new ConflictException('This username is already taken');
     }
