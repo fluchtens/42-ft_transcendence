@@ -282,16 +282,22 @@ export class ChatGateway {
   ): Promise<any> {
     const userId: number = client.handshake.auth.userId;
     if (userId) {
-      const channels = await Promise.all(
-        channelIds.map(async (channelId) => {
-          const channel = await this.getChannelData(client, channelId, false);
-          return channel;
-        }),
-      );
-      return channels;
-    } else {
-      return;
+      try {
+        const channels = await Promise.all(
+          channelIds.map(async (channelId) => {
+            const channel = await this.getChannelData(client, channelId, false);
+            return channel;
+          }),
+        );
+        return channels;
+      }
+      catch {
+        return;
+      }
     }
+    else {
+
+   }
   }
 
   @SubscribeMessage('getChannelStatus')
