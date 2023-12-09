@@ -44,7 +44,7 @@ import { GameService } from 'src/game/game.service';
     credentials: true,
   },
 })
-export class ChatGateway implements OnModuleInit {
+export class ChatGateway {
   constructor(
     private readonly authService: AuthService,
     private readonly chatService: ChatService,
@@ -76,7 +76,6 @@ export class ChatGateway implements OnModuleInit {
     const userSocket = this.userConnections.get(userId);
     if (userSocket) {
       userSocket.delete(socketData);
-
       if (userSocket.size === 0) {
         this.userConnections.delete(userId);
       } else {
@@ -240,6 +239,7 @@ export class ChatGateway implements OnModuleInit {
 
       const userId = client.handshake.auth.userId;
       this.addSocketToUser(userId, client);
+      await this.InitRooms(client);
     } catch (error) {
       client.disconnect(true);
     }
@@ -250,7 +250,6 @@ export class ChatGateway implements OnModuleInit {
     const userId = client.handshake.auth.userId;
 
     this.removeSocketFromUser(userId, client);
-
     this.connectedUsers.forEach((usersSet, channelId) => {
       if (usersSet.has(client.id)) {
         usersSet.delete(client.id);
@@ -258,12 +257,6 @@ export class ChatGateway implements OnModuleInit {
           this.connectedUsers.delete(channelId);
         }
       }
-    });
-  }
-
-  onModuleInit(): any {
-    this.server.on('connection', (socket) => {
-      this.InitRooms(socket);
     });
   }
 
@@ -285,12 +278,17 @@ export class ChatGateway implements OnModuleInit {
   @SubscribeMessage('getChannelInitialData')
   async handleChannelInitialData(
     @ConnectedSocket() client: Socket,
-    @MessageBody() channelId: string,
+    @MessageBody() channelIds: string[],
   ): Promise<any> {
     const userId: number = client.handshake.auth.userId;
     if (userId) {
-      const channel = await this.getChannelData(client, channelId, false);
-      return channel;
+      const channels = await Promise.all(
+        channelIds.map(async (channelId) => {
+          const channel = await this.getChannelData(client, channelId, false);
+          return channel;
+        }),
+      );
+      return channels;
     } else {
       return;
     }
@@ -455,10 +453,10 @@ export class ChatGateway implements OnModuleInit {
       channelName.length >= 3 &&
       channelName.length <= 16;
     if (userId) {
-      if (!isChannelNameValid) {
-        throw new Error('invalid input');
-      }
       try {
+        if (!isChannelNameValid) {
+          throw new Error('invalid input');
+        }
         const channelData = await this.chatService.createChannel(
           userId,
           channelName,
@@ -1424,7 +1422,6 @@ export class ChatGateway implements OnModuleInit {
   async removeGameRequest(request: CreateGameInfo): Promise<any> {
     if (request) {
       const { userId, channelId, privateChannel, messageId } = request;
-      const user = await this.getOrAddUserData(userId);
       if (!privateChannel) {
         const message = await this.chatService.deleteGameMessage(messageId);
         if (message) {

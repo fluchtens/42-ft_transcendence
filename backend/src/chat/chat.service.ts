@@ -1,9 +1,7 @@
 import {
-  BadRequestException,
   Injectable,
-  NotFoundException,
 } from '@nestjs/common';
-import { Channel, Member, MemberRole, Message } from '@prisma/client';
+import { Channel, Member, MemberRole, Message, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { v4 as uuidv4 } from 'uuid';
 import * as bcrypt from 'bcryptjs';
@@ -18,14 +16,14 @@ export class ChatService {
     connected?: boolean,
   ): Promise<Partial<Channel>> {
     try {
-      if (!channelId) throw new BadRequestException('invalid channelId');
+      if (!channelId) throw new Error('invalid channelId');
       const channel = await this.prismaService.channel.findUnique({
         where: {
           id: channelId,
         },
       });
       if (!channel) {
-        throw new NotFoundException('Channel not found');
+        throw new Error('Channel not found');
       }
       const sanitizedChannel: Partial<Channel> = {
         id: channel.id,
@@ -41,29 +39,29 @@ export class ChatService {
         if (matchPwd) {
           return channel;
         } else {
-          throw new BadRequestException('wrong password');
+          throw new Error('wrong password');
         }
       }
       return channel;
     } catch (error) {
-      throw new BadRequestException(error.message);
+      throw new Error(error.message);
     }
   }
 
   async getSimpleChannelById(channelId: string): Promise<Channel> {
     try {
-      if (!channelId) throw new BadRequestException('invalid channelId');
+      if (!channelId) throw new Error('invalid channelId');
       const channel = await this.prismaService.channel.findUnique({
         where: {
           id: channelId,
         },
       });
       if (!channel) {
-        throw new NotFoundException('Channel not found');
+        throw new Error('Channel not found');
       }
       return channel;
     } catch (error) {
-      throw new BadRequestException(error.message);
+      throw new Error(error.message);
     }
   }
   async passwordChannelVerify(
@@ -77,7 +75,7 @@ export class ChatService {
         },
       });
       if (!channel) {
-        throw new NotFoundException('Channel not found');
+        throw new Error('Channel not found');
       }
       const matchPwd = await bcrypt.compare(password, channel.password);
       if (matchPwd) {
@@ -228,7 +226,7 @@ export class ChatService {
         return channel;
       }
     } catch (error) {
-      throw new NotFoundException();
+      throw new Error();
     }
   }
 
@@ -237,7 +235,7 @@ export class ChatService {
       const channels = await this.prismaService.channel.findMany();
       return channels;
     } catch (error) {
-      throw new NotFoundException(error.message);
+      throw new Error(error.message);
     }
   }
 
@@ -261,7 +259,7 @@ export class ChatService {
   }
 
   async getUserChannels(userId: any): Promise<any> {
-    if (!userId) throw new BadRequestException('userId not found');
+    if (!userId) throw new Error('userId not found');
     try {
       const userInfo = await this.prismaService.user.findUnique({
         where: {
@@ -271,6 +269,9 @@ export class ChatService {
           members: {
             include: {
               channel: true,
+            },
+            orderBy: {
+              createdAt: Prisma.SortOrder.asc,
             },
           },
         },
@@ -663,7 +664,7 @@ export class ChatService {
   ): Promise<any> {
     try {
       if (!userId) {
-        throw new BadRequestException('userId not found');
+        throw new Error('userId not found');
       }
       const channelMembers = await this.getChannelMembers(channelId);
       const existingMember = channelMembers.find(

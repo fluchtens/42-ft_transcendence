@@ -121,6 +121,10 @@ function Chat() {
       setMessages((prevMessages) => [...prevMessages, message]);
     });
 
+    socket.on("joinGame", () => {
+      navigate("/game");
+    });
+
     socket.on(`${id}/member`, (member: MemberUsers) => {
       setMembers((prevMembers) => [...prevMembers, member]);
     });
