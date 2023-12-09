@@ -295,9 +295,6 @@ export class ChatGateway {
         return;
       }
     }
-    else {
-
-   }
   }
 
   @SubscribeMessage('getChannelStatus')
