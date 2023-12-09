@@ -24,6 +24,11 @@ function Layout() {
     return authPages.some((authPage) => pathname.startsWith(authPage));
   };
 
+  const isChannelOrFriendsPage = () => {
+    const allowedPages = ["/channels", "/friends"];
+    return allowedPages.includes(pathname);
+  };
+
   useEffect(() => {
     if (user === null && !isAuthPage() && !isHomePage()) {
       navigate("/login");
@@ -41,9 +46,13 @@ function Layout() {
     <div className={styles.container}>
       {!isAuthPage() && <Header />}
       <div className={styles.main}>
-        {!isAuthPage() && <Channels styles={channelStyles} />}
+        {!isAuthPage() && !isChannelOrFriendsPage() && (
+          <Channels styles={channelStyles} />
+        )}
         <main>{isHomePage() ? <Home /> : <Outlet />}</main>
-        {!isAuthPage() && <Friends styles={friendStyles} />}
+        {!isAuthPage() && !isChannelOrFriendsPage() && (
+          <Friends styles={friendStyles} />
+        )}
       </div>
       <Notify />
     </div>
