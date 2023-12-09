@@ -301,21 +301,26 @@ export class ChatGateway {
   ): Promise<any> {
     const userId: number = client.handshake.auth.userId;
     if (userId) {
-      const channelIsPublic = await this.chatService.isChannelPublic(channelId);
-      const isMember = await this.chatService.findMemberInChannel(
-        channelId,
-        userId,
-      );
-      if (channelIsPublic && !isMember) {
-        const channel = await this.chatService.getChannelById(channelId);
-        const channeldata: Partial<ChannelData> = channel;
-        if (channel.password === 'true') {
-          channeldata.protected = true;
+      try {
+        const channelIsPublic = await this.chatService.isChannelPublic(channelId);
+        const isMember = await this.chatService.findMemberInChannel(
+          channelId,
+          userId,
+        );
+        if (channelIsPublic && !isMember) {
+          const channel = await this.chatService.getChannelById(channelId);
+          const channeldata: Partial<ChannelData> = channel;
+          if (channel.password === 'true') {
+            channeldata.protected = true;
+          }
+          return channel;
         }
+        const channel = await this.getChannelData(client, channelId, false);
         return channel;
       }
-      const channel = await this.getChannelData(client, channelId, false);
-      return channel;
+      catch (error) {
+        return;
+      }
     } else {
       return;
     }
