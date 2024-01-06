@@ -6,7 +6,7 @@ import Setup from "./pages/auth/Setup";
 import Login from "./pages/auth/Login";
 import TwoFaAuth from "./pages/auth/TwoFaAuth";
 import Profile from "./pages/user/Profile";
-import GameElement from "./components/GameElement";
+import Game from "./pages/game/Game";
 import Channels from "./pages/channels/Channels";
 import channelStyles from "./pages/channels/Channels.module.scss";
 import Chat from "./pages/chat/Chat";
@@ -48,7 +48,7 @@ function App() {
         },
         {
           path: "/game",
-          element: <GameElement />,
+          element: <Game />,
         },
         {
           path: "/channels",
