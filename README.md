@@ -28,3 +28,11 @@ DATABASE_URL=postgresql://admin:42@transcendence-postgres:5432/transcendence
 
 ### Usage:
 - Run ```make``` to start the application in production mode with docker.
+
+### Screenshots:
+![1](https://i.imgur.com/Nsrzsc2.png)
+![2](https://i.imgur.com/YwahwD5.png)
+![3](https://i.imgur.com/Gik9SW4.png)
+![4](https://i.imgur.com/tLDHS1j.png)
+![5](https://i.imgur.com/w29aA4b.png)
+![6](https://i.imgur.com/iTr8PZi.png)
