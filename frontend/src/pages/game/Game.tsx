@@ -1,8 +1,8 @@
 import { io, Socket } from "socket.io-client";
 import { useRef, useEffect, useState, createContext, useContext } from "react";
-import * as gm from "./gameLogic";
-import { notifyError } from "../utils/notifications";
-import { Separator } from "./Separator";
+import * as gm from "../../utils/gameLogic";
+import { notifyError } from "../../utils/notifications";
+import { Separator } from "../../components/Separator";
 import lobbyStyles from "./GameLobby.module.scss";
 import winStyles from "./GameWin.module.scss";
 import pongStyles from "./GamePong.module.scss";
@@ -17,7 +17,7 @@ const SocketContext = createContext<Socket>(gameSocket);
 /*                                     Game                                   */
 /* -------------------------------------------------------------------------- */
 
-export default function GameElement() {
+export default function Game() {
   let sockRef = useRef<Socket>(gameSocket);
 
   useEffect(() => {
@@ -32,13 +32,13 @@ export default function GameElement() {
 
   return (
     <SocketContext.Provider value={sockRef.current}>
-      <GameElementContent />
+      <GameContent />
     </SocketContext.Provider>
   );
 }
 
 /* -------------------------------------------------------------------------- */
-/*                             GameElementContent                             */
+/*                                 GameContent                                */
 /* -------------------------------------------------------------------------- */
 
 enum UserStatus {
@@ -47,7 +47,7 @@ enum UserStatus {
   Playing,
 }
 
-function GameElementContent() {
+function GameContent() {
   enum WinLose {
     NA = 0,
     Win,
@@ -57,8 +57,6 @@ function GameElementContent() {
   const [status, setStatus] = useState<UserStatus | undefined>(undefined);
   const [winLose, setWinLose] = useState(WinLose.NA);
 
-  // authenticate and get status + log
-  // set hooks for changes of status
   useEffect(() => {
     socket.emit("getStatus", (gotStatus: UserStatus | undefined) => {
       setStatus(gotStatus);
@@ -98,7 +96,6 @@ function GameElementContent() {
         content = <></>;
         break;
       case UserStatus.Playing:
-        // content = <PongBoard availWidth={1020} availHeight={768} />;
         content = <PongBoard availWidth={858} availHeight={525} />;
         break;
       case UserStatus.Waiting:
@@ -395,7 +392,6 @@ function PongBoard({
   const secondaryColor = "#D3D3D3";
   const tertiaryColor = "#3aa043";
 
-  // DRAW FUNCTIONS
   function drawCountdown(
     cx: CanvasRenderingContext2D,
     seconds: number,
@@ -433,96 +429,50 @@ function PongBoard({
     cx.fillStyle = saveColor;
   }
 
-  //   function drawGame(
-  //     cx: CanvasRenderingContext2D,
-  //     { width, height, scale }: { width: number; height: number; scale: number }
-  //   ) {
-  //     let game: any = gameRef.current; // will actually be `ClassicGame`
-  //     if (!game || !cx) return;
-  //
-  //     cx.fillStyle = primaryColor;
-  //     cx.fillRect(0, 0, width, height);
-  //     cx.fillStyle = secondaryColor; // bluish green
-  //     game.update();
-  //
-  //     // display paddles
-  //     let [w, h] = [gm.PONG.paddleWidth * scale, gm.PONG.paddleHeight * scale];
-  //     for (let { x, y } of [game.player1, game.player2]) {
-  //       cx.fillRect(x * scale, y * scale, w, h);
-  //     }
-  //
-  //     // display ball
-  //     if (game.ball) {
-  //       let { x, y } = game.ball;
-  //       cx.fillRect(x * scale, y * scale, w, w);
-  //     } else {
-  //       let countdown = game.timeToBall() / 1000;
-  //       if (countdown > 0)
-  //         drawCountdown(cx, game.timeToBall() / 1000, { width, height });
-  //     }
-  //
-  //     // display scores
-  //     let textHeight = Math.floor(height / 15);
-  //     cx.font = `${textHeight}px Monospace`;
-  //     cx.textAlign = "left";
-  //     cx.fillText(String(game.player1.score), 0, textHeight);
-  //     cx.textAlign = "right";
-  //     cx.fillText(String(game.player2.score), width - 1, textHeight);
-  //     //
-  //     requestAnimationFrame(() => {
-  //       drawGame(cx, { width, height, scale });
-  //     });
-  //   }
-
   function drawWallGame(
     cx: CanvasRenderingContext2D,
     { width, height }: { width: number; height: number }
   ) {
     function rtop(r: number): number {
-      // real to pixel
       return Math.ceil((r / gm.WALL_PONG.width) * width);
     }
 
-    let game: any = gameRef.current; // will actually be `WallGame`
+    let game: any = gameRef.current;
     if (!game || !cx) return;
-    // console.log(game);
 
     game.update();
 
     cx.fillStyle = primaryColor;
     cx.fillRect(0, 0, width, height);
 
-    cx.fillStyle = secondaryColor; // bluish green
+    cx.fillStyle = secondaryColor;
 
-    // display paddles
     let [w, h] = [
       rtop(gm.WALL_PONG.paddleWidth),
       rtop(gm.WALL_PONG.paddleHeight),
     ];
+
     for (let { x, y } of game.players) {
       [x, y] = [rtop(x), rtop(y)];
       cx.fillRect(x, y, w, h);
     }
 
-    // display walls
     for (let { x, y, w, h } of game.walls) {
       [x, y, w, h] = [x, y, w, h].map(rtop);
       cx.fillRect(x, y, w, h);
     }
 
-    // display scores
     let textHeight = Math.floor(height / 15);
     cx.font = `${textHeight}px Monospace`;
     cx.textAlign = "left";
     cx.fillText(String(game.scores[0]), 10, textHeight);
     cx.textAlign = "right";
     cx.fillText(String(game.scores[1]), width - 10, textHeight);
-    //
+
     requestAnimationFrame(() => {
       drawWallGame(cx, { width, height });
     });
 
-    // display ball
     let countdown = game.timeToBall() / 1000;
     if (countdown <= 0) {
       let { x, y } = game.ball;
@@ -533,7 +483,6 @@ function PongBoard({
     }
   }
 
-  // ACTUAL COMPONENT LOGIC
   const gameRef = useRef<gm.Game | null>(null);
   const socket = useContext(SocketContext);
   const boardRef = useRef<HTMLCanvasElement | null>(null);
@@ -622,7 +571,7 @@ function PongBoard({
           ref={boardRef}
           width={canvasDim[0]}
           height={canvasDim[1]}
-          tabIndex={0} // apparently needed for onKey* events?
+          tabIndex={0}
           onKeyDown={handleKeyDown}
           onKeyUp={handleKeyUp}
         >
@@ -632,27 +581,3 @@ function PongBoard({
     </div>
   );
 }
-
-// function PongBox() {
-// 	let box = useRef<HTMLDivElement | null>(null);
-// 	let [dims, setDims] = useState<{width: number, height: number}>({width: 750, height: 500});
-//
-// 	useEffect( () => {
-// 		addEventListener("resize", () => {
-// 			if (!box.current) return;
-//
-// 			let newDims = { width: box.current.clientWidth, height: box.current.clientHeight};
-// 			setDims( newDims );
-// 			console.log(newDims);
-// 		});
-// 	}, []);
-//
-// 	return (
-// 		<div ref={box} style={{width: '100%', height: '100%'}}>
-// 			<PongBoard
-// 				availWidth={dims.width}
-// 				availHeight={dims.height}
-// 			/>
-// 		</div>
-// 	);
-// }
