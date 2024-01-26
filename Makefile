@@ -7,15 +7,14 @@ install:
 build: clean
 	docker-compose up --build
 
-up:
-	docker-compose down
+up: down
 	docker-compose up
 
 down:
-	docker-compose down --rmi all --volumes
+	docker-compose down
 
-clean: down
-	docker system prune -a -f
+clean:
+	docker-compose down --rmi all --volumes
 
 .PHONY: all install build up down clean
 
