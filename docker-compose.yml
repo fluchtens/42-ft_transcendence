@@ -38,9 +38,11 @@ services:
       - 3000:3000
       - 5555:5555
     volumes:
-      - uploads:/app/uploads
+      # - /etc/letsencrypt/live/pong.fluchtens.com/fullchain.pem:/app/fullchain.pem
+      # - /etc/letsencrypt/live/pong.fluchtens.com/privkey.pem:/app/privkey.pem
       # - ./backend:/app
       # - /app/node_modules
+      - uploads:/app/uploads
     networks:
       - transcendence_network
     restart: always
