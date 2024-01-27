@@ -1,6 +1,7 @@
 *dist
 *node_modules
 *.DS_Store
-.env
-# backend/prisma/migrations
+*.pem
+*.env
 backend/uploads
+# backend/prisma/migrations
