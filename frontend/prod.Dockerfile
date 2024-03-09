@@ -13,8 +13,12 @@ COPY package.json package-lock.json ./
 RUN npm install
 COPY ./ ./
 
+# Copy env variables
+ARG VITE_BACK_URL
+ENV VITE_BACK_URL=$VITE_BACK_URL
+
 # Build project app
-# RUN npm run build
+RUN npm run build
 
 # Setups nginx with app
 COPY nginx.conf /etc/nginx/http.d/default.conf
@@ -23,5 +27,4 @@ COPY nginx.conf /etc/nginx/http.d/default.conf
 EXPOSE 80
 
 # Starts application
-ENTRYPOINT [ "sh", "entrypoint.sh" ]
 CMD ["nginx", "-g", "daemon off;"]
