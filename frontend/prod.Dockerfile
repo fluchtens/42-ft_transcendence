@@ -1,17 +1,17 @@
-# Specifies the base image to be used to build the Docker image
+# Use node lts alpine as base image
 FROM node:lts-alpine
 
-# Installs the required packages
+# Update and install required packages
 RUN apk update && \
 		apk add nginx
 
-# Sets the working directory
+# Set working directory
 WORKDIR /app
 
-# Installs project dependencies
-COPY package.json package-lock.json ./
+# Copy package.json and install dependencies
+COPY package.json package-lock.json .
 RUN npm install
-COPY ./ ./
+COPY . .
 
 # Copy env variables
 ARG VITE_BACK_URL
@@ -20,11 +20,11 @@ ENV VITE_BACK_URL=$VITE_BACK_URL
 # Build project app
 RUN npm run build
 
-# Setups nginx with app
+# Set up nginx
 COPY nginx.conf /etc/nginx/http.d/default.conf
 
 # Exposes port
 EXPOSE 80
 
-# Starts application
+# Start the application
 CMD ["nginx", "-g", "daemon off;"]

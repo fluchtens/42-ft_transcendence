@@ -1,21 +1,18 @@
-# Specifies the base image to be used to build the Docker image
-FROM node:lts
+# Use node lts alpine as base image
+FROM node:lts-alpine
 
-# Installs the required packages
-RUN apt-get update
+# Update and install required packages
+RUN apk update
 
-# Sets the working directory
+# Set working directory
 WORKDIR /app
 
-# # Create a volume for the uploads directory
-# VOLUME ["/app/uploads"]
-
-# Installs project dependencies
-COPY package.json package-lock.json ./
+# Copy package.json and install dependencies
+COPY package.json package-lock.json .
 RUN npm install
-COPY ./ ./
+COPY . .
 
-# Setups prisma
+# Generate prisma client
 RUN npx prisma generate
 
 # Build project app
@@ -25,5 +22,5 @@ RUN npm run build
 EXPOSE 3000
 EXPOSE 5555
 
-# Starts application
+# Start the application
 CMD ["npm", "run", "start:migrate:prod"]

@@ -14,8 +14,11 @@ down:
 	docker-compose down
 
 clean:
+	docker-compose down --rmi all
+
+fclean:
 	docker-compose down --rmi all --volumes
 
-.PHONY: all install build up down clean
+.PHONY: all install build up down clean fclean
 
 .SILENT:
