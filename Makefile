@@ -1,3 +1,16 @@
+MODE=dev
+COMPOSE_FILE = docker/${MODE}/docker-compose.yml
+DOCKER_COMPOSE = docker-compose -f ${COMPOSE_FILE}
+PROJECT=ft_transcendence
+
+all: build
+
+ifeq ($(MODE),prod)
+	RUN_FLAGS = -d
+else
+	RUN_FLAGS =
+endif
+
 all: build
 
 install:
@@ -5,20 +18,25 @@ install:
 	cd frontend && npm install
 
 build: clean
-	docker-compose up --build
+	${DOCKER_COMPOSE} -p ${PROJECT} up --build ${RUN_FLAGS}
 
 up: down
-	docker-compose up
+	${DOCKER_COMPOSE} -p ${PROJECT} up ${RUN_FLAGS}
 
 down:
-	docker-compose down
+	${DOCKER_COMPOSE} -p ${PROJECT} down
+
+prune:
+	docker system prune -f
 
 clean:
-	docker-compose down --rmi all
+	${DOCKER_COMPOSE} -p ${PROJECT} down --rmi all
+	@make prune
 
 fclean:
-	docker-compose down --rmi all --volumes
+	${DOCKER_COMPOSE} -p ${PROJECT} down --rmi all --volumes
+	@make prune
 
-.PHONY: all install build up down clean fclean
+.PHONY: all install build up down prune clean fclean
 
 .SILENT:
