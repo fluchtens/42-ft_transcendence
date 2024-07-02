@@ -3,8 +3,6 @@ COMPOSE_FILE = docker/${MODE}/docker-compose.yml
 DOCKER_COMPOSE = docker-compose -f ${COMPOSE_FILE}
 PROJECT=ft_transcendence
 
-all: build
-
 ifeq ($(MODE),prod)
 	RUN_FLAGS = -d
 else
