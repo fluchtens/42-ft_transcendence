@@ -1,16 +1,16 @@
 import { useEffect, useRef, useState } from "react";
+import { AiFillHome } from "react-icons/ai";
+import { BsFillChatDotsFill } from "react-icons/bs";
+import { FaUserGroup } from "react-icons/fa6";
+import { IoGameController } from "react-icons/io5";
+import { MdLeaderboard } from "react-icons/md";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+import { useFriendshipSocket } from "../../hooks/useFriendshipSocket";
+import styles from "./Header.module.scss";
 import { MainNavLink } from "./MainNavLink";
 import { NavLink } from "./NavLink";
 import { ProfileBtn } from "./ProfileBtn";
-import { AiFillHome } from "react-icons/ai";
-import { IoGameController } from "react-icons/io5";
-import { BsFillChatDotsFill } from "react-icons/bs";
-import styles from "./Header.module.scss";
-import { useAuth } from "../../hooks/useAuth";
-import { FaUserGroup } from "react-icons/fa6";
-import { useFriendshipSocket } from "../../hooks/useFriendshipSocket";
-import { MdLeaderboard } from "react-icons/md";
 
 export default function Header() {
   const { user, refreshUser } = useAuth();
@@ -56,53 +56,24 @@ export default function Header() {
           <MainNavLink toggleNavMenu={toggleNavMenu} />
           <ul className={`${navMenu ? styles.navListMenu : styles.navList}`}>
             <li>
-              <NavLink
-                path="/"
-                text="HOME"
-                icon={<AiFillHome />}
-                cb={closeNavMenu}
-              />
+              <NavLink path="/" text="HOME" icon={<AiFillHome />} cb={closeNavMenu} />
             </li>
             <li>
-              <NavLink
-                path="/game"
-                text="GAME"
-                icon={<IoGameController />}
-                cb={closeNavMenu}
-              />
+              <NavLink path="/game" text="GAME" icon={<IoGameController />} cb={closeNavMenu} />
             </li>
             <li>
-              <NavLink
-                path="/channels"
-                text="CHANNELS"
-                icon={<BsFillChatDotsFill />}
-                cb={closeNavMenu}
-              />
+              <NavLink path="/channels" text="CHANNELS" icon={<BsFillChatDotsFill />} cb={closeNavMenu} />
             </li>
             <li>
-              <NavLink
-                path="/friends"
-                text="FRIENDS"
-                icon={<FaUserGroup />}
-                cb={closeNavMenu}
-              />
+              <NavLink path="/friends" text="FRIENDS" icon={<FaUserGroup />} cb={closeNavMenu} />
             </li>
             <li>
-              <NavLink
-                path="/leaderboard"
-                text="LEADERBOARD"
-                icon={<MdLeaderboard />}
-                cb={closeNavMenu}
-              />
+              <NavLink path="/leaderboard" text="LEADERBOARD" icon={<MdLeaderboard />} cb={closeNavMenu} />
             </li>
           </ul>
         </div>
         {user && isLoggedIn ? (
-          <ProfileBtn
-            username={user.username}
-            avatar={user.avatar}
-            onLogout={handleLogout}
-          />
+          <ProfileBtn username={user.username} avatar={user.avatar} onLogout={handleLogout} />
         ) : (
           <Link to="/login" className={styles.loginButton}>
             Sign in
