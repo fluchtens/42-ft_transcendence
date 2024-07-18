@@ -43,7 +43,7 @@ function Layout() {
       {!isAuthPage() && <Header />}
       <div className="flex flex-1">
         {/* {!isAuthPage() && !isChannelOrFriendsPage() && <Channels styles={channelStyles} />} */}
-        <main className="flex-1">{isHomePage() ? <Home /> : <Outlet />}</main>
+        <main className="flex-1 p-4 md:p-6">{isHomePage() ? <Home /> : <Outlet />}</main>
         {/* {!isAuthPage() && !isChannelOrFriendsPage() && <Friends styles={friendStyles} />} */}
       </div>
       {!isAuthPage() && <Footer />}
