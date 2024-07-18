@@ -1,14 +1,14 @@
+import { Notify, notifyError } from "@/utils/notifications";
 import { useEffect } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
-import Channels from "../../pages/channels/Channels";
-import Friends from "../../pages/friends/Friends";
-import Home from "../../pages/home/Home";
-import { Notify, notifyError } from "../../utils/notifications";
+import { useAuth } from "../../../hooks/useAuth";
+import Channels from "../../../pages/channels/Channels";
+import Friends from "../../../pages/friends/Friends";
+import Home from "../../../pages/home/Home";
 import channelStyles from "../channels/Channels.module.scss";
 import friendStyles from "../friends/Friends.module.scss";
 import Header from "../header/Header";
-import styles from "./Layout.module.scss";
+import { Footer } from "./Footer";
 
 function Layout() {
   const { user } = useAuth();
@@ -43,13 +43,14 @@ function Layout() {
   }, [user, pathname]);
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="min-h-screen flex flex-col">
       {!isAuthPage() && <Header />}
-      <div className={styles.main}>
+      <div className="flex flex-1">
         {!isAuthPage() && !isChannelOrFriendsPage() && <Channels styles={channelStyles} />}
-        <main>{isHomePage() ? <Home /> : <Outlet />}</main>
+        <main className="flex-1">{isHomePage() ? <Home /> : <Outlet />}</main>
         {!isAuthPage() && !isChannelOrFriendsPage() && <Friends styles={friendStyles} />}
       </div>
+      {!isAuthPage() && <Footer />}
       <Notify />
     </div>
   );
