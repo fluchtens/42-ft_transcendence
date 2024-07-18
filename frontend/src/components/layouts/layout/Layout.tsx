@@ -2,11 +2,7 @@ import { Notify, notifyError } from "@/utils/notifications";
 import { useEffect } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
-import Channels from "../../../pages/channels/Channels";
-import Friends from "../../../pages/friends/Friends";
 import Home from "../../../pages/home/Home";
-import channelStyles from "../channels/Channels.module.scss";
-import friendStyles from "../friends/Friends.module.scss";
 import Header from "../header/Header";
 import { Footer } from "./Footer";
 
@@ -46,9 +42,9 @@ function Layout() {
     <div className="min-h-screen flex flex-col">
       {!isAuthPage() && <Header />}
       <div className="flex flex-1">
-        {!isAuthPage() && !isChannelOrFriendsPage() && <Channels styles={channelStyles} />}
+        {/* {!isAuthPage() && !isChannelOrFriendsPage() && <Channels styles={channelStyles} />} */}
         <main className="flex-1">{isHomePage() ? <Home /> : <Outlet />}</main>
-        {!isAuthPage() && !isChannelOrFriendsPage() && <Friends styles={friendStyles} />}
+        {/* {!isAuthPage() && !isChannelOrFriendsPage() && <Friends styles={friendStyles} />} */}
       </div>
       {!isAuthPage() && <Footer />}
       <Notify />
