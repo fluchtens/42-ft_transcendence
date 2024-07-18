@@ -1,16 +1,16 @@
+import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import styles from "./Home.module.scss";
 
 function Home() {
   return (
-    <div className={styles.container}>
-      <div className={styles.title}>
-        <h1>Welcome to ft_transcendence</h1>
-        <h2>Final project of the common core curriculum at 42</h2>
+    <div className="flex flex-col items-center">
+      <div className="mt-14 text-center">
+        <h1 className="text-3xl md:text-5xl font-semibold">ft_transcendence</h1>
+        <h2 className="mt-1 text-base md:text-xl font-extralight">Modern multiplayer pong game</h2>
       </div>
-      <Link to="/game" className={styles.playButton}>
-        Play Now
-      </Link>
+      <Button className="mt-5" asChild>
+        <Link to="/game">Play Now</Link>
+      </Button>
     </div>
   );
 }

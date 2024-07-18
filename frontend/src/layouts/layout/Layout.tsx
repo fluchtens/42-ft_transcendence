@@ -1,14 +1,14 @@
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import Home from "../../pages/home/Home";
-import Header from "../header/Header";
-import Friends from "../../pages/friends/Friends";
-import Channels from "../../pages/channels/Channels";
-import { Notify, notifyError } from "../../utils/notifications";
-import styles from "./Layout.module.scss";
-import friendStyles from "../friends/Friends.module.scss";
-import channelStyles from "../channels/Channels.module.scss";
-import { useAuth } from "../../hooks/useAuth";
 import { useEffect } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+import Channels from "../../pages/channels/Channels";
+import Friends from "../../pages/friends/Friends";
+import Home from "../../pages/home/Home";
+import { Notify, notifyError } from "../../utils/notifications";
+import channelStyles from "../channels/Channels.module.scss";
+import friendStyles from "../friends/Friends.module.scss";
+import Header from "../header/Header";
+import styles from "./Layout.module.scss";
 
 function Layout() {
   const { user } = useAuth();
@@ -43,16 +43,12 @@ function Layout() {
   }, [user, pathname]);
 
   return (
-    <div className={styles.container}>
+    <div className="flex flex-col min-h-screen">
       {!isAuthPage() && <Header />}
       <div className={styles.main}>
-        {!isAuthPage() && !isChannelOrFriendsPage() && (
-          <Channels styles={channelStyles} />
-        )}
+        {!isAuthPage() && !isChannelOrFriendsPage() && <Channels styles={channelStyles} />}
         <main>{isHomePage() ? <Home /> : <Outlet />}</main>
-        {!isAuthPage() && !isChannelOrFriendsPage() && (
-          <Friends styles={friendStyles} />
-        )}
+        {!isAuthPage() && !isChannelOrFriendsPage() && <Friends styles={friendStyles} />}
       </div>
       <Notify />
     </div>
