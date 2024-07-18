@@ -34,13 +34,11 @@ function Home() {
             </Link>
           </Button>
         </div>
-
-        <div className="flex-col md:flex-row flex gap-4">
-          {config.card.map((card) => (
-            <HomeCard title={card.title} desc={card.description} />
+        <div className="w-full flex-col md:flex-row flex gap-4">
+          {config.card.map((card, index) => (
+            <HomeCard key={index} title={card.title} desc={card.description} />
           ))}
         </div>
-
         <div className="w-full flex-col flex gap-1">
           <h1 className="text-2xl font-semibold text-foreground">FAQ</h1>
           <Accordion type="single" collapsible className="w-full">

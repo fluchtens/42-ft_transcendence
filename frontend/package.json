@@ -45,7 +45,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/node": "^20.14.11",
+    "@types/node": "^20.11.22",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@types/react-router-dom": "^5.3.3",
@@ -60,7 +60,7 @@
     "socket.io": "^4.7.2",
     "socket.io-client": "^4.7.2",
     "tailwindcss": "^3.4.6",
-    "typescript": "^5.0.2",
+    "typescript": "^5.5.3",
     "vite": "^4.4.5"
   }
 }
