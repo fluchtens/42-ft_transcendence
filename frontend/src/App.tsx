@@ -26,54 +26,18 @@ function App() {
       element: <Layout />,
       errorElement: <Error />,
       children: [
-        {
-          path: "/register",
-          element: <Register />,
-        },
-        {
-          path: "/register/setup",
-          element: <Setup />,
-        },
-        {
-          path: "/login",
-          element: <Login />,
-        },
-        {
-          path: "/login/twofa",
-          element: <TwoFaAuth />,
-        },
-        {
-          path: "/user/:username",
-          element: <Profile />,
-        },
-        {
-          path: "/game",
-          element: <Game />,
-        },
-        {
-          path: "/channels",
-          element: <Channels styles={channelStyles} />,
-        },
-        {
-          path: "/chat/:id",
-          element: <Chat />,
-        },
-        {
-          path: "/pm/:id",
-          element: <PrivateChat />,
-        },
-        {
-          path: "/friends",
-          element: <Friends styles={friendStyles} />,
-        },
-        {
-          path: "/settings",
-          element: <Settings />,
-        },
-        {
-          path: "/leaderboard",
-          element: <Leaderboard />,
-        },
+        { path: "/register", element: <Register /> },
+        { path: "/register/setup", element: <Setup /> },
+        { path: "/login", element: <Login /> },
+        { path: "/login/twofa", element: <TwoFaAuth /> },
+        { path: "/user/:username", element: <Profile /> },
+        { path: "/game", element: <Game /> },
+        { path: "/channels", element: <Channels styles={channelStyles} /> },
+        { path: "/chat/:id", element: <Chat /> },
+        { path: "/pm/:id", element: <PrivateChat /> },
+        { path: "/friends", element: <Friends styles={friendStyles} /> },
+        { path: "/settings", element: <Settings /> },
+        { path: "/leaderboard", element: <Leaderboard /> },
       ],
     },
   ]);
