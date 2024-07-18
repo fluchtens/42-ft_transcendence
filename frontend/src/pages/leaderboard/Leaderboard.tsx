@@ -58,7 +58,7 @@ function Leaderboard() {
                   <tr key={index} className={`${index !== users.length - 1 ? "border-b border-opacity-5" : ""} text-base font-normal`}>
                     <td className="py-4 text-left">{index + 1}</td>
                     <td className="py-4 flex items-center gap-1 text-left">
-                      <Avatar className="w-16 h-16 rounded-full">
+                      <Avatar className="w-12 h-12 rounded-full">
                         <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
                         {user.avatar && <AvatarImage src={user.avatar} className="object-cover pointer-events-none" />}
                       </Avatar>
