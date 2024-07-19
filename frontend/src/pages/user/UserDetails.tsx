@@ -8,7 +8,7 @@ import { User } from "../../types/user.interface";
 import { convertDate } from "../../utils/date";
 import winLossRatio from "../../utils/winLossRatio";
 import { ManageBtn } from "./ManageBtn";
-import { StatsBar } from "./StatsBar";
+import { WonLostBar } from "./WonLostBar";
 
 interface UserDetailElementProps {
   icon: React.ReactNode;
@@ -62,7 +62,7 @@ const UserDetails = ({ targetUser, stats }: UserDetailsProps) => {
               />
             </ul>
           </div>
-          <StatsBar stats={stats} />
+          <WonLostBar stats={stats} />
         </div>
       </div>
     </div>
