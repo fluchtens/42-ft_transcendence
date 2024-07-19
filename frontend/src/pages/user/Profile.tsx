@@ -53,7 +53,7 @@ function Profile() {
   return (
     <>
       {user && targetUser && stats && history && (
-        <div className="m-auto max-w-screen-lg">
+        <div className="m-auto max-w-screen-lg flex flex-col gap-4">
           <UserDetails targetUser={targetUser} stats={stats} />
           <UserHistory history={history} />
         </div>
