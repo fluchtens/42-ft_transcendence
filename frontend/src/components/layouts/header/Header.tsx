@@ -57,14 +57,14 @@ export default function Header() {
   return (
     <header className="px-4 py-3 border-b">
       <nav className="flex justify-between items-center">
-        <div className="flex gap-4" ref={navMenuRef}>
+        <Button variant="ghost" size="icon" onClick={toggleNavMenu} className="flex lg:hidden">
+          <AiOutlineMenu className="h-[1.2rem] w-[1.2rem]" />
+        </Button>
+        <div className="hidden lg:flex gap-4" ref={navMenuRef}>
           <Link to="/" className="hidden py-2 lg:flex items-center gap-2 text-lg font-semibold">
             <GiPingPongBat className="w-[2rem] h-[2rem]" />
             ft_transcendence
           </Link>
-          <Button variant="ghost" size="icon" onClick={toggleNavMenu} className="flex lg:hidden">
-            <AiOutlineMenu className="h-[1.2rem] w-[1.2rem]" />
-          </Button>
           <ul className="flex items-center gap-4">
             <li>
               <NavLink path="/" text="HOME" icon={<AiFillHome />} cb={closeNavMenu} />
