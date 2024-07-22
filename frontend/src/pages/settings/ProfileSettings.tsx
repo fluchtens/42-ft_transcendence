@@ -1,11 +1,12 @@
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import { useEffect, useState } from "react";
-import { updateAvatarApi, updateUsernameApi } from "../../services/user.api";
-import { notifyError, notifySuccess } from "../../utils/notifications";
-import { Separator } from "../../components/Separator";
-import defaultAvatar from "/default_avatar.png";
-import styles from "./ProfileSettings.module.scss";
 import { useAuth } from "../../hooks/useAuth";
 import { useChatSocket } from "../../hooks/useChatSocket";
+import { updateAvatarApi, updateUsernameApi } from "../../services/user.api";
+import { notifyError, notifySuccess } from "../../utils/notifications";
 
 function ProfileSettings() {
   const { user, refreshUser } = useAuth();
@@ -62,37 +63,34 @@ function ProfileSettings() {
   return (
     <>
       {user && (
-        <form className={styles.profileSettings}>
-          <h1>Public profile</h1>
-          <Separator />
-          <div className={styles.dataToSubmit}>
-            <div className={styles.inputText}>
-              <label>Username</label>
-              <input
-                type="text"
-                value={username}
-                onChange={changeUsername}
-                placeholder="Enter a username"
-                required
-              />
-              <p>Your username is your unique identifier on our platform.</p>
+        <form className="mt-5 p-0">
+          <h1 className="text-xl md:text-2xl font-semibold">Public profile</h1>
+          <Separator className="mt-3" />
+          <div className="mt-4 flex flex-col md:flex-row justify-between gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium">Username</label>
+              <Input type="text" value={username} onChange={changeUsername} placeholder="Enter a username" required></Input>
+              <p className="text-xs font-normal text-muted-foreground">Your username is your unique identifier on our platform.</p>
             </div>
-            <div className={styles.inputFile}>
-              <label>Profile picture</label>
+            <div className="relative flex flex-col items-start md:items-center gap-2">
+              <label className="text-sm font-medium">Profile picture</label>
               {file ? (
                 <img src={URL.createObjectURL(file)} />
-              ) : user.avatar ? (
-                <img src={user.avatar} />
               ) : (
-                <img src={defaultAvatar} />
+                <Avatar className="max-w-[12rem] max-h-[12rem] w-full h-full rounded-full">
+                  <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
+                  {user.avatar && <AvatarImage src={user.avatar} className="object-cover pointer-events-none" />}
+                </Avatar>
               )}
-              <label className={styles.chooseFile}>
-                <input type="file" onChange={avatarSelection} />
+              <label className="px-4 py-2 absolute bottom-0 left-0 bg-secondary rounded-lg text-sm font-medium cursor-pointer">
+                <input type="file" accept=".png, .jpg, .jpeg, .gif" onChange={avatarSelection} className="hidden" />
                 Edit
               </label>
             </div>
           </div>
-          <button onClick={submitData}>Update profile</button>
+          <Button onClick={submitData} className="mt-6">
+            Update profile
+          </Button>
         </form>
       )}
     </>

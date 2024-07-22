@@ -44,11 +44,11 @@ function Leaderboard() {
             <tr className="text-base font-semibold">
               <th className="text-left">#</th>
               <th className="text-left">Player</th>
-              <th className="hidden md:table-cell text-center">Matches</th>
-              <th className="hidden md:table-cell text-center">Won</th>
-              <th className="hidden md:table-cell text-center">Lost</th>
-              <th className="hidden md:table-cell text-center">W/L Ratio</th>
-              <th className="text-right md:text-center">Rating</th>
+              <th className="hidden md:table-cell text-right">Matches</th>
+              <th className="hidden md:table-cell text-right">Won</th>
+              <th className="hidden md:table-cell text-right">Lost</th>
+              <th className="hidden md:table-cell text-right">W/L Ratio</th>
+              <th className="text-right md:text-right">Rating</th>
             </tr>
           </thead>
           <tbody>
@@ -64,11 +64,11 @@ function Leaderboard() {
                     <Link to={`/user/${user.username}`}>{user.username}</Link>
                   </Button>
                 </td>
-                <td className="hidden md:table-cell text-center">{user.wonMatches + user.lostMatches}</td>
-                <td className="hidden md:table-cell text-center">{user.wonMatches}</td>
-                <td className="hidden md:table-cell text-center">{user.lostMatches}</td>
-                <td className="hidden md:table-cell text-center">{winLossRatio(user.wonMatches, user.lostMatches)}</td>
-                <td className="text-right md:text-center">{user.rating}</td>
+                <td className="hidden md:table-cell text-right">{user.wonMatches + user.lostMatches}</td>
+                <td className="hidden md:table-cell text-right">{user.wonMatches}</td>
+                <td className="hidden md:table-cell text-right">{user.lostMatches}</td>
+                <td className="hidden md:table-cell text-right">{winLossRatio(user.wonMatches, user.lostMatches)}</td>
+                <td className="text-right md:text-right">{user.rating}</td>
               </tr>
             ))}
           </tbody>
