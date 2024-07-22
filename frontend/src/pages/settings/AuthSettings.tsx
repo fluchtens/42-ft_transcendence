@@ -3,10 +3,10 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import { disableTwoFaApi, generateTwoFaQrCodeApi } from "../../services/auth.api";
+import { disableTwoFaApi } from "../../services/auth.api";
 import { updatePasswordApi } from "../../services/user.api";
 import { notifyError, notifySuccess } from "../../utils/notifications";
-import TwoFaSetup from "./TwoFaSetup";
+import { TwoFaSetupDialog } from "./TwoFaSetupDialog";
 
 interface InputTextProps {
   label: string;
@@ -26,12 +26,6 @@ function AuthSettings() {
   const [actualPwd, setActualPwd] = useState<string>("");
   const [newPwd, setNewPwd] = useState<string>("");
   const [confirmNewPwd, setConfirmNewPwd] = useState<string>("");
-  const [qrcode, setQrcode] = useState<string>("");
-  const [twoFaModal, setTwoFaModal] = useState<boolean>(false);
-
-  const closeTwoFaModal = () => {
-    setTwoFaModal(false);
-  };
 
   const changeActualPwd = (e: React.ChangeEvent<HTMLInputElement>) => {
     setActualPwd(e.target.value);
@@ -59,20 +53,6 @@ function AuthSettings() {
     setNewPwd("");
     setConfirmNewPwd("");
     await refreshUser();
-  };
-
-  const enableTwoFa = async () => {
-    const data = await generateTwoFaQrCodeApi();
-    if (!data.success) {
-      notifyError(data.message);
-      return;
-    }
-
-    if (data.qrcode) {
-      const qrCodeBase64 = btoa(data.qrcode);
-      setQrcode(qrCodeBase64);
-      setTwoFaModal(true);
-    }
   };
 
   const disableTwoFa = async () => {
@@ -125,15 +105,15 @@ function AuthSettings() {
                 <p className="text-sm font-normal text-muted-foreground">
                   Two-factor authentication adds an additional layer of security to your account by requiring more than just a password to sign in.
                 </p>
-                <Button onClick={enableTwoFa} className="mt-4">
+                {/* <Button onClick={enableTwoFa} className="mt-4">
                   Enable two-factor authentication
-                </Button>
+                </Button> */}
+                <TwoFaSetupDialog />
               </div>
             )}
           </div>
         </div>
       )}
-      {twoFaModal && qrcode && <TwoFaSetup qrcode={qrcode} close={closeTwoFaModal} />}
     </>
   );
 }
