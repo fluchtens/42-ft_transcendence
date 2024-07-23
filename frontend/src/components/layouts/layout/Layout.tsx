@@ -3,8 +3,8 @@ import { useEffect } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
 import Home from "../../../pages/home/Home";
+import { Footer } from "../footer/Footer";
 import Header from "../header/Header";
-import { Footer } from "./Footer";
 
 function Layout() {
   const { user } = useAuth();

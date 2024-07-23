@@ -1,17 +1,8 @@
-import { AiFillGithub } from "react-icons/ai";
-import styles from "./Footer.module.scss";
-
-function Footer() {
-  return (
-    <div className={styles.container}>
-      <p className={styles.text}>© 2023 All rights reserved</p>
-      <a href="https://github.com/fluchtens/42-ft_transcendence">
-        <button className={styles.gitHubButton}>
-          <AiFillGithub className={styles.gitHubIcon} />
-        </button>
-      </a>
+export const Footer = () => (
+  <footer className="px-4 py-3 border-t">
+    <div className="max-w-screen-lg m-auto flex-col flex justify-center items-center gap-1 text-center">
+      <p className="text-xs	font-normal text-muted-foreground">ft_transcendence made by fluchten, mgomes-d and najacque.</p>
+      <p className="text-xs font-normal text-muted-foreground">© 2024. All rights reserved.</p>
     </div>
-  );
-}
-
-export default Footer;
+  </footer>
+);
