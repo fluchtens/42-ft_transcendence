@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { io, Socket } from "socket.io-client";
+import { useGameSocket } from "@/hooks/useGameSocket";
+import { useEffect, useRef, useState } from "react";
 import { Separator } from "../../components/Separator";
 import * as gm from "../../utils/gameLogic";
 import { notifyError } from "../../utils/notifications";
@@ -7,34 +7,24 @@ import lobbyStyles from "./GameLobby.module.scss";
 import pongStyles from "./GamePong.module.scss";
 import winStyles from "./GameWin.module.scss";
 
-const SOCK_HOST = import.meta.env.VITE_BACK_URL;
-const gameSocket = io(`${SOCK_HOST}/gamesocket`, {
-  withCredentials: true,
-});
-const SocketContext = createContext<Socket>(gameSocket);
-
 /* -------------------------------------------------------------------------- */
 /*                                     Game                                   */
 /* -------------------------------------------------------------------------- */
 
 export default function Game() {
-  let sockRef = useRef<Socket>(gameSocket);
+  const socket = useGameSocket();
 
   useEffect(() => {
-    sockRef.current.on("gameSocketError", (errmsg: string) => {
+    socket.on("gameSocketError", (errmsg: string) => {
       notifyError(errmsg);
     });
 
     return () => {
-      sockRef.current.off("gameSocketError");
+      socket.off("gameSocketError");
     };
   }, []);
 
-  return (
-    <SocketContext.Provider value={sockRef.current}>
-      <GameContent />
-    </SocketContext.Provider>
-  );
+  return <GameContent />;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -53,7 +43,7 @@ function GameContent() {
     Win,
     Lose,
   }
-  const socket = useContext(SocketContext);
+  const socket = useGameSocket();
   const [status, setStatus] = useState<UserStatus | undefined>(undefined);
   const [winLose, setWinLose] = useState(WinLose.NA);
 
@@ -132,7 +122,7 @@ type GameInfo = {
 
 function GamesLobby({ waiting = false }) {
   type GamesList = Array<GameInfo>;
-  const socket = useContext(SocketContext);
+  const socket = useGameSocket();
   const [gamesInfo, setGamesInfo] = useState<GamesList>([]);
 
   function CreateGame() {
@@ -435,7 +425,7 @@ function PongBoard({ availWidth, availHeight }: { availWidth: number; availHeigh
   }
 
   const gameRef = useRef<gm.Game | null>(null);
-  const socket = useContext(SocketContext);
+  const socket = useGameSocket();
   const boardRef = useRef<HTMLCanvasElement | null>(null);
 
   let [canvasDim, setCanvasDim] = useState<[number, number]>([availWidth, availHeight]);
