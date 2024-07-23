@@ -1,10 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
+import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { getUserApi } from "../services/user.api";
 import { User } from "../types/user.interface";
 
@@ -18,11 +12,7 @@ const AuthContext = createContext<AuthContextProps>({
   refreshUser: () => {},
 });
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
-
-export const AuthProvider = ({ children }: AuthProviderProps) => {
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null | undefined>(undefined);
 
   const refreshUser = async () => {
@@ -38,11 +28,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     refreshUser();
   }, []);
 
-  return (
-    <AuthContext.Provider value={{ user, refreshUser }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, refreshUser }}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = (): AuthContextProps => useContext(AuthContext);

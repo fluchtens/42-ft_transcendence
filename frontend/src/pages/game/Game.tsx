@@ -1,11 +1,11 @@
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
-import { useRef, useEffect, useState, createContext, useContext } from "react";
+import { Separator } from "../../components/Separator";
 import * as gm from "../../utils/gameLogic";
 import { notifyError } from "../../utils/notifications";
-import { Separator } from "../../components/Separator";
 import lobbyStyles from "./GameLobby.module.scss";
-import winStyles from "./GameWin.module.scss";
 import pongStyles from "./GamePong.module.scss";
+import winStyles from "./GameWin.module.scss";
 
 const SOCK_HOST = import.meta.env.VITE_BACK_URL;
 const gameSocket = io(`${SOCK_HOST}/gamesocket`, {
@@ -166,27 +166,17 @@ function GamesLobby({ waiting = false }) {
           <input
             type="text"
             value={basicMatchName}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setBasicMatchName(e.target.value)
-            }
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBasicMatchName(e.target.value)}
             placeholder="Enter a match name"
             required
             disabled={waiting}
           />
           {waiting ? (
-            <button
-              className={lobbyStyles.disabled}
-              type="submit"
-              disabled={waiting}
-            >
+            <button className={lobbyStyles.disabled} type="submit" disabled={waiting}>
               Create basic match
             </button>
           ) : (
-            <button
-              className={lobbyStyles.enabled}
-              type="submit"
-              disabled={waiting}
-            >
+            <button className={lobbyStyles.enabled} type="submit" disabled={waiting}>
               Create basic match
             </button>
           )}
@@ -197,9 +187,7 @@ function GamesLobby({ waiting = false }) {
           <input
             type="text"
             value={customMatchName}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setCustomMatchName(e.target.value)
-            }
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCustomMatchName(e.target.value)}
             placeholder="Enter a match name"
             required
             disabled={waiting}
@@ -213,19 +201,11 @@ function GamesLobby({ waiting = false }) {
             ))}
           </select>
           {waiting ? (
-            <button
-              className={lobbyStyles.disabled}
-              type="submit"
-              disabled={waiting}
-            >
+            <button className={lobbyStyles.disabled} type="submit" disabled={waiting}>
               Create custom match
             </button>
           ) : (
-            <button
-              className={lobbyStyles.enabled}
-              type="submit"
-              disabled={waiting}
-            >
+            <button className={lobbyStyles.enabled} type="submit" disabled={waiting}>
               Create custom match
             </button>
           )}
@@ -381,23 +361,12 @@ function GamesTable({
 /*                                  PongBoard                                 */
 /* -------------------------------------------------------------------------- */
 
-function PongBoard({
-  availWidth,
-  availHeight,
-}: {
-  availWidth: number;
-  availHeight: number;
-}) {
+function PongBoard({ availWidth, availHeight }: { availWidth: number; availHeight: number }) {
   const primaryColor = "#0d0e17";
   const secondaryColor = "#D3D3D3";
   const tertiaryColor = "#3aa043";
 
-  function drawCountdown(
-    cx: CanvasRenderingContext2D,
-    seconds: number,
-    { width, height }: { width: number; height: number },
-    color = tertiaryColor
-  ) {
+  function drawCountdown(cx: CanvasRenderingContext2D, seconds: number, { width, height }: { width: number; height: number }, color = tertiaryColor) {
     const cen = {
       x: Math.floor((width + 1) / 2),
       y: Math.floor((height + 1) / 2),
@@ -406,33 +375,18 @@ function PongBoard({
     let saveColor = cx.fillStyle;
     cx.fillStyle = color;
     cx.textAlign = "center";
-    cx.fillText(
-      String(Math.ceil(seconds)),
-      cen.x,
-      cen.y + textSize / 2,
-      textSize
-    );
+    cx.fillText(String(Math.ceil(seconds)), cen.x, cen.y + textSize / 2, textSize);
 
     const arcWidth = 10;
     const frac = seconds % 1;
     cx.beginPath();
     cx.arc(cen.x, cen.y, textSize, 0, frac * 2 * Math.PI, false);
-    cx.arc(
-      cen.x,
-      cen.y,
-      textSize + arcWidth,
-      frac * 2 * Math.PI,
-      2 * Math.PI,
-      true
-    );
+    cx.arc(cen.x, cen.y, textSize + arcWidth, frac * 2 * Math.PI, 2 * Math.PI, true);
     cx.fill();
     cx.fillStyle = saveColor;
   }
 
-  function drawWallGame(
-    cx: CanvasRenderingContext2D,
-    { width, height }: { width: number; height: number }
-  ) {
+  function drawWallGame(cx: CanvasRenderingContext2D, { width, height }: { width: number; height: number }) {
     function rtop(r: number): number {
       return Math.ceil((r / gm.WALL_PONG.width) * width);
     }
@@ -447,10 +401,7 @@ function PongBoard({
 
     cx.fillStyle = secondaryColor;
 
-    let [w, h] = [
-      rtop(gm.WALL_PONG.paddleWidth),
-      rtop(gm.WALL_PONG.paddleHeight),
-    ];
+    let [w, h] = [rtop(gm.WALL_PONG.paddleWidth), rtop(gm.WALL_PONG.paddleHeight)];
 
     for (let { x, y } of game.players) {
       [x, y] = [rtop(x), rtop(y)];
@@ -487,45 +438,30 @@ function PongBoard({
   const socket = useContext(SocketContext);
   const boardRef = useRef<HTMLCanvasElement | null>(null);
 
-  let [canvasDim, setCanvasDim] = useState<[number, number]>([
-    availWidth,
-    availHeight,
-  ]);
+  let [canvasDim, setCanvasDim] = useState<[number, number]>([availWidth, availHeight]);
 
   useEffect(function () {
-    socket.emit(
-      "syncGame",
-      ({
-        type,
-        args,
-        packet,
-      }: {
-        type: "classic" | "wall";
-        args: any;
-        packet: any;
-      }) => {
-        if (!gameRef.current) {
-          gameRef.current = gm.makeGame({ type, args });
-          gameRef.current.pushPacket(packet);
+    socket.emit("syncGame", ({ type, args, packet }: { type: "classic" | "wall"; args: any; packet: any }) => {
+      if (!gameRef.current) {
+        gameRef.current = gm.makeGame({ type, args });
+        gameRef.current.pushPacket(packet);
 
-          boardRef.current?.focus();
-          let cx = boardRef.current?.getContext("2d");
-          if (!cx) throw new Error("Unexpected bad state");
+        boardRef.current?.focus();
+        let cx = boardRef.current?.getContext("2d");
+        if (!cx) throw new Error("Unexpected bad state");
 
-          {
-            let aspectRatio = gm.WALL_PONG.width / gm.WALL_PONG.height;
-            let [width, height] = [0, 0];
-            if (availWidth >= availHeight * aspectRatio)
-              [width, height] = [availHeight * aspectRatio, availHeight];
-            else [width, height] = [availWidth, availWidth / aspectRatio];
-            setCanvasDim([width, height]);
-            drawWallGame(cx, { width, height });
-          }
-        } else {
-          gameRef.current.pushPacket(packet);
+        {
+          let aspectRatio = gm.WALL_PONG.width / gm.WALL_PONG.height;
+          let [width, height] = [0, 0];
+          if (availWidth >= availHeight * aspectRatio) [width, height] = [availHeight * aspectRatio, availHeight];
+          else [width, height] = [availWidth, availWidth / aspectRatio];
+          setCanvasDim([width, height]);
+          drawWallGame(cx, { width, height });
         }
+      } else {
+        gameRef.current.pushPacket(packet);
       }
-    );
+    });
 
     socket.on("gameUpdate", (packet) => {
       if (!gameRef.current) return;
@@ -542,10 +478,7 @@ function PongBoard({
 
   const pressed = useRef<Set<string>>(new Set());
   function dir(): gm.MotionType {
-    return (
-      Number(pressed.current.has("ArrowDown")) -
-      Number(pressed.current.has("ArrowUp"))
-    );
+    return Number(pressed.current.has("ArrowDown")) - Number(pressed.current.has("ArrowUp"));
   }
 
   function handleKeyDown(ev: any) {
@@ -567,14 +500,7 @@ function PongBoard({
   return (
     <div className={pongStyles.container}>
       <div className={pongStyles.gameContainer}>
-        <canvas
-          ref={boardRef}
-          width={canvasDim[0]}
-          height={canvasDim[1]}
-          tabIndex={0}
-          onKeyDown={handleKeyDown}
-          onKeyUp={handleKeyUp}
-        >
+        <canvas ref={boardRef} width={canvasDim[0]} height={canvasDim[1]} tabIndex={0} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
           Cannot load pong game.
         </canvas>
       </div>
