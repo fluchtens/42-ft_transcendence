@@ -90,7 +90,6 @@ export const PongBoard = ({ availWidth, availHeight }: { availWidth: number; ava
         gameRef.current = gm.makeGame({ type, args });
         gameRef.current.pushPacket(packet);
 
-        boardRef.current?.focus();
         let cx = boardRef.current?.getContext("2d");
         if (!cx) throw new Error("Unexpected bad state");
 
@@ -102,6 +101,8 @@ export const PongBoard = ({ availWidth, availHeight }: { availWidth: number; ava
           setCanvasDim([width, height]);
           drawWallGame(cx, { width, height });
         }
+
+        boardRef.current?.focus();
       } else {
         gameRef.current.pushPacket(packet);
       }
