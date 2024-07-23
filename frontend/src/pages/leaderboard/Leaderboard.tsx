@@ -26,7 +26,6 @@ function Leaderboard() {
       })
     );
     setUsers(improvedUsersData as User[]);
-    console.log(improvedUsersData);
   };
 
   useEffect(() => {

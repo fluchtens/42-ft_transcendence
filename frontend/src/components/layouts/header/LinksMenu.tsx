@@ -23,7 +23,7 @@ export const LinksMenu = () => {
 
   return (
     <Sheet>
-      <SheetTrigger asChild className="flex lg:hidden">
+      <SheetTrigger asChild className="flex md:hidden">
         <Button variant="outline" size="icon">
           <HamburgerMenuIcon className="h-[1.1rem] w-[1.1rem]" />
         </Button>

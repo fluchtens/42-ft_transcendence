@@ -4,8 +4,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useAuth } from "@/hooks/useAuth";
 import { useFriendshipSocket } from "@/hooks/useFriendshipSocket";
 import { userLogoutApi } from "@/services/auth.api";
+import { GitHubLogoIcon } from "@radix-ui/react-icons";
 import { GiPingPongBat } from "react-icons/gi";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import config from "../../../config.json";
 import { LinksMenu } from "./LinksMenu";
 
 const NavLink = ({ label, link, pathname }: { label: string; link: string; pathname: string }) => (
@@ -38,8 +40,8 @@ export default function Header() {
     <header className="px-4 py-3 border-b">
       <nav className="flex justify-between items-center">
         <LinksMenu />
-        <div className="hidden lg:flex items-center gap-2">
-          <Link to="/" className="hidden py-2 lg:flex items-center gap-2 text-lg font-semibold">
+        <div className="hidden md:flex items-center gap-2">
+          <Link to="/" className="hidden py-2 md:flex items-center gap-2 text-md font-semibold">
             <GiPingPongBat className="w-[2rem] h-[2rem]" />
             ft_transcendence
           </Link>
@@ -50,29 +52,36 @@ export default function Header() {
             <NavLink label="Leaderboard" link="/leaderboard" pathname={pathname} />
           </div>
         </div>
-        {user ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Avatar className="ml-1.5 w-10 h-10 rounded-full">
-                <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
-                <AvatarImage src={user.avatar} className="object-cover pointer-events-none" />
-              </Avatar>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem asChild>
-                <Link to={`/user/${user.username}`}>Profile</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/settings">Settings</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleLogout}>Sign out </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : (
-          <Button asChild>
-            <Link to="/login">Sign in</Link>
+        <div className="flex items-center gap-0.5">
+          <Button variant="ghost" size="icon" asChild>
+            <Link to={config.repository} target="_blank">
+              <GitHubLogoIcon className="h-[1.2rem] w-[1.2rem]" />
+            </Link>
           </Button>
-        )}
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Avatar className="ml-1.5 w-10 h-10 rounded-full">
+                  <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
+                  <AvatarImage src={user.avatar} className="object-cover pointer-events-none" />
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem asChild>
+                  <Link to={`/user/${user.username}`}>Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/settings">Settings</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>Sign out </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button asChild>
+              <Link to="/login">Sign in</Link>
+            </Button>
+          )}
+        </div>
       </nav>
     </header>
   );
