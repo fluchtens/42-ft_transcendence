@@ -13,7 +13,7 @@ import { LinksMenu } from "./LinksMenu";
 const NavLink = ({ label, link, pathname }: { label: string; link: string; pathname: string }) => (
   <Link
     to={link}
-    className={`px-1.5 py-1 text-base font-light transition-colors  ${
+    className={`px-1.5 py-1 text-sm font-light transition-colors  ${
       pathname === link ? "text-foregound" : "text-foreground/60 hover:text-foreground/80"
     }`}
   >

@@ -21,18 +21,18 @@ const config = {
         input: "var(--input)",
         ring: "hsl(var(--ring))",
         background: "var(--background)",
-        foreground: "hsl(var(--foreground))",
+        foreground: "var(--foreground)",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
+          DEFAULT: "var(--primary)",
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
           DEFAULT: "var(--secondary)",
-          foreground: "hsl(var(--secondary-foreground))",
+          foreground: "var(--secondary-foreground)",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+          foreground: "var(--destructive-foreground)",
         },
         muted: {
           DEFAULT: "var(--muted)",
@@ -40,15 +40,15 @@ const config = {
         },
         accent: {
           DEFAULT: "var(--accent)",
-          foreground: "hsl(var(--accent-foreground))",
+          foreground: "var(--accent-foreground)",
         },
         popover: {
           DEFAULT: "var(--popover)",
-          foreground: "hsl(var(--popover-foreground))",
+          foreground: "var(--popover-foreground)",
         },
         card: {
           DEFAULT: "var(--card)",
-          foreground: "hsl(var(--card-foreground))",
+          foreground: "var(--card-foreground)",
         },
       },
       // borderRadius: {
