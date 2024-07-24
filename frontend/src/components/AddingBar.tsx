@@ -1,8 +1,10 @@
-import { IoPersonAddSharp } from "react-icons/io5";
-import styles from "./AddingBar.module.scss";
-import { FaPlus } from "react-icons/fa6";
-import { CreateChannel } from "../pages/channels/actions/CreateChannel";
+import { PlusIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
+import { IoPersonAddSharp } from "react-icons/io5";
+import { CreateChannel } from "../pages/channels/actions/CreateChannel";
+import styles from "./AddingBar.module.scss";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 
 interface AddUserBarProps {
   value: string;
@@ -45,26 +47,16 @@ const AddChannelBar = () => {
 
   return (
     <>
-      <form className={styles.form} onSubmit={openModal}>
-        <input
-          type="text"
-          value={newChannel.name}
-          onChange={changeName}
-          required
-        />
-        <button type="submit">
-          <FaPlus className={styles.icon} />
-        </button>
+      <form className="flex items-center gap-1" onSubmit={openModal}>
+        <Input type="text" value={newChannel.name} onChange={changeName} placeholder="Enter a channel name" required></Input>
+        <Button type="submit" size="icon" variant="outline">
+          <PlusIcon className="w-[1.2rem] h-[1.2rem]" />
+          {/* <FaPlus className="w[1.2rem] h-[1.2rem]" /> */}
+        </Button>
       </form>
-      {modal && (
-        <CreateChannel
-          newChannel={newChannel}
-          setNewChannel={setNewChannel}
-          closeModal={closeModal}
-        />
-      )}
+      {modal && <CreateChannel newChannel={newChannel} setNewChannel={setNewChannel} closeModal={closeModal} />}
     </>
   );
 };
 
-export { AddUserBar, AddChannelBar };
+export { AddChannelBar, AddUserBar };

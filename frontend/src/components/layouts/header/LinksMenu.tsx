@@ -37,8 +37,6 @@ export const LinksMenu = () => {
         </SheetClose>
         <div className="mt-1 flex-col flex">
           <NavLink label="Game" link="/game" pathname={pathname} />
-          <NavLink label="Channels" link="/channels" pathname={pathname} />
-          <NavLink label="Friends" link="/friends" pathname={pathname} />
           <NavLink label="Leaderboard" link="/leaderboard" pathname={pathname} />
         </div>
       </SheetContent>

@@ -1,15 +1,16 @@
-import { useAuth } from "../../hooks/useAuth";
-import { ChannelElement } from "./ChannelElement";
-import { AddChannelBar } from "../../components/AddingBar";
+import { AddChannelBar } from "@/components/AddingBar";
+import { Button } from "@/components/ui/button";
+import { DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { Sheet, SheetClose, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { HamburgerMenuIcon } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
-import { Channel } from "../../types/chat.interface";
+import { Link } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 import { useChatSocket } from "../../hooks/useChatSocket";
+import { Channel } from "../../types/chat.interface";
+import { ChannelElement } from "./ChannelElement";
 
-interface ChannelsProps {
-  styles: CSSModuleClasses;
-}
-
-function Channels({ styles }: ChannelsProps) {
+function Channels() {
   const [channelIds, setChannelIds] = useState<string[]>([]);
   const [channelsDataRaw, setChannelsDataRaw] = useState<Channel[]>([]);
   const [channelsData, setChannelsData] = useState<Channel[]>([]);
@@ -22,9 +23,7 @@ function Channels({ styles }: ChannelsProps) {
     });
 
     socket.on("channelDeleted", (deletedChannelId: string) => {
-      setChannelIds((prevChannels) =>
-        prevChannels.filter((channelId) => channelId !== deletedChannelId)
-      );
+      setChannelIds((prevChannels) => prevChannels.filter((channelId) => channelId !== deletedChannelId));
     });
 
     socket.on("resetChannel", (channelId: string) => {
@@ -32,21 +31,15 @@ function Channels({ styles }: ChannelsProps) {
         setChannelsDataRaw((prevChannelsData) => {
           const updatedChannels = [...prevChannelsData];
           if (!channel.isMember && !channel.public) {
-            const updatedChannels = prevChannelsData.filter(
-              (channelData) => channelData.id !== channel.id
-            );
+            const updatedChannels = prevChannelsData.filter((channelData) => channelData.id !== channel.id);
             return updatedChannels;
           }
-          const channelIndex = updatedChannels.findIndex(
-            (channel) => channel.id === channelId
-          );
+          const channelIndex = updatedChannels.findIndex((channel) => channel.id === channelId);
           if (channelIndex !== -1) {
             if (channel.isMember || channel.public) {
               updatedChannels[channelIndex] = channel;
             } else {
-              const filteredChannels = updatedChannels.filter(
-                (channel) => channel.id !== channelId
-              );
+              const filteredChannels = updatedChannels.filter((channel) => channel.id !== channelId);
               return filteredChannels;
             }
           } else {
@@ -84,32 +77,46 @@ function Channels({ styles }: ChannelsProps) {
       return false;
     });
     setChannelsData(filteredChannels);
-  return () => {};
-  }, [channelsDataRaw])
+    return () => {};
+  }, [channelsDataRaw]);
 
   useEffect(() => {
-      socket.emit("getChannelInitialData", channelIds, (channels: Channel[]) => {
-        setChannelsDataRaw(channels);
+    socket.emit("getChannelInitialData", channelIds, (channels: Channel[]) => {
+      setChannelsDataRaw(channels);
     });
-    return () => {
-    };
+    return () => {};
   }, [channelIds]);
 
   return (
     <>
       {user && (
-        <div className={styles.container}>
-          <AddChannelBar />
-          <ul>
-            {channelsData.map((channel) => {
-              return (
-                <li key={channel.id}>
-                  <ChannelElement channel={channel} />
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="outline" size="icon">
+              <HamburgerMenuIcon className="h-[1.1rem] w-[1.1rem]" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left">
+            <SheetClose asChild>
+              <Link to="/" className="text-xl font-semibold text-left">
+                <DialogTitle>ft_transcendence</DialogTitle>
+                <DialogDescription className="text-sm font-light text-muted-foreground">Multiplayer pong game</DialogDescription>
+              </Link>
+            </SheetClose>
+            <div className="mt-2 max-h-[59rem] flex flex-col">
+              <AddChannelBar />
+              <ul className="mt-2 overflow-y-scroll">
+                {channelsData.map((channel) => (
+                  <SheetClose asChild>
+                    <li key={channel.id}>
+                      <ChannelElement channel={channel} />
+                    </li>
+                  </SheetClose>
+                ))}
+              </ul>
+            </div>
+          </SheetContent>
+        </Sheet>
       )}
     </>
   );

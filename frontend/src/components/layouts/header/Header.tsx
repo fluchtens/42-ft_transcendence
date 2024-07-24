@@ -47,8 +47,6 @@ export default function Header() {
           </Link>
           <div className="flex items-center">
             <NavLink label="Game" link="/game" pathname={pathname} />
-            <NavLink label="Channels" link="/channels" pathname={pathname} />
-            <NavLink label="Friends" link="/friends" pathname={pathname} />
             <NavLink label="Leaderboard" link="/leaderboard" pathname={pathname} />
           </div>
         </div>
