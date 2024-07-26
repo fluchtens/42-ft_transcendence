@@ -93,7 +93,7 @@ export const CreateChannelDialog = ({ dialog, setDialog, newChannel, setNewChann
   };
 
   return (
-    <Dialog open={dialog} onOpenChange={setDialog}>
+    <Dialog open={dialog} onOpenChange={cancel}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">Create channel</DialogTitle>
