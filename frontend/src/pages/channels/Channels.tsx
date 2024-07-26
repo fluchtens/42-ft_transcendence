@@ -1,16 +1,18 @@
-import { AddChannelBar } from "@/components/AddingBar";
 import { Button } from "@/components/ui/button";
 import { DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { HamburgerMenuIcon } from "@radix-ui/react-icons";
+import { ChatBubbleIcon } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useChatSocket } from "../../hooks/useChatSocket";
 import { Channel } from "../../types/chat.interface";
 import { ChannelElement } from "./ChannelElement";
+import { CreateChannelBar } from "./CreateChannelBar";
 
-function Channels() {
+export default function Channels() {
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [channelIds, setChannelIds] = useState<string[]>([]);
   const [channelsDataRaw, setChannelsDataRaw] = useState<Channel[]>([]);
   const [channelsData, setChannelsData] = useState<Channel[]>([]);
@@ -90,28 +92,27 @@ function Channels() {
   return (
     <>
       {user && (
-        <Sheet>
+        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
           <SheetTrigger asChild>
-            <Button variant="outline" size="icon">
-              <HamburgerMenuIcon className="h-[1.1rem] w-[1.1rem]" />
+            <Button variant="ghost" size="icon">
+              <ChatBubbleIcon className="h-[1.1rem] w-[1.1rem]" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left">
+          <SheetContent side="right">
             <SheetClose asChild>
               <Link to="/" className="text-xl font-semibold text-left">
                 <DialogTitle>ft_transcendence</DialogTitle>
                 <DialogDescription className="text-sm font-light text-muted-foreground">Multiplayer pong game</DialogDescription>
               </Link>
             </SheetClose>
-            <div className="mt-2 max-h-[59rem] flex flex-col">
-              <AddChannelBar />
-              <ul className="mt-2 overflow-y-scroll">
-                {channelsData.map((channel) => (
-                  <SheetClose asChild>
-                    <li key={channel.id}>
-                      <ChannelElement channel={channel} />
-                    </li>
-                  </SheetClose>
+            <div className="mt-2 max-h-[55.3rem] flex flex-col">
+              <CreateChannelBar />
+              <ul className="mt-2 overflow-y-scroll flex flex-col">
+                {channelsData.map((channel, index) => (
+                  <li key={channel.id}>
+                    <ChannelElement channel={channel} setSheetOpen={setSheetOpen} />
+                    <Separator className={`${index !== channelsData.length - 1 ? "my-1" : "hidden"}`} />
+                  </li>
                 ))}
               </ul>
             </div>
@@ -121,5 +122,3 @@ function Channels() {
     </>
   );
 }
-
-export default Channels;

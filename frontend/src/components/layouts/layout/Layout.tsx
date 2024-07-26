@@ -1,4 +1,3 @@
-import Channels from "@/pages/channels/Channels";
 import { Notify, notifyError } from "@/utils/notifications";
 import { useEffect } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -21,11 +20,6 @@ function Layout() {
     return authPages.some((authPage) => pathname.startsWith(authPage));
   };
 
-  const isChannelOrFriendsPage = () => {
-    const allowedPages = ["/channels", "/friends"];
-    return allowedPages.includes(pathname);
-  };
-
   useEffect(() => {
     if (user === null && !isAuthPage() && !isHomePage()) {
       navigate("/login");
@@ -42,11 +36,7 @@ function Layout() {
   return (
     <div className="min-h-screen flex flex-col">
       {!isAuthPage() && <Header />}
-      <div className="flex flex-1">
-        {!isAuthPage() && !isChannelOrFriendsPage() && <Channels />}
-        <main className="flex-1 p-4 md:p-6">{isHomePage() ? <Home /> : <Outlet />}</main>
-        {/* {!isAuthPage() && !isChannelOrFriendsPage() && <Friends styles={friendStyles} />} */}
-      </div>
+      <main className="flex-1 p-4 md:p-6">{isHomePage() ? <Home /> : <Outlet />}</main>
       {!isAuthPage() && <Footer />}
       <Notify />
     </div>

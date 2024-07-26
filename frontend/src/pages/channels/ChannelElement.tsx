@@ -1,20 +1,21 @@
-import styles from "./ChannelElement.module.scss";
-import { Channel } from "../../types/chat.interface";
 import { useState } from "react";
-import { JoinChannelModal } from "./actions/JoinChannelModal";
-import { useNavigate } from "react-router-dom";
 import { RiGitRepositoryPrivateFill } from "react-icons/ri";
+import { useNavigate } from "react-router-dom";
+import { Channel } from "../../types/chat.interface";
+import { JoinChannelModal } from "./actions/JoinChannelModal";
 
 interface ChannelElementProps {
   channel: Channel;
+  setSheetOpen: (value: boolean) => void;
 }
 
-const ChannelElement = ({ channel }: ChannelElementProps) => {
+const ChannelElement = ({ channel, setSheetOpen }: ChannelElementProps) => {
   const [modal, setModal] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const closeModal = () => {
     setModal(false);
+    setSheetOpen(false);
   };
 
   const joinChannel = () => {
@@ -22,22 +23,21 @@ const ChannelElement = ({ channel }: ChannelElementProps) => {
       setModal(true);
     } else {
       navigate("/chat/" + channel.id);
+      setSheetOpen(false);
     }
   };
 
   return (
     <>
-      <button className={styles.button} onClick={joinChannel}>
-        <p className={styles.name}>{channel.name}</p>
-        <div className={styles.infos}>
+      <button className="p-3 w-full flex flex-col rounded-md hover:bg-card" onClick={joinChannel}>
+        <h1 className="text-sm font-normal">{channel.name}</h1>
+        <div className="flex items-center gap-1">
           {channel.public ? (
-            <p className={styles.status}>Public</p>
+            <h2 className="text-xs font-normal text-muted-foreground">Public</h2>
           ) : (
-            <p className={styles.status}>Private</p>
+            <h2 className="text-xs font-normal text-muted-foreground">Private</h2>
           )}
-          {channel.protected && (
-            <RiGitRepositoryPrivateFill className={styles.icon} />
-          )}
+          {channel.protected && <RiGitRepositoryPrivateFill className="w-[0.75rem] h-[0.75rem] text-muted-foreground" />}
         </div>
       </button>
       {modal && <JoinChannelModal channel={channel} closeModal={closeModal} />}

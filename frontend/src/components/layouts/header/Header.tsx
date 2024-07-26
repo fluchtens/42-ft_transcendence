@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { useFriendshipSocket } from "@/hooks/useFriendshipSocket";
+import Channels from "@/pages/channels/Channels";
 import { userLogoutApi } from "@/services/auth.api";
 import { GitHubLogoIcon } from "@radix-ui/react-icons";
 import { GiPingPongBat } from "react-icons/gi";
@@ -38,7 +39,7 @@ export default function Header() {
 
   return (
     <header className="px-4 py-3 border-b">
-      <nav className="flex justify-between items-center">
+      <nav className="m-auto max-w-screen-lg flex justify-between items-center">
         <LinksMenu />
         <div className="hidden md:flex items-center gap-2">
           <Link to="/" className="hidden py-2 md:flex items-center gap-2 text-md font-semibold">
@@ -51,6 +52,7 @@ export default function Header() {
           </div>
         </div>
         <div className="flex items-center gap-0.5">
+          <Channels />
           <Button variant="ghost" size="icon" asChild>
             <Link to={config.repository} target="_blank">
               <GitHubLogoIcon className="h-[1.2rem] w-[1.2rem]" />
