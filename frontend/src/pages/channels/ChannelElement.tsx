@@ -2,7 +2,7 @@ import { useState } from "react";
 import { RiGitRepositoryPrivateFill } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 import { Channel } from "../../types/chat.interface";
-import { JoinChannelModal } from "./actions/JoinChannelModal";
+import { JoinChannelDialog } from "./JoinChannelDialog";
 
 interface ChannelElementProps {
   channel: Channel;
@@ -10,17 +10,12 @@ interface ChannelElementProps {
 }
 
 const ChannelElement = ({ channel, setSheetOpen }: ChannelElementProps) => {
-  const [modal, setModal] = useState<boolean>(false);
+  const [dialog, setDialog] = useState<boolean>(false);
   const navigate = useNavigate();
-
-  const closeModal = () => {
-    setModal(false);
-    setSheetOpen(false);
-  };
 
   const joinChannel = () => {
     if ((!channel.isConnected && channel.protected) || !channel.isMember) {
-      setModal(true);
+      setDialog(true);
     } else {
       navigate("/chat/" + channel.id);
       setSheetOpen(false);
@@ -40,7 +35,7 @@ const ChannelElement = ({ channel, setSheetOpen }: ChannelElementProps) => {
           {channel.protected && <RiGitRepositoryPrivateFill className="w-[0.75rem] h-[0.75rem] text-muted-foreground" />}
         </div>
       </button>
-      {modal && <JoinChannelModal channel={channel} closeModal={closeModal} />}
+      <JoinChannelDialog dialog={dialog} setDialog={setDialog} setSheetOpen={setSheetOpen} channel={channel} />
     </>
   );
 };

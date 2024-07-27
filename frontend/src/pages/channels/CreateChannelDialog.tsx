@@ -100,7 +100,7 @@ export const CreateChannelDialog = ({ dialog, setDialog, newChannel, setNewChann
           <DialogDescription className="text-sm font-normal">Create a real-time chat room.</DialogDescription>
         </DialogHeader>
         <Separator />
-        <form onSubmit={submit} className="flex flex-col gap-3">
+        <form onSubmit={submit} className="p-0 flex flex-col gap-3">
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-semibold">Confidentiality</label>
             <div onClick={handleHavePassword} className="px-4 py-3 rounded-md bg-card hover:bg-secondary cursor-pointer">
@@ -132,7 +132,7 @@ export const CreateChannelDialog = ({ dialog, setDialog, newChannel, setNewChann
               <Input type="text" value={newChannel.password} onChange={handlePassword} placeholder="Enter a channel password" required></Input>
             </div>
           )}
-          <div className="mt-1.5 ml-auto flex items-center gap-2">
+          <div className="mt-1.5 md:ml-auto flex items-center gap-2">
             <Button type="button" variant="ghost" onClick={cancel}>
               Cancel
             </Button>
