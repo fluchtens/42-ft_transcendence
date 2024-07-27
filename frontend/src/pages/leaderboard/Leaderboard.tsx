@@ -38,7 +38,7 @@ function Leaderboard() {
   return (
     <>
       {user && (
-        <table className="m-auto max-w-screen-lg w-full">
+        <table className="m-auto max-w-screen-xl w-full">
           <thead>
             <tr className="text-base font-semibold">
               <th className="text-left">#</th>

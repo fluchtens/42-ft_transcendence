@@ -15,7 +15,7 @@ function Settings() {
   return (
     <>
       {user && (
-        <Tabs defaultValue="profile" className="m-auto max-w-screen-lg">
+        <Tabs defaultValue="profile" className="m-auto max-w-screen-xl">
           <TabsList className="w-full h-full grid grid-cols-1 md:grid-cols-2">
             <TabsTrigger value="profile">Public profile</TabsTrigger>
             <TabsTrigger value="auth">Password and authentification</TabsTrigger>

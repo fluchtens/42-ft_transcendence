@@ -146,7 +146,7 @@ export const GamesLobby = ({ waiting }: { waiting: boolean }) => {
   }, []);
 
   return (
-    <div className="m-auto max-w-screen-lg flex flex-col gap-5">
+    <div className="m-auto max-w-screen-xl flex flex-col gap-5">
       <div>
         <h1 className="text-2xl font-semibold text-center">Create match</h1>
         <Separator className="mt-2" />

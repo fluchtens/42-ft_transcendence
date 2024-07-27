@@ -39,7 +39,7 @@ export default function Header() {
 
   return (
     <header className="px-4 py-3 border-b">
-      <nav className="m-auto max-w-screen-lg flex justify-between items-center">
+      <nav className="m-auto max-w-screen-xl flex justify-between items-center">
         <LinksMenu />
         <div className="hidden md:flex items-center gap-2">
           <Link to="/" className="hidden py-2 md:flex items-center gap-2 text-md font-semibold">
