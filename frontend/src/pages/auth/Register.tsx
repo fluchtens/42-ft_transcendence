@@ -1,10 +1,11 @@
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import styles from "./Auth.module.scss";
-import { userRegistrationApi } from "../../services/auth.api";
-import { MainTitle } from "./MainTitle";
-import { notifySuccess } from "../../utils/notifications";
 import { useAuth } from "../../hooks/useAuth";
+import { userRegistrationApi } from "../../services/auth.api";
+import { notifySuccess } from "../../utils/notifications";
+import { MainTitle } from "./MainTitle";
 
 function Register() {
   const { user } = useAuth();
@@ -38,45 +39,31 @@ function Register() {
   return (
     <>
       {user === null && (
-        <div className={styles.container}>
+        <div className="max-w-[22rem] p-2 md:p-0 w-full">
           <MainTitle />
-          <form className={styles.form} onSubmit={submitData}>
-            <h1>Register a new account</h1>
+          <form className="mt-2 px-3 sm:px-6 py-3 sm:py-5 flex flex-col items-center rounded-xl bg-card" onSubmit={submitData}>
+            <h1 className="text-2xl font-semibold">Register a new account</h1>
             {errorMessage && (
-              <div className={styles.error}>
-                <p>
-                  {Array.isArray(errorMessage) ? errorMessage[0] : errorMessage}
-                </p>
+              <div className="mt-4 w-full px-3 py-2 bg-[#f8d7da] rounded-md">
+                <p className="text-sm text-[#721c24] text-center">{Array.isArray(errorMessage) ? errorMessage[0] : errorMessage}</p>
               </div>
             )}
-            <div className={styles.input}>
-              <label>Username :</label>
-              <input
-                type="text"
-                value={username}
-                onChange={changeUsername}
-                placeholder="Enter a username"
-                required
-              />
+            <div className="mt-4 w-full flex flex-col gap-1.5">
+              <div className="flex flex-col items-start">
+                <label className="text-sm font-medium">Username</label>
+                <Input type="text" value={username} onChange={changeUsername} placeholder="Enter a username" className="bg-secondary" required />
+              </div>
+              <div className="flex flex-col items-start">
+                <label className="text-sm font-medium">Password</label>
+                <Input type="password" value={password} onChange={changePassword} placeholder="Enter a password" className="bg-secondary" required />
+              </div>
             </div>
-            <div className={styles.input}>
-              <label>Password :</label>
-              <input
-                type="password"
-                value={password}
-                onChange={changePassword}
-                placeholder="Enter a password"
-                required
-              />
+            <div className="mt-6 w-full flex flex-col gap-1.5">
+              <Button type="submit">Sign up</Button>
             </div>
-            <div className={styles.buttons}>
-              <button className={styles.submitBtn} type="submit">
-                Sign up
-              </button>
-            </div>
-            <p className={styles.help}>
-              <span>Have an account?</span>
-              <Link to={"/login"} className={styles.link}>
+            <p className="mt-4">
+              <span className="text-sm font-light text-muted-foreground">Have an account?</span>
+              <Link to="/login" className="ml-1 text-sm font-medium text-muted-foreground">
                 Sign in
               </Link>
             </p>

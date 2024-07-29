@@ -34,12 +34,20 @@ function Layout() {
   }, [user, pathname]);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {!isAuthPage() && <Header />}
-      <main className="flex-1 p-4 md:p-6">{isHomePage() ? <Home /> : <Outlet />}</main>
-      {!isAuthPage() && <Footer />}
-      <Notify />
-    </div>
+    <>
+      {!isAuthPage() ? (
+        <div className="min-h-screen flex flex-col">
+          <Header />
+          <main className="flex-1 p-4 md:p-6">{isHomePage() ? <Home /> : <Outlet />}</main>
+          <Footer />
+          <Notify />
+        </div>
+      ) : (
+        <main className="min-h-screen flex flex-col justify-center items-center">
+          <Outlet />
+        </main>
+      )}
+    </>
   );
 }
 
