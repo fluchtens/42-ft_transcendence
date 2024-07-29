@@ -1,20 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { useAuth } from "../../hooks/useAuth";
 import { useNavigate, useParams } from "react-router-dom";
-import styles from "./Chat.module.scss";
+import { Loading } from "../../components/Loading";
+import { useAuth } from "../../hooks/useAuth";
+import { useChatSocket } from "../../hooks/useChatSocket";
+import { getBlockedUsersApi } from "../../services/friendship.api";
+import { Channel, MemberUsers, Message } from "../../types/chat.interface";
+import { notifyError } from "../../utils/notifications";
 import { ChatHeader } from "./ChatHeader";
 import { MessageElement } from "./MessageElement";
 import { MessageInput } from "./MessageInput";
-import { UserElement } from "../../components/UserElement";
-import { ContextMenuType } from "../../components/UserContextMenu";
-import { useChatSocket } from "../../hooks/useChatSocket";
-import { Channel, MemberUsers, Message } from "../../types/chat.interface";
-import { Loading } from "../../components/Loading";
-import { notifyError } from "../../utils/notifications";
-import { AddUserBar } from "../../components/AddingBar";
-import { getBlockedUsersApi } from "../../services/friendship.api";
 
-function Chat() {
+export default function Chat() {
   const [loading, setLoading] = useState<boolean>(true);
   const [channel, setChannel] = useState<Channel>();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -112,9 +108,7 @@ function Chat() {
     });
 
     socket.on(`${id}/messageDeleted`, (deletedMessageId: string) => {
-      setMessages((prevMessages) =>
-        prevMessages.filter((message) => message.id !== deletedMessageId)
-      );
+      setMessages((prevMessages) => prevMessages.filter((message) => message.id !== deletedMessageId));
     });
 
     socket.on(`${id}/message`, (message: Message) => {
@@ -134,9 +128,7 @@ function Chat() {
     });
 
     socket.on(`${id}/memberDeleted`, (deletedMemberId: Number) => {
-      setMembers((prevMembers) =>
-        prevMembers.filter((member) => member.member.userId !== deletedMemberId)
-      );
+      setMembers((prevMembers) => prevMembers.filter((member) => member.member.userId !== deletedMemberId));
     });
     socket.emit("joinRoom", { channelId: id, getMessages: true });
 
@@ -161,9 +153,7 @@ function Chat() {
 
       setMessages((prevMessages) =>
         prevMessages.map((message) => {
-          const isUserBlocked = blockedUsers.some(
-            (user) => message.userId === user.id
-          );
+          const isUserBlocked = blockedUsers.some((user) => message.userId === user.id);
           if (isUserBlocked) {
             return {
               ...message,
@@ -190,18 +180,14 @@ function Chat() {
     <>
       {loading && <Loading />}
       {!loading && user && channel && (
-        <div className={styles.container}>
-          <div className={styles.chat}>
-            <ChatHeader
-              members={members}
-              channel={channel}
-              toggleMembersMenu={toggleMembersMenu}
-            />
-            <ul>
+        <div className="m-auto p-4 max-w-screen-lg h-[calc(100vh-10rem)] md:h-[calc(100vh-11.5rem)] bg-card rounded-xl">
+          <div className="h-full flex flex-col gap-4">
+            <ChatHeader members={members} channel={channel} toggleMembersMenu={toggleMembersMenu} />
+            <ul className="overflow-y-scroll flex flex-col break">
               {messages?.map(
                 (message: Message) =>
                   message.user && (
-                    <li key={message.id}>
+                    <li key={message.id} className="p-2 flex items-center gap-3 rounded-md hover:bg-secondary transition-colors break-all">
                       <MessageElement
                         avatar={message.user.avatar}
                         username={message.user.username}
@@ -214,21 +200,13 @@ function Chat() {
               )}
               <div ref={messagesRef} />
             </ul>
-            <MessageInput
-              content={newMessage}
-              onChange={changeNewMessage}
-              onSubmit={sendMessage}
-            />
+            <MessageInput content={newMessage} onChange={changeNewMessage} onSubmit={sendMessage} />
           </div>
-          {membersMenu && (
+          {/* {membersMenu && (
             <>
               <div className={styles.line}></div>
               <div className={styles.members}>
-                <AddUserBar
-                  value={addedMember}
-                  onChange={changeAddedMember}
-                  onSubmit={addMember}
-                />
+                <AddUserBar value={addedMember} onChange={changeAddedMember} onSubmit={addMember} />
                 <ul>
                   {members?.map((member: MemberUsers) => (
                     <li key={member.user.id}>
@@ -239,20 +217,16 @@ function Chat() {
                         role={member.member.role}
                         contextMenu={contextMenu === member.user.id}
                         contextMenuType={ContextMenuType.MEMBER}
-                        toggleContextMenu={() =>
-                          toggleContextMenu(member.user.id)
-                        }
+                        toggleContextMenu={() => toggleContextMenu(member.user.id)}
                       />
                     </li>
                   ))}
                 </ul>
               </div>
             </>
-          )}
+          )} */}
         </div>
       )}
     </>
   );
 }
-
-export default Chat;
