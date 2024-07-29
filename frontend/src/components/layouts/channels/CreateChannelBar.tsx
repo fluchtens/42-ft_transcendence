@@ -27,7 +27,7 @@ export const CreateChannelBar = () => {
   return (
     <>
       <form className="flex items-center gap-1" onSubmit={openModal}>
-        <Input type="text" value={newChannel.name} onChange={changeName} placeholder="Enter a channel name" required></Input>
+        <Input type="text" value={newChannel.name} onChange={changeName} placeholder="Enter a channel name" required />
         <Button type="submit" size="icon" variant="outline">
           <PlusIcon className="w-[1.2rem] h-[1.2rem]" />
         </Button>

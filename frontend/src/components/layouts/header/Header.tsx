@@ -9,6 +9,7 @@ import { GiPingPongBat } from "react-icons/gi";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import config from "../../../config.json";
 import Channels from "../channels/Channels";
+import { Friends } from "../friends/Friends";
 import { LinksMenu } from "./LinksMenu";
 
 const NavLink = ({ label, link, pathname }: { label: string; link: string; pathname: string }) => (
@@ -52,6 +53,7 @@ export default function Header() {
           </div>
         </div>
         <div className="flex items-center gap-0.5">
+          <Friends />
           <Channels />
           <Button variant="ghost" size="icon" asChild>
             <Link to={config.repository} target="_blank">

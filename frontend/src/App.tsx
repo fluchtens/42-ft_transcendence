@@ -11,8 +11,6 @@ import Setup from "./pages/auth/Setup";
 import TwoFaAuth from "./pages/auth/TwoFaAuth";
 import Chat from "./pages/chat/Chat";
 import PrivateChat from "./pages/chat/PrivateChat";
-import Friends from "./pages/friends/Friends";
-import friendStyles from "./pages/friends/Friends.module.scss";
 import Game from "./pages/game/Game";
 import Leaderboard from "./pages/leaderboard/Leaderboard";
 import Settings from "./pages/settings/Settings";
@@ -33,7 +31,6 @@ function App() {
         { path: "/game", element: <Game /> },
         { path: "/chat/:id", element: <Chat /> },
         { path: "/pm/:id", element: <PrivateChat /> },
-        { path: "/friends", element: <Friends styles={friendStyles} /> },
         { path: "/settings", element: <Settings /> },
         { path: "/leaderboard", element: <Leaderboard /> },
       ],

@@ -5,8 +5,8 @@ import { Sheet, SheetClose, SheetContent, SheetTrigger } from "@/components/ui/s
 import { useAuth } from "@/hooks/useAuth";
 import { useChatSocket } from "@/hooks/useChatSocket";
 import { Channel } from "@/types/chat.interface";
-import { ChatBubbleIcon } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
+import { BsFillChatDotsFill } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { ChannelElement } from "./ChannelElement";
 import { CreateChannelBar } from "./CreateChannelBar";
@@ -95,7 +95,7 @@ export default function Channels() {
         <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon">
-              <ChatBubbleIcon className="h-[1.1rem] w-[1.1rem]" />
+              <BsFillChatDotsFill className="h-[1.1rem] w-[1.1rem]" />
             </Button>
           </SheetTrigger>
           <SheetContent side="right">
