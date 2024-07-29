@@ -23,7 +23,7 @@ const FaqQuestion = ({ value, question, answer }: { value: string; question: str
 
 function Home() {
   return (
-    <div className="md:py-16 m-auto max-w-screen-xl flex flex-col items-center gap-6 md:gap-16">
+    <div className="md:py-16 m-auto max-w-screen-lg flex flex-col items-center gap-6 md:gap-16">
       <div className="text-center">
         <h1 className="text-3xl md:text-5xl font-semibold">ft_transcendence</h1>
         <h2 className="mt-1 text-base md:text-xl font-extralight">Modern multiplayer pong game</h2>

@@ -42,7 +42,7 @@ const CreateGame = ({ waiting }: { waiting: boolean }) => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row md:justify-between items-center md:items-start">
+    <div className="flex flex-col md:flex-row md:justify-around items-center md:items-start">
       <form onSubmit={createBasicMatch} className="mt-5 flex flex-col gap-1.5">
         <h2 className="text-lg font-semibold">Create a basic match</h2>
         <label className="text-sm font-medium">Name</label>
@@ -146,7 +146,7 @@ export const GamesLobby = ({ waiting }: { waiting: boolean }) => {
   }, []);
 
   return (
-    <div className="m-auto max-w-screen-xl flex flex-col gap-5">
+    <div className="m-auto max-w-screen-lg flex flex-col gap-5">
       <div>
         <h1 className="text-2xl font-semibold text-center">Create match</h1>
         <Separator className="mt-2" />
