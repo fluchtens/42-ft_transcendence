@@ -2,12 +2,12 @@ import { Button } from "@/components/ui/button";
 import { DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useAuth } from "@/hooks/useAuth";
+import { useChatSocket } from "@/hooks/useChatSocket";
+import { Channel } from "@/types/chat.interface";
 import { ChatBubbleIcon } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
-import { useChatSocket } from "../../hooks/useChatSocket";
-import { Channel } from "../../types/chat.interface";
 import { ChannelElement } from "./ChannelElement";
 import { CreateChannelBar } from "./CreateChannelBar";
 

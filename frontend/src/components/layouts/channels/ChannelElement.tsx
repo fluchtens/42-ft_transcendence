@@ -1,7 +1,7 @@
+import { Channel } from "@/types/chat.interface";
 import { useState } from "react";
 import { RiGitRepositoryPrivateFill } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
-import { Channel } from "../../types/chat.interface";
 import { JoinChannelDialog } from "./JoinChannelDialog";
 
 interface ChannelElementProps {

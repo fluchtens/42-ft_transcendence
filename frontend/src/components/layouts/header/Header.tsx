@@ -3,12 +3,12 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { useFriendshipSocket } from "@/hooks/useFriendshipSocket";
-import Channels from "@/pages/channels/Channels";
 import { userLogoutApi } from "@/services/auth.api";
 import { GitHubLogoIcon } from "@radix-ui/react-icons";
 import { GiPingPongBat } from "react-icons/gi";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import config from "../../../config.json";
+import Channels from "../channels/Channels";
 import { LinksMenu } from "./LinksMenu";
 
 const NavLink = ({ label, link, pathname }: { label: string; link: string; pathname: string }) => (
