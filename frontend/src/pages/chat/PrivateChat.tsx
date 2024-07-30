@@ -1,14 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { useAuth } from "../../hooks/useAuth";
 import { useParams } from "react-router-dom";
-import styles from "./Chat.module.scss";
-import { MessageElement } from "./MessageElement";
-import { MessageInput } from "./MessageInput";
-import { useChatSocket } from "../../hooks/useChatSocket";
-import { Message, PrivateChannelData } from "../../types/chat.interface";
 import { Loading } from "../../components/Loading";
-import { notifyError } from "../../utils/notifications";
+import { useAuth } from "../../hooks/useAuth";
+import { useChatSocket } from "../../hooks/useChatSocket";
 import { getBlockedUsersApi } from "../../services/friendship.api";
+import { Message, PrivateChannelData } from "../../types/chat.interface";
+import { notifyError } from "../../utils/notifications";
 
 function PrivateChat() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -45,25 +42,19 @@ function PrivateChat() {
   };
 
   useEffect(() => {
-    socket.emit(
-      "getPrivateChannelData",
-      id,
-      (channelData: PrivateChannelData) => {
-        if (channelData) {
-          setMessages(channelData.messages);
-          setChannel(channelData);
-        }
-        setLoading(false);
+    socket.emit("getPrivateChannelData", id, (channelData: PrivateChannelData) => {
+      if (channelData) {
+        setMessages(channelData.messages);
+        setChannel(channelData);
       }
-    );
+      setLoading(false);
+    });
 
     socket.on(`${id}/message`, (message: Message) => {
       setMessages((prevMessages) => [...prevMessages, message]);
     });
     socket.on(`${id}/messageDeleted`, (deletedMessageId: string) => {
-      setMessages((prevMessages) =>
-        prevMessages.filter((message) => message.id !== deletedMessageId)
-      );
+      setMessages((prevMessages) => prevMessages.filter((message) => message.id !== deletedMessageId));
     });
 
     return () => {
@@ -79,9 +70,7 @@ function PrivateChat() {
 
       setMessages((prevMessages) =>
         prevMessages.map((message) => {
-          const isUserBlocked = blockedUsers.some(
-            (user) => message.userId === user.id
-          );
+          const isUserBlocked = blockedUsers.some((user) => message.userId === user.id);
           if (isUserBlocked) {
             return {
               ...message,
@@ -108,8 +97,8 @@ function PrivateChat() {
     <>
       {loading && <Loading />}
       {!loading && user && channel && (
-        <div className={styles.container}>
-          <div className={styles.chat}>
+        <div className="">
+          {/* <div className={styles.chat}>
             <h1>{channel.name}</h1>
             <ul>
               {messages?.map(
@@ -133,7 +122,7 @@ function PrivateChat() {
               onChange={changeNewMessage}
               onSubmit={sendMessage}
             />
-          </div>
+          </div> */}
         </div>
       )}
     </>

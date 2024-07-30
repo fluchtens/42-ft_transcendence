@@ -77,7 +77,7 @@ function ProfileSettings() {
               {file ? (
                 <img src={URL.createObjectURL(file)} />
               ) : (
-                <Avatar className="max-w-[12rem] max-h-[12rem] w-full h-full rounded-full">
+                <Avatar className="w-[12rem] h-[12rem] rounded-full">
                   <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
                   {user.avatar && <AvatarImage src={user.avatar} className="object-cover pointer-events-none" />}
                 </Avatar>

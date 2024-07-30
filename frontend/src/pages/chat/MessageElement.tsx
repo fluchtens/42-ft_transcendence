@@ -1,7 +1,7 @@
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { useChatSocket } from "../../hooks/useChatSocket";
 import { notifyError, notifySuccess } from "../../utils/notifications";
-import styles from "./MessageElement.module.scss";
-import defaultAvatar from "/default_avatar.png";
 
 interface MessageElementProps {
   avatar: string;
@@ -11,13 +11,7 @@ interface MessageElementProps {
   gameInvit?: boolean;
 }
 
-const MessageElement = ({
-  avatar,
-  username,
-  content,
-  userId,
-  gameInvit,
-}: MessageElementProps) => {
+const MessageElement = ({ avatar, username, content, userId, gameInvit }: MessageElementProps) => {
   const useChat = useChatSocket();
 
   const joiningGame = () => {
@@ -34,17 +28,18 @@ const MessageElement = ({
 
   return (
     <>
-      <div className={styles.avatar}>
-        {avatar ? <img src={avatar} /> : <img src={defaultAvatar} />}
-      </div>
-      <div className={styles.texts}>
-        <p className={styles.user}>{username}</p>
-        <p className={styles.content}>{content}</p>
+      <Avatar className="w-12 h-12 rounded-full">
+        <AvatarFallback className="bg-secondary">{username[0].toUpperCase()}</AvatarFallback>
+        {avatar && <AvatarImage src={avatar} className="object-cover pointer-events-none" />}
+      </Avatar>
+      <div>
+        <p className="text-sm font-medium text-white">{username}</p>
+        <p className="text-sm font-normal">{content}</p>
       </div>
       {gameInvit && (
-        <button className={styles.joinBtn} onClick={joiningGame}>
+        <Button onClick={joiningGame} className="ml-auto">
           Join
-        </button>
+        </Button>
       )}
     </>
   );

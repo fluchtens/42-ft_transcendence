@@ -1,16 +1,17 @@
-import { IoGameController, IoSettings } from "react-icons/io5";
-import { HiUsers } from "react-icons/hi2";
-import styles from "./ChatHeader.module.scss";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { useEffect, useState } from "react";
-import { EditChannel } from "./actions/EditChannel";
-import { Channel, MemberUsers } from "../../types/chat.interface";
-import { FaDoorOpen } from "react-icons/fa6";
-import { notifyError, notifySuccess } from "../../utils/notifications";
-import { useChatSocket } from "../../hooks/useChatSocket";
-import { useNavigate } from "react-router-dom";
-import { UnbanUser } from "./actions/UnbanUser";
 import { FaBan } from "react-icons/fa";
+import { FaDoorOpen } from "react-icons/fa6";
+import { HiUsers } from "react-icons/hi2";
+import { IoGameController, IoSettings } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { useChatSocket } from "../../hooks/useChatSocket";
+import { Channel, MemberUsers } from "../../types/chat.interface";
+import { notifyError, notifySuccess } from "../../utils/notifications";
+import { EditChannelDialog } from "./actions/EditChannelDialog";
+import { UnbanUserDialog } from "./actions/UnbanUserDialog";
 
 interface ChatHeaderProps {
   channel: Channel;
@@ -18,15 +19,11 @@ interface ChatHeaderProps {
   toggleMembersMenu: () => void;
 }
 
-const ChatHeader = ({
-  members,
-  channel,
-  toggleMembersMenu,
-}: ChatHeaderProps) => {
+export const ChatHeader = ({ members, channel, toggleMembersMenu }: ChatHeaderProps) => {
   const { user } = useAuth();
   const [role, setRole] = useState<string>("");
-  const [editChannelModal, setEditChannelModal] = useState<boolean>(false);
-  const [unbanUserModal, setUnbanUserModal] = useState<boolean>(false);
+  const [editChannelDialog, setEditChannelDialog] = useState<boolean>(false);
+  const [unbanUserDialog, setUnbanUserDialog] = useState<boolean>(false);
   const navigate = useNavigate();
   const chatSocket = useChatSocket();
   const [editChannel, setEditChannel] = useState({
@@ -35,22 +32,6 @@ const ChatHeader = ({
     protected: false,
     password: "",
   });
-
-  const openEditMenuModal = () => {
-    setEditChannelModal(true);
-  };
-
-  const closeEditMenuModal = () => {
-    setEditChannelModal(false);
-  };
-
-  const openUnbanUserModal = () => {
-    setUnbanUserModal(true);
-  };
-
-  const closeUnbanUserModal = () => {
-    setUnbanUserModal(false);
-  };
 
   const leaveChannel = () => {
     chatSocket.emit("leaveChannel", channel.id, (result: string) => {
@@ -100,19 +81,19 @@ const ChatHeader = ({
       case "OWNER":
         return (
           <>
-            <button onClick={openEditMenuModal}>
-              <IoSettings className={styles.icon} />
-            </button>
-            <button onClick={openUnbanUserModal}>
-              <FaBan className={styles.icon} />
-            </button>
+            <Button onClick={() => setEditChannelDialog(true)} size="icon" variant="outline" className="bg-secondary hover:bg-secondary">
+              <IoSettings className="w-[1rem] h-[1rem]" />
+            </Button>
+            <Button onClick={() => setUnbanUserDialog(true)} size="icon" variant="outline" className="bg-secondary hover:bg-secondary">
+              <FaBan className="w-[1rem] h-[1rem]" />
+            </Button>
           </>
         );
       case "ADMIN":
         return (
-          <button onClick={openUnbanUserModal}>
-            <FaBan className={styles.icon} />
-          </button>
+          <Button onClick={() => setUnbanUserDialog(true)} size="icon" variant="outline" className="bg-secondary hover:bg-secondary">
+            <FaBan className="w-[1rem] h-[1rem]" />
+          </Button>
         );
       default:
         return null;
@@ -121,36 +102,32 @@ const ChatHeader = ({
 
   return (
     <>
-      <div className={styles.header}>
-        <div className={styles.leftBtns}>
+      <div className="flex justify-between items-center gap-4">
+        <div className="flex items-center gap-1">
           {renderButtons()}
-          <button onClick={leaveChannel}>
-            <FaDoorOpen className={styles.icon} />
-          </button>
+          <Button onClick={leaveChannel} size="icon" variant="outline" className="bg-secondary hover:bg-secondary">
+            <FaDoorOpen className="w-[1rem] h-[1rem]" />
+          </Button>
         </div>
-        <h1>{channel.name}</h1>
-        <div className={styles.rightBtns}>
-          <button onClick={createGameInvitation}>
-            <IoGameController className={styles.icon} />
-          </button>
-          <button onClick={toggleMembersMenu}>
-            <HiUsers className={styles.icon} />
-          </button>
+        <h1 className="text-xl font-semibold text-center text-ellipsis overflow-hidden whitespace-nowrap">{channel.name}</h1>
+        <div className="flex items-center gap-1">
+          <Button onClick={createGameInvitation} size="icon" variant="ghost" className="bg-secondary hover:bg-secondary">
+            <IoGameController className="w-[1rem] h-[1rem]" />
+          </Button>
+          <Button onClick={toggleMembersMenu} size="icon" variant="outline" className="bg-secondary hover:bg-secondary">
+            <HiUsers className="w-[1rem] h-[1rem]" />
+          </Button>
         </div>
       </div>
-      {editChannelModal && (
-        <EditChannel
-          editChannel={editChannel}
-          setEditChannel={setEditChannel}
-          closeModal={closeEditMenuModal}
-          channel={channel}
-        />
-      )}
-      {unbanUserModal && (
-        <UnbanUser channel={channel} closeModal={closeUnbanUserModal} />
-      )}
+      <EditChannelDialog
+        editChannel={editChannel}
+        setEditChannel={setEditChannel}
+        channel={channel}
+        dialog={editChannelDialog}
+        setDialog={setEditChannelDialog}
+      />
+      <UnbanUserDialog channel={channel} dialog={unbanUserDialog} setDialog={setUnbanUserDialog} />
+      <Separator className="bg-secondary" />
     </>
   );
 };
-
-export { ChatHeader };
