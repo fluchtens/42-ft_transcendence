@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Loading } from "../../components/Loading";
 import { useAuth } from "../../hooks/useAuth";
 import { useChatSocket } from "../../hooks/useChatSocket";
 import { getBlockedUsersApi } from "../../services/friendship.api";
@@ -95,7 +94,6 @@ function PrivateChat() {
 
   return (
     <>
-      {loading && <Loading />}
       {!loading && user && channel && (
         <div className="">
           {/* <div className={styles.chat}>

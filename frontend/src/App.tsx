@@ -1,5 +1,4 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Error from "./components/Error";
 import Layout from "./components/layouts/layout/Layout";
 import { AuthProvider } from "./hooks/useAuth";
 import { ChatSocketProvider } from "./hooks/useChatSocket";
@@ -11,6 +10,7 @@ import Register from "./pages/auth/register/Register";
 import Setup from "./pages/auth/register/Setup";
 import Chat from "./pages/chat/Chat";
 import PrivateChat from "./pages/chat/PrivateChat";
+import Error from "./pages/error/Error";
 import Game from "./pages/game/Game";
 import Leaderboard from "./pages/leaderboard/Leaderboard";
 import Settings from "./pages/settings/Settings";

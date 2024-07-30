@@ -3,7 +3,6 @@ import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetClose, SheetContent } from "@/components/ui/sheet";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { Loading } from "../../components/Loading";
 import { useAuth } from "../../hooks/useAuth";
 import { useChatSocket } from "../../hooks/useChatSocket";
 import { getBlockedUsersApi } from "../../services/friendship.api";
@@ -174,7 +173,6 @@ export default function Chat() {
 
   return (
     <>
-      {loading && <Loading />}
       {!loading && user && channel && (
         <div className="m-auto p-4 max-w-screen-lg h-[calc(100vh-10rem)] md:h-[calc(100vh-11.5rem)] bg-card rounded-xl">
           <div className="h-full flex flex-col gap-4">
