@@ -1,11 +1,21 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useChatSocket } from "@/hooks/useChatSocket";
 import { blockUserApi } from "@/services/friendship.api";
 import { Channel } from "@/types/chat.interface";
 import { User } from "@/types/user.interface";
 import { notifyError, notifySuccess } from "@/utils/notifications";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { MuteUserDialog } from "../actions/MuteUserDialog";
 
 interface MemberElementProps {
   member: User;
@@ -18,9 +28,10 @@ interface MemberElementProps {
 export const MemberElement = ({ member, userRole, channel, role, setSheetOpen }: MemberElementProps) => {
   const navigate = useNavigate();
   const chatSocket = useChatSocket();
+  const [muteDialog, setMuteDialog] = useState<boolean>(false);
 
   const viewUserProfile = () => {
-    navigate(`/member/${member.username}`);
+    navigate(`/user/${member.username}`);
     setSheetOpen(false);
   };
 
@@ -118,28 +129,36 @@ export const MemberElement = ({ member, userRole, channel, role, setSheetOpen }:
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem onClick={viewUserProfile}>View member profile</DropdownMenuItem>
-          <DropdownMenuItem onClick={sendPrivateMessage}>Send private message</DropdownMenuItem>
-          <DropdownMenuItem onClick={blockUser}>Block all communication</DropdownMenuItem>
-          {userRole === "OWNER" && (
+          <DropdownMenuLabel>{member.username}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuItem onClick={viewUserProfile}>View member profile</DropdownMenuItem>
+            <DropdownMenuItem onClick={sendPrivateMessage}>Send private message</DropdownMenuItem>
+            <DropdownMenuItem onClick={blockUser}>Block all communication</DropdownMenuItem>
+          </DropdownMenuGroup>
+          {(userRole === "OWNER" || userRole === "ADMIN") && (
             <>
-              <DropdownMenuItem onClick={promoteOwner}>Promote to owner rank</DropdownMenuItem>
-              <DropdownMenuItem onClick={promoteAdmin}>Promote to admin rank</DropdownMenuItem>
-              <DropdownMenuItem onClick={demoteUser}>Demote to member rank</DropdownMenuItem>
-              <DropdownMenuItem onClick={kickUser}>Kick member</DropdownMenuItem>
-              <DropdownMenuItem onClick={banUser}>Ban member</DropdownMenuItem>
-              {/* <DropdownMenuItem onClick={openMuteModalModal}>Mute member</DropdownMenuItem> */}
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem onClick={kickUser}>Kick member</DropdownMenuItem>
+                <DropdownMenuItem onClick={banUser}>Ban member</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setMuteDialog(true)}>Mute member</DropdownMenuItem>
+              </DropdownMenuGroup>
             </>
           )}
-          {userRole === "ADMIN" && (
+          {userRole === "OWNER" && (
             <>
-              <DropdownMenuItem onClick={kickUser}>Kick member</DropdownMenuItem>
-              <DropdownMenuItem onClick={banUser}>Ban member</DropdownMenuItem>
-              {/* <DropdownMenuItem onClick={openMuteModalModal}>Mute member</DropdownMenuItem> */}
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem onClick={promoteOwner}>Promote to owner rank</DropdownMenuItem>
+                <DropdownMenuItem onClick={promoteAdmin}>Promote to admin rank</DropdownMenuItem>
+                <DropdownMenuItem onClick={demoteUser}>Demote to member rank</DropdownMenuItem>
+              </DropdownMenuGroup>
             </>
           )}
         </DropdownMenuContent>
       </DropdownMenu>
+      <MuteUserDialog memberId={member.id} member={member} channel={channel} dialog={muteDialog} setDialog={setMuteDialog} />
     </>
   );
 };

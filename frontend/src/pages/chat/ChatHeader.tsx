@@ -12,15 +12,14 @@ import { Channel, MemberUsers } from "../../types/chat.interface";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import { EditChannelDialog } from "./actions/EditChannelDialog";
 import { UnbanUserDialog } from "./actions/UnbanUserDialog";
-import { ChatMembers } from "./ChatMembers";
 
 interface ChatHeaderProps {
   channel: Channel;
   members: MemberUsers[];
-  toggleMembersMenu: () => void;
+  setMembersSheet: (value: boolean) => void;
 }
 
-export const ChatHeader = ({ members, channel, toggleMembersMenu }: ChatHeaderProps) => {
+export const ChatHeader = ({ members, channel, setMembersSheet }: ChatHeaderProps) => {
   const { user } = useAuth();
   const [role, setRole] = useState<string>("");
   const [editChannelDialog, setEditChannelDialog] = useState<boolean>(false);
@@ -115,10 +114,9 @@ export const ChatHeader = ({ members, channel, toggleMembersMenu }: ChatHeaderPr
           <Button onClick={createGameInvitation} size="icon" variant="ghost" className="bg-secondary hover:bg-secondary">
             <IoGameController className="w-[1rem] h-[1rem]" />
           </Button>
-          <Button onClick={toggleMembersMenu} size="icon" variant="outline" className="bg-secondary hover:bg-secondary">
+          <Button onClick={() => setMembersSheet(true)} size="icon" variant="outline" className="bg-secondary hover:bg-secondary">
             <HiUsers className="w-[1rem] h-[1rem]" />
           </Button>
-          <ChatMembers />
         </div>
       </div>
       <EditChannelDialog

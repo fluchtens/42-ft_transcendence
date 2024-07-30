@@ -1,9 +1,7 @@
-import { Button } from "@/components/ui/button";
 import { DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { Sheet, SheetClose, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetClose, SheetContent } from "@/components/ui/sheet";
 import { useEffect, useRef, useState } from "react";
-import { FaUserGroup } from "react-icons/fa6";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Loading } from "../../components/Loading";
 import { useAuth } from "../../hooks/useAuth";
@@ -11,14 +9,14 @@ import { useChatSocket } from "../../hooks/useChatSocket";
 import { getBlockedUsersApi } from "../../services/friendship.api";
 import { Channel, MemberUsers, Message } from "../../types/chat.interface";
 import { notifyError } from "../../utils/notifications";
-import { AddMemberBar } from "./AddMemberBar";
 import { ChatHeader } from "./ChatHeader";
-import { MemberElement } from "./MemberElement";
+import { AddMemberBar } from "./members/AddMemberBar";
+import { MemberElement } from "./members/MemberElement";
 import { MessageElement } from "./MessageElement";
 import { MessageInput } from "./MessageInput";
 
 export default function Chat() {
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const [membersSheet, setMembersSheet] = useState(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [channel, setChannel] = useState<Channel>();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -26,7 +24,6 @@ export default function Chat() {
   const [newMessage, setNewMessage] = useState<string>("");
   const [members, setMembers] = useState<MemberUsers[]>([]);
   const [addedMember, setAddedMember] = useState<string>("");
-  const [membersMenu, setMembersMenu] = useState<boolean>(true);
   const { user } = useAuth();
   const { id } = useParams();
   const socket = useChatSocket();
@@ -43,10 +40,6 @@ export default function Chat() {
       });
     }
     return role;
-  };
-
-  const toggleMembersMenu = () => {
-    setMembersMenu(!membersMenu);
   };
 
   const changeNewMessage = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -185,7 +178,7 @@ export default function Chat() {
       {!loading && user && channel && (
         <div className="m-auto p-4 max-w-screen-lg h-[calc(100vh-10rem)] md:h-[calc(100vh-11.5rem)] bg-card rounded-xl">
           <div className="h-full flex flex-col gap-4">
-            <ChatHeader members={members} channel={channel} toggleMembersMenu={toggleMembersMenu} />
+            <ChatHeader members={members} channel={channel} setMembersSheet={setMembersSheet} />
             <ul className="overflow-y-scroll flex-1 flex flex-col break">
               {messages?.map(
                 (message: Message) =>
@@ -205,13 +198,7 @@ export default function Chat() {
             </ul>
             <MessageInput content={newMessage} onChange={changeNewMessage} onSubmit={sendMessage} />
           </div>
-
-          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <FaUserGroup className="h-[1.1rem] w-[1.1rem]" />
-              </Button>
-            </SheetTrigger>
+          <Sheet open={membersSheet} onOpenChange={setMembersSheet}>
             <SheetContent side="right">
               <SheetClose asChild>
                 <Link to="/" className="text-xl font-semibold text-left">
@@ -229,7 +216,7 @@ export default function Chat() {
                         channel={channel}
                         role={member.member.role}
                         userRole={getMyRole()}
-                        setSheetOpen={setSheetOpen}
+                        setSheetOpen={setMembersSheet}
                       />
                       <Separator className={`${index !== members.length - 1 ? "my-1" : "hidden"}`} />
                     </li>
