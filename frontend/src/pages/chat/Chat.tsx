@@ -1,16 +1,24 @@
+import { Button } from "@/components/ui/button";
+import { DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
+import { Sheet, SheetClose, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { FaUserGroup } from "react-icons/fa6";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { Loading } from "../../components/Loading";
 import { useAuth } from "../../hooks/useAuth";
 import { useChatSocket } from "../../hooks/useChatSocket";
 import { getBlockedUsersApi } from "../../services/friendship.api";
 import { Channel, MemberUsers, Message } from "../../types/chat.interface";
 import { notifyError } from "../../utils/notifications";
+import { AddMemberBar } from "./AddMemberBar";
 import { ChatHeader } from "./ChatHeader";
+import { MemberElement } from "./MemberElement";
 import { MessageElement } from "./MessageElement";
 import { MessageInput } from "./MessageInput";
 
 export default function Chat() {
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [channel, setChannel] = useState<Channel>();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -19,14 +27,13 @@ export default function Chat() {
   const [members, setMembers] = useState<MemberUsers[]>([]);
   const [addedMember, setAddedMember] = useState<string>("");
   const [membersMenu, setMembersMenu] = useState<boolean>(true);
-  const [contextMenu, setContextMenu] = useState<number | null>(null);
   const { user } = useAuth();
   const { id } = useParams();
   const socket = useChatSocket();
   const navigate = useNavigate();
 
   const getMyRole = () => {
-    let role = undefined;
+    let role = "";
     if (user) {
       members.map((member: MemberUsers) => {
         if (user.id === member.member.userId) {
@@ -40,10 +47,6 @@ export default function Chat() {
 
   const toggleMembersMenu = () => {
     setMembersMenu(!membersMenu);
-  };
-
-  const toggleContextMenu = (userId: number) => {
-    setContextMenu(contextMenu === userId ? null : userId);
   };
 
   const changeNewMessage = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -202,29 +205,39 @@ export default function Chat() {
             </ul>
             <MessageInput content={newMessage} onChange={changeNewMessage} onSubmit={sendMessage} />
           </div>
-          {/* {membersMenu && (
-            <>
-              <div className={styles.line}></div>
-              <div className={styles.members}>
-                <AddUserBar value={addedMember} onChange={changeAddedMember} onSubmit={addMember} />
-                <ul>
-                  {members?.map((member: MemberUsers) => (
-                    <li key={member.user.id}>
-                      <UserElement
-                        user={member.user}
-                        userRole={getMyRole()}
+
+          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <FaUserGroup className="h-[1.1rem] w-[1.1rem]" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right">
+              <SheetClose asChild>
+                <Link to="/" className="text-xl font-semibold text-left">
+                  <DialogTitle>ft_transcendence</DialogTitle>
+                  <DialogDescription className="text-sm font-light text-muted-foreground">Multiplayer pong game</DialogDescription>
+                </Link>
+              </SheetClose>
+              <div className="mt-2 max-h-[61rem] flex flex-col">
+                <AddMemberBar value={addedMember} onChange={changeAddedMember} onSubmit={addMember} />
+                <ul className="mt-2 overflow-y-scroll flex flex-col">
+                  {members?.map((member: MemberUsers, index) => (
+                    <li key={index}>
+                      <MemberElement
+                        member={member.user}
                         channel={channel}
                         role={member.member.role}
-                        contextMenu={contextMenu === member.user.id}
-                        contextMenuType={ContextMenuType.MEMBER}
-                        toggleContextMenu={() => toggleContextMenu(member.user.id)}
+                        userRole={getMyRole()}
+                        setSheetOpen={setSheetOpen}
                       />
+                      <Separator className={`${index !== members.length - 1 ? "my-1" : "hidden"}`} />
                     </li>
                   ))}
                 </ul>
               </div>
-            </>
-          )} */}
+            </SheetContent>
+          </Sheet>
         </div>
       )}
     </>

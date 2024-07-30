@@ -12,6 +12,7 @@ import { Channel, MemberUsers } from "../../types/chat.interface";
 import { notifyError, notifySuccess } from "../../utils/notifications";
 import { EditChannelDialog } from "./actions/EditChannelDialog";
 import { UnbanUserDialog } from "./actions/UnbanUserDialog";
+import { ChatMembers } from "./ChatMembers";
 
 interface ChatHeaderProps {
   channel: Channel;
@@ -117,6 +118,7 @@ export const ChatHeader = ({ members, channel, toggleMembersMenu }: ChatHeaderPr
           <Button onClick={toggleMembersMenu} size="icon" variant="outline" className="bg-secondary hover:bg-secondary">
             <HiUsers className="w-[1rem] h-[1rem]" />
           </Button>
+          <ChatMembers />
         </div>
       </div>
       <EditChannelDialog
