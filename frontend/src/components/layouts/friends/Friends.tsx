@@ -91,7 +91,7 @@ export const Friends = () => {
               <FaUserGroup className="h-[1.1rem] w-[1.1rem]" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="right">
+          <SheetContent side="right" className="p-4 sm:p-6">
             <SheetClose asChild>
               <Link to="/" className="text-xl font-semibold text-left">
                 <DialogTitle>ft_transcendence</DialogTitle>
