@@ -75,7 +75,7 @@ function ProfileSettings() {
             <div className="relative flex flex-col items-start md:items-center gap-2">
               <label className="text-sm font-medium">Profile picture</label>
               {file ? (
-                <img src={URL.createObjectURL(file)} />
+                <img src={URL.createObjectURL(file)} className="w-[12rem] h-[12rem] rounded-full" />
               ) : (
                 <Avatar className="w-[12rem] h-[12rem] rounded-full">
                   <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
