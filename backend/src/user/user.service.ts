@@ -5,13 +5,13 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import * as fs from 'fs';
 import * as path from 'path';
-import { UsernameDto } from './dtos/UsernameDto';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdatePwdDto } from './dtos/UpdatePwdDto';
-import { User } from '@prisma/client';
+import { UsernameDto } from './dtos/UsernameDto';
 
 @Injectable()
 export class UserService {
@@ -170,6 +170,9 @@ export class UserService {
     const usersData = users.map((user) => {
       const userData = this.exclude(user, ['fortyTwoId', 'password']);
       if (userData.avatar) {
+        if (user.fortyTwoId && userData.avatar.startsWith('https://')) {
+          return userData;
+        }
         userData.avatar = `${process.env.VITE_BACK_URL}/user/avatar/${userData.avatar}`;
       }
       return userData;
@@ -186,6 +189,9 @@ export class UserService {
 
     const userData = this.exclude(user, ['fortyTwoId', 'password']);
     if (userData.avatar) {
+      if (user.fortyTwoId && userData.avatar.startsWith('https://')) {
+        return userData;
+      }
       userData.avatar = `${process.env.VITE_BACK_URL}/user/avatar/${userData.avatar}`;
     }
     return userData;
@@ -199,6 +205,9 @@ export class UserService {
 
     const userData = this.exclude(user, ['fortyTwoId', 'password']);
     if (userData.avatar) {
+      if (user.fortyTwoId && userData.avatar.startsWith('https://')) {
+        return userData;
+      }
       userData.avatar = `${process.env.VITE_BACK_URL}/user/avatar/${userData.avatar}`;
     }
     return userData;

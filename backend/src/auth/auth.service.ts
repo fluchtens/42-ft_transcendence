@@ -7,10 +7,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import * as fs from 'fs';
-import fetch from 'node-fetch';
 import { authenticator } from 'otplib';
-import * as path from 'path';
 import { toDataURL } from 'qrcode';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserService } from 'src/user/user.service';
@@ -51,22 +48,22 @@ export class AuthService {
     });
   }
 
-  private async downloadAvatar(fortyTwoId: number, fortyTwoAvatar: string) {
-    const response = await fetch(fortyTwoAvatar);
-    const buffer = await response.buffer();
+  // private async downloadAvatar(fortyTwoId: number, fortyTwoAvatar: string) {
+  //   const response = await fetch(fortyTwoAvatar);
+  //   const buffer = await response.buffer();
 
-    const uploadPath = './uploads';
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath);
-    }
+  //   const uploadPath = './uploads';
+  //   if (!fs.existsSync(uploadPath)) {
+  //     fs.mkdirSync(uploadPath);
+  //   }
 
-    const fileExtension = path.extname(fortyTwoAvatar);
-    const fileName = `42-${fortyTwoId}${fileExtension}`;
-    const filePath = path.join(uploadPath, fileName);
-    fs.writeFileSync(filePath, buffer);
+  //   const fileExtension = path.extname(fortyTwoAvatar);
+  //   const fileName = `42-${fortyTwoId}${fileExtension}`;
+  //   const filePath = path.join(uploadPath, fileName);
+  //   fs.writeFileSync(filePath, buffer);
 
-    return fileName;
-  }
+  //   return fileName;
+  // }
 
   /* -------------------------------------------------------------------------- */
   /*                                   General                                  */
@@ -183,10 +180,9 @@ export class AuthService {
     });
 
     if (fortyTwoAvatar) {
-      const avatar = await this.downloadAvatar(fortyTwoId, fortyTwoAvatar);
       await this.prismaService.user.update({
         where: { id: user.id },
-        data: { avatar },
+        data: { avatar: fortyTwoAvatar },
       });
     }
 
