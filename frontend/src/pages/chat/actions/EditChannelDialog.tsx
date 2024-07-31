@@ -176,7 +176,7 @@ export const EditChannelDialog = ({ editChannel, setEditChannel, channel, dialog
           {editChannel.protected && (
             <div className="flex flex-col gap-1.5 w-full">
               <label className="text-sm font-semibold">Password</label>
-              <Input type="text" value={editChannel.password} onChange={changePassword} placeholder="Enter a channel password" required></Input>
+              <Input type="password" value={editChannel.password} onChange={changePassword} placeholder="Enter a channel password" required></Input>
             </div>
           )}
           <div className="mt-1.5 flex justify-between items-center gap-2">
