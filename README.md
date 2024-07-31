@@ -30,9 +30,14 @@ DATABASE_URL=postgresql://admin:42@transcendence-postgres:5432/transcendence
 - Run ```make``` to start the application in production mode with docker.
 
 ### Screenshots:
-![1](https://i.imgur.com/Nsrzsc2.png)
-![2](https://i.imgur.com/YwahwD5.png)
-![3](https://i.imgur.com/Gik9SW4.png)
-![4](https://i.imgur.com/tLDHS1j.png)
-![5](https://i.imgur.com/w29aA4b.png)
-![6](https://i.imgur.com/iTr8PZi.png)
+![1](https://fluchtens.com/projects/ft_transcendence/ft_transcendence_1.webp)
+![2](https://fluchtens.com/projects/ft_transcendence/ft_transcendence_2.webp)
+![3](https://fluchtens.com/projects/ft_transcendence/ft_transcendence_3.webp)
+![4](https://fluchtens.com/projects/ft_transcendence/ft_transcendence_4.webp)
+![5](https://fluchtens.com/projects/ft_transcendence/ft_transcendence_5.webp)
+![6](https://fluchtens.com/projects/ft_transcendence/ft_transcendence_6.webp)
+![7](https://fluchtens.com/projects/ft_transcendence/ft_transcendence_7.webp)
+![8](https://fluchtens.com/projects/ft_transcendence/ft_transcendence_8.webp)
+![9](https://fluchtens.com/projects/ft_transcendence/ft_transcendence_9.webp)
+![10](https://fluchtens.com/projects/ft_transcendence/ft_transcendence_10.webp)
+![11](https://fluchtens.com/projects/ft_transcendence/ft_transcendence_11.webp)
