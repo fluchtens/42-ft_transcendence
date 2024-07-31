@@ -65,7 +65,7 @@ export const TwoFaSetupDialog = () => {
             <DialogDescription className="text-sm font-normal">Add security to your account.</DialogDescription>
           </DialogHeader>
           <Separator />
-          <form className="p-0 flex flex-col gap-5 text-center md:text-left" onSubmit={enableTwoFa}>
+          <form className="p-0 flex flex-col items-center md:items-start gap-5 text-center md:text-left" onSubmit={enableTwoFa}>
             <div>
               <label className="text-base font-semibold">Setup authenticator app</label>
               <p className="text-sm font-normal text-muted-foreground">
