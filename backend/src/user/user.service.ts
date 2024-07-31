@@ -305,9 +305,15 @@ export class UserService {
     const users = await this.getAllUsers();
     if (!users) throw new NotFoundException('No users found');
 
-    const sortedUsers = users.sort((a, b) => b.rating - a.rating);
-    const topUsers = sortedUsers.slice(0, 100);
-    return topUsers;
+    const sortedUsers = users.sort((a, b) => {
+      if (b.rating !== a.rating) {
+        return b.rating - a.rating;
+      } else {
+        return a.username.localeCompare(b.username);
+      }
+    });
+
+    return sortedUsers;
   }
 
   async getUserStats(id: number) {
