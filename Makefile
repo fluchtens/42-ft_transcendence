@@ -1,4 +1,4 @@
-MODE=dev
+MODE=prod
 COMPOSE_FILE = docker/${MODE}/docker-compose.yml
 DOCKER_COMPOSE = docker-compose -f ${COMPOSE_FILE}
 PROJECT=ft_transcendence
@@ -13,7 +13,7 @@ all: build
 
 install:
 	cd backend && npm install && npx prisma generate
-	cd frontend && npm install
+	cd frontend && pnpm install
 
 build: clean
 	${DOCKER_COMPOSE} -p ${PROJECT} up --build ${RUN_FLAGS}
