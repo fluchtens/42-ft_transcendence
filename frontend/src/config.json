@@ -1,0 +1,35 @@
+{
+  "repository": "https://github.com/fluchtens/ft_transcendence",
+  "card": [
+    {
+      "title": "Multiplayer",
+      "description": "Create matches with your friends or join the matchmaking queue."
+    },
+    {
+      "title": "Ranking",
+      "description": "Improve your ranking to reach the top of the leaderboard."
+    },
+    {
+      "title": "Chat rooms",
+      "description": "Create public or private chat rooms to chat with your friends in real time."
+    }
+  ],
+  "faq": [
+    {
+      "question": "What is the aim of this project?",
+      "answer": "This is the latest project of the 42 common core, involving the creation of a multiplayer pong game web application."
+    },
+    {
+      "question": "What technologies were used in this project?",
+      "answer": "This project was built using React and NestJS."
+    },
+    {
+      "question": "Is the project open source?",
+      "answer": "Yes, the project is open source. You can find the GitHub repository at https://github.com/fluchtens/ft_transcendence"
+    },
+    {
+      "question": "Where is the data stored?",
+      "answer": "The website and database are hosted by OVH in Gravelines, France."
+    }
+  ]
+}

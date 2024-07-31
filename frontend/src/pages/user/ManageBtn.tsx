@@ -1,18 +1,12 @@
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useEffect, useRef, useState } from "react";
-import styles from "./ManageBtn.module.scss";
-import { useAuth } from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { User } from "../../types/user.interface";
-import {
-  blockUserApi,
-  getFriendsApi,
-  removeFriendApi,
-  sendFriendRequestApi,
-} from "../../services/friendship.api";
-import { notifyError, notifySuccess } from "../../utils/notifications";
-import { ImBlocked } from "react-icons/im";
-import { FaUser } from "react-icons/fa6";
+import { useAuth } from "../../hooks/useAuth";
 import { useChatSocket } from "../../hooks/useChatSocket";
+import { blockUserApi, getFriendsApi, removeFriendApi, sendFriendRequestApi } from "../../services/friendship.api";
+import { User } from "../../types/user.interface";
+import { notifyError, notifySuccess } from "../../utils/notifications";
 
 interface ManageBtnProps {
   targetUser: User;
@@ -108,26 +102,22 @@ const ManageBtn = ({ targetUser }: ManageBtnProps) => {
   }, [user, targetUser]);
 
   return (
-    <div className={styles.container} ref={menuRef}>
-      {isMe && <button onClick={editProfile}>Edit Profile</button>}
-      {isFriend && <button onClick={sendPrivateMessage}>Message</button>}
-      {!isMe && !isFriend && (
-        <button onClick={sendFriendRequest}>Add Friend</button>
-      )}
-      {!isMe && <button onClick={handleMenu}>...</button>}
-      {menu && (
-        <div className={styles.menu}>
-          <button onClick={blockUser}>
-            <ImBlocked className={styles.icon}></ImBlocked>
-            <p>Block all communication</p>
-          </button>
-          {isFriend && (
-            <button onClick={removeFriend}>
-              <FaUser></FaUser>
-              <p>Remove friend</p>
-            </button>
-          )}
-        </div>
+    <div className="flex items-center gap-2">
+      {isMe && <Button onClick={editProfile}>Edit Profile</Button>}
+      {isFriend && <Button onClick={sendPrivateMessage}>Message</Button>}
+      {!isMe && !isFriend && <Button onClick={sendFriendRequest}>Add Friend</Button>}
+      {!isMe && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="secondary" size="icon" onClick={handleMenu}>
+              ...
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={blockUser}>Block all communication</DropdownMenuItem>
+            {isFriend && <DropdownMenuItem onClick={removeFriend}>Remove friend</DropdownMenuItem>}
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
     </div>
   );

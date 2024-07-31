@@ -1,14 +1,12 @@
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import { useEffect, useState } from "react";
+import { useAuth } from "../../hooks/useAuth";
+import { disableTwoFaApi } from "../../services/auth.api";
 import { updatePasswordApi } from "../../services/user.api";
 import { notifyError, notifySuccess } from "../../utils/notifications";
-import styles from "./AuthSettings.module.scss";
-import {
-  disableTwoFaApi,
-  generateTwoFaQrCodeApi,
-} from "../../services/auth.api";
-import { Separator } from "../../components/Separator";
-import { useAuth } from "../../hooks/useAuth";
-import TwoFaSetup from "./TwoFaSetup";
+import { TwoFaSetupDialog } from "./TwoFaSetupDialog";
 
 interface InputTextProps {
   label: string;
@@ -17,15 +15,9 @@ interface InputTextProps {
 }
 
 const TextInput = ({ label, value, onChange }: InputTextProps) => (
-  <div className={styles.inputText}>
-    <label>{label}</label>
-    <input
-      type="password"
-      value={value}
-      onChange={onChange}
-      placeholder=""
-      required
-    />
+  <div>
+    <label className="text-sm font-medium">{label}</label>
+    <Input type="password" value={value} onChange={onChange} placeholder="" required className="mt-1 max-w-[20rem] w-full"></Input>
   </div>
 );
 
@@ -34,12 +26,6 @@ function AuthSettings() {
   const [actualPwd, setActualPwd] = useState<string>("");
   const [newPwd, setNewPwd] = useState<string>("");
   const [confirmNewPwd, setConfirmNewPwd] = useState<string>("");
-  const [qrcode, setQrcode] = useState<string>("");
-  const [twoFaModal, setTwoFaModal] = useState<boolean>(false);
-
-  const closeTwoFaModal = () => {
-    setTwoFaModal(false);
-  };
 
   const changeActualPwd = (e: React.ChangeEvent<HTMLInputElement>) => {
     setActualPwd(e.target.value);
@@ -69,20 +55,6 @@ function AuthSettings() {
     await refreshUser();
   };
 
-  const enableTwoFa = async () => {
-    const data = await generateTwoFaQrCodeApi();
-    if (!data.success) {
-      notifyError(data.message);
-      return;
-    }
-
-    if (data.qrcode) {
-      const qrCodeBase64 = btoa(data.qrcode);
-      setQrcode(qrCodeBase64);
-      setTwoFaModal(true);
-    }
-  };
-
   const disableTwoFa = async () => {
     const data = await disableTwoFaApi();
     if (!data.success) {
@@ -101,60 +73,46 @@ function AuthSettings() {
   return (
     <>
       {user && (
-        <div className={styles.authSettings}>
-          <form className={styles.changePassword} onSubmit={submitData}>
-            <h1>Change password</h1>
-            <Separator />
-            <TextInput
-              label="Old password"
-              value={actualPwd}
-              onChange={changeActualPwd}
-            />
-            <TextInput
-              label="New password"
-              value={newPwd}
-              onChange={changeNewPwd}
-            />
-            <TextInput
-              label="Confirm new password"
-              value={confirmNewPwd}
-              onChange={changeConfirmNewPwd}
-            />
-            <button type="submit">Update password</button>
+        <div className="mt-5">
+          <form className="p-0" onSubmit={submitData}>
+            <h1 className="text-xl md:text-2xl font-semibold">Change password</h1>
+            <Separator className="mt-3" />
+            <div className="mt-4 flex flex-col gap-2">
+              <TextInput label="Old password" value={actualPwd} onChange={changeActualPwd} />
+              <TextInput label="New password" value={newPwd} onChange={changeNewPwd} />
+              <TextInput label="Confirm new password" value={confirmNewPwd} onChange={changeConfirmNewPwd} />
+            </div>
+            <Button type="submit" className="mt-6">
+              Update password
+            </Button>
           </form>
-          <div className={styles.toggleTwoFa}>
-            <h1>Two-factor authentication</h1>
-            <Separator />
+          <div className="mt-8">
+            <h1 className="text-xl md:text-2xl font-semibold">Two-factor authentication</h1>
+            <Separator className="mt-3" />
             {user.twoFa ? (
-              <>
-                <h2>Two-factor authentication is enabled.</h2>
+              <div className="mt-4">
+                <h2 className="text-lg font-semibold">Two-factor authentication is enabled.</h2>
                 <p>
-                  Two-factor authentication adds an additional layer of security
-                  to your account by requiring more than just a password to sign
-                  in.
+                  Two-factor authentication adds an additional layer of security to your account by requiring more than just a password to sign in.
                 </p>
-                <button className={styles.disableBtm} onClick={disableTwoFa}>
+                <Button onClick={disableTwoFa} variant="destructive" className="mt-4">
                   Disable two-factor authentication
-                </button>
-              </>
+                </Button>
+              </div>
             ) : (
-              <>
-                <h2>Two-factor authentication is not enabled yet.</h2>
-                <p>
-                  Two-factor authentication adds an additional layer of security
-                  to your account by requiring more than just a password to sign
-                  in.
+              <div className="mt-4">
+                <h2 className="text-lg font-semibold">Two-factor authentication is not enabled yet.</h2>
+                <p className="text-sm font-normal text-muted-foreground">
+                  Two-factor authentication adds an additional layer of security to your account by requiring more than just a password to sign in.
                 </p>
-                <button className={styles.enableBtn} onClick={enableTwoFa}>
+                {/* <Button onClick={enableTwoFa} className="mt-4">
                   Enable two-factor authentication
-                </button>
-              </>
+                </Button> */}
+                <TwoFaSetupDialog />
+              </div>
             )}
           </div>
         </div>
-      )}
-      {twoFaModal && qrcode && (
-        <TwoFaSetup qrcode={qrcode} close={closeTwoFaModal} />
       )}
     </>
   );

@@ -13,7 +13,7 @@ all: build
 
 install:
 	cd backend && npm install && npx prisma generate
-	cd frontend && npm install
+	cd frontend && pnpm install
 
 build: clean
 	${DOCKER_COMPOSE} -p ${PROJECT} up --build ${RUN_FLAGS}

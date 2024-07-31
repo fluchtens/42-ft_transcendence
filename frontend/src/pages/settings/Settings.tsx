@@ -1,8 +1,8 @@
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect } from "react";
-import styles from "./Settings.module.scss";
+import { useAuth } from "../../hooks/useAuth";
 import AuthSettings from "./AuthSettings";
 import ProfileSettings from "./ProfileSettings";
-import { useAuth } from "../../hooks/useAuth";
 import UnlockUser from "./UnlockUser";
 
 function Settings() {
@@ -15,19 +15,19 @@ function Settings() {
   return (
     <>
       {user && (
-        <div className={styles.container}>
-          <ul className={styles.settings}>
-            <li>
-              <ProfileSettings />
-            </li>
-            <li>
-              <AuthSettings />
-            </li>
-            <li>
-              <UnlockUser />
-            </li>
-          </ul>
-        </div>
+        <Tabs defaultValue="profile" className="m-auto max-w-screen-xl">
+          <TabsList className="w-full h-full grid grid-cols-1 md:grid-cols-2">
+            <TabsTrigger value="profile">Public profile</TabsTrigger>
+            <TabsTrigger value="auth">Password and authentification</TabsTrigger>
+          </TabsList>
+          <TabsContent value="profile">
+            <ProfileSettings />
+          </TabsContent>
+          <TabsContent value="auth">
+            <AuthSettings />
+            <UnlockUser />
+          </TabsContent>
+        </Tabs>
       )}
     </>
   );

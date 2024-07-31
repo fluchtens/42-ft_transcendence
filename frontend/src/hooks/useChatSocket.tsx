@@ -1,4 +1,4 @@
-import { createContext, useContext, ReactNode } from "react";
+import { ReactNode, createContext, useContext } from "react";
 import { Socket, io } from "socket.io-client";
 
 const socketInstance = io(`${import.meta.env.VITE_BACK_URL}/chatSocket`, {
@@ -7,14 +7,8 @@ const socketInstance = io(`${import.meta.env.VITE_BACK_URL}/chatSocket`, {
 
 const ChatSocketContext = createContext<Socket>(socketInstance);
 
-interface ChatSocketProviderProps {
-  children: ReactNode;
-}
-
-export const ChatSocketProvider = ({ children }: ChatSocketProviderProps) => (
-  <ChatSocketContext.Provider value={socketInstance}>
-    {children}
-  </ChatSocketContext.Provider>
+export const ChatSocketProvider = ({ children }: { children: ReactNode }) => (
+  <ChatSocketContext.Provider value={socketInstance}>{children}</ChatSocketContext.Provider>
 );
 
 export const useChatSocket = () => {

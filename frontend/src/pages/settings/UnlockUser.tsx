@@ -1,26 +1,10 @@
-import styles from "./UnlockUser.module.scss";
-import { Separator } from "../../components/Separator";
-import { useAuth } from "../../hooks/useAuth";
-import { IoPersonRemoveSharp } from "react-icons/io5";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
+import { useAuth } from "../../hooks/useAuth";
+import { unlockUserApi } from "../../services/friendship.api";
 import { getUserByUsernameApi } from "../../services/user.api";
 import { notifyError, notifySuccess } from "../../utils/notifications";
-import { unlockUserApi } from "../../services/friendship.api";
-
-interface UnlockUserBarProps {
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onSubmit: (e: React.FormEvent) => void;
-}
-
-const UnlockUserBar = ({ value, onChange, onSubmit }: UnlockUserBarProps) => (
-  <form className={styles.unlockUserBar} onSubmit={onSubmit}>
-    <input type="text" value={value} onChange={onChange} required />
-    <button type="submit">
-      <IoPersonRemoveSharp className={styles.icon} />
-    </button>
-  </form>
-);
 
 function UnlockUser() {
   const [target, setTarget] = useState<string>("");
@@ -49,22 +33,15 @@ function UnlockUser() {
   return (
     <>
       {user && (
-        <div className={styles.container}>
-          <h1>Blocked users</h1>
-          <Separator />
-          <div className={styles.dataToSubmit}>
-            <h2>Unlock a user.</h2>
-            <p>
-              By unblocking a user, you'll be able to communicate with them
-              again.
-            </p>
-            <UnlockUserBar
-              value={target}
-              onChange={changeTarget}
-              onSubmit={submitData}
-            />
+        <form className="mt-8" onSubmit={submitData}>
+          <h1 className="text-xl md:text-2xl font-semibold">Blocked users</h1>
+          <Separator className="mt-3" />
+          <div className="mt-4 flex flex-col gap-1">
+            <h2 className="text-lg font-semibold">Unlock a user.</h2>
+            <p className="text-sm font-normal text-muted-foreground">By unblocking a user, you'll be able to communicate with them again.</p>
+            <Input type="text" value={target} onChange={changeTarget} placeholder="Username" className="mt-1 max-w-[20rem] w-full"></Input>
           </div>
-        </div>
+        </form>
       )}
     </>
   );

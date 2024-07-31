@@ -3,14 +3,15 @@ FROM node:lts-alpine
 
 # Update and install required packages
 RUN apk update && \
-		apk add nginx
+		apk add nginx && \
+		npm install -g pnpm
 
 # Set working directory
 WORKDIR /app
 
 # Copy package.json and install dependencies
-COPY package.json package-lock.json .
-RUN npm install
+COPY package.json .
+RUN pnpm install
 COPY . .
 
 # Copy env variables
@@ -18,7 +19,7 @@ ARG VITE_BACK_URL
 ENV VITE_BACK_URL=$VITE_BACK_URL
 
 # Build project app
-RUN npm run build
+RUN pnpm run build
 
 # Set up nginx
 COPY nginx.conf /etc/nginx/http.d/default.conf

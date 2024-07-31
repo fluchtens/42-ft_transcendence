@@ -2,18 +2,19 @@
 FROM node:lts-alpine
 
 # Update and install required packages
-RUN apk update
+RUN apk update && \
+    npm install -g pnpm
 
 # Set working directory
 WORKDIR /app
 
 # Copy package.json and install dependencies
-COPY package.json package-lock.json .
-RUN npm install
+COPY package.json .
+RUN pnpm install
 COPY . .
 
 # Expose port
 EXPOSE 80
 
 # Start the application
-CMD ["npm", "run", "dev"]
+CMD ["pnpm", "run", "dev"]

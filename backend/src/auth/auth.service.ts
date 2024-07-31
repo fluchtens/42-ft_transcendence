@@ -5,19 +5,16 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { RegisterDto } from './dtos/RegisterDto';
-import { LoginDto } from './dtos/LoginDto';
-import { SetupDto } from './dtos/SetupDto';
-import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
-import * as fs from 'fs';
-import * as path from 'path';
-import fetch from 'node-fetch';
+import * as bcrypt from 'bcryptjs';
 import { authenticator } from 'otplib';
 import { toDataURL } from 'qrcode';
-import { TwoFaDto } from './dtos/TwoFaDto';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { UserService } from 'src/user/user.service';
+import { LoginDto } from './dtos/LoginDto';
+import { RegisterDto } from './dtos/RegisterDto';
+import { SetupDto } from './dtos/SetupDto';
+import { TwoFaDto } from './dtos/TwoFaDto';
 
 @Injectable()
 export class AuthService {
@@ -31,19 +28,18 @@ export class AuthService {
   /*                                   Private                                  */
   /* -------------------------------------------------------------------------- */
 
-  private readonly cookieExpirationTime = 2 * 60 * 60 * 1000;
-
-  private async generateJwtToken(payload: any, expiresIn: string) {
+  private async generateJwtToken(payload: any) {
     const token = await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_SECRET,
-      expiresIn: expiresIn,
+      expiresIn: '30d',
     });
 
     return token;
   }
 
-  private async setAccessTokenCookie(res, token: string, expiresIn: number) {
-    const expirationTime = new Date(Date.now() + expiresIn);
+  private async setAccessTokenCookie(res, token: string) {
+    const cookieExpirationTime = 30 * 24 * 60 * 60 * 1000;
+    const expirationTime = new Date(Date.now() + cookieExpirationTime);
 
     res.cookie('access_token', token, {
       httpOnly: true,
@@ -52,22 +48,22 @@ export class AuthService {
     });
   }
 
-  private async downloadAvatar(fortyTwoId: number, fortyTwoAvatar: string) {
-    const response = await fetch(fortyTwoAvatar);
-    const buffer = await response.buffer();
+  // private async downloadAvatar(fortyTwoId: number, fortyTwoAvatar: string) {
+  //   const response = await fetch(fortyTwoAvatar);
+  //   const buffer = await response.buffer();
 
-    const uploadPath = './uploads';
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath);
-    }
+  //   const uploadPath = './uploads';
+  //   if (!fs.existsSync(uploadPath)) {
+  //     fs.mkdirSync(uploadPath);
+  //   }
 
-    const fileExtension = path.extname(fortyTwoAvatar);
-    const fileName = `42-${fortyTwoId}${fileExtension}`;
-    const filePath = path.join(uploadPath, fileName);
-    fs.writeFileSync(filePath, buffer);
+  //   const fileExtension = path.extname(fortyTwoAvatar);
+  //   const fileName = `42-${fortyTwoId}${fileExtension}`;
+  //   const filePath = path.join(uploadPath, fileName);
+  //   fs.writeFileSync(filePath, buffer);
 
-    return fileName;
-  }
+  //   return fileName;
+  // }
 
   /* -------------------------------------------------------------------------- */
   /*                                   General                                  */
@@ -110,8 +106,8 @@ export class AuthService {
     }
 
     const payload = { id: user.id };
-    const token = await this.generateJwtToken(payload, '2h');
-    await this.setAccessTokenCookie(res, token, this.cookieExpirationTime);
+    const token = await this.generateJwtToken(payload);
+    await this.setAccessTokenCookie(res, token);
 
     return { message: 'User succesfully connected' };
   }
@@ -154,8 +150,8 @@ export class AuthService {
     }
 
     const payload = { id: user.id, username: user.username };
-    const token = await this.generateJwtToken(payload, '2h');
-    await this.setAccessTokenCookie(res, token, this.cookieExpirationTime);
+    const token = await this.generateJwtToken(payload);
+    await this.setAccessTokenCookie(res, token);
 
     return res.redirect(process.env.VITE_FRONT_URL);
   }
@@ -184,16 +180,15 @@ export class AuthService {
     });
 
     if (fortyTwoAvatar) {
-      const avatar = await this.downloadAvatar(fortyTwoId, fortyTwoAvatar);
       await this.prismaService.user.update({
         where: { id: user.id },
-        data: { avatar },
+        data: { avatar: fortyTwoAvatar },
       });
     }
 
     const payload = { id: user.id, username: user.username };
-    const token = await this.generateJwtToken(payload, '2h');
-    await this.setAccessTokenCookie(res, token, this.cookieExpirationTime);
+    const token = await this.generateJwtToken(payload);
+    await this.setAccessTokenCookie(res, token);
 
     res.clearCookie('connect.sid');
 
@@ -289,8 +284,8 @@ export class AuthService {
     }
 
     const payload = { id: userId };
-    const token = await this.generateJwtToken(payload, '2h');
-    await this.setAccessTokenCookie(res, token, this.cookieExpirationTime);
+    const token = await this.generateJwtToken(payload);
+    await this.setAccessTokenCookie(res, token);
 
     return { message: 'User succesfully connected' };
   }
