@@ -197,7 +197,7 @@ export default function Chat() {
             <MessageInput content={newMessage} onChange={changeNewMessage} onSubmit={sendMessage} />
           </div>
           <Sheet open={membersSheet} onOpenChange={setMembersSheet}>
-            <SheetContent side="right">
+            <SheetContent side="right" onOpenAutoFocus={(e) => e.preventDefault()}>
               <SheetClose asChild>
                 <Link to="/" className="text-xl font-semibold text-left">
                   <DialogTitle>ft_transcendence</DialogTitle>

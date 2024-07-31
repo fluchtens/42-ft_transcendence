@@ -28,7 +28,7 @@ export const LinksMenu = () => {
           <HamburgerMenuIcon className="h-[1.1rem] w-[1.1rem]" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left">
+      <SheetContent side="left" onOpenAutoFocus={(e) => e.preventDefault()}>
         <SheetClose asChild>
           <Link to="/" className="text-xl font-semibold text-left">
             <DialogTitle>ft_transcendence</DialogTitle>

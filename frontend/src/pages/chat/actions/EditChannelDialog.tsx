@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { useChatSocket } from "@/hooks/useChatSocket";
 import { Channel } from "@/types/chat.interface";
 import { notifyError, notifySuccess } from "@/utils/notifications";
@@ -140,7 +141,7 @@ export const EditChannelDialog = ({ editChannel, setEditChannel, channel, dialog
 
   return (
     <Dialog open={dialog} onOpenChange={closeDialog}>
-      <DialogContent>
+      <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">Edit Channel</DialogTitle>
           <DialogDescription className="hidden"></DialogDescription>
@@ -149,22 +150,22 @@ export const EditChannelDialog = ({ editChannel, setEditChannel, channel, dialog
         <form className="p-0 flex flex-col gap-3" onSubmit={submitData}>
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-semibold">Confidentiality</label>
-            <div onClick={changeProtected} className="px-4 py-3 rounded-md bg-card hover:bg-secondary cursor-pointer">
+            <div className="px-4 py-3 rounded-md border cursor-pointer">
               <div className="flex justify-between items-center gap-3">
                 <div>
                   <label className="text-sm font-medium">Protected by a password</label>
                   <p className="text-xs font-normal text-muted-foreground">Only members with the channel password will be able to join.</p>
                 </div>
-                <input type="checkbox" checked={editChannel.protected} onChange={changeProtected} className="cursor-pointer" />
+                <Switch checked={editChannel.protected} onClick={changeProtected} />
               </div>
             </div>
-            <div onClick={changeStatus} className="px-4 py-3 rounded-md bg-card hover:bg-secondary cursor-pointer">
+            <div className="px-4 py-3 rounded-md border cursor-pointer">
               <div className="flex justify-between items-center gap-3">
                 <div>
                   <label className="text-sm font-medium">Private</label>
                   <p className="text-xs font-normal text-muted-foreground">Only selected members and roles will be able to view this channel.</p>
                 </div>
-                <input type="checkbox" checked={!editChannel.isPublic} onChange={changeStatus} className="cursor-pointer" />
+                <Switch checked={!editChannel.isPublic} onClick={changeStatus} />
               </div>
             </div>
           </div>

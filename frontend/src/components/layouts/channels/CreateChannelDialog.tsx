@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { useChatSocket } from "@/hooks/useChatSocket";
 import { notifyError, notifySuccess } from "@/utils/notifications";
 import { useState } from "react";
@@ -94,7 +95,7 @@ export const CreateChannelDialog = ({ dialog, setDialog, newChannel, setNewChann
 
   return (
     <Dialog open={dialog} onOpenChange={cancel}>
-      <DialogContent>
+      <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">Create channel</DialogTitle>
           <DialogDescription className="text-sm font-normal">Create a real-time chat room.</DialogDescription>
@@ -103,22 +104,22 @@ export const CreateChannelDialog = ({ dialog, setDialog, newChannel, setNewChann
         <form onSubmit={submit} className="p-0 flex flex-col gap-3">
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-semibold">Confidentiality</label>
-            <div onClick={handleHavePassword} className="px-4 py-3 rounded-md bg-card hover:bg-secondary cursor-pointer">
+            <div className="px-4 py-3 rounded-md border cursor-pointer">
               <div className="flex justify-between items-center gap-3">
                 <div>
                   <label className="text-sm font-medium">Protected by a password</label>
                   <p className="text-xs font-normal text-muted-foreground">Only members with the channel password will be able to join.</p>
                 </div>
-                <input type="checkbox" checked={havePassword} onChange={handleHavePassword} className="cursor-pointer" />
+                <Switch checked={havePassword} onClick={handleHavePassword} />
               </div>
             </div>
-            <div onClick={handleIsPublic} className="px-4 py-3 rounded-md bg-card hover:bg-secondary cursor-pointer">
+            <div className="px-4 py-3 rounded-md border cursor-pointer">
               <div className="flex justify-between items-center gap-3">
                 <div>
                   <label className="text-sm font-medium">Private</label>
                   <p className="text-xs font-normal text-muted-foreground">Only selected members and roles will be able to view this channel.</p>
                 </div>
-                <input type="checkbox" checked={!newChannel.isPublic} onChange={handleIsPublic} className="cursor-pointer" />
+                <Switch checked={!newChannel.isPublic} onClick={handleIsPublic} />
               </div>
             </div>
           </div>
