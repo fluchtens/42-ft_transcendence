@@ -56,7 +56,7 @@ const GameContent = () => {
     };
   }, []);
 
-  function WinScreen({ win = true }) {
+  const WinScreen = ({ win = true }) => {
     return (
       <div className="m-auto max-w-screen-md h-full flex justify-center items-center">
         <div className="p-6 bg-card rounded-xl text-center">
@@ -67,7 +67,7 @@ const GameContent = () => {
         </div>
       </div>
     );
-  }
+  };
 
   let content = <></>;
   if (winLose != WinLose.NA) {
