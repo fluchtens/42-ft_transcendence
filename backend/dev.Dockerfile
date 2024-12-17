@@ -1,5 +1,5 @@
 # Use node lts alpine as base image
-FROM node:lts-alpine
+FROM node:22-alpine3.19
 
 # Update and install required packages
 RUN apk update
